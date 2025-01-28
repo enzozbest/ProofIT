@@ -32,6 +32,7 @@ subprojects {
 dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation(project(":routes"))
+    implementation(project(":chat_history"))
 }
 tasks.test {
     useJUnitPlatform()
