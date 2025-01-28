@@ -9,18 +9,23 @@ import io.ktor.server.routing.*
 /**
  * Configures the routes that will be used for authentication.
  */
-fun Application.configureAuthenticationRoutes(){
-    routing{
-        authenticate("cognito") {
-            get("/api/signup"){
+
+val SIGN_UP_ROUTE: String = "/api/signup"
+val LOG_IN_ROUTE: String = "/api/login"
+val CALL_BACK_ROUTE: String = "/api/callback"
+
+fun Application.configureAuthenticationRoutes(authName: String = "Cognito") {
+    routing {
+        authenticate(authName) {
+            get(SIGN_UP_ROUTE) {
                 call.respondRedirect("/authenticate")
             }
-            get("/api/login"){
+            get(LOG_IN_ROUTE) {
                 call.respondRedirect("/authenticate")
             }
-            get("/api/callback"){
+            get(CALL_BACK_ROUTE) {
                 val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-                if (principal != null){
+                if (principal != null) {
                     call.respondText("Login successful!", status = HttpStatusCode.OK)
                 } else {
                     call.respondText("Login failed!", status = HttpStatusCode.Unauthorized)
