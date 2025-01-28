@@ -1,36 +1,90 @@
 package kcl.seg.rtt.auth
 
+import com.auth0.jwt.JWT
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.sessions.*
+import kotlinx.serialization.Serializable
+
+val AUTHENTICATION_ROUTE: String = "/api/auth"
+val CALL_BACK_ROUTE: String = "/api/callback"
+val LOG_OUT_ROUTE: String = "/api/logout"
+
+/**
+ * Data class representing a user session in the API.
+ */
+@Serializable
+data class UserSession(
+    val userId: String,
+    val token: String,
+    val admin: Boolean
+)
 
 /**
  * Configures the routes that will be used for authentication.
  */
-
-val SIGN_UP_ROUTE: String = "/api/signup"
-val LOG_IN_ROUTE: String = "/api/login"
-val CALL_BACK_ROUTE: String = "/api/callback"
-
 fun Application.configureAuthenticationRoutes(authName: String = "Cognito") {
+    setupSessions()
+
     routing {
         authenticate(authName) {
-            get(SIGN_UP_ROUTE) {
-                call.respondRedirect("/authenticate")
-            }
-            get(LOG_IN_ROUTE) {
-                call.respondRedirect("/authenticate")
-            }
-            get(CALL_BACK_ROUTE) {
-                val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-                if (principal != null) {
-                    call.respondText("Login successful!", status = HttpStatusCode.OK)
-                } else {
-                    call.respondText("Login failed!", status = HttpStatusCode.Unauthorized)
-                }
-            }
+            setAuthenticationEndpoint(AUTHENTICATION_ROUTE)
+            setLogOutEndpoint(LOG_OUT_ROUTE)
+            setUpCallbackRoute(CALL_BACK_ROUTE)
         }
     }
 }
+
+/**
+ * Sets up the authentication endpoint for the authentication process.
+ */
+private fun Route.setAuthenticationEndpoint(route: String) {
+    get(route) {
+        call.respondRedirect("/authenticate")
+    }
+}
+
+/**
+ * Sets up the callback route for the authentication process.
+ */
+private fun Route.setUpCallbackRoute(route: String) {
+    get(route) {
+        val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
+
+        if (principal == null)
+            call.respond(HttpStatusCode.Unauthorized) //Authentication failed, do not grant access.
+
+        val token: String? = principal!!.extraParameters["id_token"]
+        val decoded = JWT.decode(token)
+        val userId: String = decoded.getClaim("sub").asString()
+        val admin: Boolean =
+            decoded.getClaim("cognito:groups").asList(String::class.java).contains("admin_users")
+        call.sessions.set(UserSession(userId, principal.accessToken, admin))
+        call.respond(HttpStatusCode.OK)
+    }
+}
+
+/**
+ * Sets up the logout endpoint for the authentication process.
+ */
+private fun Route.setLogOutEndpoint(route: String) {
+    post(route) {
+        call.sessions.clear<UserSession>()
+        call.respond(HttpStatusCode.OK)
+    }
+}
+
+/**
+ * Sets up the sessions for the application.
+ */
+private fun Application.setupSessions() {
+    install(Sessions) {
+        cookie<UserSession>("UserSession") {
+            cookie.maxAgeInSeconds = 3600
+        }
+    }
+}
+

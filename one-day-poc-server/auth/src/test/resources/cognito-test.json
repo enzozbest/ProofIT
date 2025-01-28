@@ -1,0 +1,16 @@
+{
+  "name": "testAuth",
+  "urlProvider": "http://localhost:8000/api/callback",
+  "providerLookup": {
+    "name": "testAuth",
+    "authorizeUrl": "http://example.com:2000/authorize",
+    "accessTokenUrl": "http://example.com:2000/token",
+    "clientId": "someId",
+    "clientSecret": "someSecret",
+    "defaultScopes": [
+      "email",
+      "openid",
+      "profile"
+    ]
+  }
+}

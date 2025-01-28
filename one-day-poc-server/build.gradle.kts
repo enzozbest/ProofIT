@@ -4,7 +4,6 @@ val kotlinVersion by extra { "2.1.0" }
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
-    id("org.jetbrains.kotlinx.kover") version "0.9.1"
 }
 
 application {
@@ -22,7 +21,6 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "org.jetbrains.kotlinx.kover")
     dependencies {
         implementation("io.ktor:ktor-server-core:$ktorVersion")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -37,8 +35,6 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation(project(":routes"))
     implementation(project(":auth"))
-    kover(project(":auth"))
-    kover(project(":routes"))
 }
 
 tasks.test {
