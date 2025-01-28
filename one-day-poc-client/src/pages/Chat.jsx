@@ -5,12 +5,33 @@ function Chat() {
     const [message, setMessage] = useState("");
     const [sentMessage, setSentMessage] = useState([]);
     const recentMessageRef = useRef(null);
+    const [llmResponse, setLlmResponse] = useState("");
 
+    const postMessage = async () => {
+        try {
+            var response = await fetch("http://localhost:8000/api/chat/send", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message)
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.text();
+            console.log(data);
+            setLlmResponse(data);
+        } catch (error) {
+            console.error('Error', error);
+        }
+    }
     const handleSend = () => {
         var currentTime = new Date().toLocaleString();
-        setSentMessage((prevMessages) => [...prevMessages, ["User",message, currentTime]]);
-        {/**In reality, the response would be the llm response*/}
-        var response = ["LLM","LLM RESPONSE", currentTime]
+        setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
+        postMessage();
+        {/**In reality, the response would be the ACTUAL llm response*/}
+        var response = ["LLM",llmResponse, currentTime]
         setSentMessage((prevMessages) => [...prevMessages, response]);
         setMessage("");
     };
