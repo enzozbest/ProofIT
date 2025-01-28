@@ -13,7 +13,7 @@ import kcl.seg.rtt.utils.JSON.readJsonFile
  * This function is called automatically by Ktor when the application is started (declared as a module entry point
  * in application.conf).
  */
-fun Application.module(){
+fun Application.authModule(){
     configureAuthentication()
     configureAuthenticationRoutes()
 }
