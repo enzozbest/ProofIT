@@ -26,12 +26,15 @@ subprojects {
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
         implementation("ch.qos.logback:logback-classic:1.4.11")
         testImplementation(kotlin("test"))
+        testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     }
 }
 
 dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation(project(":routes"))
+    implementation(project(":auth"))
 }
 tasks.test {
     useJUnitPlatform()
