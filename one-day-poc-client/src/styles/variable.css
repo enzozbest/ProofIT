@@ -1,0 +1,25 @@
+
+
+:root {
+    --background: 255 255 255;
+    --foreground: 0 0 0;
+    --muted: 249 250 251;
+    --muted-foreground: 108 113 127;
+    --primary: 255 153 0;
+    --primary-foreground: 255 255 255;
+    --secondary: 35 47 62;
+    --secondary-foreground: 255 255 255;
+    --accent: 16 185 129;
+    --accent-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --ring: 59 130 246;
+    --radius: 0.375rem;
+
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+}
+/*.dark{*/
+/*    */
+/*}*/
