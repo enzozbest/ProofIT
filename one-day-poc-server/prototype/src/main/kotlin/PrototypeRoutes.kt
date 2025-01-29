@@ -22,4 +22,26 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
             call.respond(HttpStatusCode.BadRequest, "Error: ${e.message ?: "Unknown error"}")
         }
     }
+
+    // Working with ID to retrieve a prototype
+    // rather than callLLM in PrototypeService
+    // which uses strings to generate a prototype
+    get("/prototype/{id}") {
+        val prototypeId = call.parameters["id"]
+        if (prototypeId.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Prototype ID is missing.")
+            return@get
+        }
+
+        // placeholder method retrievePrototype
+        // To be replaced with our own logic
+        val result: String? = prototypeService.retrievePrototype(prototypeId)
+        // Assumes prototypeService will return also some ID associated
+
+        if (result == null) {
+            call.respond(HttpStatusCode.NotFound, "No prototype found for ID: $prototypeId")
+        } else {
+            call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(result))
+        }
+    }
 }
