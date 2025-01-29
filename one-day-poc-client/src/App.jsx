@@ -23,7 +23,6 @@ function App() {
   return (
     <div>
       <LandingPage buttons={buttons} />
-      <ColorPreview></ColorPreview>
     </div>
   );
 }
