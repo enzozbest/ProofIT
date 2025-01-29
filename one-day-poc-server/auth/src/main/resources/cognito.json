@@ -1,6 +1,6 @@
 {
   "name": "Cognito",
-  "verifier": "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_i06RrasFd/.well-known/jwks.json",
+  "jwtIssuer": "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_i06RrasFd",
   "urlProvider": "http://localhost:8000/api/callback",
   "providerLookup": {
     "name": "Cognito",
