@@ -18,6 +18,10 @@ data class GenerateResponse(val output: String)
 data class ErrorResponse(val error: String)
 
 fun Route.prototypeRoutes(prototypeService: PrototypeService) {
+    get("/health") {
+        call.respond(HttpStatusCode.OK, "OK")
+    }
+
     post("/generate") {
         try {
             val request = call.receive<GenerateRequest>()
