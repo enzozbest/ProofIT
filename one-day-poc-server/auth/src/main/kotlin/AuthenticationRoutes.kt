@@ -50,8 +50,8 @@ private fun Route.setUpCallbackRoute(route: String) {
         val token: String? = principal!!.extraParameters["id_token"]
         val decoded = JWT.decode(token)
         val userId: String = decoded.getClaim("sub").asString()
-        val admin: Boolean =
-            decoded.getClaim("cognito:groups").asList(String::class.java).contains("admin_users")
+        val admin: Boolean? =
+            decoded.getClaim("cognito:groups")?.asList(String::class.java)?.contains("admin_users")
         call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
         call.respond(HttpStatusCode.OK)
     }
