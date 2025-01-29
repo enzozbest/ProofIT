@@ -9,7 +9,6 @@ import io.ktor.server.testing.*
 import io.ktor.util.*
 import kcl.seg.rtt.auth.AUTHENTICATION_ROUTE
 import kcl.seg.rtt.auth.CALL_BACK_ROUTE
-import kcl.seg.rtt.auth.UserSession
 import kcl.seg.rtt.auth.authModule
 import kcl.seg.rtt.utils.JSON.readJsonFile
 import org.json.JSONObject
@@ -19,24 +18,16 @@ import kotlin.test.assertTrue
 
 class AuthenticationTest {
 
-    private val json_config: JSONObject =
+    private val jsonConfig: JSONObject =
         readJsonFile("src/test/resources/cognito-test.json")
-    private val urlProvider: JSONObject = json_config.getJSONObject("providerLookup")
+    private val urlProvider: JSONObject = jsonConfig.getJSONObject("providerLookup")
+
 
     @Test
-    fun testUserSessionClass() {
-        val userSession = UserSession("userId", "token", true)
-
-        assertEquals("userId", userSession.userId)
-        assertEquals("token", userSession.token)
-        assertTrue { userSession.admin }
-    }
-
-    @Test
-    fun testAuthenticationFlow() = testApplication {
+    fun `Test Authentication flow`() = testApplication {
         application {
             authentication {
-                configureTestBasic()
+                configureBasicAuthentication()
             }
             authModule(
                 configFilePath = "src/test/resources/cognito-test.json",
@@ -61,7 +52,7 @@ class AuthenticationTest {
     }
 
     @Test
-    fun testAuthenticationRouteExists() = testApplication {
+    fun `Test Authentication Route exists`() = testApplication {
         application {
             authModule(
                 configFilePath = "src/test/resources/cognito-test.json",
@@ -77,7 +68,7 @@ class AuthenticationTest {
     }
 
     @Test
-    fun testCallbackRouteExists() = testApplication {
+    fun `Test Callback Route exists`() = testApplication {
         application {
             authModule(
                 configFilePath = "src/test/resources/cognito-test.json",
@@ -93,14 +84,14 @@ class AuthenticationTest {
     }
 
     @Test
-    fun testAuthorizeRouteExists() = testApplication {
+    fun `Test Authorize Route exists`() = testApplication {
         application {
             authModule(
                 configFilePath = "src/test/resources/cognito-test.json",
                 authName = "testAuth"
             )
         }
-        setupExternalServices(json_config)
+        setupExternalServices(jsonConfig)
 
         val myClient = createClient {
             followRedirects = false
@@ -113,7 +104,7 @@ class AuthenticationTest {
     /**
      * Set up Basic authentication for testing purposes only
      */
-    private fun AuthenticationConfig.configureTestBasic() {
+    private fun AuthenticationConfig.configureBasicAuthentication() {
         basic("testAuth") {
             validate { credentials ->
                 if (credentials.name == "test" && credentials.password == "password") {

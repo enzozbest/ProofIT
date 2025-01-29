@@ -7,21 +7,11 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
-import kotlinx.serialization.Serializable
 
 val AUTHENTICATION_ROUTE: String = "/api/auth"
 val CALL_BACK_ROUTE: String = "/api/callback"
 val LOG_OUT_ROUTE: String = "/api/logout"
 
-/**
- * Data class representing a user session in the API.
- */
-@Serializable
-data class UserSession(
-    val userId: String,
-    val token: String,
-    val admin: Boolean
-)
 
 /**
  * Configures the routes that will be used for authentication.
@@ -62,7 +52,7 @@ private fun Route.setUpCallbackRoute(route: String) {
         val userId: String = decoded.getClaim("sub").asString()
         val admin: Boolean =
             decoded.getClaim("cognito:groups").asList(String::class.java).contains("admin_users")
-        call.sessions.set(UserSession(userId, principal.accessToken, admin))
+        call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
         call.respond(HttpStatusCode.OK)
     }
 }
