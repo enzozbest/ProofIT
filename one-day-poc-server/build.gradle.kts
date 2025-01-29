@@ -35,11 +35,12 @@ subprojects {
         testImplementation("io.mockk:mockk:1.13.16")
         testImplementation("net.bytebuddy:byte-buddy:1.14")
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
+        implementation("io.ktor:ktor-server-netty:$ktorVersion")
     }
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+
     implementation(project(":routes"))
     implementation(project(":auth"))
 }

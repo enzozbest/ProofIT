@@ -5,6 +5,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -157,36 +159,16 @@ class JWTValidatorIntegrationTest {
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun `Test JWT Validator is set up and works`() = testApplication {
-        val mockJWKSUrl = "http://localhost:80"
+        val mockJWKSUrl = "localhost:5000"
+        this@JWTValidatorIntegrationTest.setUpMockJWKSEndpoint()
 
         this.application {
             this@application.install(Authentication) {
-                configureJWTValidator(MockJsonConfig(mockJWKSUrl))
+                val jwtConfig = MockJsonConfig(mockJWKSUrl)
+                configureJWTValidator(jwtConfig)
             }
-            routing {
-                get("/.well-known/jwks.json") {
-                    call.respondText(
-                        Json.encodeToString(
-                            JsonObject.serializer(),
-                            JsonObject(
-                                mapOf(
-                                    "keys" to JsonArray(
-                                        listOf(
-                                            Json.parseToJsonElement(
-                                                createMockJWK(
-                                                    "test-key-id",
-                                                    rsaPublicKey
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        ),
-                        ContentType.Application.Json
-                    )
-                }
 
+            routing {
                 authenticate("jwt-verifier") {
                     get("/test/protected") {
                         call.respond(HttpStatusCode.OK, "Authorized!")
@@ -208,27 +190,62 @@ class JWTValidatorIntegrationTest {
         }
         assertEquals(HttpStatusCode.OK, responseWithToken.status)
     }
-    
 
     private fun createValidToken(): String {
-        val algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey)
+        val algorithm = Algorithm.RSA256(null, rsaPrivateKey)
         return JWT.create()
             .withKeyId("test-key-id")
+            .withIssuer("http://localhost:5000")
             .withClaim("email", "test@example.org")
             .sign(algorithm)
     }
 
     private fun createMockJWK(keyId: String, publicKey: RSAPublicKey): String {
+        val encoder = Base64.getUrlEncoder().withoutPadding()
+
+        val modulus = encoder.encodeToString(publicKey.modulus.toByteArray())
+        val exponent = encoder.encodeToString(publicKey.publicExponent.toByteArray())
         return """
             {
                 "kty": "RSA",
                 "kid": "$keyId",
+                "typ": "JWT",
                 "use": "sig",
                 "alg": "RS256",
-                "n": "${Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray())}",
-                "e": "${Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray())}"
+                "n": "$modulus",
+                "e": "$exponent"
             }
         """.trimIndent()
+    }
+
+    private fun setUpMockJWKSEndpoint() {
+        embeddedServer(Netty, port = 5000) {
+            routing {
+                get("/.well-known/jwks.json") {
+                    log.info("JWK Endpoint Called")
+                    call.respondText(
+                        Json.encodeToString(
+                            JsonObject.serializer(),
+                            JsonObject(
+                                mapOf(
+                                    "keys" to JsonArray(
+                                        listOf(
+                                            Json.parseToJsonElement(
+                                                createMockJWK(
+                                                    "test-key-id",
+                                                    rsaPublicKey
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        ContentType.Application.Json
+                    )
+                }
+            }
+        }.start()
     }
 
     private fun generateRSAKeyPair(): Pair<RSAPrivateKey, RSAPublicKey> {

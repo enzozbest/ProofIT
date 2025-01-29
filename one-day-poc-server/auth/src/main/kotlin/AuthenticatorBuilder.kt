@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 /**
  * Configures the OAuth settings for the application.
@@ -41,8 +42,11 @@ fun AuthenticationConfig.configureOAuth(config: JSONObject) {
 fun AuthenticationConfig.configureJWTValidator(config: JSONObject) {
     jwt("jwt-verifier") {
         val issuer = config.getString("jwtIssuer")
-        val jwkProvider = JwkProviderBuilder(issuer).build()
-        verifier(jwkProvider, issuer) {
+        val jwkProvider = JwkProviderBuilder("http://$issuer")
+            .cached(10, 1, TimeUnit.HOURS)
+            .rateLimited(10, 1, TimeUnit.MINUTES)
+            .build()
+        verifier(jwkProvider, "http://$issuer") {
             acceptLeeway(10)
         }
         validate { credential ->
