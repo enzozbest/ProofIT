@@ -26,13 +26,12 @@ function Chat() {
             console.error('Error', error);
         }
     }
-    const handleSend = () => {
-        var currentTime = new Date().toLocaleString();
+
+    const handleSend = async () => {
+        const currentTime = new Date().toLocaleString();
         setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
-        postMessage();
         {/**In reality, the response would be the ACTUAL llm response*/}
-        var response = ["LLM",llmResponse, currentTime]
-        setSentMessage((prevMessages) => [...prevMessages, response]);
+        await postMessage();
         setMessage("");
     };
 
@@ -50,6 +49,16 @@ function Chat() {
         }
     }, [sentMessage]);
 
+    // Update sentMessage when llmResponse changes
+    useEffect(() => {
+        if (llmResponse) {
+            const currentTime = new Date().toLocaleString();
+            setSentMessage((prevMessages) => [
+                ...prevMessages,
+                ["LLM", llmResponse, currentTime]
+            ]);
+        }
+    }, [llmResponse]);
 
     return (
         <div style={{
@@ -80,6 +89,7 @@ function Chat() {
                         flexDirection: "column",
                     }}
                 >
+                    {/*List of messages*/}
                     {sentMessage.map((msg, index) => (
                         msg[0] === "User" ? (
                             <div
@@ -132,7 +142,7 @@ function Chat() {
                         type="text"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        placeholder="Type a message"
+                        placeholder="How can we help you today?"
                         onKeyDown={handleKeyDown}
                         style={{
                             flex: 1,

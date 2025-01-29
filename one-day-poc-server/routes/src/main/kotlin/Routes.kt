@@ -23,7 +23,8 @@ fun Application.configureRouting() {
             call.respondText("Hello")
         }
         post("/api/chat/send") {
-            call.respondText("This is the LLM response", status= HttpStatusCode.OK)
+            var time = System.currentTimeMillis()
+            call.respondText("This is the LLM response $time", status= HttpStatusCode.OK)
         }
     }
 }
