@@ -2,6 +2,7 @@ import React from "react";
 import NavBar from "../components/NavBar";
 import HeroSection from "../components/HeroSection";
 import InputBox from "../components/InputBox";
+import OldPrompts from "../components/OldPrompts";
 
 const LandingPage = ({ buttons }) => {
   return (
@@ -9,6 +10,7 @@ const LandingPage = ({ buttons }) => {
       <NavBar />
       <div className="flex flex-col items-center justify-center flex-grow">
         <HeroSection />
+        <OldPrompts />
         <InputBox />
         <div className="mt-5 flex gap-3">
           {buttons.map((text, index) => (
