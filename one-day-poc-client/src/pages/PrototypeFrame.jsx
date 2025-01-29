@@ -50,7 +50,7 @@ const PrototypeFrame = ({htmlContent, cssContent, jsContent, width = '100%', hei
     return (
         <iframe
         ref={iframeRef}
-        id="prototype-iframe"
+        data-testid="prototype-iframe"
         width={width}
         height={height}
         style={{ border: 'none' }}
