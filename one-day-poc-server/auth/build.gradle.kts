@@ -23,6 +23,7 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.json:json:20210307")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
     implementation(project(":utils"))
     testImplementation(kotlin("test"))
 }

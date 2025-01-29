@@ -15,8 +15,16 @@ import kcl.seg.rtt.auth.CALL_BACK_ROUTE
 import kcl.seg.rtt.auth.authModule
 import kcl.seg.rtt.auth.configureJWTValidator
 import kcl.seg.rtt.utils.JSON.readJsonFile
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
+import java.security.KeyPairGenerator
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -142,14 +150,43 @@ class AuthenticationTest {
 
 class JWTValidatorIntegrationTest {
 
+    private val rsaKeyPair = generateRSAKeyPair()
+    private val rsaPrivateKey = rsaKeyPair.first
+    private val rsaPublicKey = rsaKeyPair.second
+
+    @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun `Test JWT Validator is set up and works`() = testApplication {
+        val mockJWKSUrl = "http://localhost:80"
+
         this.application {
             this@application.install(Authentication) {
-                configureJWTValidator(MockJsonConfig())
+                configureJWTValidator(MockJsonConfig(mockJWKSUrl))
             }
-
             routing {
+                get("/.well-known/jwks.json") {
+                    call.respondText(
+                        Json.encodeToString(
+                            JsonObject.serializer(),
+                            JsonObject(
+                                mapOf(
+                                    "keys" to JsonArray(
+                                        listOf(
+                                            Json.parseToJsonElement(
+                                                createMockJWK(
+                                                    "test-key-id",
+                                                    rsaPublicKey
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        ContentType.Application.Json
+                    )
+                }
+
                 authenticate("jwt-verifier") {
                     get("/test/protected") {
                         call.respond(HttpStatusCode.OK, "Authorized!")
@@ -161,111 +198,52 @@ class JWTValidatorIntegrationTest {
         val responseNoToken = client.get("test/protected")
         assertEquals(HttpStatusCode.Unauthorized, responseNoToken.status)
 
-        val responseWithToken = client.get("test/protected") {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-        }
-        assertEquals(HttpStatusCode.OK, responseWithToken.status)
-
         val responseInvalidToken = client.get("test/protected") {
             header(HttpHeaders.Authorization, "Bearer invalid_jwt_here")
         }
         assertEquals(HttpStatusCode.Unauthorized, responseInvalidToken.status)
+
+        val responseWithToken = client.get("test/protected") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+        }
+        assertEquals(HttpStatusCode.OK, responseWithToken.status)
     }
+    
 
     private fun createValidToken(): String {
-        val algorithm = Algorithm.HMAC256("secret") // Replace with your secret/key
-
+        val algorithm = Algorithm.RSA256(rsaPublicKey, rsaPrivateKey)
         return JWT.create()
-            .withIssuer("my-issuer")
-            .withAudience("my-audience")
+            .withKeyId("test-key-id")
             .withClaim("email", "test@example.org")
             .sign(algorithm)
     }
 
-    private class MockJsonConfig : JSONObject() {
+    private fun createMockJWK(keyId: String, publicKey: RSAPublicKey): String {
+        return """
+            {
+                "kty": "RSA",
+                "kid": "$keyId",
+                "use": "sig",
+                "alg": "RS256",
+                "n": "${Base64.getUrlEncoder().encodeToString(publicKey.modulus.toByteArray())}",
+                "e": "${Base64.getUrlEncoder().encodeToString(publicKey.publicExponent.toByteArray())}"
+            }
+        """.trimIndent()
+    }
+
+    private fun generateRSAKeyPair(): Pair<RSAPrivateKey, RSAPublicKey> {
+        val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
+        keyPairGenerator.initialize(2048)
+        val keyPair = keyPairGenerator.generateKeyPair()
+        return keyPair.private as RSAPrivateKey to keyPair.public as RSAPublicKey
+    }
+
+    private class MockJsonConfig(private val jwksUrl: String) : JSONObject() {
         override fun getString(key: String?): String {
             return when (key) {
-                "verifier" -> "mockVerifier"
+                "jwtIssuer" -> jwksUrl
                 else -> error("Unexpected key: $key")
             }
         }
     }
 }
-
-//    @Test
-//    fun `Test JWT Validator setup`() {
-//        every { config.getString("verifier") } returns "someVerifier"
-//        jwtValidator.configureJWTValidator(config)
-//        verify { jwtValidator.jwt("jwt-verifier", any()) }
-//
-//        val mockConfig = mockk<JWTAuthenticationProvider.Config>(relaxed = true)
-//        val configBlock = slot<JWTAuthenticationProvider.Config.() -> Unit>()
-//        verify { jwtValidator.jwt("jwt-verifier", capture(configBlock)) }
-//
-//        val capturedBlock = configBlock.captured
-//        capturedBlock.invoke(mockConfig)
-//        verify { mockConfig.verifier("someVerifier") }
-//    }
-//}
-
-
-//    @Test
-//    fun `Test JWT Validator with valid email`() {
-//        every {
-//            config.getString("verifier")
-//        } returns "someVerifier"
-//
-//        jwtValidator.configureJWTValidator(config)
-//        val credential = createJWT("test@example.org")
-//        val result = jwtValidator.jwt { validate { credential } }
-//        println(result)
-//        assertNotNull(result)
-//    }
-//
-//    @Test
-//    fun `Test JWT Validator with invalid email`() {
-//        every {
-//            config.getString("verifier")
-//        } returns "someVerifier"
-//
-//        jwtValidator.configureJWTValidator(config)
-//        val credential = createJWT("test")
-//        val result = jwtValidator.jwt("jwt-verifier") { validate { credential } }
-//        assertNull(result)
-//    }
-//
-//    @Test
-//    fun `Test JWT Validator with blank email`() {
-//        every {
-//            config.getString("verifier")
-//        } returns "someVerifier"
-//
-//        jwtValidator.configureJWTValidator(config)
-//        val credential = createJWT("")
-//        val result = jwtValidator.jwt("jwt-verifier") { validate { credential } }
-//        assertNull(result)
-//    }
-//
-//    @Test
-//    fun `Test JWT Validator with null email`() {
-//        every {
-//            config.getString("verifier")
-//        } returns "someVerifier"
-//
-//        jwtValidator.configureJWTValidator(config)
-//        val credential = createJWT(null)
-//        val result = jwtValidator.jwt("jwt-verifier") { validate { credential } }
-//        assertNull(result)
-//    }
-//
-//    private fun createJWT(email: String?): JWTCredential {
-//        val decodedJWT = mockk<DecodedJWT> {
-//            every { getClaim("email").asString() } returns email
-//        }
-//        val credential = mockk<JWTCredential> {
-//            every { payload } returns decodedJWT
-//        }
-//        return credential
-//    }
-//}
-

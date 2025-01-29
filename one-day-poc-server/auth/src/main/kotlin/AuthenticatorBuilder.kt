@@ -1,5 +1,6 @@
 package kcl.seg.rtt.auth
 
+import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.http.*
@@ -39,7 +40,11 @@ fun AuthenticationConfig.configureOAuth(config: JSONObject) {
 
 fun AuthenticationConfig.configureJWTValidator(config: JSONObject) {
     jwt("jwt-verifier") {
-        verifier(config.getString("verifier"))
+        val issuer = config.getString("jwtIssuer")
+        val jwkProvider = JwkProviderBuilder(issuer).build()
+        verifier(jwkProvider, issuer) {
+            acceptLeeway(10)
+        }
         validate { credential ->
             if (credential.payload.getClaim("email").asString() != null)
                 JWTPrincipal(credential.payload)
