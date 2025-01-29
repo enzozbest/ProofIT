@@ -1,5 +1,5 @@
 import React,{ useState, useRef, useEffect } from "react";
-import PrototypeFrame from "./PrototypeIframe";
+import PrototypeFrame from "./PrototypeFrame";
 
 
 function Chat() {

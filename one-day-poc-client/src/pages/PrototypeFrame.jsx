@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const PrototypeFrame = ({htmlContent, cssContent, jsContent, width = '600px', height = '400px' }) => {
+const PrototypeFrame = ({htmlContent, cssContent, jsContent, width = '100%', height = '100%' }) => {
     const iframeRef = useRef(null);
 
     /*
@@ -50,6 +50,7 @@ const PrototypeFrame = ({htmlContent, cssContent, jsContent, width = '600px', he
     return (
         <iframe
         ref={iframeRef}
+        id="prototype-iframe"
         width={width}
         height={height}
         style={{ border: 'none' }}
