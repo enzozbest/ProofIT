@@ -72,7 +72,10 @@ private fun Route.setLogOutEndpoint(route: String) {
  */
 private fun Application.setupSessions() {
     install(Sessions) {
-        cookie<UserSession>("UserSession") {
+        cookie<GuestSession>("GuestSession") {
+            cookie.maxAgeInSeconds = 3600
+        }
+        cookie<AuthenticatedSession>("AuthenticatedSession") {
             cookie.maxAgeInSeconds = 3600
         }
     }

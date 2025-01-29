@@ -28,6 +28,13 @@ subprojects {
         testImplementation(kotlin("test"))
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
+        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+        testImplementation("org.mockito:mockito-core:5.12")
+        testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+        testImplementation("io.mockk:mockk:1.13.16")
+        testImplementation("net.bytebuddy:byte-buddy:1.14")
+        testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
     }
 }
 
