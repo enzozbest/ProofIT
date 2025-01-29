@@ -8,7 +8,7 @@ sealed class UserSession {
     fun isAdmin(): Boolean {
         return when (this) {
             is GuestSession -> false
-            is AuthenticatedSession -> admin
+            is AuthenticatedSession -> admin ?: false
         }
     }
 
@@ -38,5 +38,5 @@ sealed class UserSession {
 data class GuestSession(val guestId: String, val submissions: Int) : UserSession()
 
 @Serializable
-data class AuthenticatedSession(val userId: String, val token: String, val admin: Boolean) : UserSession()
+data class AuthenticatedSession(val userId: String, val token: String, val admin: Boolean?) : UserSession()
 
