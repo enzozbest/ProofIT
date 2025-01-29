@@ -17,7 +17,8 @@
     "@rollup/rollup-win32-x64-msvc": "^4.32.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "lucide-react": "^0.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
