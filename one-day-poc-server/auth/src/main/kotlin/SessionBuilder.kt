@@ -11,7 +11,7 @@ sealed class UserSession {
             is AuthenticatedSession -> admin
         }
     }
-    
+
     fun getAccessToken(): String? {
         return when (this) {
             is GuestSession -> null
@@ -34,6 +34,9 @@ sealed class UserSession {
     }
 }
 
+@Serializable
 data class GuestSession(val guestId: String, val submissions: Int) : UserSession()
+
+@Serializable
 data class AuthenticatedSession(val userId: String, val token: String, val admin: Boolean) : UserSession()
 
