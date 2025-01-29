@@ -15,15 +15,16 @@ fun Application.configureSerialization() {
             ignoreUnknownKeys = true
         })
     }
+    println("Serialization configured")
 }
 
 
 fun Application.prototypeModule() {
-    println("configuring serialization")
     configureSerialization()
     val prototypeService = PrototypeService()
 
     routing {
         prototypeRoutes(prototypeService)
     }
+    println("Prototype module configured")
 }
