@@ -1,15 +1,27 @@
 package kcl.seg.rtt.utils.JSON
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import java.io.File
-import org.json.JSONObject
 
 /**
- * Reads a JSON file and returns a JSONObject
- * @param path The path to the JSON file
- * @return The JSONObject
+ * Object to encapsulate JSON utilities
  */
-fun readJsonFile(path: String): JSONObject {
-    val file : File = File(path)
-    val content : String = file.readText()
-    return JSONObject(content)
+object PoCJSON {
+
+    /**
+     * Reads a JSON file and returns a JsonObject
+     * @param path The path to the JSON file
+     * @return The JSONObject
+     */
+
+    fun readJsonFile(path: String): JsonObject {
+        val file: File = File(path)
+        val content: String = file.readText()
+        return Json.parseToJsonElement(content).jsonObject
+    }
 }
+
+
+
