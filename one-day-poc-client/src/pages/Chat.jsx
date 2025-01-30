@@ -9,12 +9,18 @@ function Chat() {
 
     const postMessage = async () => {
         try {
-            var response = await fetch("http://localhost:8000/api/chat/send", {
+            const messagePayload = {
+                userID: "user123",  // hardcoded for now
+                time: new Date().toISOString(),  // ISO 8601 format
+                prompt: message
+            };
+
+            var response = await fetch("http://localhost:8000/json", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(message)
+                body: JSON.stringify(messagePayload)
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');

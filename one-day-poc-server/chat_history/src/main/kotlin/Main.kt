@@ -37,5 +37,8 @@ fun Application.module() {
             }
         }
 
+        // terminal line to test this
+        // Invoke-RestMethod -Uri "http://127.0.0.1:8000/json" -Method POST -Headers @{ "Content-Type" = "application/json" } -Body '{"userID":"user123","time":"2025-01-01T12:00:00","prompt":"Hello"}'
+
     }
 }
