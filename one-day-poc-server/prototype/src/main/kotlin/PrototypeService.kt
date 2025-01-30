@@ -62,4 +62,10 @@ class PrototypeService {
         // This is a placeholder for future functionality.
     }
 
+    // Placeholder for future functionality
+    // Will be needed to pass to web container
+    fun formatToJSON(prototypeOutput: String): String {
+        return prototypeOutput
+    }
+
 }
