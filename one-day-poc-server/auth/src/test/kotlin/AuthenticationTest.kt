@@ -12,12 +12,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
-import kcl.seg.rtt.auth.AUTHENTICATION_ROUTE
-import kcl.seg.rtt.auth.CALL_BACK_ROUTE
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.configureJWTValidator
+import kcl.seg.rtt.auth.*
 import kcl.seg.rtt.utils.JSON.PoCJSON
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
 import java.security.KeyPairGenerator
@@ -155,9 +153,9 @@ class JWTValidatorIntegrationTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `Test JWT Validator is set up and works`() = testApplication {
+    fun `Test JWT Validator is set up and works with Authorization Header`() = testApplication {
         val mockJWKSUrl = "localhost:5000"
-        this@JWTValidatorIntegrationTest.setUpMockJWKSEndpoint()
+        this@JWTValidatorIntegrationTest.setUpMockJWKSEndpoint(5000)
 
         this.application {
             this@application.install(Authentication) {
@@ -183,17 +181,70 @@ class JWTValidatorIntegrationTest {
         assertEquals(HttpStatusCode.Unauthorized, responseInvalidToken.status)
 
         val responseWithToken = client.get("test/protected") {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken(5000)}")
         }
         assertEquals(HttpStatusCode.OK, responseWithToken.status)
     }
 
-    private fun createValidToken(): String {
+    @OptIn(ExperimentalSerializationApi::class)
+    @Test
+    fun `Test JWT Validator is set up and works with AuthenticatedSession cookie`() = testApplication {
+        val mockJWKSUrl = "localhost:6000"
+        this@JWTValidatorIntegrationTest.setUpMockJWKSEndpoint(6000)
+
+        this.application {
+            this@application.install(Authentication) {
+                val jwtConfig = MockJsonConfig(mockJWKSUrl).getJson()
+                configureJWTValidator(jwtConfig)
+            }
+
+            routing {
+                authenticate("jwt-verifier") {
+                    get("/test/protected") {
+                        call.respond(HttpStatusCode.OK, "Authorized!")
+                    }
+                }
+            }
+        }
+
+        val responseWithoutCookie = client.get("test/protected") {
+            headers.clear()
+        }
+        assertEquals(HttpStatusCode.Unauthorized, responseWithoutCookie.status)
+
+        val responseWithInvalidCookie = client.get("test/protected") {
+            cookie("AuthenticatedSession", "invalid_cookie_here")
+        }
+        assertEquals(HttpStatusCode.Unauthorized, responseWithInvalidCookie.status)
+
+        val responseWithValidCookie = client.get("test/protected") {
+            val session = AuthenticatedSession("id", createValidToken(6000), false)
+            cookie("AuthenticatedSession", Json.encodeToString<AuthenticatedSession>(session))
+        }
+        assertEquals(HttpStatusCode.OK, responseWithValidCookie.status)
+
+        val responseWithInvalidToken = client.get("test/protected") {
+            cookie("AuthenticatedSession", createInvalidToken(6000))
+        }
+        assertEquals(HttpStatusCode.Unauthorized, responseWithInvalidToken.status)
+    }
+
+
+    private fun createValidToken(port: Int): String {
         val algorithm = Algorithm.RSA256(null, rsaPrivateKey)
         return JWT.create()
             .withKeyId("test-key-id")
-            .withIssuer("http://localhost:5000")
+            .withIssuer("http://localhost:$port")
             .withClaim("email", "test@example.org")
+            .sign(algorithm)
+    }
+
+    private fun createInvalidToken(port: Int): String {
+        val algorithm = Algorithm.RSA256(null, rsaPrivateKey)
+        return JWT.create()
+            .withKeyId("test-key-id")
+            .withIssuer("http://localhost:$port")
+            .withClaim("email", "")
             .sign(algorithm)
     }
 
@@ -215,8 +266,8 @@ class JWTValidatorIntegrationTest {
         """.trimIndent()
     }
 
-    private fun setUpMockJWKSEndpoint() {
-        embeddedServer(Netty, port = 5000) {
+    private fun setUpMockJWKSEndpoint(port: Int) {
+        embeddedServer(Netty, port = port) {
             routing {
                 get("/.well-known/jwks.json") {
                     log.info("JWK Endpoint Called")
