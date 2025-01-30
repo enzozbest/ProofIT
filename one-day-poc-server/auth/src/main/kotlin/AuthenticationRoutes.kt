@@ -9,7 +9,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 
 val AUTHENTICATION_ROUTE: String = "/api/auth"
-val CALL_BACK_ROUTE: String = "/api/callback"
+val CALL_BACK_ROUTE: String = "/api/auth/callback"
 val LOG_OUT_ROUTE: String = "/api/logout"
 
 
