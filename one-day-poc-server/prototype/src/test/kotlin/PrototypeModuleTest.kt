@@ -14,7 +14,7 @@ class PrototypeRoutesTest {
             prototypeModule()
         }
 
-        val response = client.get("/health")
+        val response = client.get("prototype/health")
 
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals("OK", response.bodyAsText())

@@ -18,18 +18,20 @@ data class GenerateResponse(val output: String)
 data class ErrorResponse(val error: String)
 
 fun Route.prototypeRoutes(prototypeService: PrototypeService) {
-    get("/health") {
-        call.respond(HttpStatusCode.OK, "OK")
-    }
+    route("/prototype") {
+        get("/health") {
+            call.respond(HttpStatusCode.OK, "OK")
+        }
 
-    post("/generate") {
-        try {
-            val request = call.receive<GenerateRequest>()
-            val result = prototypeService.generatePrototype(request.prompt)
-            val serializedResponse = GenerateResponse(result)
-            call.respond(HttpStatusCode.OK, serializedResponse)
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, ErrorResponse("Error: ${e.message ?: "Unknown error"}"))
+        post("/generate") {
+            try {
+                val request = call.receive<GenerateRequest>()
+                val result = prototypeService.generatePrototype(request.prompt)
+                val serializedResponse = GenerateResponse(result)
+                call.respond(HttpStatusCode.OK, serializedResponse)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, ErrorResponse("Error: ${e.message ?: "Unknown error"}"))
+            }
         }
     }
 }
