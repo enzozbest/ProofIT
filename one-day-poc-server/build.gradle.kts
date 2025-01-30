@@ -25,6 +25,8 @@ subprojects {
         implementation("io.ktor:ktor-server-core:$ktorVersion")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
         implementation("ch.qos.logback:logback-classic:1.4.11")
+        implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
         testImplementation(kotlin("test"))
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")

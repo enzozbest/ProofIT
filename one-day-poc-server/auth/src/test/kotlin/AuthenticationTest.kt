@@ -16,12 +16,9 @@ import kcl.seg.rtt.auth.AUTHENTICATION_ROUTE
 import kcl.seg.rtt.auth.CALL_BACK_ROUTE
 import kcl.seg.rtt.auth.authModule
 import kcl.seg.rtt.auth.configureJWTValidator
-import kcl.seg.rtt.utils.JSON.readJsonFile
+import kcl.seg.rtt.utils.JSON.PoCJSON
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import org.json.JSONObject
+import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -32,9 +29,9 @@ import kotlin.test.assertTrue
 
 class AuthenticationTest {
 
-    private val jsonConfig: JSONObject =
-        readJsonFile("src/test/resources/cognito-test.json")
-    private val urlProvider: JSONObject = jsonConfig.getJSONObject("providerLookup")
+    private val jsonConfig: JsonObject =
+        PoCJSON.readJsonFile("src/test/resources/cognito-test.json")
+    private val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
 
 
     @Test
@@ -53,7 +50,7 @@ class AuthenticationTest {
 
         routing {
             get("/authenticate") {
-                call.respondRedirect(urlProvider.getString("authorizeUrl"))
+                call.respondRedirect(urlProvider["authorizeUrl"]!!.jsonPrimitive.content)
             }
         }
 
@@ -78,7 +75,7 @@ class AuthenticationTest {
         }
         val response = myClient.get(AUTHENTICATION_ROUTE)
         assertEquals(HttpStatusCode.Found, response.status)
-        assertTrue(response.headers["Location"]!!.startsWith(urlProvider.getString("authorizeUrl")))
+        assertTrue(response.headers["Location"]!!.startsWith(urlProvider["authorizeUrl"]!!.jsonPrimitive.content))
     }
 
     @Test
@@ -94,7 +91,7 @@ class AuthenticationTest {
         }
         val response = myClient.get(CALL_BACK_ROUTE)
         assertEquals(HttpStatusCode.Found, response.status)
-        assertTrue(response.headers["Location"]!!.startsWith(urlProvider.getString("authorizeUrl")))
+        assertTrue(response.headers["Location"]!!.startsWith(urlProvider["authorizeUrl"]!!.jsonPrimitive.content))
     }
 
     @Test
@@ -111,7 +108,7 @@ class AuthenticationTest {
             followRedirects = false
         }
 
-        val response = myClient.get(urlProvider.getString("authorizeUrl"))
+        val response = myClient.get(urlProvider["authorizeUrl"]!!.jsonPrimitive.content)
         assertEquals(HttpStatusCode.OK, response.status)
     }
 
@@ -128,7 +125,7 @@ class AuthenticationTest {
         }
     }
 
-    private fun TestApplicationBuilder.setupExternalServices(urlProvider: JSONObject) {
+    private fun TestApplicationBuilder.setupExternalServices(urlProvider: JsonObject) {
         externalServices {
             hosts("http://example.com:2000") {
                 routing {
@@ -164,7 +161,7 @@ class JWTValidatorIntegrationTest {
 
         this.application {
             this@application.install(Authentication) {
-                val jwtConfig = MockJsonConfig(mockJWKSUrl)
+                val jwtConfig = MockJsonConfig(mockJWKSUrl).getJson()
                 configureJWTValidator(jwtConfig)
             }
 
@@ -255,11 +252,10 @@ class JWTValidatorIntegrationTest {
         return keyPair.private as RSAPrivateKey to keyPair.public as RSAPublicKey
     }
 
-    private class MockJsonConfig(private val jwksUrl: String) : JSONObject() {
-        override fun getString(key: String?): String {
-            return when (key) {
-                "jwtIssuer" -> jwksUrl
-                else -> error("Unexpected key: $key")
+    private class MockJsonConfig(private val jwksUrl: String) {
+        fun getJson(): JsonObject {
+            return buildJsonObject {
+                put("jwtIssuer", jwksUrl)
             }
         }
     }

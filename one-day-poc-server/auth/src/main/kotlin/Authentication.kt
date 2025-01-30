@@ -2,7 +2,7 @@ package kcl.seg.rtt.auth
 
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import kcl.seg.rtt.utils.JSON.readJsonFile
+import kcl.seg.rtt.utils.JSON.PoCJSON
 
 /**
  * Configures the authentication settings for the application and the routes that will be used for authentication.
@@ -22,7 +22,7 @@ fun Application.authModule(
  * Configures the authentication settings for the application.
  */
 private fun Application.configureAuthentication(configFilePath: String) {
-    val config = readJsonFile(configFilePath)
+    val config = PoCJSON.readJsonFile(configFilePath)
     try {
         install(Authentication) {
             configureOAuth(config)

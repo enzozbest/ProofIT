@@ -6,7 +6,10 @@ import io.ktor.client.engine.cio.*
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.util.concurrent.TimeUnit
 
 /**
@@ -16,22 +19,18 @@ import java.util.concurrent.TimeUnit
  *
  * @param config The JSON object containing the configuration settings for the OAuth provider.
  */
-fun AuthenticationConfig.configureOAuth(config: JSONObject) {
-    val providerLookupData = config.getJSONObject("providerLookup")
-    oauth(config.getString("name")) {
-        urlProvider = { config.getString("urlProvider") }
+fun AuthenticationConfig.configureOAuth(config: JsonObject) {
+    val providerLookupData = config["providerLookup"]!!.jsonObject
+    oauth(config["name"]!!.jsonPrimitive.content) {
+        urlProvider = { config["urlProvider"]!!.jsonPrimitive.content }
         providerLookup = {
             OAuthServerSettings.OAuth2ServerSettings(
-                name = providerLookupData.getString("name"),
-                authorizeUrl = providerLookupData.getString("authorizeUrl"),
-                accessTokenUrl = providerLookupData.getString("accessTokenUrl"),
-                clientId = providerLookupData.getString("clientId"),
-                clientSecret = providerLookupData.getString("clientSecret"),
-                defaultScopes = providerLookupData.getJSONArray("defaultScopes").let { jsonArray ->
-                    List(jsonArray.length()) { index ->
-                        jsonArray.getString(index)
-                    }
-                },
+                name = providerLookupData["name"]!!.jsonPrimitive.content,
+                authorizeUrl = providerLookupData["authorizeUrl"]!!.jsonPrimitive.content,
+                accessTokenUrl = providerLookupData["accessTokenUrl"]!!.jsonPrimitive.content,
+                clientId = providerLookupData["clientId"]!!.jsonPrimitive.content,
+                clientSecret = providerLookupData["clientSecret"]!!.jsonPrimitive.content,
+                defaultScopes = providerLookupData["defaultScopes"]!!.jsonArray.map { it.jsonPrimitive.content },
                 requestMethod = HttpMethod.Post,
             )
         }
@@ -39,9 +38,16 @@ fun AuthenticationConfig.configureOAuth(config: JSONObject) {
     }
 }
 
-fun AuthenticationConfig.configureJWTValidator(config: JSONObject) {
+/**
+ * Configures the JWT settings for the application.
+ * Settings are loaded from a JSON file containing the relevant fields. In this case, the JSON file is expected to
+ * contain the jwtIssuer field. This is a JWKS Domain from which the application will retrieve the signing key for the JWT.
+ *
+ * @param config The JSON object containing the configuration settings for the JWT validator.
+ */
+fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
     jwt("jwt-verifier") {
-        val issuer = config.getString("jwtIssuer")
+        val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
         val jwkProvider = JwkProviderBuilder("http://$issuer")
             .cached(10, 1, TimeUnit.HOURS)
             .rateLimited(10, 1, TimeUnit.MINUTES)
