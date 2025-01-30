@@ -9,9 +9,9 @@ const OldPrompts = () => {
       ];
 
     return (
-        <div className="flex gap-10 my-40">
+      <div className="flex gap-10 my-20">
           {oldPrompts.map((item, index) => (
-            <button key={index} className="border px-4 py-2 rounded-lg hover:opacity-80 w-[150px] h-30 text-left">
+            <button key={index} className="border py-2 rounded-lg hover:opacity-80 w-[200px] h-30 text-left">
                 <MessageCircle size={24} className="pb-1" /> 
                 {item.text}
                 <p className="text-xs text-gray-500 pt-1">{item.duration}</p>
