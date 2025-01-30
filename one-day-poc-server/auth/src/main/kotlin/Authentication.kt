@@ -26,6 +26,7 @@ private fun Application.configureAuthentication(configFilePath: String) {
     try {
         install(Authentication) {
             configureOAuth(config)
+            configureJWTValidator(config)
         }
     } catch (e: DuplicatePluginException) {
         print("")
