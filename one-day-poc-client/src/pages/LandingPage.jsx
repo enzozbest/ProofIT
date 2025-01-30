@@ -3,22 +3,22 @@ import NavBar from "../components/NavBar";
 import HeroSection from "../components/HeroSection";
 import InputBox from "../components/InputBox";
 import OldPrompts from "../components/OldPrompts";
+import GeneratedPrompts from "../components/GeneratedPrompts";
 
-const LandingPage = ({ buttons }) => {
+const LandingPage = () => {
+  const prompts = [
+    "Generate code for a chatbot",
+    "Build a mobile app for my service",
+    "Create a documentation site",
+  ];
   return (
     <div className="flex flex-col min-h-screen">
       <NavBar />
-      <div className="flex flex-col items-center justify-center flex-grow">
+      <div className="flex flex-col items-center justify-center flex-grow pb-9">
         <HeroSection />
         <OldPrompts />
         <InputBox />
-        <div className="mt-5 flex gap-3">
-          {buttons.map((text, index) => (
-            <button key={index} className="border px-4 py-2 rounded-lg hover:opacity-80">
-              {text} →
-            </button>
-          ))}
-        </div>
+        <GeneratedPrompts prompts={prompts}/>
       </div>
     </div>
   );
