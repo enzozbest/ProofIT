@@ -7,11 +7,12 @@ import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
+import kotlinx.serialization.json.Json
 
 val AUTHENTICATION_ROUTE: String = "/api/auth"
 val CALL_BACK_ROUTE: String = "/api/auth/callback"
 val LOG_OUT_ROUTE: String = "/api/logout"
-
+val JWT_VALIDATION_ROUTE: String = "/api/auth/me"
 
 /**
  * Configures the routes that will be used for authentication.
@@ -24,6 +25,7 @@ fun Application.configureAuthenticationRoutes(authName: String = "Cognito") {
             setAuthenticationEndpoint(AUTHENTICATION_ROUTE)
             setLogOutEndpoint(LOG_OUT_ROUTE)
             setUpCallbackRoute(CALL_BACK_ROUTE)
+            setUpJwtValidationRoute(JWT_VALIDATION_ROUTE)
         }
     }
 }
@@ -68,6 +70,20 @@ private fun Route.setLogOutEndpoint(route: String) {
 }
 
 /**
+ * Sets up JWT validation route
+ */
+private fun Route.setUpJwtValidationRoute(route: String) {
+    authenticate("jwt-verifier") {
+        get(route) {
+            val sessionCookie =
+                Json.decodeFromString<AuthenticatedSession>(call.request.cookies["AuthenticatedSession"] ?: "")
+
+            call.respond(mapOf("userId" to sessionCookie.userId, "admin" to sessionCookie.admin))
+        }
+    }
+}
+
+/**
  * Sets up the sessions for the application.
  */
 private fun Application.setupSessions() {
@@ -80,4 +96,3 @@ private fun Application.setupSessions() {
         }
     }
 }
-
