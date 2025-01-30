@@ -14,15 +14,9 @@ function ColorPreview() {
 }
 
 function App() {
-  const buttons = [
-    "Generate code for a chatbot",
-    "Build a mobile app for my service",
-    "Create a documentation site",
-  ];
-
   return (
     <div>
-      <LandingPage buttons={buttons} />
+      <LandingPage />
     </div>
   );
 }
