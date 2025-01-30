@@ -23,8 +23,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 
-    testImplementation("io.ktor:ktor-server-tests-jvm:2.3.3")
-    testImplementation("io.ktor:ktor-server-test-host:2.3.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
+    testImplementation("io.ktor:ktor-client-cio:$ktorVersion")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testImplementation("io.mockk:mockk:1.13.4")
