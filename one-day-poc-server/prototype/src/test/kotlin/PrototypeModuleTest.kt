@@ -3,8 +3,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kcl.seg.rtt.prototype.prototypeModule
-import kotlin.test.Test
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 
 class PrototypeModuleTest {
