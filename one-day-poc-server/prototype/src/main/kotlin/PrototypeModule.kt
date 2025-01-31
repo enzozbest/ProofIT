@@ -15,7 +15,6 @@ fun Application.configureSerialization() {
             ignoreUnknownKeys = true
         })
     }
-    println("Serialization configured")
 }
 
 

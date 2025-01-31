@@ -27,7 +27,9 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
             try {
                 val request = call.receive<GenerateRequest>()
                 val result = prototypeService.generatePrototype(request.prompt)
+                println("Result: $result")
                 val serializedResponse = GenerateResponse(result)
+                println("Serialized: $serializedResponse")
                 call.respond(HttpStatusCode.OK, serializedResponse)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, ErrorResponse("Error: ${e.message ?: "Unknown error"}"))
