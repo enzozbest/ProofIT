@@ -20,6 +20,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
     implementation(project(":utils"))
     testImplementation(kotlin("test"))
