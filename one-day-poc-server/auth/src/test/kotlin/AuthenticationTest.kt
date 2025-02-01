@@ -1,8 +1,8 @@
-import AuthenticationTestHelpers.configureBasicAuthentication
-import AuthenticationTestHelpers.setupExternalServices
-import AuthenticationTestHelpers.urlProvider
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import helpers.AuthenticationTestHelpers.configureBasicAuthentication
+import helpers.AuthenticationTestHelpers.setupExternalServices
+import helpers.AuthenticationTestHelpers.urlProvider
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -181,7 +181,6 @@ class AuthenticationTest {
         embeddedServer(Netty, port = port) {
             routing {
                 get("/.well-known/jwks.json") {
-                    log.info("JWK Endpoint Called")
                     call.respondText(
                         Json.encodeToString(
                             JsonObject.serializer(),

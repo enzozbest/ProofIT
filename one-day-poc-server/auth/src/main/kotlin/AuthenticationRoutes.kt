@@ -8,13 +8,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.date.*
-import kcl.seg.rtt.utils.JSON.PoCJSON.findCognitoUserAttribute
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.Response
 
 const val AUTHENTICATION_ROUTE: String = "/api/auth"
 const val CALL_BACK_ROUTE: String = "/api/auth/callback"
@@ -26,7 +22,6 @@ const val USER_INFO_ROUTE: String = "api/auth/userinfo"
  * Configures the routes that will be used for authentication.
  */
 fun Application.configureAuthenticationRoutes(authName: String = "Cognito") {
-    setupSessions()
     routing {
         authenticate(authName) {
             setAuthenticationEndpoint(AUTHENTICATION_ROUTE)
@@ -72,11 +67,11 @@ private fun Route.setLogOutEndpoint(route: String) {
 /**
  * Sets up JWT validation route
  */
-private fun Route.setUpJWTValidation(validationRoute: String) {
+fun Route.setUpJWTValidation(validationRoute: String) {
     get(validationRoute) {
         val sessionCookie =
             Json.decodeFromString<AuthenticatedSession>(call.request.cookies["AuthenticatedSession"] ?: "")
-        call.respond(mapOf("userId" to sessionCookie.userId, "admin" to sessionCookie.admin))
+        call.respond(JWTValidationResponse(sessionCookie.userId, sessionCookie.admin))
     }
 }
 
@@ -100,7 +95,7 @@ private fun Route.setUpUserInfoRoute(route: String) {
                 call.respond(HttpStatusCode.Unauthorized, "Invalid token")
                 return@get
             }
-            val userinfo = generateResponseJson(response)
+            val userinfo = generateUserInfo(response)
             call.respond(HttpStatusCode.OK, userinfo)
         } catch (e: Exception) {
             call.respond(HttpStatusCode.InternalServerError)
@@ -108,47 +103,30 @@ private fun Route.setUpUserInfoRoute(route: String) {
     }
 }
 
-private fun generateResponseJson(response: Response): CognitoUserInfo {
-    val jsonResponse = Json.parseToJsonElement(response.body?.string() ?: "{}").jsonObject
-    val attributes = jsonResponse["UserAttributes"]?.jsonArray ?: return CognitoUserInfo("", "", "")
-
-    return CognitoUserInfo(
-        name = findCognitoUserAttribute(attributes, "name") ?: "Unknown",
-        email = findCognitoUserAttribute(attributes, "email") ?: "Unknown",
-        dob = findCognitoUserAttribute(attributes, "birthdate") ?: "Unknown"
-    )
-}
-
 /**
  * Sets up the callback route for the authentication process.
  */
-private fun Route.setUpCallbackRoute(route: String) {
+fun Route.setUpCallbackRoute(route: String, redirectDomain: String = "http://localhost:5173") {
     get(route) {
         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-
-        if (principal == null)
+        if (principal == null) {
             call.respond(HttpStatusCode.Unauthorized) //Authentication failed, do not grant access.
+            return@get
+        }
+        val token: String? = principal.extraParameters["id_token"]
+        try {
+            val decoded = JWT.decode(token ?: return@get call.respond(HttpStatusCode.Unauthorized))
+            val userId: String =
+                decoded.getClaim("sub").asString() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+            val admin: Boolean =
+                decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
 
-        val token: String? = principal!!.extraParameters["id_token"]
-        val decoded = JWT.decode(token)
-        val userId: String = decoded.getClaim("sub").asString()
-        val admin: Boolean? =
-            decoded.getClaim("cognito:groups")?.asList(String::class.java)?.contains("admin_users")
-        call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
-        val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
-        call.respondRedirect("localhost:5173$redirectUrl")
-    }
-}
-
-/**
- * Sets up the sessions for the application.
- */
-private fun Application.setupSessions() {
-    install(Sessions) {
-        cookie<AuthenticatedSession>("AuthenticatedSession") {
-            cookie.maxAgeInSeconds = 3600
-            cookie.secure = true
-            cookie.httpOnly = true
+            call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
+            val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
+            call.respondRedirect("$redirectDomain$redirectUrl")
+        } catch (e: Exception) {
+            return@get call.respond(HttpStatusCode.Unauthorized) //JWT token is invalid
         }
     }
 }
+

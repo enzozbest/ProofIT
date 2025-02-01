@@ -1,8 +1,5 @@
 import kcl.seg.rtt.utils.JSON.PoCJSON
-import kotlinx.serialization.json.buildJsonArray
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -10,7 +7,7 @@ import kotlin.test.assertNull
 class JSONUtilsTest {
 
     @Test
-    fun testJSONReader() {
+    fun `Test parses JSON correctly`() {
         val json = PoCJSON.readJsonFile("src/test/resources/test.json")
         assertEquals("value", json["key"]!!.jsonPrimitive.content)
     }
@@ -27,9 +24,7 @@ class JSONUtilsTest {
                 put("Value", "123456")
             })
         }
-
-        val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
-        assertEquals("test@example.com", result)
+        assertEquals("test@example.com", PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
     }
 
     @Test
@@ -40,9 +35,7 @@ class JSONUtilsTest {
                 put("Value", "123456")
             })
         }
-
-        val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
-        assertNull(result)
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
     }
 
     @Test
@@ -52,9 +45,7 @@ class JSONUtilsTest {
                 put("Value", "test@example.com")
             })
         }
-
-        val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
-        assertNull(result)
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
     }
 
     @Test
@@ -64,7 +55,47 @@ class JSONUtilsTest {
                 put("Name", "email")
             })
         }
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
+    }
 
+    @Test
+    fun `Test returns null when Name is not a JSON primitive`() {
+        val jsonArray = buildJsonArray {
+            add(buildJsonObject {
+                put("Name", buildJsonObject { put("unexpected", "value") })
+                put("Value", "test@example.com")
+            })
+        }
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
+    }
+
+    @Test
+    fun `Test returns null when element is not a JSON object`() {
+        val jsonArray = buildJsonArray {
+            add(JsonPrimitive("not an object"))
+        }
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
+    }
+
+    @Test
+    fun `Test returns null when Value is not a JSON primitive`() {
+        val jsonArray = buildJsonArray {
+            add(buildJsonObject {
+                put("Name", "email")
+                put("Value", buildJsonObject { put("nested", "value") })
+            })
+        }
+        assertNull(PoCJSON.findCognitoUserAttribute(jsonArray, "email"))
+    }
+
+    @Test
+    fun `Test returns null when Name is JsonNull`() {
+        val jsonArray = buildJsonArray {
+            add(buildJsonObject {
+                put("Name", JsonNull)
+                put("Value", "test@example.com")
+            })
+        }
         val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
         assertNull(result)
     }
@@ -77,7 +108,6 @@ class JSONUtilsTest {
                 put("Value", "test@example.com")
             })
         }
-
         val result = PoCJSON.findCognitoUserAttribute(jsonArray, "Email")
         assertEquals("test@example.com", result)
     }
@@ -85,7 +115,6 @@ class JSONUtilsTest {
     @Test
     fun `Test returns null when array is empty`() {
         val jsonArray = buildJsonArray {}
-
         val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
         assertNull(result)
     }
@@ -102,7 +131,6 @@ class JSONUtilsTest {
                 put("Value", "second@example.com")
             })
         }
-
         val result = PoCJSON.findCognitoUserAttribute(jsonArray, "email")
         assertEquals("first@example.com", result)
     }

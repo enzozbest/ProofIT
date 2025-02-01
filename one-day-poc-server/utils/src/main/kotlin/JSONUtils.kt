@@ -27,8 +27,14 @@ object PoCJSON {
      * @return The value of the attribute as a String, or null if the attribute is not found
      */
     fun findCognitoUserAttribute(array: JsonArray, attribute: String): String? {
-        return array.find { it.jsonObject["Name"]?.toString() == "\"${attribute.lowercase()}\"" }?.jsonObject?.get("Value")
-            ?.jsonPrimitive?.content
+        return try {
+            array.find { it.jsonObject["Name"]?.toString() == "\"${attribute.lowercase()}\"" }?.jsonObject?.get(
+                "Value"
+            )
+                ?.jsonPrimitive?.content
+        } catch (e: IllegalArgumentException) {
+            null
+        }
     }
 }
 
