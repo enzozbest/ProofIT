@@ -35,13 +35,13 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
 
         // placeholder method retrievePrototype
         // To be replaced with our own logic
-        val result: String? = prototypeService.retrievePrototype(prototypeId)
+        val prototypeString: String? = prototypeService.retrievePrototype(prototypeId)
         // Assumes prototypeService will return also some ID associated
 
         if (result == null) {
             call.respond(HttpStatusCode.NotFound, "No prototype found for ID: $prototypeId")
         } else {
-            call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(result))
+            call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
         }
     }
 }
