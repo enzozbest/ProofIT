@@ -6,6 +6,7 @@ import io.ktor.server.routing.*
 import io.ktor.util.*
 import kotlinx.serialization.Serializable
 import io.ktor.server.response.respond
+import kcl.seg.rtt.prototype.LlmResponse
 
 // Request and Response DTOs
 @Serializable
@@ -27,10 +28,15 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
             try {
                 val request = call.receive<GenerateRequest>()
                 val result = prototypeService.generatePrototype(request.prompt)
+
+                // Debug print
                 println("Result: $result")
-                val serializedResponse = GenerateResponse(result)
-                println("Serialized: $serializedResponse")
-                call.respond(HttpStatusCode.OK, serializedResponse)
+
+                result.onSuccess { llmResponse ->
+                    call.respond(HttpStatusCode.OK, llmResponse)
+                }.onFailure { error ->
+                    call.respond(HttpStatusCode.BadRequest, ErrorResponse("Error: ${error.message ?: "Unknown error"}"))
+                }
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, ErrorResponse("Error: ${e.message ?: "Unknown error"}"))
             }

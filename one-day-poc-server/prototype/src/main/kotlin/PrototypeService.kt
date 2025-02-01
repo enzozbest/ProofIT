@@ -10,6 +10,29 @@ import kotlinx.serialization.Serializable
 import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.client.plugins.HttpTimeout
+
+@Serializable
+data class OllamaRequest(
+    val model: String,
+    val prompt: String,
+    val stream: Boolean
+)
+
+@Serializable
+data class OllamaResponse(
+    val response: String
+)
+
+@Serializable
+data class FileContent(val content: String)
+
+@Serializable
+data class LlmResponse(
+    val mainFile: String,
+    val files: Map<String, FileContent>
+)
+
 
 class PrototypeService {
     private val client = HttpClient(CIO) {
@@ -20,24 +43,19 @@ class PrototypeService {
                 ignoreUnknownKeys = true
             })
         }
-    }
 
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = 600_000  // 10 minutes
+            connectTimeoutMillis = 30_000   // 30 seconds
+            socketTimeoutMillis = 600_000   // 10 minutes
+        }
+    }
 
     companion object {
         // Ollama defaults to this port
         private const val OLLAMA_PORT = 11434
     }
-
-    @Serializable
-    data class LlmRequest(
-        val model: String = "codellama:7b",
-        val prompt: String
-    )
-
-    @Serializable
-    data class LlmResponse(
-        val response: String
-    )
 
     private suspend fun isOllamaRunning(): Boolean {
         return try {
@@ -48,21 +66,56 @@ class PrototypeService {
         }
     }
 
-    suspend fun generatePrototype(prompt: String): String {
-        if (isOllamaRunning()) {
-             val llmResponse = callLLM(prompt)
-             return llmResponse
-        } else {
-            return "Ollama is not running. Run: 'ollama serve' in terminal to start ollama locally."
+    suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
+        if (!isOllamaRunning()) {
+            return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
 
+        return try {
+            val llmResponse = callLLM(prompt)
+            Result.success(llmResponse)
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to call Ollama: ${e.message}"))
+        }
     }
 
-    private suspend fun callLLM(prompt: String): String {
-        val response = client.post("http://localhost:11434/api/generate") {
-            contentType(ContentType.Application.Json)
-            setBody(LlmRequest(prompt = prompt))
+    private suspend fun callLLM(prompt: String): LlmResponse {
+        println("Starting LLM call with prompt: $prompt")
+
+        val ollamaRequest = OllamaRequest(
+            model = "codellama:7b",
+            prompt = """
+            You are an AI that generates software prototypes formatted for WebContainers.
+            Your output must be a JSON object containing:
+            1. A 'mainFile' field specifying the main entry file (e.g., 'index.js').
+            2. A 'files' object where each key is a filename and the value is an object containing a 'content' key with the file content.
+            3. Include a 'package.json' file with required dependencies.
+            4. Ensure all scripts use 'npm start' and static files are served correctly.
+            
+            Now, generate a project for the request: "$prompt"
+        """.trimIndent(),
+            stream = false
+        )
+
+        val ollamaApiUrl = "http://localhost:11434/api/generate"
+
+        println("Sending request to Ollama...")
+
+        val response: HttpResponse = client.post(ollamaApiUrl) {
+            contentType(io.ktor.http.ContentType.Application.Json)
+            setBody(ollamaRequest)
         }
-        return response.body<LlmResponse>().response
+
+        // Parse JSON response from Ollama
+        val responseText = response.bodyAsText()
+        println("Ollama response: $responseText")
+
+        val ollamaResponse = Json.decodeFromString<OllamaResponse>(responseText)
+
+        return runCatching {
+            Json.decodeFromString<LlmResponse>(ollamaResponse.response)
+        }.getOrElse {
+            throw IllegalArgumentException("Invalid JSON response from Ollama: ${it.message}")
+        }
     }
 }
