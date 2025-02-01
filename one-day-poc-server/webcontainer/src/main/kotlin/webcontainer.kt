@@ -57,3 +57,39 @@ fun Application.configureWebContainer() {
     }
 }
 
+/**
+ * TO BE COPIED TO FRONTEND UPON MERGE FOR WEBCONTAINER
+ * (iframe code)
+ *
+ * import React, { useEffect, useState } from 'react';
+ *
+ * interface PrototypeFrameProps {
+ *     prototypeId: string;
+ * }
+ *
+ * const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ prototypeId }) => {
+ *     const [url, setUrl] = useState('');
+ *
+ *     useEffect(() => {
+ *         setUrl(`http://localhost:8080/webcontainer/${prototypeId}`);
+ *     }, [prototypeId]);
+ *
+ *     return (
+ *         <iframe
+ *             src={url}
+ *             style={{
+ *                 width: '100%',
+ *                 height: '500px',
+ *                 border: '1px solid #ccc',
+ *                 borderRadius: '4px'
+ *             }}
+ *             title="Prototype Preview"
+ *             sandbox="allow-scripts allow-same-origin"
+ *         />
+ *     );
+ * };
+ *
+ * export default PrototypeFrame;
+ *
+ *
+ */
