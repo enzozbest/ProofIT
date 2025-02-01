@@ -7,10 +7,12 @@
 
 package kcl.seg.rtt.prototype
 
+
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
 
-object `PrototypesTable.kt` : Table("prototypes") {
+
+object PrototypesTable : Table("prototypes") {
     val id: Column<Int> = integer("id").autoIncrement()
     val prototype: Column<String> = text("prototype")
     override val primaryKey = PrimaryKey(id)

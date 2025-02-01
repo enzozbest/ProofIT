@@ -54,11 +54,10 @@ class PrototypeService {
     private fun storePrototype(prototypeOutput: String, context: List<String>?) {
         // Stub for storing the generated prototype
         transaction {
-            PrototypesTable.insert {row ->
-                row[prototype] = prototypeOutput
+            PrototypesTable.insert {
+                it[prototype] = prototypeOutput
             }
         }
-
         // This is a placeholder for future functionality.
     }
 
@@ -66,6 +65,11 @@ class PrototypeService {
     // Will be needed to pass to web container
     fun formatToJSON(prototypeOutput: String): String {
         return prototypeOutput
+    }
+
+    fun retrievePrototype(prototypeId: String): String? {
+        // Placeholder for future functionality
+        return null
     }
 
 }

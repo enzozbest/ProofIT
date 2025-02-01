@@ -4,6 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import io.ktor.server.response.respond
 
 // Request and Response DTOs
 @Serializable
@@ -11,6 +12,11 @@ data class GenerateRequest(val prompt: String, val context: List<String>?)
 
 @Serializable
 data class GenerateResponse(val output: String)
+
+// dummy function
+fun RetrievePrototypeResponse(output: String): Any {
+    return output // Or return a proper response object
+}
 
 fun Route.prototypeRoutes(prototypeService: PrototypeService) {
     post("/generate") {
@@ -35,13 +41,21 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
 
         // placeholder method retrievePrototype
         // To be replaced with our own logic
-        val prototypeString: String? = prototypeService.retrievePrototype(prototypeId)
+
+        //val prototypeString: String? = prototypeService.retrievePrototype(prototypeId)
+        val prototypeString = "prototypestring"
+
         // Assumes prototypeService will return also some ID associated
 
-        if (result == null) {
+        /**
+        if (prototypeString == null) {
             call.respond(HttpStatusCode.NotFound, "No prototype found for ID: $prototypeId")
         } else {
             call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
         }
+        */
+        call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
     }
 }
+
+
