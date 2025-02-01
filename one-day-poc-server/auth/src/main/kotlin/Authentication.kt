@@ -2,6 +2,7 @@ package kcl.seg.rtt.auth
 
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.sessions.*
 import kcl.seg.rtt.utils.JSON.PoCJSON
 
 /**
@@ -15,6 +16,7 @@ fun Application.authModule(
     authName: String = "Cognito"
 ) {
     configureAuthentication(configFilePath)
+    configureSessions()
     configureAuthenticationRoutes(authName = authName)
 }
 
@@ -33,8 +35,15 @@ private fun Application.configureAuthentication(configFilePath: String) {
     }
 }
 
-
-
-
-
-
+/**
+ * Sets up the sessions for the application.
+ */
+private fun Application.configureSessions() {
+    install(Sessions) {
+        cookie<AuthenticatedSession>("AuthenticatedSession") {
+            cookie.maxAgeInSeconds = 3600
+            cookie.secure = true
+            cookie.httpOnly = true
+        }
+    }
+}
