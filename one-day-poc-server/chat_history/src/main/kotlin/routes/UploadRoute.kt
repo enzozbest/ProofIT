@@ -32,16 +32,32 @@ fun Route.uploadRoutes() {
                 }
 
                 is PartData.FileItem -> {
-                    fileName = part.originalFileName as String
+                    fileName = generateTimestampedFileName(part.originalFileName as String)
                     val fileBytes = part.provider().readRemaining().readByteArray()
-                    File("$uploadDir/$fileName${System.currentTimeMillis()}").writeBytes(fileBytes)
+                    File("$uploadDir/$fileName").writeBytes(fileBytes)
                 }
 
                 else -> {}
             }
             part.dispose()
         }
-
         call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
+    }
+}
+
+/*
+    * This function generates a timestamped file name for the uploaded file to avoid conflicts
+ */
+fun generateTimestampedFileName(originalFileName: String?): String {
+    val timestamp = System.currentTimeMillis()
+    if (originalFileName.isNullOrBlank()) return "unknown_$timestamp"
+
+    val lastDotIndex = originalFileName.lastIndexOf('.')
+    return if (lastDotIndex != -1) {
+        val name = originalFileName.substring(0, lastDotIndex)
+        val extension = originalFileName.substring(lastDotIndex)
+        "${name}_$timestamp$extension"
+    } else {
+        "${originalFileName}_$timestamp"
     }
 }
