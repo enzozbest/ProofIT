@@ -8,9 +8,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.util.date.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 const val AUTHENTICATION_ROUTE: String = "/api/auth"
 const val CALL_BACK_ROUTE: String = "/api/auth/callback"
@@ -75,31 +74,44 @@ fun Route.setUpJWTValidation(validationRoute: String) {
     }
 }
 
-private fun Route.setUpUserInfoRoute(route: String) {
+/**
+ * Sets up a route to retrieve user information from the relevant authentication provider.
+ */
+fun Route.setUpUserInfoRoute(
+    route: String,
+    verifierUrl: String = "https://cognito-idp.eu-west-2.amazonaws.com/",
+    contentType: String = "application/x-amz-json-1.1",
+    amzTarget: Boolean = true,
+    amzApi: String = "AWSCognitoIdentityProviderService.GetUser"
+) {
     get(route) {
-        val sessionCookie =
-            Json.decodeFromString<AuthenticatedSession>(call.request.cookies["AuthenticatedSession"] ?: "")
-        val token = sessionCookie.token
+        val sessionJson = call.request.cookies["AuthenticatedSession"] ?: return@get call.respond(
+            HttpStatusCode.Unauthorized,
+            "Missing authentication cookie"
+        )
 
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://cognito-idp.eu-west-2.amazonaws.com/")
-            .addHeader("Authorization", "Bearer $token")
-            .addHeader("Content-Type", "application/x-amz-json-1.1")
-            .addHeader("X-Amz-Target", "AWSCognitoIdentityProviderService.GetUser")
-            .build()
-
-        try {
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                call.respond(HttpStatusCode.Unauthorized, "Invalid token")
-                return@get
-            }
-            val userinfo = generateUserInfo(response)
-            call.respond(HttpStatusCode.OK, userinfo)
+        val token = try {
+            Json.decodeFromString<AuthenticatedSession>(sessionJson).token
         } catch (e: Exception) {
-            call.respond(HttpStatusCode.InternalServerError)
+            return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token format")
         }
+
+        val response = buildUserInfoRequest(token, verifierUrl, contentType, amzTarget, amzApi).sendRequest()
+        if (!response.isSuccessful)
+            return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token")
+
+        val userInfo = generateUserInfo(response)
+        if (userInfo == CognitoUserInfo("", "", ""))
+            return@get call.respondText(
+                "Internal Server Error",
+                status = HttpStatusCode.InternalServerError
+            ) //Issue with the generation of the user info JSON.
+
+        call.respondText(
+            Json.encodeToString<CognitoUserInfo>(userInfo),
+            status = HttpStatusCode.OK,
+            contentType = ContentType.Application.Json
+        )
     }
 }
 

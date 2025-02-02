@@ -28,7 +28,7 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class AuthenticationTest {
+class TestAuthentication {
     private val rsaKeyPair = generateRSAKeyPair()
     private val rsaPrivateKey = rsaKeyPair.first
     private val rsaPublicKey = rsaKeyPair.second

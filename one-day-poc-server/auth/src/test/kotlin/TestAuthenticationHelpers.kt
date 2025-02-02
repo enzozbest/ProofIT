@@ -1,7 +1,4 @@
-import kcl.seg.rtt.auth.AuthenticatedSession
-import kcl.seg.rtt.auth.CognitoUserInfo
-import kcl.seg.rtt.auth.JWTValidationResponse
-import kcl.seg.rtt.auth.generateUserInfo
+import kcl.seg.rtt.auth.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
@@ -11,13 +8,12 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
+import kotlin.test.*
 
-class HelpersTest {
+class TestAuthenticationHelpers {
 
     @Test
     fun `Test AuthenticatedSession Class`() {
@@ -194,6 +190,111 @@ class HelpersTest {
         assertEquals("Alice", userInfo.name)
         assertEquals("Unknown", userInfo.email)
         assertEquals("Unknown", userInfo.dob)
+    }
+
+    @Test
+    fun `Test generateUserInfo with no UserAttributes`() {
+        val json = """
+            {
+                
+            }
+        """.trimIndent()
+        val response = createResponse(json)
+        val userInfo = generateUserInfo(response)
+        assertEquals("", userInfo.name)
+        assertEquals("", userInfo.email)
+        assertEquals("", userInfo.dob)
+    }
+
+    @Test
+    fun `Test generateUserInfo with invalid JSON body`() {
+        val response = createResponse("")
+        assertFailsWith<Exception> {
+            generateUserInfo(response)
+        }
+    }
+
+    @Test
+    fun `Test generateUserInfo with non-array UserAttributes`() {
+        val json = """
+        {
+            "UserAttributes": "not an array"
+        }
+    """.trimIndent()
+        val response = createResponse(json)
+        assertFailsWith<Exception> {
+            generateUserInfo(response)
+        }
+    }
+    
+    @Test
+    fun `Test sendRequest() returns a response`() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.start(port = 10000)
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("Success"))
+
+        val request = Request.Builder()
+            .url(mockWebServer.url("/test"))
+            .build()
+
+        val response = request.sendRequest()
+
+        assertTrue(response.isSuccessful)
+        assertEquals(200, response.code)
+        assertEquals("Success", response.body?.string())
+    }
+
+    @Test
+    fun `Test buildUserInfoRequest builds request with correct headers when amzTarget is true`() {
+        val request = buildUserInfoRequest(
+            token = "test-token",
+            verifierUrl = "https://example.com",
+            contentType = "application/json",
+            amzTarget = true,
+            amzApi = "AWSCognitoIdentityProviderService.GetUser"
+        )
+        assertEquals("https://example.com/", request.url.toString())
+        assertEquals("Bearer test-token", request.header("Authorization"))
+        assertEquals("application/json", request.header("Content-Type"))
+        assertEquals("AWSCognitoIdentityProviderService.GetUser", request.header("X-Amz-Target"))
+    }
+
+    @Test
+    fun `Test buildUserInfoRequest does not add X-Amz-Target header when amzTarget is false`() {
+        val request = buildUserInfoRequest(
+            token = "test-token",
+            verifierUrl = "https://example.com",
+            contentType = "application/json",
+            amzTarget = false,
+            amzApi = "AWSCognitoIdentityProviderService.GetUser"
+        )
+        assertEquals("https://example.com/", request.url.toString())
+        assertEquals("Bearer test-token", request.header("Authorization"))
+        assertEquals("application/json", request.header("Content-Type"))
+        assertNull(request.header("X-Amz-Target")) // Header should not exist
+    }
+
+    @Test
+    fun `Test buildUserInfoRequest handles empty token`() {
+        val request = buildUserInfoRequest(
+            verifierUrl = "https://example.com",
+            contentType = "application/json",
+            amzTarget = true,
+            amzApi = "AWSCognitoIdentityProviderService.GetUser"
+        )
+        assertEquals("Bearer", request.header("Authorization"))
+    }
+
+    @Test
+    fun `Test buildUserInfoRequest handles different content types`() {
+        val request = buildUserInfoRequest(
+            token = "test-token",
+            verifierUrl = "https://example.com",
+            contentType = "text/plain",
+            amzTarget = true,
+            amzApi = "AWSCognitoIdentityProviderService.GetUser"
+        )
+        assertEquals("text/plain", request.header("Content-Type"))
     }
 
     private fun createResponse(body: String?): Response {
