@@ -37,6 +37,10 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    // JSoup for HTML sanitization
+    implementation("org.jsoup:jsoup:1.15.3")
+    // OWASP Java Encoder for encoding (prevents XSS)
+    implementation("org.owasp.encoder:encoder:1.2.3")
 }
 
 tasks.test {
