@@ -33,6 +33,10 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation(project(":routes"))
     implementation(project(":chat_history"))
+    // JSoup for HTML sanitization
+    implementation("org.jsoup:jsoup:1.15.3")
+    // OWASP Java Encoder for encoding (prevents XSS)
+    implementation("org.owasp.encoder:encoder:1.2.3")
 }
 tasks.test {
     useJUnitPlatform()
