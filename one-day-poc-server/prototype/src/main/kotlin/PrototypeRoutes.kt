@@ -29,9 +29,6 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
                 val request = call.receive<GenerateRequest>()
                 val result = prototypeService.generatePrototype(request.prompt)
 
-                // Debug print
-                println("Result: $result")
-
                 result.onSuccess { llmResponse ->
                     call.respond(HttpStatusCode.OK, llmResponse)
                 }.onFailure { error ->

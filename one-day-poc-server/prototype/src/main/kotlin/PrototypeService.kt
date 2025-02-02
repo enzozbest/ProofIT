@@ -11,6 +11,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import kotlinx.serialization.json.Json
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.HttpTimeout
+import kotlinx.serialization.encodeToString
 
 @Serializable
 data class OllamaRequest(
@@ -21,7 +22,17 @@ data class OllamaRequest(
 
 @Serializable
 data class OllamaResponse(
-    val response: String
+    val model: String,
+    val created_at: String,
+    val response: String,
+    val done: Boolean,
+    val done_reason: String,
+    val context: List<Int>? = null,
+    val total_duration: Long? = null,
+    val load_duration: Long? = null,
+    val prompt_eval_duration: Long? = null,
+    val eval_duration: Long? = null,
+    val eval_count: Int? = null
 )
 
 @Serializable
@@ -85,32 +96,45 @@ class PrototypeService {
         val ollamaRequest = OllamaRequest(
             model = "codellama:7b",
             prompt = """
-            You are an AI that generates software prototypes formatted for WebContainers.
-            Your output must be a JSON object containing:
-            1. A 'mainFile' field specifying the main entry file (e.g., 'index.js').
-            2. A 'files' object where each key is a filename and the value is an object containing a 'content' key with the file content.
-            3. Include a 'package.json' file with required dependencies.
-            4. Ensure all scripts use 'npm start' and static files are served correctly.
-            
-            Now, generate a project for the request: "$prompt"
+            You are an AI that generates software prototypes formatted for WebContainers.  
+            Your response must be **a single valid JSON object** and contain nothing else—no explanations, preambles, or additional text.
+
+            ### JSON Structure:
+            - `"mainFile"`: Specifies the main entry file (e.g., `"index.js"`).
+            - `"files"`: An object where each key is a filename and the value is an object containing:
+            - `"content"`: The full content of the file.
+            - `"package.json"`: Must be included with all required dependencies.
+            - Ensure that:
+                - All scripts use `"npm start"` for execution.
+                - Static files (if any) are served correctly.
+
+            Now, generate a JSON response for the following request:
+
+            **User Request:**  
+            "$prompt"
         """.trimIndent(),
             stream = false
         )
 
         val ollamaApiUrl = "http://localhost:11434/api/generate"
 
-        println("Sending request to Ollama...")
+        println("Sending request to Ollama at $ollamaApiUrl with payload: $ollamaRequest")
 
-        val response: HttpResponse = client.post(ollamaApiUrl) {
-            contentType(io.ktor.http.ContentType.Application.Json)
-            setBody(ollamaRequest)
+        val response: HttpResponse = try {
+                client.post(ollamaApiUrl) {
+                    contentType(io.ktor.http.ContentType.Application.Json)
+                    setBody(ollamaRequest)
+            }
+        } catch (e: Exception) {
+            println("Error sending request to Ollama: ${e.message}")
+            throw e
         }
+        println("Response status: ${response.status}")
 
-        // Parse JSON response from Ollama
         val responseText = response.bodyAsText()
-        println("Ollama response: $responseText")
 
-        val ollamaResponse = Json.decodeFromString<OllamaResponse>(responseText)
+        val ollamaResponse = Json{ ignoreUnknownKeys = true }.decodeFromString<OllamaResponse>(responseText)
+        println("Formatted JSON Response:\n" + Json { prettyPrint = true }.encodeToString(ollamaResponse))
 
         return runCatching {
             Json.decodeFromString<LlmResponse>(ollamaResponse.response)
