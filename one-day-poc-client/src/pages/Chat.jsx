@@ -20,7 +20,6 @@ function Chat() {
                 throw new Error('Network response was not ok');
             }
             const data = await response.text();
-            console.log(data);
             setLlmResponse(data);
         } catch (error) {
             console.error('Error', error);
@@ -44,7 +43,7 @@ function Chat() {
 
     // Scroll to the most recent message
     useEffect(() => {
-        if (recentMessageRef.current) {
+        if (recentMessageRef.current && recentMessageRef.current.offsetParent !== null) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [sentMessage]);
