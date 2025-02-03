@@ -7,6 +7,9 @@ import io.ktor.server.routing.*
 import kcl.seg.rtt.chat_history.Request
 import kcl.seg.rtt.chat_history.Response
 import java.time.LocalDateTime
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
+
 
 /*
     * This route is used to handle JSON requests with the Request.kt schema
@@ -16,11 +19,13 @@ fun Route.jsonRoutes() {
         try {
             val request = call.receive<Request>()
             println("Received request: $request")
+            val prompt = Jsoup.clean(request.prompt, Safelist.none()).trim().replace(Regex("&[a-zA-Z0-9#]+;"), "")
             val response = Response(
                 time = LocalDateTime.now().toString(),
-                message = "${request.prompt}, ${request.userID}!"
-            )
+                message = "${prompt}, ${request.userID}!")
+            println(prompt)
             call.respond(response)
+
         } catch (e: Exception) {
             println("Error processing request: ${e.message}")
             call.respondText(
