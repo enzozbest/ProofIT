@@ -1,6 +1,6 @@
 import React,{ useState, useRef, useEffect } from "react";
-import { ChatBox } from "@/components/chat-box.jsx";
-import { MessageBox } from "@/components/messages-box.jsx";
+import { ChatBox } from "../components/chat-box";
+import { MessageBox } from "../components/messages-box";
 
 
 function Chat() {

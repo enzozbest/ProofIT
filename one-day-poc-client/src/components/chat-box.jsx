@@ -38,11 +38,6 @@ export function ChatBox({ setSentMessage }) {
         }
     };
 
-    useEffect(() => {
-        if (recentMessageRef.current && recentMessageRef.current.offsetParent !== null) {
-            recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [llmResponse]);
 
     useEffect(() => {
         if (llmResponse) {

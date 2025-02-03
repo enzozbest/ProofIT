@@ -1,5 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import Chat from '../pages/Chat';
+import { ChatBox } from "../components/chat-box";
+import { MessageBox } from "../components/messages-box";
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 
@@ -10,6 +12,7 @@ test("Renders chat page", () => {
     const element = screen.getByPlaceholderText(/How can we help you today?/i);
     expect(element).toBeInTheDocument();
 });
+
 
 test("Enter text in chat", async () =>{
     render(<Chat/>);
