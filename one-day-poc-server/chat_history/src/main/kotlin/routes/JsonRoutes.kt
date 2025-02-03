@@ -6,8 +6,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kcl.seg.rtt.chat_history.Request
 import kcl.seg.rtt.chat_history.Response
-import kcl.seg.rtt.chat_history.InputSanitation
 import java.time.LocalDateTime
+import org.jsoup.Jsoup
+import org.jsoup.safety.Safelist
 
 
 /*
@@ -18,11 +19,10 @@ fun Route.jsonRoutes() {
         try {
             val request = call.receive<Request>()
             println("Received request: $request")
-            val prompt = InputSanitation.sanitise(request.prompt)
-            val userID = InputSanitation.sanitise(request.userID)
+            val prompt = Jsoup.clean(request.prompt, Safelist.none()).trim().replace(Regex("&[a-zA-Z0-9#]+;"), "")
             val response = Response(
                 time = LocalDateTime.now().toString(),
-                message = "${prompt}, ${userID}!")
+                message = "${prompt}, ${request.userID}!")
             println(prompt)
             call.respond(response)
 
