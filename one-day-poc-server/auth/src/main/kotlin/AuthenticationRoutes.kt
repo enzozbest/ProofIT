@@ -13,9 +13,9 @@ import kotlinx.serialization.json.Json
 
 const val AUTHENTICATION_ROUTE: String = "/api/auth"
 const val CALL_BACK_ROUTE: String = "/api/auth/callback"
-const val LOG_OUT_ROUTE: String = "/api/logout"
-const val JWT_VALIDATION_ROUTE: String = "/api/auth/me"
-const val USER_INFO_ROUTE: String = "api/auth/userinfo"
+const val LOG_OUT_ROUTE: String = "/api/auth/logout"
+const val JWT_VALIDATION_ROUTE: String = "/api/auth/check"
+const val USER_INFO_ROUTE: String = "api/auth/me"
 
 /**
  * Configures the routes that will be used for authentication.
