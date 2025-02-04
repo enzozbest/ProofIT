@@ -30,6 +30,7 @@ subprojects {
         testImplementation(kotlin("test"))
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
         testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
         testImplementation("org.mockito:mockito-core:5.12")
@@ -42,7 +43,11 @@ subprojects {
 }
 
 dependencies {
-
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
+    implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation(project(":routes"))
     implementation(project(":auth"))
 }
