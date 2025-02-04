@@ -71,7 +71,7 @@ fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
             acceptLeeway(10)
         }
         validate { credential ->
-            if (!credential.payload.getClaim("email").asString().isNullOrEmpty())
+            if (!credential.payload.getClaim("sub").asString().isNullOrEmpty())
                 JWTPrincipal(credential.payload)
             else
                 null //Invalid credential

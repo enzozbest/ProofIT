@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
 import kcl.seg.rtt.utils.JSON.PoCJSON
+import kotlin.collections.set
 
 /**
  * Configures the authentication settings for the application and the routes that will be used for authentication.
@@ -44,6 +45,8 @@ private fun Application.configureSessions() {
             cookie.maxAgeInSeconds = 3600
             cookie.secure = true
             cookie.httpOnly = true
+            cookie.path = "/"
+            cookie.extensions["SameSite"] = "None"
         }
     }
 }

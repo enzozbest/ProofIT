@@ -147,7 +147,7 @@ class TestAuthentication {
         return JWT.create()
             .withKeyId("test-key-id")
             .withIssuer("http://localhost:$port")
-            .withClaim("email", "test@example.org")
+            .withClaim("sub", "test-user-id")
             .sign(algorithm)
     }
 
@@ -156,7 +156,7 @@ class TestAuthentication {
         return JWT.create()
             .withKeyId("test-key-id")
             .withIssuer("http://localhost:$port")
-            .withClaim("email", "")
+            .withClaim("sub", "")
             .sign(algorithm)
     }
 
