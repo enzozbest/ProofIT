@@ -74,7 +74,7 @@ class TestAuthentication {
 
     @Test
     fun `Test JWT Validator is set up and works with Authorization Header`() = testApplication {
-        val mockJWKSUrl = "localhost:5000"
+        val mockJWKSUrl = "http://localhost:5000"
         setUpMockJWKSEndpoint(5000)
 
         this.application {
@@ -108,7 +108,7 @@ class TestAuthentication {
 
     @Test
     fun `Test JWT Validator is set up and works with AuthenticatedSession cookie`() = testApplication {
-        val mockJWKSUrl = "localhost:6000"
+        val mockJWKSUrl = "http://localhost:6000"
         setUpMockJWKSEndpoint(6000)
         this.application {
             this@application.install(Authentication) {
