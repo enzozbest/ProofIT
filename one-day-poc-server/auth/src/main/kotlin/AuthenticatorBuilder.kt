@@ -48,33 +48,33 @@ fun AuthenticationConfig.configureOAuth(config: JsonObject) {
 fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
     jwt("jwt-verifier") {
         val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
-        val jwkProvider = JwkProviderBuilder("http://$issuer")
+        val jwkProvider = JwkProviderBuilder(issuer)
             .cached(10, 1, TimeUnit.HOURS)
             .rateLimited(10, 1, TimeUnit.MINUTES)
             .build()
 
         authHeader { call ->
             val sessionCookie = call.request.cookies["AuthenticatedSession"]
-                ?: if (call.request.headers["Authorization"] == null) return@authHeader null
+                ?: if (call.request.headers["Authorization"] == null) return@authHeader null //No credentials
                 else
-                    return@authHeader parseAuthorizationHeader(call.request.headers["Authorization"]!!)
+                    return@authHeader parseAuthorizationHeader(call.request.headers["Authorization"]!!) //Authorization header present
 
             try {
                 val session = Json.decodeFromString<AuthenticatedSession>(sessionCookie)
-                return@authHeader parseAuthorizationHeader("Bearer ${session.token}")
+                return@authHeader parseAuthorizationHeader("Bearer ${session.token}") //Read token from cookie
             } catch (e: Exception) {
-                return@authHeader null
+                return@authHeader null //Cookie has invalid format
             }
         }
 
-        verifier(jwkProvider, "http://$issuer") {
+        verifier(jwkProvider, issuer) {
             acceptLeeway(10)
         }
         validate { credential ->
             if (!credential.payload.getClaim("email").asString().isNullOrEmpty())
                 JWTPrincipal(credential.payload)
             else
-                null
+                null //Invalid credential
         }
     }
 }
