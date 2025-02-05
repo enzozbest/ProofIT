@@ -7,30 +7,11 @@ function Chat() {
     const [sentMessage, setSentMessage] = useState([]);
     
     return (
-        <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            backgroundColor:'white',
-            width:'100vw',
-            height:'100vh',
-            color:'black'}}
-        >
-            {/* Chat Side */}
-            <div style={{
-                flex:2,
-                borderStyle: 'solid',
-                display: "flex",
-                flexDirection: "column",
-                maxHeight: "100vh",
-                overflow: "hidden"
-            }}>
+        <div className="relative h-full flex flex-col">
+                
                 <MessageBox sentMessage={sentMessage}/>
-                <ChatBox setSentMessage={setSentMessage}/>
-            </div>
-            {/*Prototype side*/}
-            <div style={{ flex: 3,borderStyle: 'solid',}}>
-                <h3> Prototype</h3>
-            </div>
+                <ChatBox setSentMessage={setSentMessage} setError={setErrorMessage}/>
+            
         </div>
 
     );
