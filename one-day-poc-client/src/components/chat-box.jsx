@@ -25,6 +25,7 @@ export function ChatBox({ setSentMessage }) {
     };
 
     const handleSend = async () => {
+        if (!message.trim()) return;
         const currentTime = new Date().toLocaleString();
         // Ensure setSentMessage is correctly used to update the state
         setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
@@ -72,6 +73,7 @@ export function ChatBox({ setSentMessage }) {
                 }}
             />
             <button
+                disabled = {!message}
                 onClick={handleSend}
                 style={{
                     padding: "10px 20px",
