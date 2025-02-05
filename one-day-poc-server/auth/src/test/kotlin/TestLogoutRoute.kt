@@ -20,7 +20,7 @@ class TestLogoutRoute {
                 authName = "testAuth"
             )
         }
-        val response = client.get(LOG_OUT_ROUTE) {
+        val response = client.post(LOG_OUT_ROUTE) {
             cookie(
                 "AuthenticatedSession",
                 Json.encodeToString(AuthenticatedSession("test", "test", false))
