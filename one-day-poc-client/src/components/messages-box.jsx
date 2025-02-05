@@ -1,4 +1,6 @@
 import React, {useEffect, useRef, useState} from "react";
+import { TypographyMuted } from "@/components/ui/typography"
+
 
 export function MessageBox({ sentMessage }) {
     const recentMessageRef = useRef(null);
@@ -37,8 +39,13 @@ export function MessageBox({ sentMessage }) {
                                 maxWidth: "70%",
                             }}
                         >
-                            <p>{msg[2]}</p>
+                            
                             <strong>User:</strong> {msg[1]}
+                            <TypographyMuted> {new Date(msg[2]).toLocaleString("en-GB",{
+                                hour: "2-digit",
+                                minute:"2-digit",
+                                hour12: true
+                            })} </TypographyMuted>
                         </div>
                     ) : (
                         <div

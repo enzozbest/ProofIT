@@ -26,7 +26,7 @@ export function ChatBox({ setSentMessage }) {
 
     const handleSend = async () => {
         if (!message.trim()) return;
-        const currentTime = new Date().toLocaleString();
+        const currentTime = new Date().toISOString();
         // Ensure setSentMessage is correctly used to update the state
         setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
         await postMessage();
@@ -42,7 +42,7 @@ export function ChatBox({ setSentMessage }) {
 
     useEffect(() => {
         if (llmResponse) {
-            const currentTime = new Date().toLocaleString();
+            const currentTime = new Date().toISOString();
             setSentMessage((prevMessages) => [
                 ...prevMessages,
                 ["LLM", llmResponse, currentTime]
