@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 
-export function ChatBox({ setSentMessage }) {
+
+export const CHAT_ERROR = "Something's wrong, please retry.";
+
+export function ChatBox({ setSentMessage, setError }) {
     const [message, setMessage] = useState("");
     const [llmResponse, setLlmResponse] = useState("");
     const recentMessageRef = useRef(null);
+
 
     const postMessage = async () => {
         try {
@@ -21,6 +25,7 @@ export function ChatBox({ setSentMessage }) {
             setLlmResponse(data);
         } catch (error) {
             console.error('Error', error);
+            setError(CHAT_ERROR)
         }
     };
 
@@ -86,6 +91,8 @@ export function ChatBox({ setSentMessage }) {
             >
                 Send
             </button>
+
+        
         </div>
     );
 }
