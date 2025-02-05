@@ -33,6 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation(project(":routes"))
     implementation(project(":prototype"))
+    implementation(project(":webcontainer"))
 }
 tasks.test {
     useJUnitPlatform()

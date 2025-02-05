@@ -18,6 +18,11 @@ data class GenerateResponse(val output: String)
 @Serializable
 data class ErrorResponse(val error: String)
 
+// dummy function
+fun RetrievePrototypeResponse(output: String): Any {
+    return output // Or return a proper response object
+}
+
 fun Route.prototypeRoutes(prototypeService: PrototypeService) {
     route("/prototype") {
         get("/health") {
@@ -39,4 +44,34 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
             }
         }
     }
+
+    // Working with ID to retrieve a prototype
+    // rather than callLLM in PrototypeService
+    // which uses strings to generate a prototype
+    get("/prototype/{id}") {
+        val prototypeId = call.parameters["id"]
+        if (prototypeId.isNullOrBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Prototype ID is missing.")
+            return@get
+        }
+
+        // placeholder method retrievePrototype
+        // To be replaced with our own logic
+
+        //val prototypeString: String? = prototypeService.retrievePrototype(prototypeId)
+        val prototypeString = "prototypestring"
+
+        // Assumes prototypeService will return also some ID associated
+
+        /**
+        if (prototypeString == null) {
+            call.respond(HttpStatusCode.NotFound, "No prototype found for ID: $prototypeId")
+        } else {
+            call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
+        }
+        */
+        call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
+    }
 }
+
+

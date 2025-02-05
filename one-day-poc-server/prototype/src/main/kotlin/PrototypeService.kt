@@ -13,6 +13,10 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.HttpTimeout
 import kotlinx.serialization.encodeToString
 
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.transaction
+import kcl.seg.rtt.prototype.PrototypesTable
+
 @Serializable
 data class OllamaRequest(
     val model: String,
@@ -142,4 +146,31 @@ class PrototypeService {
             throw IllegalArgumentException("Invalid JSON response from Ollama: ${it.message}")
         }
     }
+
+    /**
+     * Location of this function can be changed later on
+     * To somewhere more prototype handling focused
+     * Just need a place for it temporarily
+     */
+    private fun storePrototype(prototypeOutput: String, context: List<String>?) {
+        // Stub for storing the generated prototype
+        transaction {
+            PrototypesTable.insert {
+                it[prototype] = prototypeOutput
+            }
+        }
+        // This is a placeholder for future functionality.
+    }
+
+    // Placeholder for future functionality
+    // Will be needed to pass to web container
+    fun formatToJSON(prototypeOutput: String): String {
+        return prototypeOutput
+    }
+
+    fun retrievePrototype(prototypeId: String): String? {
+        // Placeholder for future functionality
+        return null
+    }
+
 }
