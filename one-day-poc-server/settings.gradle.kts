@@ -4,3 +4,5 @@ plugins {
 rootProject.name = "one-day-poc-server"
 include("routes")
 include("chat_history")
+include("auth")
+include("utils")
