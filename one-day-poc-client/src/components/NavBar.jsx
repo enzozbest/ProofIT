@@ -6,7 +6,7 @@ const NavBar = ({isAuthenticated, setIsAuthenticated}) => {
   };
 
   const handleSignOut = () => {
-    fetch("http://localhost:8000/auth/logout", {
+    fetch("http://localhost:8000/api/auth/logout", {
       method: "POST",
       credentials: "include",
     })
