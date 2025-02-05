@@ -47,7 +47,7 @@ private fun Route.setAuthenticationEndpoint(route: String) {
  * Sets up the logout endpoint for the authentication process.
  */
 private fun Route.setLogOutEndpoint(route: String) {
-    get(route) {
+    post(route) {
         call.sessions.clear<AuthenticatedSession>()
         call.response.cookies.append(
             Cookie(
