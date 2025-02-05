@@ -139,7 +139,7 @@ function Chat() {
             </div>
             {/*Prototype side*/}
             <div style={{ flex: 3,borderStyle: 'solid',}}>
-                <PrototypeFrame htmlContent={'<h1>Prototype Frame</h1>'} cssContent={'body { font-family: Arial, sans-serif; background-color: #f0f0f0; } h1 {color: #333 }'} jsContent={'console.log("hello from prototype");'} width={'100%'} height={'100%'} />
+                <PrototypeFrame prototypeId={"1"} width={'100%'} height={'100%'} />
             </div>
         </div>
 

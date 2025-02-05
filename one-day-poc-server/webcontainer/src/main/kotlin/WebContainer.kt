@@ -1,5 +1,6 @@
 package kcl.seg.rtt.webcontainer
 
+import kotlinx.serialization.Serializable
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.http.*
@@ -15,6 +16,7 @@ data class WebContainerContent(
     val js: String
 )
 
+@Serializable
 class WebContainer {
     // Convert prototype string to WebContainer format
     fun parsePrototype(prototypeString: String): WebContainerContent {
