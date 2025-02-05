@@ -8,20 +8,22 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "react-scripts start",
-    "test": "react-scripts test",
+    "test": "react-scripts test --watchAll --coverage",
     "lint": "eslint . --ext .js,.jsx",
     "format": "prettier --write .",
     "eject": "react-scripts eject"
   },
   "dependencies": {
     "@rollup/rollup-win32-x64-msvc": "^4.32.1",
+    "lucide-react": "0.474.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1",
-    "lucide-react": "0.474.0"
+    "react-scripts": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.2.0",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
@@ -33,6 +35,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "jest": "^27.5.1",
     "prettier": "^3.4.2",
     "vite": "^6.0.5"
   }
