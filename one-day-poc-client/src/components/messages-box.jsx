@@ -1,5 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
-import { TypographyMuted } from "@/components/ui/typography"
+import { TypographyMuted,
+    TypographyInlineCode,
+ } from "@/components/ui/typography"
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 
 export function MessageBox({ sentMessage }) {
@@ -11,6 +15,7 @@ export function MessageBox({ sentMessage }) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [sentMessage]);
+    
 
     return(
         <>
@@ -40,7 +45,26 @@ export function MessageBox({ sentMessage }) {
                             }}
                         >
                             
-                            <strong>User:</strong> {msg[1]}
+                            {msg[1] && (
+                                <Markdown
+                                    key={index}
+                                    remarkPlugins={[remarkGfm]} 
+                                    components={{
+                                        code({ node, inline, className, children, ...props }) {
+                                            return inline ? (
+                                                <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
+                                            ) : (
+                                                <pre className="whitespace-pre-wrap pt-2">
+                                                    <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
+                                                </pre>
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {msg[1]} 
+                                </Markdown>
+                            )}
+
                             <TypographyMuted> {new Date(msg[2]).toLocaleString("en-GB",{
                                 hour: "2-digit",
                                 minute:"2-digit",
@@ -60,8 +84,31 @@ export function MessageBox({ sentMessage }) {
                                 maxWidth: "70%",
                             }}
                         >
-                            <p>{msg[2]}</p>
-                            <strong>LLM:</strong> {msg[1]}
+                            {msg[1] && (
+                                <Markdown
+                                    key={index}
+                                    remarkPlugins={[remarkGfm]} 
+                                    components={{
+                                        code({ node, inline, className, children, ...props }) {
+                                            return inline ? (
+                                                <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
+                                            ) : (
+                                                <pre className="whitespace-pre-wrap pt-2">
+                                                    <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
+                                                </pre>
+                                            );
+                                        }
+                                    }}
+                                >
+                                    {msg[1]} 
+                                </Markdown>
+                            )}
+
+                            <TypographyMuted> {new Date(msg[2]).toLocaleString("en-GB",{
+                                hour: "2-digit",
+                                minute:"2-digit",
+                                hour12: true
+                            })} </TypographyMuted>
                         </div>
                     )
                 ))}
