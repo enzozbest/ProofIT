@@ -8,6 +8,7 @@ import io.ktor.server.plugins.cors.routing.*
 
 // Data class to hold prototype content
 // Can change to relevant languages
+@Serializable
 data class WebContainerContent(
     val html: String,
     val css: String,
@@ -39,7 +40,9 @@ class WebContainer {
             // to fetch the prototype string
             val prototypeString = "PrototypeResult" // Get from PrototypeRoutes
 
-            val content = parsePrototype(prototypeString)
+            //val content = parsePrototype(prototypeString)
+
+            val content = "this is a prototype string"
 
             call.respond(content)
         }
