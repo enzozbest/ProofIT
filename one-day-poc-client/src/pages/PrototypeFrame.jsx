@@ -17,7 +17,9 @@ const PrototypeFrame = ({prototypeId, width = '100%', height = '100%' }) => {
                 width: width, 
                 height: height,
                 border: '1px solid #ccc',
-                borderRadius: '4px'
+                borderRadius: '4px',
+                color: 'black',
+                fontSize: '50px'
             }}
             title="Prototype Preview"
             sandbox="allow-scripts allow-same-origin"

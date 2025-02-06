@@ -1,4 +1,5 @@
-val ktorVersion: String by rootProject.extra
+val ktorVersion: String by project
+val kotlinVersion: String by project
 
 plugins {
     kotlin("jvm")

@@ -18,37 +18,88 @@ data class WebContainerContent(
 
 @Serializable
 class WebContainer {
-    // Convert prototype string to WebContainer format
+
     fun parsePrototype(prototypeString: String): WebContainerContent {
-        // This will need to be implemented based on how your LLM
-        // structures the prototype string
+        // CHange based off our prototype format
         return WebContainerContent(
-            html = "", // Extract HTML content
-            css = "",  // Extract CSS content
-            js = ""    // Extract JavaScript content
+            html = "<h1>Hello, Prototype!</h1>",  // For example purposes
+            css = "body { background-color: #fafafa; }",
+            js = "console.log('Prototype loaded');"
         )
     }
 
     // Set up routes for webcontainer
     fun Route.webcontainerRoutes() {
-
         get("/webcontainer/{id}") {
-            val prototypeId = call.parameters["id"] ?: return@get call.respond(
-                HttpStatusCode.BadRequest,
-                "Missing prototype ID"
-            )
+            // (You can still use the prototypeId if needed)
+            val htmlResponse = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Multi-Page Prototype</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 0;
+                        padding: 20px;
+                        text-align: center;
+                    }
+                    .page { display: none; }
+                    .active { display: block; }
+                    button {
+                        padding: 10px 20px;
+                        font-size: 16px;
+                        margin: 10px;
+                        cursor: pointer;
+                    }
+                </style>
+            </head>
+            <body>
+                <div id="counterPage" class="page active">
+                    <p id="counterText">Button clicked 0 times!</p>
+                    <button id="incrementButton">Increment Counter</button>
+                    <button id="goToHiButton">Go to Hi Page</button>
+                </div>
+                <div id="hiPage" class="page">
+                    <h1>Hi Prototype!</h1>
+                    <button id="backToCounterButton">Back to Counter</button>
+                </div>
+                <script>
+                    let counter = 0;
+                    const counterText = document.getElementById('counterText');
+                    const incrementButton = document.getElementById('incrementButton');
+                    const goToHiButton = document.getElementById('goToHiButton');
+                    const backToCounterButton = document.getElementById('backToCounterButton');
 
-            // This will need to integrate with PrototypeService
-            // to fetch the prototype string
-            val prototypeString = "PrototypeResult" // Get from PrototypeRoutes
+                    incrementButton.addEventListener('click', () => {
+                        counter++;
+                        counterText.textContent = 'Button clicked ' + counter + ' times!';
+                    });
 
-            //val content = parsePrototype(prototypeString)
+                    goToHiButton.addEventListener('click', () => {
+                        showPage('hiPage');
+                    });
 
-            val content = "this is a prototype string"
+                    backToCounterButton.addEventListener('click', () => {
+                        showPage('counterPage');
+                    });
 
-            call.respond(content)
+                    function showPage(pageId) {
+                        document.querySelectorAll('.page').forEach(page => {
+                            page.classList.remove('active');
+                        });
+                        document.getElementById(pageId).classList.add('active');
+                    }
+                </script>
+            </body>
+            </html>
+        """.trimIndent()
+
+            call.respondText(htmlResponse, ContentType.Text.Html)
         }
     }
+
 }
 
 // Extension function for Application
