@@ -33,6 +33,8 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
     // Test dependencies
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.22")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation(kotlin("test"))
