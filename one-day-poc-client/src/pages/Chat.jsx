@@ -1,70 +1,41 @@
-import React,{ useState, useRef, useEffect } from "react";
-
+import React, {useEffect, useRef} from "react";
+import { useLocation } from "react-router-dom";
+import ChatMessage from '../hooks/Chat';
 
 function Chat() {
-    const [message, setMessage] = useState("");
-    const [sentMessage, setSentMessage] = useState([]);
-    const recentMessageRef = useRef(null);
-    const [llmResponse, setLlmResponse] = useState("");
+    const {
+        message,
+        setMessage,
+        sentMessages,
+        handleSend,
+    } = ChatMessage();
 
-    const postMessage = async () => {
-        try {
-            const messagePayload = {
-                userID: "user123",  // hardcoded for now
-                time: new Date().toISOString(),  // ISO 8601 format
-                prompt: message
-            };
+    const location = useLocation();
+    const initialMessage = location.state?.initialMessage;
 
-            var response = await fetch("http://localhost:8000/json", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(messagePayload)
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.text();
-            console.log(data);
-            setLlmResponse(data);
-        } catch (error) {
-            console.error('Error', error);
+    /*
+        * This useEffect hook is used to send the initial message to the chat taken from the landing page
+     */
+    useEffect(() => {
+        if (initialMessage) {
+            setMessage(initialMessage);
+            handleSend();
         }
-    }
+    }, []);
 
-    const handleSend = async () => {
-        const currentTime = new Date().toLocaleString();
-        setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
-        {/**In reality, the response would be the ACTUAL llm response*/}
-        await postMessage();
-        setMessage("");
-    };
+    const recentMessageRef = useRef(null);
 
-    // Also sends message if the user presses enter
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
             handleSend();
         }
     };
 
-    // Scroll to the most recent message
     useEffect(() => {
         if (recentMessageRef.current) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [sentMessage]);
-
-    // Update sentMessage when llmResponse changes
-    useEffect(() => {
-        if (llmResponse) {
-            const currentTime = new Date().toLocaleString();
-            setSentMessage((prevMessages) => [
-                ...prevMessages,
-                ["LLM", llmResponse, currentTime]
-            ]);
-        }
-    }, [llmResponse]);
+    }, [sentMessages]);
 
     return (
         <div style={{
@@ -83,7 +54,7 @@ function Chat() {
                 flexDirection: "column",
                 maxHeight: "100vh",
                 overflow: "hidden"
-                }}>
+            }}>
 
                 {/* Message List */}
                 <div
@@ -96,8 +67,8 @@ function Chat() {
                     }}
                 >
                     {/*List of messages*/}
-                    {sentMessage.map((msg, index) => (
-                        msg[0] === "User" ? (
+                    {sentMessages.map((msg, index) => (
+                        msg.role === "User" ? (
                             <div
                                 key={index}
                                 style={{
@@ -110,8 +81,8 @@ function Chat() {
                                     maxWidth: "70%",
                                 }}
                             >
-                                <p>{msg[2]}</p>
-                                <strong>User:</strong> {msg[1]}
+                                <p>{msg.timestamp}</p>
+                                <strong>User:</strong> {msg.content}
                             </div>
                         ) : (
                             <div
@@ -126,8 +97,8 @@ function Chat() {
                                     maxWidth: "70%",
                                 }}
                             >
-                                <p>{msg[2]}</p>
-                                <strong>LLM:</strong> {msg[1]}
+                                <p>{msg.timestamp}</p>
+                                <strong>LLM:</strong> {msg.content}
                             </div>
                         )
                     ))}
@@ -178,7 +149,6 @@ function Chat() {
                 <h3> Prototype</h3>
             </div>
         </div>
-
     );
 }
 

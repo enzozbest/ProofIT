@@ -5,8 +5,12 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
+import kcl.seg.rtt.chat_history.Request
+import kcl.seg.rtt.chat_history.Response
 import kotlinx.io.readByteArray
+import kotlinx.serialization.json.Json
 import java.io.File
+import java.time.LocalDateTime
 
 /*
     * This route is used to upload files to the server, can be of any type#
@@ -15,6 +19,8 @@ import java.io.File
 fun Route.uploadRoutes() {
     var fileDescription = ""
     var fileName = ""
+    var message: Request? = null
+    var response: Response? = null
 
     post("/upload") {
 //        val uploadDir = File(application.environment.config.property("upload.dir").getString())
@@ -28,7 +34,15 @@ fun Route.uploadRoutes() {
         multipartData.forEachPart { part ->
             when (part) {
                 is PartData.FormItem -> {
-                    fileDescription = part.value
+                    if(part.name == "description"){
+                        fileDescription = part.value
+                    } else if (part.name == "message") {
+                        message = Json.decodeFromString(part.value)
+                        response = Response(
+                            time = LocalDateTime.now().toString(),
+                            message = "${message?.prompt}, ${message?.userID}!"
+                        )
+                    }
                 }
 
                 is PartData.FileItem -> {
@@ -42,6 +56,9 @@ fun Route.uploadRoutes() {
             part.dispose()
         }
         call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
+        if(response != null) {
+            call.respond(response!!)
+        }
     }
 }
 

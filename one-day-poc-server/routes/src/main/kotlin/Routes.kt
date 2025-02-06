@@ -9,15 +9,6 @@ import io.ktor.server.plugins.cors.routing.CORS
 
 
 fun Application.configureRouting() {
-    install(CORS) {
-        allowHost("localhost:5173")
-        allowHeader(HttpHeaders.ContentType)
-        allowHeader(HttpHeaders.Authorization)
-        allowMethod(HttpMethod.Get)
-        allowMethod(HttpMethod.Post)
-        allowCredentials = true
-    }
-
     routing {
         get("/") {
             call.respondText("Hello")
