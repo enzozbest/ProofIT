@@ -20,9 +20,8 @@ function ColorPreview() {
 function App() {
     return (
         <div>
-            <LandingPage />
             <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<LandingPage />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/generate" element={<Generate1 />} />
             </Routes>
