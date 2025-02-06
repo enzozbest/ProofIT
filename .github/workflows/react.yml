@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      CI: true
 
     steps:
     - name: Checkout repository
@@ -29,4 +31,4 @@ jobs:
 
     - name: Run tests
       working-directory: one-day-poc-client
-      run: npm test -- --watch=false --passWithNoTests
+      run: npm test -- --watchAll=false --passWithNoTests
