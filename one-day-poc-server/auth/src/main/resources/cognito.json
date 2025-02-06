@@ -1,0 +1,17 @@
+{
+  "name": "Cognito",
+  "jwtIssuer": "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_i06RrasFd",
+  "urlProvider": "http://localhost:8000/api/auth/callback",
+  "providerLookup": {
+    "name": "Cognito",
+    "authorizeUrl": "https://eu-west-2i06rrasfd.auth.eu-west-2.amazoncognito.com/oauth2/authorize",
+    "accessTokenUrl": "https://eu-west-2i06rrasfd.auth.eu-west-2.amazoncognito.com/oauth2/token",
+    "clientId": "77gmuso2dv9at14bdbdpm7gjim",
+    "clientSecret": "ktkvui8ejngejm586v2iussm6g04f9p60ao47p876b8929nv2kv",
+    "defaultScopes": [
+      "email",
+      "openid",
+      "profile"
+    ]
+  }
+}
