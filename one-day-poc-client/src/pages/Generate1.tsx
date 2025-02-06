@@ -1,3 +1,4 @@
+import Chat from './Chat'
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
@@ -24,7 +25,7 @@ import { Label } from "@/components/ui/label"
 
 import { 
   ChevronDownIcon, 
-  ChevronRightIcon,
+  ChevronLeftIcon,
 } from "@radix-ui/react-icons"
 
 import {
@@ -89,11 +90,11 @@ export default function Page() {
         </header>
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
     
-          <div className="w-[450px] h-full rounded-xl bg-muted/50 border border-neutral-500">
-            chatbot placeholder meow
+          <div className="w-[450px] h-full rounded-xl bg-muted/50">
+            <Chat />
           </div>
           <div className="flex h-full items-center justify-center">
-            <ChevronRightIcon className="h-12 w-9 text-neutral-200" />
+            <ChevronLeftIcon className="h-12 w-9 text-neutral-200" />
           </div>
           <div className="flex-1 h-full rounded-xl bg-neutral-200">
             prototype viewer placeholder
