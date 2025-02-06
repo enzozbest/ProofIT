@@ -33,10 +33,11 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
     // Test dependencies
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation(kotlin("test-junit"))
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     // JSoup for HTML sanitization
     implementation("org.jsoup:jsoup:1.15.3")
 }
