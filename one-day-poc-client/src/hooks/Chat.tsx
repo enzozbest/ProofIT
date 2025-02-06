@@ -19,6 +19,7 @@ const ChatMessage = (): ChatHookReturn => {
 
             const response = await fetch("http://localhost:8000/json", {
                 method: 'POST',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json',
                 },
