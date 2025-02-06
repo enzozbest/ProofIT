@@ -1,42 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import ChatMessage from "@/hooks/Chat";
 
 
 export const CHAT_ERROR = "Something's wrong, please retry.";
 
 export function ChatBox({ setSentMessage, setError }) {
-    const [message, setMessage] = useState("");
-    const [llmResponse, setLlmResponse] = useState("");
-    const recentMessageRef = useRef(null);
 
+    const {
+        message,
+        setMessage,
+        sentMessages,
+        handleSend,
+    } = ChatMessage();
 
-    const postMessage = async () => {
-        try {
-            const response = await fetch("http://localhost:8000/api/chat/send", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(message)
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.text();
-            setLlmResponse(data);
-        } catch (error) {
-            console.error('Error', error);
-            setError(CHAT_ERROR)
+    const location = useLocation();
+    const initialMessage = location.state?.initialMessage;
+
+    /*
+        * This useEffect hook is used to send the initial message to the chat taken from the landing page
+     */
+    useEffect(() => {
+        if (initialMessage) {
+            setMessage(initialMessage);
+            handleSend();
         }
-    };
+    }, []);
 
-    const handleSend = async () => {
-        if (!message.trim()) return;
-        const currentTime = new Date().toISOString();
-        // Ensure setSentMessage is correctly used to update the state
-        setSentMessage((prevMessages) => [...prevMessages, ["User", message, currentTime]]);
-        await postMessage();
-        setMessage("");
-    };
+    const recentMessageRef = useRef(null);
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {
@@ -44,16 +35,15 @@ export function ChatBox({ setSentMessage, setError }) {
         }
     };
 
+    const handleButton = () => {
+        handleSend();
+    }
 
     useEffect(() => {
-        if (llmResponse) {
-            const currentTime = new Date().toISOString();
-            setSentMessage((prevMessages) => [
-                ...prevMessages,
-                ["LLM", llmResponse, currentTime]
-            ]);
+        if (recentMessageRef.current) {
+            recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [llmResponse]);
+    }, [sentMessages]);
 
     return (
         <div
@@ -79,7 +69,7 @@ export function ChatBox({ setSentMessage, setError }) {
             />
             <button
                 disabled = {!message}
-                onClick={handleSend}
+                onClick={handleButton}
                 style={{
                     padding: "10px 20px",
                     backgroundColor: "#007bff",

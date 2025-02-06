@@ -11,7 +11,7 @@ const InputBox = () => {
      */
     const handleNavigateToChat = () => {
         if (message.trim()) {
-            navigate('/chat', { state: { initialMessage: message } });
+            navigate('/generate', { state: { initialMessage: message } });
         }
     };
 

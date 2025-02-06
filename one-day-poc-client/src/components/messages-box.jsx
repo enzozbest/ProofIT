@@ -1,20 +1,24 @@
 import React, {useEffect, useRef, useState} from "react";
-import { TypographyMuted,
-    TypographyInlineCode,
- } from "@/components/ui/typography"
+import { TypographyMuted, TypographyInlineCode,} from "@/components/ui/typography"
+import ChatMessage from "@/hooks/Chat";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 
-export function MessageBox({ sentMessage }) {
+export function MessageBox({ sentMessages }) {
     const recentMessageRef = useRef(null);
+
+    // const {
+    //     sentMessages
+    // } = ChatMessage();
 
     // Scroll to the most recent message
     useEffect(() => {
         if (recentMessageRef.current && recentMessageRef.current.offsetParent !== null) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
-    }, [sentMessage]);
+        console.log(sentMessages);
+    }, [sentMessages]);
     
 
     return(
@@ -30,7 +34,7 @@ export function MessageBox({ sentMessage }) {
                 }}
             >
                 {/*List of messages*/}
-                {sentMessage.map((msg, index) => (
+                {sentMessages.map((msg, index) => (
                     msg[0] === "User" ? (
                         <div
                             key={index}
