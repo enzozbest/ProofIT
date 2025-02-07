@@ -3,3 +3,5 @@ plugins {
 }
 rootProject.name = "one-day-poc-server"
 include("routes")
+include("auth")
+include("utils")
