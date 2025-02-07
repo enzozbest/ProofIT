@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Message, MessagePayload, ChatHookReturn } from './types';
+import { Message, MessagePayload, ChatHookReturn } from './Types';
 
 /*
  * Hook used to communicate to back end endpoint for chat messages

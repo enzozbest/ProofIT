@@ -12,7 +12,10 @@ function Chat() {
     const [errorMessage, setErrorMessage] = useState("");
 
     const {
+        message,
+        setMessage,
         sentMessages,
+        handleSend,
     } = ChatMessage();
 
     return (
@@ -25,7 +28,7 @@ function Chat() {
             )}
 
             <MessageBox sentMessages={sentMessages}/>
-            <ChatBox setSentMessage={setSentMessage} setError={setErrorMessage}/>
+            <ChatBox setMessage={setMessage} message={message} handleSend={handleSend} setError={setErrorMessage}/>
 
         </div>
 
