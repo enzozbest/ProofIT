@@ -8,15 +8,13 @@ import remarkGfm from "remark-gfm";
 export function MessageBox({ sentMessages }) {
     const recentMessageRef = useRef(null);
 
-    // const {
-    //     sentMessages
-    // } = ChatMessage();
 
     // Scroll to the most recent message
     useEffect(() => {
         if (recentMessageRef.current && recentMessageRef.current.offsetParent !== null) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
+        console.log("Messages are");
         console.log(sentMessages);
     }, [sentMessages]);
     
@@ -69,7 +67,7 @@ export function MessageBox({ sentMessages }) {
                                 </Markdown>
                             )}
 
-                            <TypographyMuted> {new Date(msg[2]).toLocaleString("en-GB",{
+                            <TypographyMuted> {new Date(msg.timestamp).toLocaleString("en-GB",{
                                 hour: "2-digit",
                                 minute:"2-digit",
                                 hour12: true

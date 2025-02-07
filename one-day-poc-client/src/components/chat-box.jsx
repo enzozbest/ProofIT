@@ -5,17 +5,13 @@ import ChatMessage from "@/hooks/Chat";
 
 export const CHAT_ERROR = "Something's wrong, please retry.";
 
-export function ChatBox({ setSentMessage, setError }) {
-
-    const {
-        message,
-        setMessage,
-        sentMessages,
-        handleSend,
-    } = ChatMessage();
-
+export function ChatBox({ message, setMessage, handleSend, setError }) {
     const location = useLocation();
     const initialMessage = location.state?.initialMessage;
+
+
+
+
 
     /*
         * This useEffect hook is used to send the initial message to the chat taken from the landing page
@@ -36,14 +32,9 @@ export function ChatBox({ setSentMessage, setError }) {
     };
 
     const handleButton = () => {
+        console.log(sentMessages);
         handleSend();
     }
-
-    useEffect(() => {
-        if (recentMessageRef.current) {
-            recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [sentMessages]);
 
     return (
         <div
