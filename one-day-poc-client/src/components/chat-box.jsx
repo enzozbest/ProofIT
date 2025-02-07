@@ -11,10 +11,10 @@ export function ChatBox({ message, setMessage, handleSend, setError }) {
 
 
 
-
-
     /*
         * This useEffect hook is used to send the initial message to the chat taken from the landing page
+        * It currently causes empty messages to be sent at the start of the chat if you jump straight to
+        * the generate page
      */
     useEffect(() => {
         if (initialMessage) {
