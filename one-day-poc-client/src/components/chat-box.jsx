@@ -32,7 +32,6 @@ export function ChatBox({ message, setMessage, handleSend, setError }) {
     };
 
     const handleButton = () => {
-        console.log(sentMessages);
         handleSend();
     }
 
