@@ -14,8 +14,6 @@ export function MessageBox({ sentMessages }) {
         if (recentMessageRef.current && recentMessageRef.current.offsetParent !== null) {
             recentMessageRef.current.scrollIntoView({ behavior: "smooth" });
         }
-        console.log("Messages are");
-        console.log(sentMessages);
     }, [sentMessages]);
     
 
@@ -33,7 +31,7 @@ export function MessageBox({ sentMessages }) {
             >
                 {/*List of messages*/}
                 {sentMessages.map((msg, index) => (
-                    msg[0] === "User" ? (
+                    msg.role === "User" ? (
                         <div
                             key={index}
                             style={{
@@ -47,7 +45,7 @@ export function MessageBox({ sentMessages }) {
                             }}
                         >
                             
-                            {msg[1] && (
+                            {msg.content && (
                                 <Markdown
                                     key={index}
                                     remarkPlugins={[remarkGfm]} 
@@ -63,7 +61,7 @@ export function MessageBox({ sentMessages }) {
                                         }
                                     }}
                                 >
-                                    {msg[1]} 
+                                    {msg.content}
                                 </Markdown>
                             )}
 
@@ -86,7 +84,7 @@ export function MessageBox({ sentMessages }) {
                                 maxWidth: "70%",
                             }}
                         >
-                            {msg[1] && (
+                            {msg.content && (
                                 <Markdown
                                     key={index}
                                     remarkPlugins={[remarkGfm]} 
@@ -102,11 +100,11 @@ export function MessageBox({ sentMessages }) {
                                         }
                                     }}
                                 >
-                                    {msg[1]} 
+                                    {msg.content}
                                 </Markdown>
                             )}
 
-                            <TypographyMuted> {new Date(msg[2]).toLocaleString("en-GB",{
+                            <TypographyMuted> {new Date(msg.timestamp).toLocaleString("en-GB",{
                                 hour: "2-digit",
                                 minute:"2-digit",
                                 hour12: true
