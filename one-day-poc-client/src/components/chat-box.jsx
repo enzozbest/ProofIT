@@ -8,20 +8,28 @@ export const CHAT_ERROR = "Something's wrong, please retry.";
 export function ChatBox({ message, setMessage, handleSend, setError }) {
     const location = useLocation();
     const initialMessage = location.state?.initialMessage;
-
-
+    const shouldSend = useRef(false);
 
     /*
-        * This useEffect hook is used to send the initial message to the chat taken from the landing page
-        * It currently causes empty messages to be sent at the start of the chat if you jump straight to
-        * the generate page
+        * Set the message to the one from the landing page
+        * Block handleSend() from running until the message has been set
      */
     useEffect(() => {
         if (initialMessage) {
             setMessage(initialMessage);
-            handleSend();
+            shouldSend.current = true;
         }
     }, []);
+
+    /*
+        * The initial message has been set, now we can send the message
+     */
+    useEffect(() => {
+        if (shouldSend.current && message === initialMessage) {
+            shouldSend.current = false;
+            handleSend();
+        }
+    }, [message, initialMessage]);
 
     const recentMessageRef = useRef(null);
 
