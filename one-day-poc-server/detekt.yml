@@ -1,0 +1,21 @@
+formatting:
+  Indentation:
+    active: true
+    autoCorrect: true
+  FinalNewline:
+    active: true
+    autoCorrect: true
+  NoWildcardImports:
+    active: false
+    autoCorrect: true
+
+style:
+  WildcardImport:
+    active: false
+    autoCorrect: true
+
+naming:
+  InvalidPackageDeclaration:
+    active: false
+    autoCorrect: true
+

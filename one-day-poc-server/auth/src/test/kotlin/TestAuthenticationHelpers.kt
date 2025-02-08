@@ -220,13 +220,13 @@ class TestAuthenticationHelpers {
         {
             "UserAttributes": "not an array"
         }
-    """.trimIndent()
+        """.trimIndent()
         val response = createResponse(json)
         assertFailsWith<Exception> {
             generateUserInfo(response)
         }
     }
-    
+
     @Test
     fun `Test sendRequest() returns a response`() {
         val mockWebServer = MockWebServer()

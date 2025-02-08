@@ -72,7 +72,9 @@ object AuthenticationTestHelpers {
             validate { credentials ->
                 if (credentials.name == "test" && credentials.password == "password") {
                     UserIdPrincipal(credentials.name)
-                } else null
+                } else {
+                    null
+                }
             }
         }
     }
@@ -138,5 +140,3 @@ object AuthenticationTestHelpers {
             .sign(Algorithm.HMAC256("test-secret"))
     }
 }
-
-
