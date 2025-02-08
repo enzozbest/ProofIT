@@ -76,22 +76,21 @@ subprojects {
     dependencies {
         detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
         implementation("io.ktor:ktor-server-core:$ktorVersion")
+        implementation("io.ktor:ktor-server-netty:$ktorVersion")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-        implementation("ch.qos.logback:logback-classic:1.4.11")
-        implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-        testImplementation(kotlin("test"))
-        testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
         implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+        implementation("ch.qos.logback:logback-classic:1.4.11")
+        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+        testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
+        testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
         testImplementation("org.mockito:mockito-core:5.12")
         testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
         testImplementation("io.mockk:mockk:1.13.16")
         testImplementation("net.bytebuddy:byte-buddy:1.14")
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
-        implementation("io.ktor:ktor-server-netty:$ktorVersion")
+        testImplementation(kotlin("test"))
     }
     detekt {
         toolVersion = "1.23.0"
@@ -118,12 +117,29 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    implementation(project(":routes"))
     implementation(project(":auth"))
+    implementation(project(":database"))
+    implementation(project(":routes"))
+    implementation(project(":utils"))
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.withType<Test> {
+    maxParallelForks = Runtime.getRuntime().availableProcessors()
+    forkEvery = 10
+}
+
+tasks.named("run") {
+    dependsOn("startDocker")
+}
+
+tasks.register<Exec>("startDocker") {
+    group = "docker"
+    description = "Starts the PostgreSQL docker container"
+    commandLine("docker-compose", "up", "-d")
 }
 
 kotlin {
