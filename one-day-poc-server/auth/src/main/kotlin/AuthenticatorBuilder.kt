@@ -55,15 +55,17 @@ fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
 
         authHeader { call ->
             val sessionCookie = call.request.cookies["AuthenticatedSession"]
-                ?: if (call.request.headers["Authorization"] == null) return@authHeader null //No credentials
-                else
-                    return@authHeader parseAuthorizationHeader(call.request.headers["Authorization"]!!) //Authorization header present
+                ?: return@authHeader if (call.request.headers["Authorization"] == null) {
+                    null // No credentials
+                } else {
+                    parseAuthorizationHeader(call.request.headers["Authorization"]!!) // Authorization header present
+                }
 
             try {
                 val session = Json.decodeFromString<AuthenticatedSession>(sessionCookie)
-                return@authHeader parseAuthorizationHeader("Bearer ${session.token}") //Read token from cookie
+                return@authHeader parseAuthorizationHeader("Bearer ${session.token}") // Read token from cookie
             } catch (e: Exception) {
-                return@authHeader null //Cookie has invalid format
+                return@authHeader null // Cookie has invalid format
             }
         }
 
@@ -71,10 +73,11 @@ fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
             acceptLeeway(10)
         }
         validate { credential ->
-            if (!credential.payload.getClaim("sub").asString().isNullOrEmpty())
+            if (!credential.payload.getClaim("sub").asString().isNullOrEmpty()) {
                 JWTPrincipal(credential.payload)
-            else
-                null //Invalid credential
+            } else {
+                null // Invalid credential
+            }
         }
     }
 }

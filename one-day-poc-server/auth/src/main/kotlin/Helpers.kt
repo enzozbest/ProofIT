@@ -9,7 +9,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 
-
 /**
  * Data class representing the information of a user's authenticated session in the API.
  */
@@ -65,8 +64,9 @@ fun buildUserInfoRequest(
         .addHeader("Authorization", "Bearer $token")
         .addHeader("Content-Type", contentType)
 
-    if (amzTarget)
+    if (amzTarget) {
         request.addHeader("X-Amz-Target", amzApi)
+    }
 
     return request.build()
 }

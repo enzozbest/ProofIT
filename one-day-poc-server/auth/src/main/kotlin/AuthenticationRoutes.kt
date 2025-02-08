@@ -97,15 +97,17 @@ fun Route.setUpUserInfoRoute(
         }
 
         val response = buildUserInfoRequest(token, verifierUrl, contentType, amzTarget, amzApi).sendRequest()
-        if (!response.isSuccessful)
+        if (!response.isSuccessful) {
             return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token")
+        }
 
         val userInfo = generateUserInfo(response)
-        if (userInfo == CognitoUserInfo("", "", ""))
+        if (userInfo == CognitoUserInfo("", "", "")) {
             return@get call.respondText(
                 "Internal Server Error",
                 status = HttpStatusCode.InternalServerError
-            ) //Issue with the generation of the user info JSON.
+            ) // Issue with the generation of the user info JSON.
+        }
 
         call.respondText(
             Json.encodeToString<CognitoUserInfo>(userInfo),
@@ -122,7 +124,7 @@ fun Route.setUpCallbackRoute(route: String, redirectDomain: String = "http://loc
     get(route) {
         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
         if (principal == null) {
-            call.respond(HttpStatusCode.Unauthorized) //Authentication failed, do not grant access.
+            call.respond(HttpStatusCode.Unauthorized) // Authentication failed, do not grant access.
             return@get
         }
         val token: String? = principal.extraParameters["id_token"]
@@ -137,8 +139,7 @@ fun Route.setUpCallbackRoute(route: String, redirectDomain: String = "http://loc
             val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
             call.respondRedirect("$redirectDomain$redirectUrl")
         } catch (e: Exception) {
-            return@get call.respond(HttpStatusCode.Unauthorized) //JWT token is invalid
+            return@get call.respond(HttpStatusCode.Unauthorized) // JWT token is invalid
         }
     }
 }
-

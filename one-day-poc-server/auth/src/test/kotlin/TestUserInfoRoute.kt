@@ -82,7 +82,7 @@ class TestUserInfoRoute {
             assertEquals("Invalid token", bodyAsText())
         }
     }
-    
+
     @Test
     fun `Test returns 500 on unexpected error`() = testApplication {
         routing {
@@ -115,7 +115,7 @@ class TestUserInfoRoute {
                 {"Name": "birthdate", "Value": "1990-01-01"}
             ]
         }
-    """.trimIndent()
+        """.trimIndent()
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody(json))
         val client = createClient {
             followRedirects = false
