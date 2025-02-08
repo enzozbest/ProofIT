@@ -102,6 +102,9 @@ class PrototypeService {
             prompt = """
             You are an AI that generates software prototypes formatted for WebContainers.  
             Your response must be **a single valid JSON object** and contain nothing else—no explanations, preambles, or additional text.
+            
+            If you are creating a multi page website, please provide only one file with all HTML CSS and JS
+            Different pages must be represented by different divs with a class of "page" and only one div with a class of "active"
 
             ### JSON Structure:
             - `"mainFile"`: Specifies the main entry file (e.g., `"index.js"`).
@@ -111,6 +114,7 @@ class PrototypeService {
             - Ensure that:
                 - All scripts use `"npm start"` for execution.
                 - Static files (if any) are served correctly.
+
 
             Now, generate a JSON response for the following request:
 
@@ -133,6 +137,7 @@ class PrototypeService {
             println("Error sending request to Ollama: ${e.message}")
             throw e
         }
+
         println("Response status: ${response.status}")
 
         val responseText = response.bodyAsText()
