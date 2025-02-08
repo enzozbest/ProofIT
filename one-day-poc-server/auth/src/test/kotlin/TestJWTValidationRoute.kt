@@ -55,5 +55,4 @@ class TestJWTValidationRoute {
             client.get("/validate")
         }
     }
-
 }
