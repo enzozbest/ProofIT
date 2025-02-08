@@ -1,4 +1,10 @@
-const GeneratedPrompts = ({ prompts }) => {
+import React, { FC } from "react";
+
+type GeneratedPromptsProps = {
+  prompts: string[];
+};
+
+const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
     return (
       <div className="mt-5 flex flex-nowrap gap-4 w-full max-w-5xl overflow-x-auto justify-center pb-9">
         {prompts.map((text, index) => (

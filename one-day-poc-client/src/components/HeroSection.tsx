@@ -1,7 +1,7 @@
-import React from "react";
+import React, { FC } from "react";
 import { BotMessageSquare } from 'lucide-react'
 
-const HeroSection = () => {
+const HeroSection: FC = () => {
   return (
     <div className="flex flex-col items-center text-center my-10">
       <BotMessageSquare size={64} />
