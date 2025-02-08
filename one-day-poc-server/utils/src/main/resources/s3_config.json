@@ -1,0 +1,10 @@
+{
+  "s3": {
+    "role": "arn:aws:iam::977098998083:role/S3SafeRole",
+    "buckets": [
+      "one-day-poc-chat",
+      "one-day-poc-prompts"
+    ],
+    "region": "eu-west-2"
+  }
+}
