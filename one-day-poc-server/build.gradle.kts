@@ -31,9 +31,9 @@ subprojects {
 
 dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation(project(":one-day-poc:one-day-poc-server:routes"))
-    implementation(project(":one-day-poc:one-day-poc-server:prototype"))
-    implementation(project(":one-day-poc:one-day-poc-server:webcontainer"))
+    implementation(project(":routes"))
+    implementation(project(":prototype"))
+    implementation(project(":webcontainer"))
 }
 tasks.test {
     useJUnitPlatform()
