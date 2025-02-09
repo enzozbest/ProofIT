@@ -25,5 +25,4 @@ fun Application.prototypeModule() {
     routing {
         prototypeRoutes(prototypeService)
     }
-    println("Prototype module configured")
 }
