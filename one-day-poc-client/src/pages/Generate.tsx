@@ -1,4 +1,4 @@
-import Chat from './Chat'
+import ChatScreen from './ChatScreen'
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
@@ -91,7 +91,7 @@ export default function Page() {
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
     
           <div className="w-[450px] h-full rounded-xl bg-muted/50">
-            <Chat />
+            <ChatScreen />
           </div>
           <div className="flex h-full items-center justify-center">
             <ChevronLeftIcon className="h-12 w-9 text-neutral-200" />
