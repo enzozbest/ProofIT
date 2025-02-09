@@ -6,8 +6,7 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
 
-
-fun Application.configureSerialization() {
+fun Application.prototypeModule() {
     install(ContentNegotiation) {
         json(Json {
             prettyPrint = true
@@ -15,14 +14,9 @@ fun Application.configureSerialization() {
             ignoreUnknownKeys = true
         })
     }
-}
 
+    val ollamaService = OllamaService()
+    val prototypeService = PrototypeService(ollamaService)
 
-fun Application.prototypeModule() {
-    configureSerialization()
-    val prototypeService = PrototypeService()
-
-    routing {
-        prototypeRoutes(prototypeService)
-    }
+    prototypeRoutes(prototypeService)
 }
