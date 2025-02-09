@@ -11,7 +11,6 @@ function App() {
         <div>
             <Routes>
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/chat" element={<Chat />} />
                 <Route path="/generate" element={<Generate />} />
             </Routes>
         </div>
