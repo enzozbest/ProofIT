@@ -1,5 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import Chat from '../pages/Chat';
+import ChatScreen from '../pages/ChatScreen';
 import { ChatBox } from "../components/chat-box";
 import { MessageBox } from "../components/messages-box";
 import '@testing-library/jest-dom';
@@ -8,14 +8,14 @@ import userEvent from '@testing-library/user-event';
 global.fetch = jest.fn();
 
 test("Renders chat page", () => {
-    render(<Chat/>);
+    render(<ChatScreen/>);
     const element = screen.getByPlaceholderText(/How can we help you today?/i);
     expect(element).toBeInTheDocument();
 });
 
 
 test("Enter text in chat", async () =>{
-    render(<Chat/>);
+    render(<ChatScreen/>);
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -23,7 +23,7 @@ test("Enter text in chat", async () =>{
 })
 
 test("Press enter button", async () =>{
-    render(<Chat/>);
+    render(<ChatScreen/>);
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -38,7 +38,7 @@ test("Valid post request", async () =>{
         ok: true,
         text: jest.fn().mockResolvedValue("Mock LLM response"),
     });
-    render(<Chat/>);
+    render(<ChatScreen/>);
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -59,7 +59,7 @@ test("Invalid post request", async () =>{
         ok: false,
         text: jest.fn().mockResolvedValue("Mock LLM response"),
     });
-    render(<Chat/>);
+    render(<ChatScreen/>);
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
