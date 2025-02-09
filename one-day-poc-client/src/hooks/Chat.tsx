@@ -40,6 +40,7 @@ const ChatMessage = (): ChatHookReturn => {
     };
 
     const handleSend = async (messageToSend: string = message): Promise<void> => {
+        if (!message.trim()) return;
         const currentTime = new Date().toLocaleString();
 
         const newMessage: Message = {
