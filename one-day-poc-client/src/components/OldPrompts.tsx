@@ -14,16 +14,16 @@ const OldPrompts: FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-6 my-16">
+    <div className="flex gap-10 my-20">
       {oldPrompts.map((item, index) => (
-        <div
+        <button
           key={index}
-          className="border px-4 py-5 rounded-lg shadow-md bg-gray-100 hover:shadow-lg transition w-[240px] text-center"
+          className="border py-2 rounded-lg bg-gray-100 hover:opacity-80 w-[200px] h-30 text-left"
         >
-          <MessageCircle size={24} className="mb-2 text-gray-600 mx-auto" />
-          <p className="text-gray-800 font-semibold">{item.text}</p>
-          <p className="text-xs text-gray-500 mt-1">{item.duration}</p>
-        </div>
+          <MessageCircle size={24} className="pb-1" />
+          {item.text}
+          <p className="text-xs text-gray-500 pt-1">{item.duration}</p>
+        </button>
       ))}
     </div>
   );
