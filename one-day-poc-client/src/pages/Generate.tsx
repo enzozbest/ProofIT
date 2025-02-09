@@ -1,6 +1,6 @@
 import ChatScreen from './ChatScreen'
 import * as React from "react";
-import { useState } from "react";
+import { useState } from "react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label"
 
 import { 
   ChevronDownIcon, 
-  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@radix-ui/react-icons"
 
 import {
@@ -93,14 +93,15 @@ export default function Page() {
         </header>
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
     
-          <div style={{ display: isVisible ? "block" : "none" }} className="w-[450px] h-full rounded-xl bg-muted/50">
+          <div className= {`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
+                           isVisible ? "opacity-100 max-w-[450px]" : "opacity-0 max-w-0"}`}>
             <ChatScreen />
           </div>
           <div className="flex h-full items-center justify-center">
             <button 
               onClick={() => setIsVisible(!isVisible)}>
-          
-            <ChevronLeftIcon className="h-12 w-9 text-neutral-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
+                                        isVisible ? "rotate-180": "rotate-0"}`} />
             </button>
           </div>
           <div className="flex-1 h-full rounded-xl bg-neutral-200">
