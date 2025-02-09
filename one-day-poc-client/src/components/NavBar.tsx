@@ -3,7 +3,7 @@ import { BotMessageSquare } from 'lucide-react';
 
 type NavBarProps = {
   isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsAuthenticated: (value: boolean) => void;
 };
 
 const NavBar: React.FC<NavBarProps> = ({
@@ -26,13 +26,11 @@ const NavBar: React.FC<NavBarProps> = ({
   };
 
   return (
-    <nav className="flex justify-between items-center w-full px-10 py-4 shadow-md border-b bg-white">
-      <div className="flex items-center gap-3 text-xl font-bold">
-        <BotMessageSquare size={32} className="text-gray-700" />
-        <span className="text-gray-900">ProofIt!</span>
+    <nav className="flex justify-between items-center w-full p-5 shadow-md border-b">
+      <div className="flex items-center gap-2 text-xl font-bold">
+        <BotMessageSquare /> ProofIt!
       </div>
-
-      <div>
+      <div className="flex gap-2">
         {isAuthenticated ? (
           <button
             onClick={handleSignOut}
