@@ -28,10 +28,12 @@ fun RetrievePrototypeResponse(output: String): Any {
     return output // Or return a proper response object
 }
 
-fun Route.prototypeRoutes(prototypeService: PrototypeService) {
-    healthCheck()
-    generatePrototype(prototypeService)
-    // getPrototypeById(prototypeService)
+fun Application.prototypeRoutes(prototypeService: PrototypeService) {
+    routing {
+        healthCheck()
+        generatePrototype(prototypeService)
+        // getPrototypeById(prototypeService)
+    }
 }
 
 private fun Route.healthCheck() {
