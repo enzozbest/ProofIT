@@ -30,13 +30,7 @@ data class OllamaResponse(
     val created_at: String,
     val response: String,
     val done: Boolean,
-    val done_reason: String,
-    val context: List<Int>? = null,
-    val total_duration: Long? = null,
-    val load_duration: Long? = null,
-    val prompt_eval_duration: Long? = null,
-    val eval_duration: Long? = null,
-    val eval_count: Int? = null
+    val done_reason: String
 )
 
 @Serializable

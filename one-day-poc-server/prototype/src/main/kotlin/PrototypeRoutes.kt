@@ -1,12 +1,17 @@
 package kcl.seg.rtt.prototype
 
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
-import io.ktor.util.*
 import kotlinx.serialization.Serializable
 import io.ktor.server.response.respond
-import kcl.seg.rtt.prototype.LlmResponse
+
+object PrototypeRoutes {
+    const val BASE = "/api/prototype"
+    const val HEALTH: String = "$BASE/health"
+    const val GENERATE: String = "$BASE/generate"
+}
 
 // Request and Response DTOs
 @Serializable
@@ -23,6 +28,44 @@ fun RetrievePrototypeResponse(output: String): Any {
     return output // Or return a proper response object
 }
 
+fun Route.prototypeRoutes(prototypeService: PrototypeService) {
+    healthCheck()
+    generatePrototype(prototypeService)
+    // getPrototypeById(prototypeService)
+}
+
+private fun Route.healthCheck() {
+    get(PrototypeRoutes.HEALTH) {
+        call.respond(HttpStatusCode.OK, "OK")
+    }
+}
+
+private fun Route.generatePrototype(prototypeService: PrototypeService) {
+    post(PrototypeRoutes.GENERATE) {
+        try {
+            val request = call.receive<GenerateRequest>()
+            prototypeService.generatePrototype(request.prompt)
+                .onSuccess { llmResponse ->
+                    call.respond(HttpStatusCode.OK, llmResponse)
+                }
+                .onFailure { error ->
+                    call.respondError(error)
+                }
+        } catch (e: Exception) {
+            call.respondError(e)
+        }
+    }
+}
+
+// Extension function for consistent error handling
+private suspend fun ApplicationCall.respondError(error: Throwable) {
+    respond(
+        HttpStatusCode.BadRequest,
+        ErrorResponse("Error: ${error.message ?: "Unknown error"}")
+    )
+}
+
+/*
 fun Route.prototypeRoutes(prototypeService: PrototypeService) {
     route("/prototype") {
         get("/health") {
@@ -73,5 +116,6 @@ fun Route.prototypeRoutes(prototypeService: PrototypeService) {
         call.respond(HttpStatusCode.OK, RetrievePrototypeResponse(prototypeString))
     }
 }
+ */
 
 
