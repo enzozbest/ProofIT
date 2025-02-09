@@ -1,5 +1,5 @@
-import React, { FC } from "react";
-import { BotMessageSquare } from 'lucide-react'
+import React, { FC } from 'react';
+import { BotMessageSquare } from 'lucide-react';
 
 const HeroSection: FC = () => {
   return (
