@@ -18,4 +18,6 @@ export interface ChatHookReturn {
     sentMessages: Message[];
     handleSend: (messageToSend?: string) => Promise<void>;
     llmResponse: string;
+    errorMessage: string | null;
+    setErrorMessage: (error:string | null) => void;
 }

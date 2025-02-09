@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import ChatMessage from "@/hooks/Chat";
 
 
-export const CHAT_ERROR = "Something's wrong, please retry.";
 
 export function ChatBox({ message, setMessage, handleSend, setError }) {
     const location = useLocation();

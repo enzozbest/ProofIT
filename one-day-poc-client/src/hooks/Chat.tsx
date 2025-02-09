@@ -8,6 +8,7 @@ const ChatMessage = (): ChatHookReturn => {
     const [message, setMessage] = useState<string>("");
     const [sentMessages, setSentMessages] = useState<Message[]>([]);
     const [llmResponse, setLlmResponse] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const postMessage = async (message: string): Promise<string> => {
         try {
@@ -35,6 +36,7 @@ const ChatMessage = (): ChatHookReturn => {
             return data;
         } catch (error) {
             console.error('Error:', error);
+            setErrorMessage("Error. Please check your connection and try again.");
             throw error;
         }
     };
@@ -55,8 +57,10 @@ const ChatMessage = (): ChatHookReturn => {
             await postMessage(messageToSend);
             setMessage("");
         } catch (error) {
-            console.error('Failed to send message:', error);
-            // handle error in UI (i [reza] am writing this so that i can hopefully ask someone front end on their opinion)
+            console.error('Error:', error);
+            setErrorMessage("Error. Please check your connection and try again.");
+            throw error;
+            
         }
     };
 
@@ -79,7 +83,9 @@ const ChatMessage = (): ChatHookReturn => {
         setMessage,
         sentMessages,
         handleSend,
-        llmResponse
+        llmResponse,
+        errorMessage,
+        setErrorMessage
     };
 };
 
