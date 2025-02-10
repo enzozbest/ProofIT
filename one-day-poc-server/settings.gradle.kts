@@ -1,3 +1,4 @@
+
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
@@ -6,3 +7,5 @@ include("routes")
 include("chat_history")
 include("auth")
 include("utils")
+include("prototype")
+include("webcontainer")
