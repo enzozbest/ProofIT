@@ -2,10 +2,6 @@ package kcl.seg.rtt.prototype
 
 import kotlinx.serialization.Serializable
 
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
-import kcl.seg.rtt.prototype.PrototypesTable
-
 /**
  * Represents a structured response from the LLM containing prototype file information.
  *
@@ -66,30 +62,10 @@ class PrototypeService(private val ollamaService: OllamaService) {
         """.trimIndent()
     }
 
-    /**
-     * Location of this function can be changed later on
-     * To somewhere more prototype handling focused
-     * Just need a place for it temporarily
-     */
-    private fun storePrototype(prototypeOutput: String, context: List<String>?) {
-        // Stub for storing the generated prototype
-        transaction {
-            PrototypesTable.insert {
-                it[prototype] = prototypeOutput
-            }
-        }
-        // This is a placeholder for future functionality.
-    }
-
-    // Placeholder for future functionality
-    // Will be needed to pass to web container
-    fun formatToJSON(prototypeOutput: String): String {
-        return prototypeOutput
-    }
-
-    fun retrievePrototype(prototypeId: String): String? {
-        // Placeholder for future functionality
-        return null
+    fun retrievePrototype(id: String): String {
+        // Later, this will query the DB or S3, etc.
+        // For now, just return a minimal HTML snippet (or null).
+        return "<html><body><h1>Hello from Prototype $id</h1></body></html>"
     }
 
 }
