@@ -6,9 +6,13 @@ function Chat() {
     const [message, setMessage] = useState("");
     const [sentMessage, setSentMessage] = useState([]);
     const recentMessageRef = useRef(null);
+    const [showPrototype, setPrototype] = useState(false);
+    const [prototypeId, setPrototypeId] = useState(0);
 
     const handleSend = () => {
         var currentTime = new Date().toLocaleString();
+        setPrototype(true);
+        setPrototypeId(prototypeId+1);
         setSentMessage((prevMessages) => [...prevMessages, ["User",message, currentTime]]);
         {/**In reality, the response would be the llm response*/}
         var response = ["LLM","LLM RESPONSE", currentTime]
@@ -139,7 +143,7 @@ function Chat() {
             </div>
             {/*Prototype side*/}
             <div style={{ flex: 3,borderStyle: 'solid',}}>
-                <PrototypeFrame prototypeId={"1"} width={'100%'} height={'100%'} />
+                { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
             </div>
         </div>
 
