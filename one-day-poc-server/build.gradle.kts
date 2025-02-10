@@ -53,6 +53,8 @@ dependencies {
     // JSoup for HTML sanitization
     implementation("org.jsoup:jsoup:1.15.3")
     implementation(project(":auth"))
+    implementation(project(":prototype"))
+    implementation(project(":webcontainer"))
 }
 
 tasks.test {
