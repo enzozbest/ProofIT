@@ -18,12 +18,29 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
     dependsOn(subprojects.map { it.tasks.named("jacocoTestReport") })
 
     executionData.setFrom(
-        subprojects.mapNotNull { it.tasks.withType<JacocoReport>().findByName("jacocoTestReport")?.executionData }
+        subprojects.mapNotNull {
+            it.tasks
+                .withType<JacocoReport>()
+                .findByName("jacocoTestReport")
+                ?.executionData
+        },
     )
 
     subprojects.forEach { subproject ->
-        additionalSourceDirs.from(subproject.extensions.getByType<JavaPluginExtension>().sourceSets.getByName("main").allSource.srcDirs)
-        sourceDirectories.from(subproject.extensions.getByType<JavaPluginExtension>().sourceSets.getByName("main").allSource.srcDirs)
+        additionalSourceDirs.from(
+            subproject.extensions
+                .getByType<JavaPluginExtension>()
+                .sourceSets
+                .getByName("main")
+                .allSource.srcDirs,
+        )
+        sourceDirectories.from(
+            subproject.extensions
+                .getByType<JavaPluginExtension>()
+                .sourceSets
+                .getByName("main")
+                .allSource.srcDirs,
+        )
         classDirectories.from(subproject.buildDir.resolve("classes/kotlin/main"))
     }
 
@@ -32,7 +49,6 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
         html.required.set(true)
     }
 }
-
 
 detekt {
     toolVersion = "1.23.0"
@@ -50,11 +66,10 @@ sonarqube {
         property("sonar.token", "sqa_9d0266531f00a65342739c57874cebd9a91e7cea")
         property(
             "sonar.coverage.jacoco.xmlReportPaths",
-            "${project.layout.buildDirectory}/reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml"
+            "${project.layout.buildDirectory}/reports/jacoco/jacocoMergedReport/jacocoMergedReport.xml",
         )
     }
 }
-
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
@@ -85,8 +100,6 @@ subprojects {
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
-        testImplementation("org.mockito:mockito-core:5.12")
-        testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
         testImplementation("io.mockk:mockk:1.13.16")
         testImplementation("net.bytebuddy:byte-buddy:1.14")
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
