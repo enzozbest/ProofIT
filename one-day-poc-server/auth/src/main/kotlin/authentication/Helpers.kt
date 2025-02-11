@@ -1,31 +1,45 @@
-package kcl.seg.rtt.auth
+package kcl.seg.rtt.auth.authentication
 
 import kcl.seg.rtt.utils.JSON.PoCJSON
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import redis.Redis
 
 /**
  * Data class representing the information of a user's authenticated session in the API.
  */
 @Serializable
-data class AuthenticatedSession(val userId: String, val token: String, val admin: Boolean?)
+data class AuthenticatedSession(
+    val userId: String,
+    val token: String,
+    val admin: Boolean?,
+)
 
 /**
  * Data class representing user's information which is relevant for the client application.
  */
 @Serializable
-data class CognitoUserInfo(val name: String, val email: String, val dob: String)
+data class CognitoUserInfo(
+    val name: String,
+    val email: String,
+    val dob: String,
+)
 
 /**
  * Data class representing the response of a validation request to the JWT verifier.
  */
 @Serializable
-data class JWTValidationResponse(val userId: String, val admin: Boolean?)
+data class JWTValidationResponse(
+    val userId: String,
+    val admin: Boolean?,
+)
 
 /**
  * Function to generate a [CognitoUserInfo] object from a response.
@@ -39,7 +53,7 @@ fun generateUserInfo(response: Response): CognitoUserInfo {
     return CognitoUserInfo(
         name = PoCJSON.findCognitoUserAttribute(attributes, "name") ?: "Unknown",
         email = PoCJSON.findCognitoUserAttribute(attributes, "email") ?: "Unknown",
-        dob = PoCJSON.findCognitoUserAttribute(attributes, "birthdate") ?: "Unknown"
+        dob = PoCJSON.findCognitoUserAttribute(attributes, "birthdate") ?: "Unknown",
     )
 }
 
@@ -57,12 +71,14 @@ fun buildUserInfoRequest(
     verifierUrl: String,
     contentType: String,
     amzTarget: Boolean,
-    amzApi: String
+    amzApi: String,
 ): Request {
-    val request = Request.Builder()
-        .url(verifierUrl)
-        .addHeader("Authorization", "Bearer $token")
-        .addHeader("Content-Type", contentType)
+    val request =
+        Request
+            .Builder()
+            .url(verifierUrl)
+            .addHeader("Authorization", "Bearer $token")
+            .addHeader("Content-Type", contentType)
 
     if (amzTarget) {
         request.addHeader("X-Amz-Target", amzApi)
@@ -75,6 +91,32 @@ fun buildUserInfoRequest(
  * Extension function on [Request] objects to send the request and return the response.
  * @return The response of the request.
  */
-fun Request.sendRequest(): Response {
-    return OkHttpClient().newCall(this).execute()
+fun Request.sendRequest(): Response = OkHttpClient().newCall(this).execute()
+
+/**
+ * Function to cache a session in Redis.
+ * @param token The token to be cached.
+ * @param authData The authentication data to be cached.
+ * @param expirySeconds The expiry time of the cache in seconds.
+ */
+fun cacheSession(
+    token: String,
+    authData: JWTValidationResponse,
+    expirySeconds: Long = 3600,
+) {
+    Redis.getRedisConnection().use { jedis ->
+        jedis.setex("auth:$token", expirySeconds, Json.encodeToString(authData))
+    }
+}
+
+/**
+ * Function to check the cache for an authentication session.
+ * @param token The token to be checked.
+ * @return The authentication data if it exists in the cache, or null if it does not.
+ */
+fun checkCache(token: String): JWTValidationResponse? {
+    Redis.getRedisConnection().use { jedis ->
+        val cachedData = jedis.get("auth:$token") ?: return null
+        return Json.decodeFromString(cachedData)
+    }
 }

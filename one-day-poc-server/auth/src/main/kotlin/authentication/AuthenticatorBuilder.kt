@@ -1,4 +1,4 @@
-package kcl.seg.rtt.auth
+package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwk.JwkProviderBuilder
 import io.ktor.client.*
@@ -48,18 +48,20 @@ fun AuthenticationConfig.configureOAuth(config: JsonObject) {
 fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
     jwt("jwt-verifier") {
         val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
-        val jwkProvider = JwkProviderBuilder(issuer)
-            .cached(10, 1, TimeUnit.HOURS)
-            .rateLimited(10, 1, TimeUnit.MINUTES)
-            .build()
+        val jwkProvider =
+            JwkProviderBuilder(issuer)
+                .cached(10, 1, TimeUnit.HOURS)
+                .rateLimited(10, 1, TimeUnit.MINUTES)
+                .build()
 
         authHeader { call ->
-            val sessionCookie = call.request.cookies["AuthenticatedSession"]
-                ?: return@authHeader if (call.request.headers["Authorization"] == null) {
-                    null // No credentials
-                } else {
-                    parseAuthorizationHeader(call.request.headers["Authorization"]!!) // Authorization header present
-                }
+            val sessionCookie =
+                call.request.cookies["AuthenticatedSession"]
+                    ?: return@authHeader if (call.request.headers["Authorization"] == null) {
+                        null // No credentials
+                    } else {
+                        parseAuthorizationHeader(call.request.headers["Authorization"]!!) // Authorization header present
+                    }
 
             try {
                 val session = Json.decodeFromString<AuthenticatedSession>(sessionCookie)
@@ -73,7 +75,11 @@ fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
             acceptLeeway(10)
         }
         validate { credential ->
-            if (!credential.payload.getClaim("sub").asString().isNullOrEmpty()) {
+            if (!credential.payload
+                    .getClaim("sub")
+                    .asString()
+                    .isNullOrEmpty()
+            ) {
                 JWTPrincipal(credential.payload)
             } else {
                 null // Invalid credential
