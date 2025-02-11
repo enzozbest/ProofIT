@@ -1,8 +1,7 @@
 import React, { useEffect,useState } from 'react';
+import { PrototypeFrameProps } from './Types';
 
-
-const PrototypeFrame = ({prototypeId, width = '100%', height = '100%' }) => {
-
+const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ prototypeId, width = '100%', height = '100%' }) => {
     const [url, setUrl] = useState('');
 
     useEffect(() => {
@@ -14,7 +13,7 @@ const PrototypeFrame = ({prototypeId, width = '100%', height = '100%' }) => {
         <iframe
             src={url}
             style={{
-                width: width, 
+                width: width,
                 height: height,
                 border: '1px solid #ccc',
                 borderRadius: '4px',

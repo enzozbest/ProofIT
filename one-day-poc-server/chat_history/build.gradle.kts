@@ -16,9 +16,9 @@ repositories {
 }
 
 dependencies {
-    // Your existing dependencies but with corrected versions
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+    implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
 
@@ -41,8 +41,6 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
     // JSoup for HTML sanitization
     implementation("org.jsoup:jsoup:1.15.3")
-
-    implementation("io.ktor:ktor-server-auth:$ktorVersion")
 }
 
 tasks.test {

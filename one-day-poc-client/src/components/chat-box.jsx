@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import ChatMessage from "@/hooks/Chat";
 
-
-
-export function ChatBox({ message, setMessage, handleSend, setError }) {
+export function ChatBox({ message, setMessage, handleSend, setError}) {
     const location = useLocation();
     const initialMessage = location.state?.initialMessage;
     const shouldSend = useRef(false);

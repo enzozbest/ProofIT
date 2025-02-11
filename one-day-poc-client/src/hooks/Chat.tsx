@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Message, MessagePayload, ChatHookReturn } from './Types';
+import { Message, MessagePayload, ChatHookReturn, ChatMessageProps } from './Types';
+
 
 /*
  * Hook used to communicate to back end endpoint for chat messages
  */
-const ChatMessage = (): ChatHookReturn => {
+const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessageProps): ChatHookReturn => {
     const [message, setMessage] = useState<string>("");
     const [sentMessages, setSentMessages] = useState<Message[]>([]);
     const [llmResponse, setLlmResponse] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
     const postMessage = async (message: string): Promise<string> => {
         try {
@@ -43,6 +45,8 @@ const ChatMessage = (): ChatHookReturn => {
 
     const handleSend = async (messageToSend: string = message): Promise<void> => {
         if (!message.trim()) return;
+        setPrototype(true);
+        setPrototypeId(prototypeId+1);
         const currentTime = new Date().toLocaleString();
 
         const newMessage: Message = {
@@ -85,7 +89,8 @@ const ChatMessage = (): ChatHookReturn => {
         handleSend,
         llmResponse,
         errorMessage,
-        setErrorMessage
+        setErrorMessage,
+
     };
 };
 

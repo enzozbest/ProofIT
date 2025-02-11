@@ -1,4 +1,5 @@
 import ChatScreen from './ChatScreen'
+import PrototypeFrame from "@/hooks/PrototypeFrame";
 import * as React from "react";
 import { useState } from "react"
 
@@ -37,6 +38,8 @@ import {
 
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
+  const [showPrototype, setPrototype] = useState<boolean>(false);
+  const [prototypeId, setPrototypeId] = useState<number>(0);
 
   return (
     <SidebarProvider>
@@ -95,7 +98,11 @@ export default function Page() {
     
           <div className= {`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
                            isVisible ? "opacity-100 max-w-[450px]" : "opacity-0 max-w-0"}`}>
-            <ChatScreen />
+            <ChatScreen
+                showPrototype={showPrototype}
+                prototypeId={prototypeId}
+                setPrototype={setPrototype}
+                setPrototypeId={setPrototypeId} />
           </div>
           <div className="flex h-full items-center justify-center">
             <button 
@@ -105,7 +112,7 @@ export default function Page() {
             </button>
           </div>
           <div className="flex-1 h-full rounded-xl bg-neutral-200">
-            prototype viewer placeholder
+            { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
           </div>
         </div>
          

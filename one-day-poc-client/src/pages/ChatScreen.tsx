@@ -9,10 +9,12 @@ import  ChatMessage from "@/hooks/Chat";
 import {toast} from 'sonner'
 
 
-
-
-
-const ChatScreen: React.FC = () => {
+const ChatScreen: React.FC<{
+    showPrototype: boolean,
+    prototypeId: number,
+    setPrototype: React.Dispatch<React.SetStateAction<boolean>>,
+    setPrototypeId: React.Dispatch<React.SetStateAction<number>>
+}> = ({ showPrototype, prototypeId, setPrototype, setPrototypeId }) =>{
 
     const {
         message,
@@ -20,8 +22,8 @@ const ChatScreen: React.FC = () => {
         sentMessages,
         handleSend,
         errorMessage,
-        setErrorMessage
-    } = ChatMessage();
+        setErrorMessage,
+    } = ChatMessage({setPrototype, setPrototypeId, prototypeId});
 
 
     useEffect(() => {
@@ -37,7 +39,12 @@ const ChatScreen: React.FC = () => {
         <div className="relative h-full flex flex-col">
 
             <MessageBox sentMessages={sentMessages}/>
-            <ChatBox setMessage={setMessage} message={message} handleSend={handleSend} setError={setErrorMessage}/>
+            <ChatBox
+                setMessage={setMessage}
+                message={message}
+                handleSend={handleSend}
+                setError={setErrorMessage}
+            />
 
         </div>
 
