@@ -1,8 +1,12 @@
 package kcl.seg.rtt.auth.authentication
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.exceptions.JWTDecodeException
+import io.ktor.http.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kcl.seg.rtt.utils.JSON.PoCJSON
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -11,6 +15,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import redis.Redis
+import java.time.Instant
+import java.util.*
 
 /**
  * Data class representing the information of a user's authenticated session in the API.
@@ -119,4 +125,47 @@ fun checkCache(token: String): JWTValidationResponse? {
         val cachedData = jedis.get("auth:$token") ?: return null
         return Json.decodeFromString<JWTValidationResponse>(cachedData)
     }
+}
+
+/**
+ * Function to validate a JWT token.
+ * The function decodes the token and checks if it is expired.
+ * If the token is invalid, expired, or null, the function returns null.
+ * If the token is valid, the function returns a [JWTValidationResponse] object.
+ * @param token The token to be validated.
+ * @return A [JWTValidationResponse] object if the token is valid, or null if it is not.
+ */
+fun validateJWT(token: String?): JWTValidationResponse? {
+    val decoded =
+        try {
+            JWT.decode(
+                token ?: return null, // No token
+            )
+        } catch (exception: JWTDecodeException) {
+            return null // Invalid token
+        }
+
+    if (decoded.expiresAt.before(Date.from(Instant.now()))) {
+        return null // Expired token
+    }
+
+    val userId = decoded.getClaim("sub").asString() ?: return null // No user ID
+    val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+    return JWTValidationResponse(userId, admin) // Valid token
+}
+
+/**
+ * Function to respond to an authentication request made through the /api/auth/check.
+ * @param response The response to be sent. If null, the response will be an Unauthorized status.
+ */
+suspend fun RoutingContext.respondAuthenticationCheckRequest(
+    response: JWTValidationResponse?,
+    token: String?,
+) {
+    response?.let {
+        cacheSession(token!!, response)
+        call.respond(HttpStatusCode.OK, response)
+        return
+    }
+    call.respond(HttpStatusCode.Unauthorized, "Invalid or missing credentials!")
 }
