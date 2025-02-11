@@ -5,16 +5,12 @@ import { MessageBox } from "@/components/messages-box";
 import { MutedOverlay } from "@/components/ui/overlay";
 import { Frown, TableRowsSplit } from 'lucide-react'
 import  ChatMessage from "@/hooks/Chat";
+import { ChatScreenProps } from "./Types";
 
 import {toast} from 'sonner'
 
 
-const ChatScreen: React.FC<{
-    showPrototype: boolean,
-    prototypeId: number,
-    setPrototype: React.Dispatch<React.SetStateAction<boolean>>,
-    setPrototypeId: React.Dispatch<React.SetStateAction<number>>
-}> = ({ showPrototype, prototypeId, setPrototype, setPrototypeId }) =>{
+const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, prototypeId, setPrototype, setPrototypeId }) =>{
 
     const {
         message,
