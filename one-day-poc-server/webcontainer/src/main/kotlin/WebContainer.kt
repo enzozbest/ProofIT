@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.server.routing.*
 import io.ktor.server.plugins.cors.routing.*
 
+
 // Data class to hold prototype content
 // Can change to relevant languages
 @Serializable
@@ -104,18 +105,11 @@ class WebContainer {
 
 // Extension function for Application
 fun Application.configureWebContainer() {
-    // enable CORS for iframe access
-    install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Get)
-        allowMethod(HttpMethod.Post)
-        allowHeader(HttpHeaders.ContentType)
-        anyHost()
-    }
 
     routing {
         val webContainer = WebContainer()
         with(webContainer) { webcontainerRoutes() }
+
     }
 }
 

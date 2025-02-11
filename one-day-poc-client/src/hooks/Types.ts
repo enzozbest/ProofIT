@@ -21,3 +21,15 @@ export interface ChatHookReturn {
     errorMessage: string | null;
     setErrorMessage: (error:string | null) => void;
 }
+
+export interface ChatMessageProps {
+    setPrototype: React.Dispatch<React.SetStateAction<boolean>>;
+    setPrototypeId: React.Dispatch<React.SetStateAction<number>>;
+    prototypeId: number;
+}
+
+export interface PrototypeFrameProps {
+    prototypeId: number;
+    width?:string;
+    height?:string;
+}
