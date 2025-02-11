@@ -17,10 +17,6 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation(kotlin("test"))
-
-    implementation("aws.smithy.kotlin:http-client-engine-okhttp:1.4.2") {
-        exclude(group = "com.squareup.okhttp3", module = "okhttp")
-    }
 }
 
 tasks.test {
