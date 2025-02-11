@@ -1,9 +1,10 @@
+import kcl.seg.rtt.auth.*
 import kcl.seg.rtt.auth.authentication.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test
 import kotlin.test.*
 
 class TestAuthenticationHelpers {
+
     @Test
     fun `Test AuthenticatedSession Class`() {
         val session = AuthenticatedSession("userId", "token", false)
@@ -155,15 +157,6 @@ class TestAuthenticationHelpers {
     }
 
     @Test
-    fun `Test generateUserInfo with null response body`() {
-        val response = createResponse(null)
-        val userInfo = generateUserInfo(response)
-        assertEquals("", userInfo.name)
-        assertEquals("", userInfo.email)
-        assertEquals("", userInfo.dob)
-    }
-
-    @Test
     fun `Test generateUserInfo with empty UserAttributes array`() {
         val json =
             """
@@ -248,7 +241,7 @@ class TestAuthenticationHelpers {
 
         assertTrue(response.isSuccessful)
         assertEquals(200, response.code)
-        assertEquals("Success", response.body?.string())
+        assertEquals("Success", response.body.string())
     }
 
     @Test
@@ -308,7 +301,7 @@ class TestAuthenticationHelpers {
         assertEquals("text/plain", request.header("Content-Type"))
     }
 
-    private fun createResponse(body: String?): Response =
+    private fun createResponse(body: String): Response =
         Response
             .Builder()
             .request(Request.Builder().url("http://localhost/").build())
@@ -316,6 +309,6 @@ class TestAuthenticationHelpers {
             .code(200)
             .message("OK")
             .body(
-                body?.toResponseBody("application/json".toMediaTypeOrNull()),
+                body.toResponseBody("application/json".toMediaType()),
             ).build()
 }
