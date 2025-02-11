@@ -47,7 +47,7 @@ data class JWTValidationResponse(
  * @return A [CognitoUserInfo] object.
  */
 fun generateUserInfo(response: Response): CognitoUserInfo {
-    val jsonResponse = Json.parseToJsonElement(response.body?.string() ?: "{}").jsonObject
+    val jsonResponse = Json.parseToJsonElement(response.body.string()).jsonObject
     val attributes = jsonResponse["UserAttributes"]?.jsonArray ?: return CognitoUserInfo("", "", "")
 
     return CognitoUserInfo(
@@ -117,6 +117,6 @@ fun cacheSession(
 fun checkCache(token: String): JWTValidationResponse? {
     Redis.getRedisConnection().use { jedis ->
         val cachedData = jedis.get("auth:$token") ?: return null
-        return Json.decodeFromString(cachedData)
+        return Json.decodeFromString<JWTValidationResponse>(cachedData)
     }
 }

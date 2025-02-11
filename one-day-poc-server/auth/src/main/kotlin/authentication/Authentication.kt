@@ -3,6 +3,8 @@ package kcl.seg.rtt.auth.authentication
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
+import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
+import kcl.seg.rtt.auth.authentication.Authenticators.configureOAuth
 import kcl.seg.rtt.utils.JSON.PoCJSON
 import kotlin.collections.set
 

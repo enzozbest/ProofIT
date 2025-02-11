@@ -8,12 +8,10 @@ import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import kcl.seg.rtt.auth.authentication.AuthenticatedSession
 import kcl.seg.rtt.auth.authentication.setUpJWTValidation
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class TestJWTValidationRoute {
     @Test
@@ -53,8 +51,8 @@ class TestJWTValidationRoute {
                     setUpJWTValidation("/validate")
                 }
             }
-            assertFailsWith<SerializationException> {
-                client.get("/validate")
-            }
+            val response = client.get("/validate")
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals("Invalid or missing credentials!", response.bodyAsText())
         }
 }

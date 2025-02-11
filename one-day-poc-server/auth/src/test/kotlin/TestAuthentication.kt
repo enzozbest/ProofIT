@@ -15,8 +15,8 @@ import io.ktor.server.testing.*
 import io.ktor.util.*
 import kcl.seg.rtt.auth.authentication.AuthenticatedSession
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
 import kcl.seg.rtt.auth.authentication.authModule
-import kcl.seg.rtt.auth.authentication.configureJWTValidator
 import kcl.seg.rtt.utils.JSON.PoCJSON.readJsonFile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
