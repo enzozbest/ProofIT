@@ -36,10 +36,10 @@ data class OllamaResponse(
 /**
  * Service for interacting with a local Ollama instance
  */
-class OllamaService {
+open class OllamaService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
 
-    private val client = HttpClient(CIO) {
+    var client = HttpClient(CIO) {
         install(io.ktor.client.plugins.contentnegotiation.ContentNegotiation) {
             json(Json {
                 prettyPrint = true
@@ -64,9 +64,9 @@ class OllamaService {
     /**
      * Checks if local Ollama instance is accessible
      */
-    private suspend fun isOllamaRunning(): Boolean {
+    open suspend fun isOllamaRunning(): Boolean {
         return try {
-            val response = client.get("http://$OLLAMA_HOST:$OLLAMA_PORT")
+            val response = client.get("http://$OLLAMA_HOST:$OLLAMA_PORT/")
             response.status == HttpStatusCode.OK
         } catch (e: Exception) {
             false
@@ -80,7 +80,7 @@ class OllamaService {
      * @return Result containing [LlmResponse] or failure with error message
      * @throws Exception if Ollama is not running or returns invalid response
      */
-    suspend fun generateResponse(prompt: String): Result<LlmResponse> {
+    open suspend fun generateResponse(prompt: String): Result<LlmResponse> {
         if (!isOllamaRunning()) {
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
