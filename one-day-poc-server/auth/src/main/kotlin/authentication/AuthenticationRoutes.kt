@@ -2,7 +2,6 @@ package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwt.JWT
 import io.ktor.http.*
-import io.ktor.http.auth.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -81,32 +80,30 @@ private fun Route.setLogOutEndpoint(route: String) {
 }
 
 /**
- * Sets up JWT validation route
+ * Sets up JWT validation route.
+ * This route checks for credentials in two places: first the AuthenticatedSession cookie, then the Authorization header.
+ * If the credentials are found and the token is valid, the route responds with a JWTValidationResponse object.
+ * Otherwise, the route responds with an Unauthorized status code.
+ * @param validationRoute The route (as a string) to set up the JWT validation on.
  */
 fun Route.setUpJWTValidation(validationRoute: String) {
     get(validationRoute) {
-        call.request.cookies["AuthenticatedSession"]?.let { cookie ->
-            kotlin.runCatching {
-                val decoded = Json.decodeFromString<AuthenticatedSession>(cookie)
-                val response = JWTValidationResponse(decoded.userId, decoded.admin)
-                cacheSession(decoded.token, response)
-                return@get call.respond(HttpStatusCode.OK, response)
-            }
-        }
+        val token: String? =
+            call.request.cookies["AuthenticatedSession"]?.let {
+                Json.decodeFromString<AuthenticatedSession>(it).token
+            } ?: call.request.headers["Authorization"]?.removePrefix("Bearer ")
 
-        call.request.headers["Authorization"]?.let { header ->
-            header.removePrefix("Bearer ")
-            val decoded = JWT.decode(header)
-            val userId = decoded.getClaim("sub").asString()
-            val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
-            val response = JWTValidationResponse(userId, admin)
-            cacheSession(decoded.token, response)
-            return@get call.respond(HttpStatusCode.OK, response)
-        }
-        call.respond(HttpStatusCode.Unauthorized, "Invalid or missing credentials!")
+        val response = validateJWT(token)
+        return@get respondAuthenticationCheckRequest(response, token)
     }
 }
 
+/**
+ * Sets up a route to check the authentication status of a user.
+ * If the user is authenticated, the route responds with the JWTValidationResponse object.
+ * Otherwise, the route responds with an Unauthorized status code.
+ * @param checkRoute The route (as a string) to set up the check on.
+ */
 fun Route.setUpCheckEndpoint(checkRoute: String) {
     get(checkRoute) {
         val sessionCookie =
@@ -115,11 +112,9 @@ fun Route.setUpCheckEndpoint(checkRoute: String) {
             } ?: return@get call.respond(HttpStatusCode.Unauthorized, "Invalid or missing session cookie")
 
         checkCache(sessionCookie.token)?.let { cachedSession ->
-            println("Cache hit!")
             return@get call.respond(HttpStatusCode.OK, cachedSession)
         }
 
-        println("Cache miss!")
         call.response.headers.append(HttpHeaders.Authorization, "Bearer ${sessionCookie.token}")
         call.response.headers.append(HttpHeaders.Location, "http://localhost:8000/api/auth/validate")
         call.respond(HttpStatusCode.TemporaryRedirect)

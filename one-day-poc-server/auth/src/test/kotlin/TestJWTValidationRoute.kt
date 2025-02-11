@@ -1,3 +1,5 @@
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -11,6 +13,8 @@ import kcl.seg.rtt.auth.authentication.setUpJWTValidation
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.util.*
 import kotlin.test.assertEquals
 
 class TestJWTValidationRoute {
@@ -25,7 +29,14 @@ class TestJWTValidationRoute {
                     setUpJWTValidation("/validate")
                 }
             }
-            val session = AuthenticatedSession(userId = "user123", token = "tokenABC", admin = true)
+            val jwt =
+                JWT
+                    .create()
+                    .withClaim("sub", "user123")
+                    .withClaim("admin", false)
+                    .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                    .sign(Algorithm.none())
+            val session = AuthenticatedSession(userId = "user123", token = jwt, admin = false)
             val cookieValue = Json.encodeToString<AuthenticatedSession>(session)
 
             val response =
@@ -35,7 +46,7 @@ class TestJWTValidationRoute {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            val expectedJson = Json.parseToJsonElement("""{"userId":"user123","admin":true}""")
+            val expectedJson = Json.parseToJsonElement("""{"userId":"user123","admin":false}""")
             val actualJson = Json.parseToJsonElement(responseBody)
             assertEquals(expectedJson, actualJson)
         }
