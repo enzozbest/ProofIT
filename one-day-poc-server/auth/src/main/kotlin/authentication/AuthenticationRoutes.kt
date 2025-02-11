@@ -2,6 +2,7 @@ package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwt.JWT
 import io.ktor.http.*
+import io.ktor.http.auth.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
@@ -84,9 +85,25 @@ private fun Route.setLogOutEndpoint(route: String) {
  */
 fun Route.setUpJWTValidation(validationRoute: String) {
     get(validationRoute) {
-        val sessionCookie =
-            Json.decodeFromString<AuthenticatedSession>(call.request.cookies["AuthenticatedSession"] ?: "")
-        call.respond(JWTValidationResponse(sessionCookie.userId, sessionCookie.admin))
+        call.request.cookies["AuthenticatedSession"]?.let { cookie ->
+            kotlin.runCatching {
+                val decoded = Json.decodeFromString<AuthenticatedSession>(cookie)
+                val response = JWTValidationResponse(decoded.userId, decoded.admin)
+                cacheSession(decoded.token, response)
+                return@get call.respond(HttpStatusCode.OK, response)
+            }
+        }
+
+        call.request.headers["Authorization"]?.let { header ->
+            header.removePrefix("Bearer ")
+            val decoded = JWT.decode(header)
+            val userId = decoded.getClaim("sub").asString()
+            val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+            val response = JWTValidationResponse(userId, admin)
+            cacheSession(decoded.token, response)
+            return@get call.respond(HttpStatusCode.OK, response)
+        }
+        call.respond(HttpStatusCode.Unauthorized, "Invalid or missing credentials!")
     }
 }
 
@@ -97,12 +114,15 @@ fun Route.setUpCheckEndpoint(checkRoute: String) {
                 kotlin.runCatching { Json.decodeFromString<AuthenticatedSession>(cookie) }.getOrNull()
             } ?: return@get call.respond(HttpStatusCode.Unauthorized, "Invalid or missing session cookie")
 
-        checkCache("auth:${sessionCookie.token}")?.let { cachedSession ->
+        checkCache(sessionCookie.token)?.let { cachedSession ->
             println("Cache hit!")
             return@get call.respond(HttpStatusCode.OK, cachedSession)
         }
+
         println("Cache miss!")
-        call.respondRedirect("http://localhost:8000$JWT_VALIDATION_ROUTE")
+        call.response.headers.append(HttpHeaders.Authorization, "Bearer ${sessionCookie.token}")
+        call.response.headers.append(HttpHeaders.Location, "http://localhost:8000/api/auth/validate")
+        call.respond(HttpStatusCode.TemporaryRedirect)
     }
 }
 
@@ -173,6 +193,7 @@ fun Route.setUpCallbackRoute(
                 decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
 
             call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
+            cacheSession(token, JWTValidationResponse(userId, admin))
             val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
             call.respondRedirect("$redirectDomain$redirectUrl")
         } catch (e: Exception) {
