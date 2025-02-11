@@ -19,7 +19,7 @@ data class LlmResponse(
 data class FileContent(val content: String)
 
 
-class PrototypeService(private val ollamaService: OllamaService) {
+open class PrototypeService(private val ollamaService: OllamaService) {
 
     /**
      * Generates a software prototype using Ollama LLM
@@ -27,7 +27,7 @@ class PrototypeService(private val ollamaService: OllamaService) {
      * @param prompt User requirements for the prototype
      * @return Result containing prototype structure or failure with error details
      */
-    suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
+    open suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
         val fullPrompt = createPrompt(prompt)
         return ollamaService.generateResponse(fullPrompt)
     }
@@ -62,7 +62,7 @@ class PrototypeService(private val ollamaService: OllamaService) {
         """.trimIndent()
     }
 
-    fun retrievePrototype(id: String): String {
+    open fun retrievePrototype(id: String): String {
         // Later, this will query the DB or S3, etc.
         // For now, just return a minimal HTML snippet (or null).
         return "<html><body><h1>Hello from Prototype $id</h1></body></html>"
