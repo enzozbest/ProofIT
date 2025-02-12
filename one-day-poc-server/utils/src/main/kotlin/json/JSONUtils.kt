@@ -7,7 +7,6 @@ import java.io.File
  * Object to encapsulate JSON utilities
  */
 object PoCJSON {
-
     /**
      * Reads a JSON file and returns a JsonObject
      * @param path The path to the JSON file
@@ -26,14 +25,19 @@ object PoCJSON {
      * @param attribute The attribute to find
      * @return The value of the attribute as a String, or null if the attribute is not found
      */
-    fun findCognitoUserAttribute(array: JsonArray, attribute: String): String? {
-        return try {
-            array.find { it.jsonObject["Name"]?.toString() == "\"${attribute.lowercase()}\"" }?.jsonObject?.get(
-                "Value"
-            )
-                ?.jsonPrimitive?.content
+    fun findCognitoUserAttribute(
+        array: JsonArray,
+        attribute: String,
+    ): String? =
+        try {
+            array
+                .find { it.jsonObject["Name"]?.toString() == "\"${attribute.lowercase()}\"" }
+                ?.jsonObject
+                ?.get(
+                    "Value",
+                )?.jsonPrimitive
+                ?.content
         } catch (e: IllegalArgumentException) {
             null
         }
-    }
 }

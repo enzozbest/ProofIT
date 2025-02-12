@@ -11,18 +11,21 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.AuthenticatedSession
-import kcl.seg.rtt.auth.setUpCallbackRoute
-import kcl.seg.rtt.utils.JSON.PoCJSON.readJsonFile
+import kcl.seg.rtt.auth.authentication.AuthenticatedSession
+import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
+import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.util.*
 
-class MockAuthenticationProvider<T : Any>(config: Config<T>) :
-    AuthenticationProvider(config) {
+class MockAuthenticationProvider<T : Any>(
+    config: Config<T>,
+) : AuthenticationProvider(config) {
     private val myConfig: Config<T> = config
 
-    class Config<T : Any>(name: String) : AuthenticationProvider.Config(name) {
+    class Config<T : Any>(
+        name: String,
+    ) : AuthenticationProvider.Config(name) {
         var principal: T? = null
     }
 
@@ -31,13 +34,15 @@ class MockAuthenticationProvider<T : Any>(config: Config<T>) :
     }
 }
 
-fun <T : Any> AuthenticationConfig.mock(name: String, configure: MockAuthenticationProvider.Config<T>.() -> Unit) {
+fun <T : Any> AuthenticationConfig.mock(
+    name: String,
+    configure: MockAuthenticationProvider.Config<T>.() -> Unit,
+) {
     val provider = MockAuthenticationProvider(MockAuthenticationProvider.Config<T>(name).apply(configure))
     register(provider)
 }
 
 object AuthenticationTestHelpers {
-
     val jsonConfig: JsonObject =
         readJsonFile("src/test/resources/cognito-test.json")
 
@@ -51,12 +56,13 @@ object AuthenticationTestHelpers {
                         json()
                     }
                     get("/authorize") {
-                        val mockPrincipalJson = """
+                        val mockPrincipalJson =
+                            """
                             accessToken = "mockAccessToken",
                             tokenType = "Bearer",
                             expiresIn = 3600,
                             refreshToken = "mockRefreshToken",
-                        """.trimIndent()
+                            """.trimIndent()
                         call.respond(mockPrincipalJson)
                     }
                 }
@@ -88,15 +94,17 @@ object AuthenticationTestHelpers {
         }
         install(Authentication) {
             mock<OAuthAccessTokenResponse.OAuth2>("test") {
-                principal = OAuthAccessTokenResponse.OAuth2(
-                    accessToken = "dummy_access",
-                    tokenType = "Bearer",
-                    expiresIn = Long.MAX_VALUE,
-                    refreshToken = null,
-                    extraParameters = Parameters.build {
-                        append("id_token", generateTestJwtToken())
-                    }
-                )
+                principal =
+                    OAuthAccessTokenResponse.OAuth2(
+                        accessToken = "dummy_access",
+                        tokenType = "Bearer",
+                        expiresIn = Long.MAX_VALUE,
+                        refreshToken = null,
+                        extraParameters =
+                            Parameters.build {
+                                append("id_token", generateTestJwtToken())
+                            },
+                    )
             }
         }
         routing {
@@ -106,37 +114,37 @@ object AuthenticationTestHelpers {
         }
     }
 
-    private fun generateTestJwtToken(): String {
-        return JWT.create()
+    fun generateTestJwtToken(): String =
+        JWT
+            .create()
             .withIssuer("test-issuer")
             .withSubject("user123")
             .withClaim("cognito:groups", listOf("admin_users"))
             .withExpiresAt(Date(System.currentTimeMillis() + 60000))
             .sign(Algorithm.HMAC256("test-secret"))
-    }
 
-    fun generateTestJwtTokenAdminFalse(): String {
-        return JWT.create()
+    fun generateTestJwtTokenAdminFalse(): String =
+        JWT
+            .create()
             .withIssuer("test-issuer")
             .withSubject("user123")
             .withClaim("cognito:groups", listOf("regular_users"))
             .withExpiresAt(Date(System.currentTimeMillis() + 60000))
             .sign(Algorithm.HMAC256("test-secret"))
-    }
 
-    fun generateTestJwtTokenNoSub(): String {
-        return JWT.create()
+    fun generateTestJwtTokenNoSub(): String =
+        JWT
+            .create()
             .withIssuer("test-issuer")
             .withClaim("cognito:groups", listOf("admin_users"))
             .withExpiresAt(Date(System.currentTimeMillis() + 60000))
             .sign(Algorithm.HMAC256("test-secret"))
-    }
 
-    fun generateTestJwtTokenNoGroups(): String {
-        return JWT.create()
+    fun generateTestJwtTokenNoGroups(): String =
+        JWT
+            .create()
             .withIssuer("test-issuer")
             .withSubject("user123")
             .withExpiresAt(Date(System.currentTimeMillis() + 60000))
             .sign(Algorithm.HMAC256("test-secret"))
-    }
 }
