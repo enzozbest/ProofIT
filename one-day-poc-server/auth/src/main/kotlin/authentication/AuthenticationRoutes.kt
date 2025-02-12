@@ -59,7 +59,11 @@ private fun Route.setAuthenticationEndpoint(route: String) {
  */
 private fun Route.setLogOutEndpoint(route: String) {
     post(route) {
-        val cookie = Json.decodeFromString<AuthenticatedSession>(call.request.cookies["AuthenticatedSession"] ?: "")
+        val cookie =
+            call.request.cookies["AuthenticatedSession"]?.let {
+                kotlin.runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()
+            } ?: return@post call.respond(HttpStatusCode.OK) // User already logged out, nothing to do.
+
         call.sessions.clear<AuthenticatedSession>()
         call.response.cookies.append(
             Cookie(
@@ -90,7 +94,7 @@ fun Route.setUpJWTValidation(validationRoute: String) {
     get(validationRoute) {
         val token: String? =
             call.request.cookies["AuthenticatedSession"]?.let {
-                Json.decodeFromString<AuthenticatedSession>(it).token
+                runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()?.token
             } ?: call.request.headers["Authorization"]?.removePrefix("Bearer ")
 
         val response = validateJWT(token)
