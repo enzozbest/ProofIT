@@ -1,0 +1,94 @@
+:root {
+    /* Font Sizes */
+    --text-4xl: 2.25rem;
+    --text-3xl: 1.875rem;
+    --text-2xl: 1.5rem;
+    --text-xl: 1.25rem;
+    --text-lg: 1.125rem;
+    --text-base: 1rem;
+    --text-sm: 0.875rem;
+    --text-muted: #6b7280;
+
+    /* Font Weights */
+    --font-extrabold: 800;
+    --font-semibold: 600;
+    --font-medium: 500;
+    --font-normal: 400;
+
+    /* Other Styles */
+    --leading-normal: 1.5;
+    --tracking-tight: -0.02em;
+    --border-color: #d1d5db;
+}
+
+/* Typography Styles */
+.typography-h1 {
+    font-size: var(--text-4xl);
+    font-weight: var(--font-extrabold);
+    letter-spacing: var(--tracking-tight);
+    margin-bottom: 1rem;
+}
+
+.typography-h2 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-semibold);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.typography-h3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+}
+
+.typography-h4 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+}
+
+.typography-p {
+    line-height: var(--leading-normal);
+    margin-top: 1.5rem;
+}
+
+.typography-blockquote {
+    margin-top: 1.5rem;
+    border-left: 2px solid var(--border-color);
+    padding-left: 1.5rem;
+    font-style: italic;
+}
+
+.typography-list {
+    margin-top: 1.5rem;
+    margin-left: 1.5rem;
+    list-style-type: disc;
+}
+
+.typography-inline-code {
+    background-color: var(--border-color);
+    padding: 0.3rem 0.2rem;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: var(--text-sm);
+    font-weight: var(--font-semibold);
+}
+
+.typography-lead {
+    font-size: var(--text-xl);
+    color: var(--text-muted);
+}
+
+.typography-large {
+    font-size: var(--text-lg);
+    font-weight: var(--font-semibold);
+}
+
+.typography-small {
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+.typography-muted {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
