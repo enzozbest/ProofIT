@@ -4,8 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ... */
-
+/*
 html, body, #root {
   height: 100%;
   width: 100%;
@@ -14,7 +13,6 @@ html, body, #root {
   display: flex;
   flex-direction: column;
 }
-
 
 a {
   font-weight: 500;
@@ -69,3 +67,4 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+*/
