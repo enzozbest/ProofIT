@@ -1,3 +1,5 @@
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import kcl.seg.rtt.auth.*
 import kcl.seg.rtt.auth.authentication.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -12,10 +14,11 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.util.*
 import kotlin.test.*
 
 class TestAuthenticationHelpers {
-
     @Test
     fun `Test AuthenticatedSession Class`() {
         val session = AuthenticatedSession("userId", "token", false)
@@ -299,6 +302,82 @@ class TestAuthenticationHelpers {
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
             )
         assertEquals("text/plain", request.header("Content-Type"))
+    }
+
+    @Test
+    fun `Test JWT validation with invalid JWT`() {
+        val response = validateJWT("invalid.jwt")
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with expired JWT`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withExpiresAt(Date(0))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with no userId JWT`() {
+        val jwt = JWT.create().withExpiresAt(Date.from(Instant.now().plusSeconds(3600))).sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with admin group`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf("admin_users"))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", true), response)
+    }
+
+    @Test
+    fun `Test JWT validation without admin group`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf("regular_users"))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
+    }
+
+    @Test
+    fun `Test JWT validation with cognito_groups not a list of strings`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf(1, 2, 3, 4, 5))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
+    }
+
+    @Test
+    fun `Test JWT validation without cognito_groups`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
     }
 
     private fun createResponse(body: String): Response =

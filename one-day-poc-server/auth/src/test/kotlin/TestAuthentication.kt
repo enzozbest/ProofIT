@@ -17,7 +17,7 @@ import kcl.seg.rtt.auth.authentication.AuthenticatedSession
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
 import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
 import kcl.seg.rtt.auth.authentication.authModule
-import kcl.seg.rtt.utils.JSON.PoCJSON.readJsonFile
+import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test

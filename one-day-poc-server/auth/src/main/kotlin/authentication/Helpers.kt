@@ -5,7 +5,7 @@ import com.auth0.jwt.exceptions.JWTDecodeException
 import io.ktor.http.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kcl.seg.rtt.utils.JSON.PoCJSON
+import kcl.seg.rtt.utils.json.PoCJSON
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -122,7 +122,7 @@ fun cacheSession(
  */
 fun checkCache(token: String): JWTValidationResponse? {
     Redis.getRedisConnection().use { jedis ->
-        val cachedData = jedis.get("auth:$token") ?: return null
+        val cachedData = jedis["auth:$token"] ?: return null
         return Json.decodeFromString<JWTValidationResponse>(cachedData)
     }
 }

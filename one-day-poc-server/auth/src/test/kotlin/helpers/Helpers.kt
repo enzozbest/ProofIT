@@ -13,7 +13,7 @@ import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
 import kcl.seg.rtt.auth.authentication.AuthenticatedSession
 import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
-import kcl.seg.rtt.utils.JSON.PoCJSON.readJsonFile
+import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import java.util.*
@@ -114,7 +114,7 @@ object AuthenticationTestHelpers {
         }
     }
 
-    private fun generateTestJwtToken(): String =
+    fun generateTestJwtToken(): String =
         JWT
             .create()
             .withIssuer("test-issuer")

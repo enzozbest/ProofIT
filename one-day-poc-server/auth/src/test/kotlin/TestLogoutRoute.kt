@@ -37,4 +37,33 @@ class TestLogoutRoute {
                 "Cookie should have an expiration date in the past",
             )
         }
+
+    @Test
+    fun `Test Logout route without session cookie`() =
+        testApplication {
+            application {
+                authModule(
+                    configFilePath = "src/test/resources/cognito-test.json",
+                    authName = "testAuth",
+                )
+            }
+            val response = client.post(LOG_OUT_ROUTE)
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
+
+    @Test
+    fun `Test Logout route with invalid session cookie`() =
+        testApplication {
+            application {
+                authModule(
+                    configFilePath = "src/test/resources/cognito-test.json",
+                    authName = "testAuth",
+                )
+            }
+            val response =
+                client.post(LOG_OUT_ROUTE) {
+                    cookie("AuthenticatedSession", "invalid")
+                }
+            assertEquals(HttpStatusCode.OK, response.status)
+        }
 }
