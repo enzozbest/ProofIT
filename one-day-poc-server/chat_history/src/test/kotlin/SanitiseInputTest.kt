@@ -8,7 +8,7 @@ import kotlin.test.*
 
 class SanitiseInputTest {
     @Test
-    fun testSimpleInput() = testApplication {
+    fun `Test json response with clean input`() = testApplication {
         application {
             chatModule()
         }
@@ -32,7 +32,7 @@ class SanitiseInputTest {
     }
 
     @Test
-    fun testHTMLInput() = testApplication {
+    fun `Test json response with HTML in input`() = testApplication {
         application {
             chatModule()
         }
