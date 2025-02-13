@@ -63,20 +63,3 @@ h1 {
     background-color: #f9f9f9;
   }
 }
-
-
-:root {
-  --color-primary: #ff008d;
-  --color-secondary: #d62483;
-  --color-tertiary: #602898;
-  --color-highlight: #121e7f;
-  --color-black: #000000;
-
-  --landing-gradient: linear-gradient(
-    90deg,
-    var(--color-primary) 0%,
-    var(--color-secondary) 25%,
-    var(--color-tertiary) 50%,
-    var(--color-highlight) 100%
-  );
-}
