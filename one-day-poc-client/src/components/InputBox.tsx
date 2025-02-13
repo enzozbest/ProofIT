@@ -7,13 +7,13 @@ const InputBox: FC = () => {
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = '50px';
+      textareaRef.current.style.height = '40px';
       textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 150)}px`;
     }
   }, [text]);
 
   return (
-    <div className="flex items-center w-full max-w-5xl border-black rounded-2xl bg-gray-900 bg-opacity-60 px-6 py-5 shadow-lg">
+    <div className="flex items-center w-full max-w-5xl border-black rounded-2xl bg-gray-500 bg-opacity-50 px-5 py-5 shadow-lg">
       <textarea
         ref={textareaRef}
         rows={1}
@@ -21,7 +21,7 @@ const InputBox: FC = () => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         className="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-white resize-none overflow-y-auto"
-        style={{ minHeight: '80px', maxHeight: '150px' }}
+        style={{ minHeight: '45px', maxHeight: '150px' }}
       />
       <button
         className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
