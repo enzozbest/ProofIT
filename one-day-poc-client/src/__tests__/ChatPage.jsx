@@ -1,8 +1,9 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import ChatScreen from '../pages/ChatScreen';
+import { ChatScreen } from '../pages/ChatScreen';
 import { ChatBox } from "../components/chat-box";
 import { MessageBox } from "../components/messages-box";
 import '@testing-library/jest-dom';
+
 import userEvent from '@testing-library/user-event';
 
 global.fetch = jest.fn();
