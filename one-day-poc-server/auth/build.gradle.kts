@@ -19,9 +19,10 @@ dependencies {
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("redis.clients:jedis:5.2.0")
+    implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation(project(":utils"))
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
     testImplementation(kotlin("test"))
 }
 
