@@ -104,33 +104,6 @@ subprojects {
         testImplementation("net.bytebuddy:byte-buddy:1.14")
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
         testImplementation(kotlin("test"))
-        testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-        testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-        implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-        testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-        testImplementation("org.mockito:mockito-core:5.12")
-        testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
-        testImplementation("io.mockk:mockk:1.13.16")
-        testImplementation("net.bytebuddy:byte-buddy:1.14")
-        testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
-        implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    }
-    detekt {
-        toolVersion = "1.23.0"
-        buildUponDefaultConfig = true
-        autoCorrect = true
-        config.setFrom("$rootDir/detekt.yml")
-    }
-    jacoco {
-        toolVersion = "0.8.10"
-    }
-
-    tasks.jacocoTestReport {
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
-        }
     }
     detekt {
         toolVersion = "1.23.0"
