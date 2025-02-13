@@ -4,6 +4,7 @@ import HeroSection from '../components/HeroSection';
 import InputBox from '../components/InputBox';
 import OldPrompts from '../components/OldPrompts';
 import GeneratedPrompts from '../components/GeneratedPrompts';
+import BackgroundSVG from '../assets/background.svg';
 
 const LandingPage: FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -34,7 +35,15 @@ const LandingPage: FC = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div
+      className="flex flex-col min-h-screen"
+      style={{
+        backgroundImage: `url(${BackgroundSVG})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+    >
       <NavBar
         isAuthenticated={isAuthenticated}
         setIsAuthenticated={setIsAuthenticated}
@@ -46,12 +55,14 @@ const LandingPage: FC = () => {
             <OldPrompts />
           </div>
         )}
-        <div className="w-full max-w-lg mt-6">
+        <div className="w-full max-w-5xl mt-6">
           <InputBox />
         </div>
-        <div className="flex justify-center w-full mt-6">
-          <GeneratedPrompts prompts={prompts} />
-        </div>
+        {!isAuthenticated && (
+          <div className="flex justify-center w-full mt-6">
+            <GeneratedPrompts prompts={prompts} />
+          </div>
+        )}
       </div>
     </div>
   );
