@@ -67,7 +67,7 @@ export function ChatBox({ message, setMessage, handleSend, setError}) {
                 onClick={handleButton}
                 style={{
                     padding: "10px 20px",
-                    backgroundColor: "#007bff",
+                    backgroundColor: "#3f0f6e",
                     color: "white",
                     border: "none",
                     borderRadius: "5px",

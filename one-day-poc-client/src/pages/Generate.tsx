@@ -51,7 +51,7 @@ export default function Page() {
 
             <div className="flex-1 flex items-center  justify-center gap-2">
               <Popover>
-                <PopoverTrigger className="flex items-center gap-1 group">
+                <PopoverTrigger className="flex items-center gap-1 group text-white">
                   <TypographySmall>
                     Project name
                   </TypographySmall>
@@ -71,7 +71,7 @@ export default function Page() {
             <div className="flex items-center gap-2 px-4">
               <div className="flex-1 flex items-center  justify-center gap-2">
                 <Popover>
-                  <PopoverTrigger className="flex items-center gap-2 group">
+                  <PopoverTrigger className="flex items-center gap-2 group text-white">
                     <Share size={14} />
                     <TypographySmall>
                       Export
@@ -86,7 +86,7 @@ export default function Page() {
                   </div>
                   </PopoverContent>
                 </Popover>
-                <Button variant="secondary" className="gap-2">
+                <Button variant="secondary" className="gap-2" style={{ backgroundColor: "#dfdfe6" }}>
                   <Rocket size={14}/>
                   Deploy
                   </Button>
@@ -111,7 +111,7 @@ export default function Page() {
                                         isVisible ? "rotate-180": "rotate-0"}`} />
             </button>
           </div>
-          <div className="flex-1 h-full rounded-xl bg-neutral-200">
+          <div className="flex-1 h-full rounded-xl" style={{ backgroundColor: "#7e808f" }}>
             { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
           </div>
         </div>
