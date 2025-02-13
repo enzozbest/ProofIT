@@ -35,8 +35,8 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>:D</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarGroupLabel className="text-white">:D</SidebarGroupLabel>
+      <SidebarMenu className="text-white">
         {items.map((item) => (
           <Collapsible
             key={item.title}
@@ -44,21 +44,21 @@ export function NavMain({
             defaultOpen={item.isActive}
             className="group/collapsible"
           >
-            <SidebarMenuItem>
+            <SidebarMenuItem className="text-white">
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
+                <SidebarMenuButton tooltip={item.title} className="text-white">
+                  {item.icon && <item.icon className="text-white"/>}
                   <span>{item.title}</span>
-                  <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                  <ChevronRightIcon className="ml-auto transition-transform duration-200 text-white group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub>
+                <SidebarMenuSub className="text-white">
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
+                    <SidebarMenuSubItem key={subItem.title} className="text-white">
+                      <SidebarMenuSubButton asChild className="text-white">
+                        <a href={subItem.url} className="text-white">
+                          <span className="text-white">{subItem.title}</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

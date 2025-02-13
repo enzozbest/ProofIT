@@ -7,7 +7,7 @@
     --text-lg: 1.125rem;
     --text-base: 1rem;
     --text-sm: 0.875rem;
-    --text-muted: #6b7280;
+    --text-muted: #cad0dc;
 
     /* Font Weights */
     --font-extrabold: 800;
@@ -27,6 +27,7 @@
     font-weight: var(--font-extrabold);
     letter-spacing: var(--tracking-tight);
     margin-bottom: 1rem;
+    color: #ffffff;
 }
 
 .typography-h2 {
@@ -34,21 +35,25 @@
     font-weight: var(--font-semibold);
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
+    color: #ffffff;
 }
 
 .typography-h3 {
     font-size: var(--text-2xl);
     font-weight: var(--font-semibold);
+    color: #ffffff;
 }
 
 .typography-h4 {
     font-size: var(--text-xl);
     font-weight: var(--font-semibold);
+    color: #ffffff;
 }
 
 .typography-p {
     line-height: var(--leading-normal);
     margin-top: 1.5rem;
+    color: #ffffff;
 }
 
 .typography-blockquote {
@@ -56,12 +61,14 @@
     border-left: 2px solid var(--border-color);
     padding-left: 1.5rem;
     font-style: italic;
+    color: #ffffff;
 }
 
 .typography-list {
     margin-top: 1.5rem;
     margin-left: 1.5rem;
     list-style-type: disc;
+    color: #ffffff;
 }
 
 .typography-inline-code {
@@ -71,6 +78,7 @@
     font-family: monospace;
     font-size: var(--text-sm);
     font-weight: var(--font-semibold);
+    color: #ffffff;
 }
 
 .typography-lead {
@@ -81,11 +89,13 @@
 .typography-large {
     font-size: var(--text-lg);
     font-weight: var(--font-semibold);
+    color: #ffffff;
 }
 
 .typography-small {
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
+    color: #ffffff;
 }
 
 .typography-muted {
