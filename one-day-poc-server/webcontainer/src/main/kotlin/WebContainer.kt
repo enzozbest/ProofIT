@@ -5,7 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.http.*
 import io.ktor.server.routing.*
-import io.ktor.server.plugins.cors.routing.*
+
 
 // Data class to hold prototype content
 // Can change to relevant languages
@@ -39,7 +39,7 @@ class WebContainer {
      * @param errorMessage Optional custom error message for missing/blank ID.
      * @return The ID string if valid, otherwise `null` (and an HTTP 400 response is sent).
      */
-    private suspend fun getValidPrototypeIdOrRespond(call: ApplicationCall, errorMessage: String = "Missing ID."): String? {
+    suspend fun getValidPrototypeIdOrRespond(call: ApplicationCall, errorMessage: String = "Missing ID."): String? {
         val id = call.parameters["id"]
         if (id.isNullOrBlank()) {
             call.respond(HttpStatusCode.BadRequest, errorMessage)
@@ -70,19 +70,5 @@ class WebContainer {
 }
 
 // Extension function for Application
-fun Application.configureWebContainer() {
-    // enable CORS for iframe access
-    install(CORS) {
-        allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Get)
-        allowMethod(HttpMethod.Post)
-        allowHeader(HttpHeaders.ContentType)
-        anyHost()
-    }
 
-    routing {
-        val webContainer = WebContainer()
-        with(webContainer) { webcontainerRoutes() }
-    }
-}
 
