@@ -1,9 +1,12 @@
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import kcl.seg.rtt.auth.*
+import kcl.seg.rtt.auth.authentication.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -11,10 +14,11 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import java.util.*
 import kotlin.test.*
 
 class TestAuthenticationHelpers {
-
     @Test
     fun `Test AuthenticatedSession Class`() {
         val session = AuthenticatedSession("userId", "token", false)
@@ -123,7 +127,8 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with valid user attributes`() {
-        val json = """
+        val json =
+            """
             {
                 "UserAttributes": [
                     {"Name": "name", "Value": "John Doe"},
@@ -131,7 +136,7 @@ class TestAuthenticationHelpers {
                     {"Name": "birthdate", "Value": "1990-01-01"}
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("John Doe", userInfo.name)
@@ -141,11 +146,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo when UserAttributes key is missing`() {
-        val json = """
+        val json =
+            """
             {
                 "OtherKey": []
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("", userInfo.name)
@@ -154,21 +160,13 @@ class TestAuthenticationHelpers {
     }
 
     @Test
-    fun `Test generateUserInfo with null response body`() {
-        val response = createResponse(null)
-        val userInfo = generateUserInfo(response)
-        assertEquals("", userInfo.name)
-        assertEquals("", userInfo.email)
-        assertEquals("", userInfo.dob)
-    }
-
-    @Test
     fun `Test generateUserInfo with empty UserAttributes array`() {
-        val json = """
+        val json =
+            """
             {
                 "UserAttributes": []
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("Unknown", userInfo.name)
@@ -178,13 +176,14 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with partial attributes`() {
-        val json = """
+        val json =
+            """
             {
                 "UserAttributes": [
                     {"Name": "name", "Value": "Alice"}
                 ]
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("Alice", userInfo.name)
@@ -194,11 +193,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with no UserAttributes`() {
-        val json = """
+        val json =
+            """
             {
                 
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("", userInfo.name)
@@ -216,43 +216,47 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with non-array UserAttributes`() {
-        val json = """
-        {
-            "UserAttributes": "not an array"
-        }
-    """.trimIndent()
+        val json =
+            """
+            {
+                "UserAttributes": "not an array"
+            }
+            """.trimIndent()
         val response = createResponse(json)
         assertFailsWith<Exception> {
             generateUserInfo(response)
         }
     }
-    
+
     @Test
     fun `Test sendRequest() returns a response`() {
         val mockWebServer = MockWebServer()
         mockWebServer.start(port = 10000)
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("Success"))
 
-        val request = Request.Builder()
-            .url(mockWebServer.url("/test"))
-            .build()
+        val request =
+            Request
+                .Builder()
+                .url(mockWebServer.url("/test"))
+                .build()
 
         val response = request.sendRequest()
 
         assertTrue(response.isSuccessful)
         assertEquals(200, response.code)
-        assertEquals("Success", response.body?.string())
+        assertEquals("Success", response.body.string())
     }
 
     @Test
     fun `Test buildUserInfoRequest builds request with correct headers when amzTarget is true`() {
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
+        val request =
+            buildUserInfoRequest(
+                token = "test-token",
+                verifierUrl = "https://example.com",
+                contentType = "application/json",
+                amzTarget = true,
+                amzApi = "AWSCognitoIdentityProviderService.GetUser",
+            )
         assertEquals("https://example.com/", request.url.toString())
         assertEquals("Bearer test-token", request.header("Authorization"))
         assertEquals("application/json", request.header("Content-Type"))
@@ -261,13 +265,14 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test buildUserInfoRequest does not add X-Amz-Target header when amzTarget is false`() {
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = false,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
+        val request =
+            buildUserInfoRequest(
+                token = "test-token",
+                verifierUrl = "https://example.com",
+                contentType = "application/json",
+                amzTarget = false,
+                amzApi = "AWSCognitoIdentityProviderService.GetUser",
+            )
         assertEquals("https://example.com/", request.url.toString())
         assertEquals("Bearer test-token", request.header("Authorization"))
         assertEquals("application/json", request.header("Content-Type"))
@@ -276,36 +281,113 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test buildUserInfoRequest handles empty token`() {
-        val request = buildUserInfoRequest(
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
+        val request =
+            buildUserInfoRequest(
+                verifierUrl = "https://example.com",
+                contentType = "application/json",
+                amzTarget = true,
+                amzApi = "AWSCognitoIdentityProviderService.GetUser",
+            )
         assertEquals("Bearer", request.header("Authorization"))
     }
 
     @Test
     fun `Test buildUserInfoRequest handles different content types`() {
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "text/plain",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
+        val request =
+            buildUserInfoRequest(
+                token = "test-token",
+                verifierUrl = "https://example.com",
+                contentType = "text/plain",
+                amzTarget = true,
+                amzApi = "AWSCognitoIdentityProviderService.GetUser",
+            )
         assertEquals("text/plain", request.header("Content-Type"))
     }
 
-    private fun createResponse(body: String?): Response {
-        return Response.Builder()
+    @Test
+    fun `Test JWT validation with invalid JWT`() {
+        val response = validateJWT("invalid.jwt")
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with expired JWT`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withExpiresAt(Date(0))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with no userId JWT`() {
+        val jwt = JWT.create().withExpiresAt(Date.from(Instant.now().plusSeconds(3600))).sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertNull(response)
+    }
+
+    @Test
+    fun `Test JWT validation with admin group`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf("admin_users"))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", true), response)
+    }
+
+    @Test
+    fun `Test JWT validation without admin group`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf("regular_users"))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
+    }
+
+    @Test
+    fun `Test JWT validation with cognito_groups not a list of strings`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withClaim("cognito:groups", listOf(1, 2, 3, 4, 5))
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
+    }
+
+    @Test
+    fun `Test JWT validation without cognito_groups`() {
+        val jwt =
+            JWT
+                .create()
+                .withClaim("sub", "user123")
+                .withExpiresAt(Date.from(Instant.now().plusSeconds(3600)))
+                .sign(Algorithm.none())
+        val response = validateJWT(jwt)
+        assertEquals(JWTValidationResponse("user123", false), response)
+    }
+
+    private fun createResponse(body: String): Response =
+        Response
+            .Builder()
             .request(Request.Builder().url("http://localhost/").build())
             .protocol(Protocol.HTTP_1_1)
             .code(200)
             .message("OK")
             .body(
-                body?.toResponseBody("application/json".toMediaTypeOrNull())
-            )
-            .build()
-    }
+                body.toResponseBody("application/json".toMediaType()),
+            ).build()
 }

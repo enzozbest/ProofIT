@@ -1,9 +1,11 @@
-package kcl.seg.rtt.auth
+package kcl.seg.rtt.auth.authentication
 
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
-import kcl.seg.rtt.utils.JSON.PoCJSON
+import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
+import kcl.seg.rtt.auth.authentication.Authenticators.configureOAuth
+import kcl.seg.rtt.utils.json.PoCJSON
 import kotlin.collections.set
 
 /**
@@ -14,7 +16,7 @@ import kotlin.collections.set
  */
 fun Application.authModule(
     configFilePath: String = "auth/src/main/resources/cognito.json",
-    authName: String = "Cognito"
+    authName: String = "Cognito",
 ) {
     configureAuthentication(configFilePath)
     configureSessions()
