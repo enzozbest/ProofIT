@@ -51,7 +51,7 @@ export default function Page() {
 
             <div className="flex-1 flex items-center  justify-center gap-2">
               <Popover>
-                <PopoverTrigger className="flex items-center gap-1 group text-white">
+                <PopoverTrigger className="flex items-center gap-1 group bg-[#060a28] text-white">
                   <TypographySmall>
                     Project name
                   </TypographySmall>
@@ -71,7 +71,7 @@ export default function Page() {
             <div className="flex items-center gap-2 px-4">
               <div className="flex-1 flex items-center  justify-center gap-2">
                 <Popover>
-                  <PopoverTrigger className="flex items-center gap-2 group text-white">
+                  <PopoverTrigger className="flex items-center gap-2 group bg-[#060a28] text-white">
                     <Share size={14} />
                     <TypographySmall>
                       Export
@@ -106,7 +106,8 @@ export default function Page() {
           </div>
           <div className="flex h-full items-center justify-center">
             <button 
-              onClick={() => setIsVisible(!isVisible)}>
+              onClick={() => setIsVisible(!isVisible)}
+              className="bg-[#060a28]">
             <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
                                         isVisible ? "rotate-180": "rotate-0"}`} />
             </button>
