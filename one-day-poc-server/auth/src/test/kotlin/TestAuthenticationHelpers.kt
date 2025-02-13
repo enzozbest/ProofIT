@@ -1,20 +1,12 @@
-<<<<<<< HEAD
-import kcl.seg.rtt.auth.*
-=======
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import kcl.seg.rtt.auth.*
 import kcl.seg.rtt.auth.authentication.*
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-<<<<<<< HEAD
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-=======
 import okhttp3.MediaType.Companion.toMediaType
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
 import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
@@ -22,18 +14,11 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Test
-<<<<<<< HEAD
-import kotlin.test.*
-
-class TestAuthenticationHelpers {
-
-=======
 import java.time.Instant
 import java.util.*
 import kotlin.test.*
 
 class TestAuthenticationHelpers {
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
     @Test
     fun `Test AuthenticatedSession Class`() {
         val session = AuthenticatedSession("userId", "token", false)
@@ -142,12 +127,8 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with valid user attributes`() {
-<<<<<<< HEAD
-        val json = """
-=======
         val json =
             """
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
             {
                 "UserAttributes": [
                     {"Name": "name", "Value": "John Doe"},
@@ -155,11 +136,7 @@ class TestAuthenticationHelpers {
                     {"Name": "birthdate", "Value": "1990-01-01"}
                 ]
             }
-<<<<<<< HEAD
-        """.trimIndent()
-=======
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("John Doe", userInfo.name)
@@ -169,20 +146,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo when UserAttributes key is missing`() {
-<<<<<<< HEAD
-        val json = """
-            {
-                "OtherKey": []
-            }
-        """.trimIndent()
-=======
         val json =
             """
             {
                 "OtherKey": []
             }
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("", userInfo.name)
@@ -191,23 +160,6 @@ class TestAuthenticationHelpers {
     }
 
     @Test
-<<<<<<< HEAD
-    fun `Test generateUserInfo with null response body`() {
-        val response = createResponse(null)
-        val userInfo = generateUserInfo(response)
-        assertEquals("", userInfo.name)
-        assertEquals("", userInfo.email)
-        assertEquals("", userInfo.dob)
-    }
-
-    @Test
-    fun `Test generateUserInfo with empty UserAttributes array`() {
-        val json = """
-            {
-                "UserAttributes": []
-            }
-        """.trimIndent()
-=======
     fun `Test generateUserInfo with empty UserAttributes array`() {
         val json =
             """
@@ -215,7 +167,6 @@ class TestAuthenticationHelpers {
                 "UserAttributes": []
             }
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("Unknown", userInfo.name)
@@ -225,22 +176,14 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with partial attributes`() {
-<<<<<<< HEAD
-        val json = """
-=======
         val json =
             """
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
             {
                 "UserAttributes": [
                     {"Name": "name", "Value": "Alice"}
                 ]
             }
-<<<<<<< HEAD
-        """.trimIndent()
-=======
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("Alice", userInfo.name)
@@ -250,20 +193,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with no UserAttributes`() {
-<<<<<<< HEAD
-        val json = """
-            {
-                
-            }
-        """.trimIndent()
-=======
         val json =
             """
             {
                 
             }
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         val userInfo = generateUserInfo(response)
         assertEquals("", userInfo.name)
@@ -281,70 +216,39 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with non-array UserAttributes`() {
-<<<<<<< HEAD
-        val json = """
-        {
-            "UserAttributes": "not an array"
-        }
-    """.trimIndent()
-=======
         val json =
             """
             {
                 "UserAttributes": "not an array"
             }
             """.trimIndent()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         val response = createResponse(json)
         assertFailsWith<Exception> {
             generateUserInfo(response)
         }
     }
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
     @Test
     fun `Test sendRequest() returns a response`() {
         val mockWebServer = MockWebServer()
         mockWebServer.start(port = 10000)
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("Success"))
 
-<<<<<<< HEAD
-        val request = Request.Builder()
-            .url(mockWebServer.url("/test"))
-            .build()
-=======
         val request =
             Request
                 .Builder()
                 .url(mockWebServer.url("/test"))
                 .build()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
 
         val response = request.sendRequest()
 
         assertTrue(response.isSuccessful)
         assertEquals(200, response.code)
-<<<<<<< HEAD
-        assertEquals("Success", response.body?.string())
-=======
         assertEquals("Success", response.body.string())
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
     }
 
     @Test
     fun `Test buildUserInfoRequest builds request with correct headers when amzTarget is true`() {
-<<<<<<< HEAD
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
-=======
         val request =
             buildUserInfoRequest(
                 token = "test-token",
@@ -353,7 +257,6 @@ class TestAuthenticationHelpers {
                 amzTarget = true,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
             )
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         assertEquals("https://example.com/", request.url.toString())
         assertEquals("Bearer test-token", request.header("Authorization"))
         assertEquals("application/json", request.header("Content-Type"))
@@ -362,15 +265,6 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test buildUserInfoRequest does not add X-Amz-Target header when amzTarget is false`() {
-<<<<<<< HEAD
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = false,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
-=======
         val request =
             buildUserInfoRequest(
                 token = "test-token",
@@ -379,7 +273,6 @@ class TestAuthenticationHelpers {
                 amzTarget = false,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
             )
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         assertEquals("https://example.com/", request.url.toString())
         assertEquals("Bearer test-token", request.header("Authorization"))
         assertEquals("application/json", request.header("Content-Type"))
@@ -388,14 +281,6 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test buildUserInfoRequest handles empty token`() {
-<<<<<<< HEAD
-        val request = buildUserInfoRequest(
-            verifierUrl = "https://example.com",
-            contentType = "application/json",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
-=======
         val request =
             buildUserInfoRequest(
                 verifierUrl = "https://example.com",
@@ -403,26 +288,11 @@ class TestAuthenticationHelpers {
                 amzTarget = true,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
             )
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
         assertEquals("Bearer", request.header("Authorization"))
     }
 
     @Test
     fun `Test buildUserInfoRequest handles different content types`() {
-<<<<<<< HEAD
-        val request = buildUserInfoRequest(
-            token = "test-token",
-            verifierUrl = "https://example.com",
-            contentType = "text/plain",
-            amzTarget = true,
-            amzApi = "AWSCognitoIdentityProviderService.GetUser"
-        )
-        assertEquals("text/plain", request.header("Content-Type"))
-    }
-
-    private fun createResponse(body: String?): Response {
-        return Response.Builder()
-=======
         val request =
             buildUserInfoRequest(
                 token = "test-token",
@@ -513,20 +383,11 @@ class TestAuthenticationHelpers {
     private fun createResponse(body: String): Response =
         Response
             .Builder()
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
             .request(Request.Builder().url("http://localhost/").build())
             .protocol(Protocol.HTTP_1_1)
             .code(200)
             .message("OK")
             .body(
-<<<<<<< HEAD
-                body?.toResponseBody("application/json".toMediaTypeOrNull())
-            )
-            .build()
-    }
-}
-=======
                 body.toResponseBody("application/json".toMediaType()),
             ).build()
 }
->>>>>>> fa550d0623b36f1e3b6380a38a3cd7b555ee1f94
