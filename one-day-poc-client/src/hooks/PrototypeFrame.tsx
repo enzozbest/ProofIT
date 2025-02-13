@@ -22,6 +22,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ prototypeId, width = '1
             }}
             title="Prototype Preview"
             sandbox="allow-scripts allow-same-origin"
+            data-testid={"prototype-iframe"}
         />
     );
 };
