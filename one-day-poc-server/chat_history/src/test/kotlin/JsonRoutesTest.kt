@@ -4,16 +4,17 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kotlin.test.*
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class JsonRoutesTest {
+class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
-    fun testValidJsonRequest() = testApplication {
-        application {
-            chatModule()
-        }
+    fun `Test Valid JSON message`() = testApplication {
+        setupTestApplication()
 
         val response = client.post("/json") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             contentType(ContentType.Application.Json)
             setBody("""
                 {
@@ -29,12 +30,11 @@ class JsonRoutesTest {
     }
 
     @Test
-    fun testInvalidJsonRequest() = testApplication {
-        application {
-            chatModule()
-        }
+    fun `Test Invalid JSON message`() = testApplication {
+        setupTestApplication()
 
         val response = client.post("/json") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             contentType(ContentType.Application.Json)
             setBody("""
                 {
