@@ -86,7 +86,7 @@ object S3Service {
         this.s3Manager = s3Manager
     }
 
-    suspend fun ensureClient() {
+    private suspend fun ensureClient() {
         if (!::s3client.isInitialized) {
             s3client = s3Manager.getClient()
         }
@@ -116,7 +116,7 @@ object S3Service {
                 this.contentType = contentType
             }
         ensureClient()
-        s3client.use { s3 -> s3.putObject(request) }
+        s3client.putObject(request)
         return "https://$bucketName.s3.amazonaws.com/$key"
     }
 
@@ -136,10 +136,8 @@ object S3Service {
                 this.key = key
             }
         ensureClient()
-        s3client.use { s3 ->
-            return s3.getObject(request) { response ->
-                response.body?.decodeToString().toString()
-            }
+        return s3client.getObject(request) { response ->
+            response.body?.decodeToString().toString()
         }
     }
 
@@ -159,8 +157,7 @@ object S3Service {
                 this.key = key
             }
         ensureClient()
-        s3client.use { s3 ->
-            s3.deleteObject(request)
+        s3client.deleteObject(request).also {
             return true
         }
     }
@@ -172,13 +169,10 @@ object S3Service {
      */
     suspend fun listBucket(bucketName: String): List<String> {
         ensureClient()
-        return s3client.use { client ->
-            val request =
-                ListObjectsV2Request {
-                    this.bucket = bucketName
-                }
-            val response = client.listObjectsV2(request)
-            response.contents?.mapNotNull { it.key } ?: emptyList()
-        }
+        val request =
+            ListObjectsV2Request {
+                this.bucket = bucketName
+            }
+        return s3client.listObjectsV2(request).contents?.mapNotNull { it.key } ?: emptyList()
     }
 }
