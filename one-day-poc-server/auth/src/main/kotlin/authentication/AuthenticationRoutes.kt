@@ -30,7 +30,7 @@ object AuthenticationRoutes {
 /**
  * Configures the routes that will be used for authentication.
  */
-fun Application.configureAuthenticationRoutes(authName: String = "Cognito") {
+fun Application.configureAuthenticationRoutes(authName: String) {
     routing {
         authenticate(authName) {
             setAuthenticationEndpoint(AUTHENTICATION_ROUTE)
