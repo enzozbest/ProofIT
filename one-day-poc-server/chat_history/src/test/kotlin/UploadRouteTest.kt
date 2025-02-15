@@ -5,24 +5,26 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import org.junit.jupiter.api.AfterEach
 import java.io.File
-import kotlin.test.*
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class UploadRoutesTest {
+class UploadRoutesTest : BaseAuthenticationServer() {
 
     private val testFileContent = "Test content"
     private val testFileName = "test.txt"
 
     @Test
-    fun testFileUpload() = testApplication {
-        application {
-            chatModule()
-        }
+    fun `Test Valid File Upload`() = testApplication {
+        setupTestApplication()
 
         File(testFileName).writeText(testFileContent)
 
         val boundary = "WebAppBoundary"
         val response = client.post("/upload") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -42,7 +44,7 @@ class UploadRoutesTest {
         assertTrue(response.bodyAsText().contains("Test file is uploaded"))
     }
 
-    @AfterTest
+    @AfterEach
     fun cleanup() {
         File(testFileName).delete()
     }
