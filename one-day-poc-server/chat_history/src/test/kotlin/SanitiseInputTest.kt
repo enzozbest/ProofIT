@@ -4,14 +4,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kotlin.test.*
+import org.junit.jupiter.api.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-class SanitiseInputTest {
+class SanitiseInputTest : BaseAuthenticationServer() {
     @Test
     fun `Test json response with clean input`() = testApplication {
-        application {
-            chatModule()
-        }
+        setupTestApplication()
 
         val requestData = """
             {
@@ -22,6 +22,7 @@ class SanitiseInputTest {
         """
 
         val response = client.post("/json") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(requestData)
         }
@@ -33,9 +34,7 @@ class SanitiseInputTest {
 
     @Test
     fun `Test json response with HTML in input`() = testApplication {
-        application {
-            chatModule()
-        }
+        setupTestApplication()
 
         val requestData = """
             {
@@ -47,6 +46,7 @@ class SanitiseInputTest {
 
 
         val response = client.post("/json") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(requestData)
         }

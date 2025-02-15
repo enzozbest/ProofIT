@@ -23,7 +23,6 @@ dependencies {
     implementation("org.jsoup:jsoup:1.15.3") // Used in JsonRoutes.kt
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation(kotlin("test"))
 
