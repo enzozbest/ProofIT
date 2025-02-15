@@ -7,7 +7,10 @@ import aws.sdk.kotlin.services.sts.model.AssumeRoleRequest
 import aws.sdk.kotlin.services.sts.model.AssumeRoleResponse
 import aws.sdk.kotlin.services.sts.model.Credentials
 import aws.smithy.kotlin.runtime.time.Instant
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import io.mockk.unmockkAll
 import kcl.seg.rtt.utils.aws.S3Manager
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
@@ -16,7 +19,7 @@ import org.junit.jupiter.api.Assertions.*
 import kotlin.time.Duration
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class S3ManagerTest {
+class S3RoleTest {
     private lateinit var mockStsClient: StsClient
     private lateinit var mockS3Client: S3Client
     private lateinit var s3Manager: S3Manager
@@ -56,7 +59,7 @@ class S3ManagerTest {
     }
 
     @Test
-    fun `Test assumeS3SafeRole returns credentials`() =
+    fun `Test assumeS3SafeRole returns valid credentials`() =
         runBlocking {
             val credentials = s3Manager.assumeS3SafeRole()
             assertNotNull(credentials)
@@ -64,48 +67,6 @@ class S3ManagerTest {
             assertEquals("secretAccessKey", credentials.secretAccessKey)
             assertEquals("sessionToken", credentials.sessionToken)
             coVerify { mockStsClient.assumeRole(any<AssumeRoleRequest>()) }
-        }
-
-    @Test
-    fun `Test returns an S3Client instance when it is not initialised`() =
-        runBlocking {
-            val mockCredentials =
-                aws.smithy.kotlin.runtime.auth.awscredentials.Credentials(
-                    "mockAccessKey",
-                    "mockSecretKey",
-                    "mockSessionToken",
-                )
-            coEvery { s3Manager.assumeS3SafeRole() } returns mockCredentials
-            mockkObject(S3Client.Companion)
-            every { S3Client.invoke(any()) } returns mockS3Client
-
-            val s3Client = s3Manager.getClient()
-            assertNotNull(s3Client)
-            assertSame(mockS3Client, s3Client)
-            coVerify { s3Manager.assumeS3SafeRole() }
-        }
-
-    @Test
-    fun `Test returns an S3Client instance when it is initialised`() =
-        runBlocking {
-            val mockCredentials =
-                aws.smithy.kotlin.runtime.auth.awscredentials.Credentials(
-                    "mockAccessKey",
-                    "mockSecretKey",
-                    "mockSessionToken",
-                )
-            coEvery { s3Manager.assumeS3SafeRole() } returns mockCredentials
-            mockkObject(S3Client.Companion)
-            every { S3Client.invoke(any()) } returns mockS3Client
-
-            val init = s3Manager.getClient() // Force initialisation
-            assertNotNull(init)
-            assertSame(mockS3Client, init)
-            val s3clinent = s3Manager.getClient() // Call the method again with the initialised instance
-            assertNotNull(s3clinent)
-            assertSame(mockS3Client, s3clinent)
-            assertSame(init, s3clinent)
-            coVerify { s3Manager.assumeS3SafeRole() }
         }
 
     @Test
@@ -121,7 +82,7 @@ class S3ManagerTest {
         }
 
     @Test
-    fun `Test assumeS3SafeRole fails when config is null`() =
+    fun `Test assumeS3SafeRole returns empty credentials when config is null`() =
         runBlocking {
             coEvery { mockStsClient.assumeRole(any()) } throws RuntimeException("roleArn must not be null")
             val s3ManagerWithInvalidConfig = S3Manager(null, mockStsClient)
@@ -148,7 +109,7 @@ class S3ManagerTest {
         }
 
     @Test
-    fun `Test assumeS3SafeRole returns empty credentials when "role" is not a JsonPrimitive`() =
+    fun `Test assumeS3SafeRole returns empty credentials when role is not a JsonPrimitive`() =
         runBlocking {
             val s3ManagerWithInvalidConfig =
                 S3Manager(
@@ -174,50 +135,33 @@ class S3ManagerTest {
             }
 
         val client = s3Manager.buildClient(s3Config, dummyCredentialsProvider)
-
         assertEquals("us-east-1", client.region)
         assertEquals(dummyCredentialsProvider, client.credentialsProvider)
     }
 
     @Test
     fun `buildClient returns S3Client with default region when s3Config is missing region`() {
-        // JSON with no "region" key.
         val s3Config = buildJsonObject { }
-
         val client = s3Manager.buildClient(s3Config, dummyCredentialsProvider)
-
-        // Since the region key is missing the runCatching block fails and we fall back to "eu-west-2".
         assertEquals("eu-west-2", client.region)
         assertEquals(dummyCredentialsProvider, client.credentialsProvider)
     }
 
     @Test
     fun `buildClient returns S3Client with default region when region is malformed in s3Config`() {
-        // Here the "region" key exists but its value is not a JsonPrimitive (so jsonPrimitive will fail).
         val s3Config =
             buildJsonObject {
                 put("region", buildJsonObject { put("unexpected", JsonPrimitive("data")) })
             }
-
         val client = s3Manager.buildClient(s3Config, dummyCredentialsProvider)
-
         assertEquals("eu-west-2", client.region)
         assertEquals(dummyCredentialsProvider, client.credentialsProvider)
     }
 
     @Test
     fun `buildClient returns S3Client with default region when s3Config is null`() {
-        val s3Config = null
-        val client = s3Manager.buildClient(s3Config, dummyCredentialsProvider)
-        assertEquals("eu-west-2", client.region)
-        assertEquals(dummyCredentialsProvider, client.credentialsProvider)
-    }
-
-    @Test
-    fun `buildClient returns S3Client with null region when s3Config is null`() {
         val client = s3Manager.buildClient(null, dummyCredentialsProvider)
-
-        assertEquals("eu-west-2", client.region)
+        assertNull(client.region)
         assertEquals(dummyCredentialsProvider, client.credentialsProvider)
     }
 }

@@ -21,7 +21,7 @@ import java.nio.file.Files
 data class ConfiguredS3Client(
     val s3Client: S3Client,
     val credentialsProvider: StaticCredentialsProvider?,
-    val region: String,
+    val region: String?,
 )
 
 /**
@@ -53,11 +53,11 @@ class S3Manager(
      */
     suspend fun getClient(): S3Client {
         if (s3client != null) return s3client!!
-
         val tempCredentials = assumeS3SafeRole()
         val credentialsProvider = StaticCredentialsProvider(tempCredentials)
-        s3client = buildClient(s3Config, credentialsProvider).s3Client
-        return s3client!!
+        return buildClient(s3Config, credentialsProvider).s3Client.also {
+            s3client = it
+        }
     }
 
     fun buildClient(
@@ -67,7 +67,8 @@ class S3Manager(
         val region =
             s3Config?.let {
                 kotlin.runCatching { it["region"]!!.jsonPrimitive.content }.getOrElse { "eu-west-2" }
-            } ?: "eu-west-2"
+            }
+
         val s3client =
             S3Client {
                 this.region = region
@@ -85,7 +86,7 @@ object S3Service {
         this.s3Manager = s3Manager
     }
 
-    private suspend fun ensureClient() {
+    suspend fun ensureClient() {
         if (!::s3client.isInitialized) {
             s3client = s3Manager.getClient()
         }
@@ -115,7 +116,7 @@ object S3Service {
                 this.contentType = contentType
             }
         ensureClient()
-        s3client.putObject(request)
+        s3client.use { s3 -> s3.putObject(request) }
         return "https://$bucketName.s3.amazonaws.com/$key"
     }
 
