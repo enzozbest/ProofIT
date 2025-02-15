@@ -1,12 +1,9 @@
 package kcl.seg.rtt.routes
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.http.*
-import io.ktor.server.plugins.cors.routing.CORS
-
-
 
 fun Application.configureRouting() {
     routing {
@@ -15,7 +12,7 @@ fun Application.configureRouting() {
         }
         post("/api/chat/send") {
             var time = System.currentTimeMillis()
-            call.respondText("This is the LLM response $time", status= HttpStatusCode.OK)
+            call.respondText("This is the LLM response $time", status = HttpStatusCode.OK)
         }
     }
 }

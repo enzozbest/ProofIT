@@ -79,6 +79,7 @@ class S3Manager(
 }
 
 object S3Service {
+    private val dispatcher = Dispatchers.IO
     private lateinit var s3Manager: S3Manager
     private lateinit var s3client: S3Client
 
@@ -105,7 +106,7 @@ object S3Service {
         key: String,
     ): String {
         val contentType =
-            withContext(Dispatchers.IO) {
+            withContext(dispatcher) {
                 Files.probeContentType(file.toPath()) // Automatically detects MIME type.
             }
         val request =

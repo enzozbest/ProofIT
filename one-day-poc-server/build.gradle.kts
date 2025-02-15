@@ -10,7 +10,7 @@ plugins {
 }
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.12"
 }
 
 tasks.register<JacocoReport>("jacocoMergedReport") {
@@ -130,7 +130,6 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-    
     implementation(project(":auth"))
     implementation(project(":prototype"))
     implementation(project(":webcontainer"))
@@ -138,7 +137,6 @@ dependencies {
     implementation(project(":routes"))
     implementation(project(":utils"))
     implementation(project(":chat_history"))
-    // JSoup for HTML sanitization
     implementation("org.jsoup:jsoup:1.15.3")
 }
 
@@ -161,6 +159,10 @@ tasks.register<Exec>("startDocker") {
     commandLine("docker-compose", "up", "-d")
 }
 
-kotlin {
-    jvmToolchain(23)
+allprojects {
+    plugins.withType<JavaPlugin> {
+        extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(23))
+        }
+    }
 }

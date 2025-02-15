@@ -229,6 +229,32 @@ class TestAuthenticationHelpers {
     }
 
     @Test
+    fun `Test generateUserInfo with non-JsonObject`() {
+        val json = """
+        [
+            {"UserAttributes": []}
+        ]
+        """.trimIndent()
+        val response = createResponse(json)
+        assertFailsWith<Exception> {
+            generateUserInfo(response)
+        }
+    }
+
+    @Test
+    fun `Test generateUserInfo with UserAttributes explicitly set to null`() {
+        val json = """
+            {
+                "UserAttributes": null
+            }
+        """.trimIndent()
+        val response = createResponse(json)
+        assertFailsWith<Exception> {
+            generateUserInfo(response)
+        }
+    }
+
+    @Test
     fun `Test sendRequest() returns a response`() {
         val mockWebServer = MockWebServer()
         mockWebServer.start(port = 10000)
