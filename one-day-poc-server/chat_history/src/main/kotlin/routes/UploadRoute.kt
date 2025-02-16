@@ -17,10 +17,10 @@ import io.ktor.server.application.ApplicationCall
     * This route is used to upload files to the server, can be of any type#
     * It creates an upload dir for now as it is not linked to an s3 bucket yet
  */
-fun Route.uploadRoutes() {
+fun Route.uploadRoutes(uploadDir: String) {
     post("/upload") {
         val uploadData = UploadData()
-        val uploadDir = createUploadDirectory()
+        val uploadDir = createUploadDirectory(uploadDir)
 
         val multipartData = call.receiveMultipart()
         multipartData.forEachPart { part ->
@@ -39,8 +39,8 @@ private data class UploadData(
     var response: Response? = null
 )
 
-private fun createUploadDirectory(): File {
-    val uploadDir = File("uploads")
+private fun createUploadDirectory(dir: String): File {
+    val uploadDir = File(dir)
     // val uploadDir = File(application.environment.config.property("upload.dir").getString())
     if (!uploadDir.exists()) {
         uploadDir.mkdirs()
