@@ -7,7 +7,6 @@ import io.ktor.http.*
 import io.ktor.server.routing.*
 
 
-
 // Data class to hold prototype content
 // Can change to relevant languages
 @Serializable
@@ -56,93 +55,17 @@ class WebContainer {
      */
     fun Route.webcontainerRoutes() {
         get("/webcontainer/{id}") {
-            val htmlResponse = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>Multi-Page Prototype</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 20px;
-                        text-align: center;
-                    }
-                    .page { display: none; }
-                    .active { display: block; }
-                    button {
-                        padding: 10px 20px;
-                        font-size: 16px;
-                        margin: 10px;
-                        cursor: pointer;
-                    }
-                </style>
-            </head>
-            <body>
-                <div id="counterPage" class="page active">
-                    <p id="counterText">Button clicked 0 times!</p>
-                    <button id="incrementButton">Increment Counter</button>
-                    <button id="goToHiButton">Go to Hi Page</button>
-                </div>
-                <div id="hiPage" class="page">
-                    <h1>Hi Prototype!</h1>
-                    <button id="backToCounterButton">Back to Counter</button>
-                </div>
-                <script>
-                    let counter = 0;
-                    const counterText = document.getElementById('counterText');
-                    const incrementButton = document.getElementById('incrementButton');
-                    const goToHiButton = document.getElementById('goToHiButton');
-                    const backToCounterButton = document.getElementById('backToCounterButton');
-
-                    incrementButton.addEventListener('click', () => {
-                        counter++;
-                        counterText.textContent = 'Button clicked ' + counter + ' times!';
-                    });
-
-                    goToHiButton.addEventListener('click', () => {
-                        showPage('hiPage');
-                    });
-
-                    backToCounterButton.addEventListener('click', () => {
-                        showPage('counterPage');
-                    });
-
-                    function showPage(pageId) {
-                        document.querySelectorAll('.page').forEach(page => {
-                            page.classList.remove('active');
-                        });
-                        document.getElementById(pageId).classList.add('active');
-                    }
-                </script>
-            </body>
-            </html>
-        """.trimIndent()
-
-            call.respondText(htmlResponse, ContentType.Text.Html)
             // Reuse the ID validator function
-//            val prototypeId = getValidPrototypeIdOrRespond(call) ?: return@get
-//
-//            val content = "<html><body><h1>Hello from Prototype $prototypeId</h1></body></html>"
-//            parsePrototype(content)
-//            if (content.isNullOrEmpty()) {
-//                call.respond(HttpStatusCode.NotFound, "No content for $prototypeId")
-//            } else {
-//                call.respondText(content, ContentType.Text.Html)
-//            }
+            val prototypeId = getValidPrototypeIdOrRespond(call) ?: return@get
+
+            val content = "<html><body><h1>Hello from Prototype $prototypeId</h1></body></html>"
+            parsePrototype(content)
+            if (content.isNullOrEmpty()) {
+                call.respond(HttpStatusCode.NotFound, "No content for $prototypeId")
+            } else {
+                call.respondText(content, ContentType.Text.Html)
+            }
         }
     }
 }
-
-// Extension function for Application
-fun Application.configureWebContainer() {
-
-    routing {
-        val webContainer = WebContainer()
-        with(webContainer) { webcontainerRoutes() }
-
-    }
-}
-
 
