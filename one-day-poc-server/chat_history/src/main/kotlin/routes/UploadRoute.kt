@@ -1,5 +1,6 @@
 package kcl.seg.rtt.chat_history.routes
 
+import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -24,7 +25,7 @@ fun Route.uploadRoutes(uploadDir: String) {
 
         val multipartData = call.receiveMultipart()
         multipartData.forEachPart { part ->
-            handlePart(part, uploadDir, uploadData)
+            handlePart(part, uploadDir, uploadData, call)
         }
 
         // Change the function to not be an extension function
@@ -48,28 +49,35 @@ private fun createUploadDirectory(dir: String): File {
     return uploadDir
 }
 
-private suspend fun handlePart(part: PartData, uploadDir: File, uploadData: UploadData) {
+private suspend fun handlePart(part: PartData, uploadDir: File, uploadData: UploadData, call: ApplicationCall) {
     when (part) {
-        is PartData.FormItem -> handleFormItem(part, uploadData)
+        is PartData.FormItem -> handleFormItem(part, uploadData, call)
         is PartData.FileItem -> handleFileItem(part, uploadDir, uploadData)
         else -> {}
     }
     part.dispose()
 }
 
-private fun handleFormItem(part: PartData.FormItem, uploadData: UploadData) {
+private suspend fun handleFormItem(part: PartData.FormItem, uploadData: UploadData, call: ApplicationCall) {
     when (part.name) {
         "description" -> uploadData.fileDescription = part.value
-        "message" -> handleMessagePart(part.value, uploadData)
+        "message" -> handleMessagePart(part.value, uploadData, call)
     }
 }
 
-private fun handleMessagePart(value: String, uploadData: UploadData) {
-    uploadData.message = Json.decodeFromString(value)
-    uploadData.response = Response(
-        time = LocalDateTime.now().toString(),
-        message = "${uploadData.message?.prompt}, ${uploadData.message?.userID}!"
-    )
+private suspend fun handleMessagePart(value: String, uploadData: UploadData, call: ApplicationCall) {
+    try {
+        uploadData.message = Json.decodeFromString(value)
+        uploadData.response = Response(
+            time = LocalDateTime.now().toString(),
+            message = "${uploadData.message?.prompt}, ${uploadData.message?.userID}!"
+        )
+    } catch (e: kotlinx.serialization.SerializationException) {
+        call.respondText(
+            text = "Invalid request: ${e.message}",
+            status = HttpStatusCode.BadRequest
+        )
+    }
 }
 
 private suspend fun handleFileItem(
@@ -86,16 +94,15 @@ private suspend fun respondToUpload(
     call: ApplicationCall,
     uploadData: UploadData
 ) {
-    call.respondText("${uploadData.fileDescription} is uploaded to 'uploads/${uploadData.fileName}'")
     uploadData.response?.let { response ->
         call.respond(response)
-    }
+    } ?: call.respondText("${uploadData.fileDescription} is uploaded to 'uploads/${uploadData.fileName}'")
 }
 
 /*
     * This function generates a timestamped file name for the uploaded file to avoid conflicts
  */
-fun generateTimestampedFileName(originalFileName: String?): String {
+internal fun generateTimestampedFileName(originalFileName: String?): String {
     val timestamp = System.currentTimeMillis()
     if (originalFileName.isNullOrBlank()) return "unknown_$timestamp"
 
