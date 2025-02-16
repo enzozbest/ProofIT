@@ -5,8 +5,6 @@ import io.ktor.server.routing.*
 import kcl.seg.rtt.chat_history.routes.*
 import io.ktor.server.auth.*
 
-private const val UPLOAD_DIR = "uploads"
-
 class ChatEndpoint {
     companion object {
         private const val DEFAULT_UPLOAD_DIR = "uploads"
@@ -23,8 +21,6 @@ class ChatEndpoint {
         fun getUploadDirectory(): String {
             return uploadDirectory
         }
-
-        val uploadDir: String get() = uploadDirectory
     }
 }
 

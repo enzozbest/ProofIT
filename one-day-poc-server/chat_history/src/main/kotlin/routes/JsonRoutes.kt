@@ -27,7 +27,6 @@ fun Route.jsonRoutes() {
             call.respond(response)
 
         } catch (e: Exception) {
-            println("Error processing request: ${e.message}")
             call.respondText(
                 text = "Invalid request: ${e.message}",
                 status = HttpStatusCode.BadRequest
