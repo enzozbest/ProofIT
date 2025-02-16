@@ -11,54 +11,84 @@ import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
+import io.ktor.server.application.ApplicationCall
 
 /*
     * This route is used to upload files to the server, can be of any type#
     * It creates an upload dir for now as it is not linked to an s3 bucket yet
  */
 fun Route.uploadRoutes() {
-    var fileDescription = ""
-    var fileName = ""
-    var message: Request? = null
-    var response: Response? = null
-
     post("/upload") {
-//        val uploadDir = File(application.environment.config.property("upload.dir").getString())
-        val uploadDir = File("uploads")
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs()
-        }
+        val uploadData = UploadData()
+        val uploadDir = createUploadDirectory()
 
         val multipartData = call.receiveMultipart()
-
         multipartData.forEachPart { part ->
-            when (part) {
-                is PartData.FormItem -> {
-                    if(part.name == "description"){
-                        fileDescription = part.value
-                    } else if (part.name == "message") {
-                        message = Json.decodeFromString(part.value)
-                        response = Response(
-                            time = LocalDateTime.now().toString(),
-                            message = "${message?.prompt}, ${message?.userID}!"
-                        )
-                    }
-                }
-
-                is PartData.FileItem -> {
-                    fileName = generateTimestampedFileName(part.originalFileName as String)
-                    val fileBytes = part.provider().readRemaining().readByteArray()
-                    File("$uploadDir/$fileName").writeBytes(fileBytes)
-                }
-
-                else -> {}
-            }
-            part.dispose()
+            handlePart(part, uploadDir, uploadData)
         }
-        call.respondText("$fileDescription is uploaded to 'uploads/$fileName'")
-        if(response != null) {
-            call.respond(response!!)
-        }
+
+        // Change the function to not be an extension function
+        respondToUpload(call, uploadData)
+    }
+}
+
+private data class UploadData(
+    var fileDescription: String = "",
+    var fileName: String = "",
+    var message: Request? = null,
+    var response: Response? = null
+)
+
+private fun createUploadDirectory(): File {
+    val uploadDir = File("uploads")
+    // val uploadDir = File(application.environment.config.property("upload.dir").getString())
+    if (!uploadDir.exists()) {
+        uploadDir.mkdirs()
+    }
+    return uploadDir
+}
+
+private suspend fun handlePart(part: PartData, uploadDir: File, uploadData: UploadData) {
+    when (part) {
+        is PartData.FormItem -> handleFormItem(part, uploadData)
+        is PartData.FileItem -> handleFileItem(part, uploadDir, uploadData)
+        else -> {}
+    }
+    part.dispose()
+}
+
+private fun handleFormItem(part: PartData.FormItem, uploadData: UploadData) {
+    when (part.name) {
+        "description" -> uploadData.fileDescription = part.value
+        "message" -> handleMessagePart(part.value, uploadData)
+    }
+}
+
+private fun handleMessagePart(value: String, uploadData: UploadData) {
+    uploadData.message = Json.decodeFromString(value)
+    uploadData.response = Response(
+        time = LocalDateTime.now().toString(),
+        message = "${uploadData.message?.prompt}, ${uploadData.message?.userID}!"
+    )
+}
+
+private suspend fun handleFileItem(
+    part: PartData.FileItem,
+    uploadDir: File,
+    uploadData: UploadData
+) {
+    uploadData.fileName = generateTimestampedFileName(part.originalFileName as String)
+    val fileBytes = part.provider().readRemaining().readByteArray()
+    File("$uploadDir/${uploadData.fileName}").writeBytes(fileBytes)
+}
+
+private suspend fun respondToUpload(
+    call: ApplicationCall,
+    uploadData: UploadData
+) {
+    call.respondText("${uploadData.fileDescription} is uploaded to 'uploads/${uploadData.fileName}'")
+    uploadData.response?.let { response ->
+        call.respond(response)
     }
 }
 
