@@ -28,7 +28,6 @@ fun Route.uploadRoutes(uploadDir: String) {
             handlePart(part, uploadDir, uploadData, call)
         }
 
-        // Change the function to not be an extension function
         respondToUpload(call, uploadData)
     }
 }
