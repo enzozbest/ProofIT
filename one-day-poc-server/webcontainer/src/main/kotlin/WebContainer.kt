@@ -69,3 +69,14 @@ class WebContainer {
     }
 }
 
+// Extension function for Application
+fun Application.configureWebContainer() {
+
+    routing {
+        val webContainer = WebContainer()
+        with(webContainer) { webcontainerRoutes() }
+
+    }
+}
+
+

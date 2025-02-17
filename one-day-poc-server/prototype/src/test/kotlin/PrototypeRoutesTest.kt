@@ -86,6 +86,32 @@ class PrototypeRoutesTest {
     }
 
     @Test
+    fun testGeneratePrototype_FailureNullMessage() = testApplication {
+        application {
+            install(ContentNegotiation) {
+                json(testJson)
+            }
+            prototypeRoutes(mockPrototypeService)
+        }
+
+        // Create an exception with a null message
+        val exceptionWithNullMessage = object : Exception() {
+            override val message: String? = null
+        }
+
+        whenever(mockPrototypeService.generatePrototype(any()))
+            .thenReturn(Result.failure(exceptionWithNullMessage))
+
+        client.post("/api/prototype/generate") {
+            contentType(ContentType.Application.Json)
+            setBody(testJson.encodeToString(GenerateRequest("Test prompt")))
+        }.apply {
+            assertEquals(HttpStatusCode.BadRequest, status)
+            assertEquals("""{"error":"Error: Unknown error"}""", bodyAsText())
+        }
+    }
+
+    @Test
     fun testGeneratePrototype_InvalidRequest() = testApplication {
         application {
             install(ContentNegotiation) {
