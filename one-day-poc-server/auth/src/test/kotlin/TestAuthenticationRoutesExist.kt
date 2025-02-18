@@ -3,7 +3,7 @@ import helpers.AuthenticationTestHelpers.urlProvider
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.*
+import kcl.seg.rtt.auth.authModule
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE

@@ -1,7 +1,7 @@
-package kcl.seg.rtt.utils.core
+package core
 
 import aws.sdk.kotlin.services.sts.StsClient
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 import kcl.seg.rtt.utils.aws.S3Manager
 import kcl.seg.rtt.utils.aws.S3Service
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
