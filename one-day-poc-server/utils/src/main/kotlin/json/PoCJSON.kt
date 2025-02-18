@@ -1,7 +1,12 @@
 package kcl.seg.rtt.utils.json
 
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
+import java.lang.IllegalArgumentException
 
 /**
  * Object to encapsulate JSON utilities
@@ -32,11 +37,9 @@ object PoCJSON {
         try {
             array
                 .find { it.jsonObject["Name"]?.toString() == "\"${attribute.lowercase()}\"" }
-                ?.jsonObject
-                ?.get(
-                    "Value",
-                )?.jsonPrimitive
-                ?.content
+                ?.let {
+                    kotlin.runCatching { it.jsonObject["Value"]!!.jsonPrimitive.content }.getOrNull()
+                }
         } catch (e: IllegalArgumentException) {
             null
         }

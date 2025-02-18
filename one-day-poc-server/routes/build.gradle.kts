@@ -1,3 +1,5 @@
+val ktorVersion by extra { "3.0.3" }
+
 plugins {
     kotlin("jvm")
 }
@@ -15,7 +17,4 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-}
-kotlin {
-    jvmToolchain(23)
 }

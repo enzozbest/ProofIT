@@ -31,4 +31,4 @@ jobs:
 
     - name: Run tests
       working-directory: one-day-poc-client
-      run: npm test -- --watchAll=false --passWithNoTests
+      run: npm test

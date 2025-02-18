@@ -1,12 +1,23 @@
-package kcl.seg.rtt.auth.authentication
+package kcl.seg.rtt.auth
 
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.sessions.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.DuplicatePluginException
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.sessions.Sessions
+import io.ktor.server.sessions.cookie
+import kcl.seg.rtt.auth.authentication.AuthenticatedSession
 import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
 import kcl.seg.rtt.auth.authentication.Authenticators.configureOAuth
+import kcl.seg.rtt.auth.authentication.configureAuthenticationRoutes
 import kcl.seg.rtt.utils.json.PoCJSON
 import kotlin.collections.set
+
+object AuthenticationConstants {
+    const val DEFAULT_EXPIRATION_SECONDS = 600L
+    const val CONFIGURATION_FILE_PATH = "auth/src/main/resources/cognito.json"
+    const val DEFAULT_AUTHENTICATOR = "Cognito"
+}
 
 /**
  * Configures the authentication settings for the application and the routes that will be used for authentication.
@@ -15,8 +26,8 @@ import kotlin.collections.set
  * in application.conf).
  */
 fun Application.authModule(
-    configFilePath: String = "auth/src/main/resources/cognito.json",
-    authName: String = "Cognito",
+    configFilePath: String = AuthenticationConstants.CONFIGURATION_FILE_PATH,
+    authName: String = AuthenticationConstants.DEFAULT_AUTHENTICATOR,
 ) {
     configureAuthentication(configFilePath)
     configureSessions()
@@ -44,7 +55,7 @@ private fun Application.configureAuthentication(configFilePath: String) {
 private fun Application.configureSessions() {
     install(Sessions) {
         cookie<AuthenticatedSession>("AuthenticatedSession") {
-            cookie.maxAgeInSeconds = 3600
+            cookie.maxAgeInSeconds = AuthenticationConstants.DEFAULT_EXPIRATION_SECONDS
             cookie.secure = true
             cookie.httpOnly = true
             cookie.path = "/"
