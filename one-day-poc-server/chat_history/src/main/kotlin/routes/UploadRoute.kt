@@ -13,13 +13,14 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
 import io.ktor.server.application.ApplicationCall
+import kcl.seg.rtt.chat_history.UPLOAD
 
 /*
     * This route is used to upload files to the server, can be of any type#
     * It creates an upload dir for now as it is not linked to an s3 bucket yet
  */
 fun Route.uploadRoutes(uploadDir: String) {
-    post("/upload") {
+    post(UPLOAD) {
         val uploadData = UploadData()
         val uploadDir = createUploadDirectory(uploadDir)
 

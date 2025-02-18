@@ -4,18 +4,18 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kcl.seg.rtt.chat_history.JSON
 import kcl.seg.rtt.chat_history.Request
 import kcl.seg.rtt.chat_history.Response
 import java.time.LocalDateTime
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
 
-
 /*
     * This route is used to handle JSON requests with the Request.kt schema
  */
 fun Route.jsonRoutes() {
-    post("/json") {
+    post(JSON) {
         try {
             val request = call.receive<Request>()
             println("Received request: $request")
