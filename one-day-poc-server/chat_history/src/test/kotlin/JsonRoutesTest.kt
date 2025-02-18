@@ -13,7 +13,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     fun `Test Valid JSON message`() = testApplication {
         setupTestApplication()
 
-        val response = client.post("/json") {
+        val response = client.post(JSON) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             contentType(ContentType.Application.Json)
             setBody("""
@@ -33,7 +33,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     fun `Test Invalid JSON message`() = testApplication {
         setupTestApplication()
 
-        val response = client.post("/json") {
+        val response = client.post(JSON) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             contentType(ContentType.Application.Json)
             setBody("""

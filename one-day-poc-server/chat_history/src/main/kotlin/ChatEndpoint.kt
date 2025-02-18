@@ -5,6 +5,11 @@ import io.ktor.server.routing.*
 import kcl.seg.rtt.chat_history.routes.*
 import io.ktor.server.auth.*
 
+const val CHAT = "/api/chat"
+const val GET = "$CHAT/get"
+const val JSON = "$CHAT/json"
+const val UPLOAD = "$CHAT/upload"
+
 class ChatEndpoint {
     companion object {
         private const val DEFAULT_UPLOAD_DIR = "uploads"

@@ -18,9 +18,6 @@ import kotlin.test.assertFalse
 
 class UploadRoutesTest : BaseAuthenticationServer() {
 
-    private val testFileContent = "Test content"
-    private val testFileName = "test.txt"
-
     @BeforeEach
     fun setup() {
         ChatEndpoint.setUploadDirectory("test_uploads")
@@ -39,7 +36,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val testDir = File("test_uploads")
         assertFalse(testDir.exists())
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -62,7 +59,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val testDir = File("test_uploads")
         testDir.mkdirs()
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -83,7 +80,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         setupTestApplication()
         val testDir = File("test_uploads")
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -105,7 +102,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
     fun `Test multipart upload with message JSON`() = testApplication {
         setupTestApplication()
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -131,7 +128,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
     fun `Test multipart upload handles invalid message JSON`() = testApplication {
         setupTestApplication()
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -193,7 +190,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
     fun `Test message response format is correct`() = testApplication {
         setupTestApplication()
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {
@@ -224,7 +221,7 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val testContent = "test content"
         val fileName = "test.txt"
 
-        val response = client.post("/upload") {
+        val response = client.post(UPLOAD) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             setBody(MultiPartFormDataContent(
                 formData {

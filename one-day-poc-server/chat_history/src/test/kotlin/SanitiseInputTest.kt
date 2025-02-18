@@ -21,7 +21,7 @@ class SanitiseInputTest : BaseAuthenticationServer() {
             }
         """
 
-        val response = client.post("/json") {
+        val response = client.post(JSON) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(requestData)
@@ -45,7 +45,7 @@ class SanitiseInputTest : BaseAuthenticationServer() {
         """
 
 
-        val response = client.post("/json") {
+        val response = client.post(JSON) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody(requestData)
