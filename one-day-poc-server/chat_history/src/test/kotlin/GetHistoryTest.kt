@@ -10,14 +10,14 @@ class GetHistoryTest : BaseAuthenticationServer() {
     @Test
     fun `Test unauthorized access`() = testApplication {
         setupTestApplication()
-        val response = client.get("/chat")
+        val response = client.get(GET)
         assertEquals(HttpStatusCode.Unauthorized, response.status)
     }
 
     @Test
     fun `Test authorized access`() = testApplication {
         setupTestApplication()
-        val response = client.get("/chat") {
+        val response = client.get(GET) {
             header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
         }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -26,7 +26,7 @@ class GetHistoryTest : BaseAuthenticationServer() {
     @Test
     fun `Test invalid token`() = testApplication {
         setupTestApplication()
-        val response = client.get("/chat") {
+        val response = client.get(GET) {
             header(HttpHeaders.Authorization, "Bearer invalid-token")
         }
         assertEquals(HttpStatusCode.Unauthorized, response.status)

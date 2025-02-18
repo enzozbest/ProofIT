@@ -20,7 +20,7 @@ const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessagePr
                 prompt: message
             };
 
-            const response = await fetch("http://localhost:8000/json", {
+            const response = await fetch("http://localhost:8000/api/chat/json", {
                 method: 'POST',
                 credentials: "include",
                 headers: {
