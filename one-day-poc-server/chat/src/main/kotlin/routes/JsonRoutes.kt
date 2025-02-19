@@ -1,12 +1,12 @@
-package kcl.seg.rtt.chat_history.routes
+package kcl.seg.rtt.chat.routes
 
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kcl.seg.rtt.chat_history.JSON
-import kcl.seg.rtt.chat_history.Request
-import kcl.seg.rtt.chat_history.Response
+import kcl.seg.rtt.chat.JSON
+import kcl.seg.rtt.chat.Request
+import kcl.seg.rtt.chat.Response
 import java.time.LocalDateTime
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist

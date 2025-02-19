@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json

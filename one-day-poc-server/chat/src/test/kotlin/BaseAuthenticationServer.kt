@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
