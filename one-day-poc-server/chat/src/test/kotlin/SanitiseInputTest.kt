@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
