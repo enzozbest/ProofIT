@@ -22,11 +22,14 @@ dependencies {
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("org.jsoup:jsoup:1.15.3") // Used in JsonRoutes.kt
     implementation("io.ktor:ktor-server-auth-jwt:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
 
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     implementation(project(":auth"))
+    implementation(project(":prototype"))
     implementation(project(":utils"))
 }
 

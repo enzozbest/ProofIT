@@ -105,7 +105,13 @@ abstract class BaseAuthenticationServer {
         }
     }
 
-    protected fun ApplicationTestBuilder.setupTestApplication() {
+    protected open fun Application.testModule() {
+        chatModule()
+    }
+
+    protected fun ApplicationTestBuilder.setupTestApplication(
+        moduleConfig: Application.() -> Unit = { testModule() }
+    ) {
         val mockJWKSUrl = "http://localhost:$TEST_PORT"
 
         application {
@@ -116,7 +122,7 @@ abstract class BaseAuthenticationServer {
             install(ContentNegotiation) {
                 json()
             }
-            chatModule()
+            moduleConfig()
         }
     }
 
