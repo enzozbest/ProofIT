@@ -14,8 +14,6 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-private val PROTOTYPE_ENDPOINT = "/api/prototype/generate"
-
 class JsonRoutesTest : BaseAuthenticationServer() {
 
     private fun Application.successTestModule() {
@@ -31,7 +29,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     }
 
     private fun createSuccessMockClient(): HttpClient {
-        print("SUCCESS MOCK CLIENT")
         return HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
@@ -46,7 +43,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     }
 
     private fun createErrorMockClient(): HttpClient {
-        "ERROR MOCK CLIENT"
         return HttpClient(MockEngine) {
             engine {
                 addHandler { request ->
@@ -83,7 +79,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             """.trimIndent())
         }
         val responseText = response.bodyAsText()
-        println("Response: $responseText")
         assertEquals(HttpStatusCode.OK, response.status)
 
         assertTrue(responseText.contains("time"))
