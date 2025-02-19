@@ -50,7 +50,7 @@ private fun Route.generatePrototype(prototypeService: PrototypeService) {
                 .onFailure { error ->
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        ErrorResponse("Failed to generate prototype: ${error.message}")
+                        ErrorResponse("Failed to generate: ${error.message}")
                     )
                 }
         } catch (e: Exception) {
