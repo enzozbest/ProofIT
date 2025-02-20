@@ -4,4 +4,5 @@ plugins {
 }
 rootProject.name = "one-day-poc-server"
 include("auth", "database", "routes", "utils", "chat_history", "prototype", "webcontainer")
-
+include("embeddings")
+include("seeder")
