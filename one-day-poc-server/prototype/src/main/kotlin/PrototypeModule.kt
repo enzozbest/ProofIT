@@ -7,13 +7,6 @@ import kotlinx.serialization.json.Json
 
 
 fun Application.prototypeModule() {
-//    install(ContentNegotiation) {
-//        json(Json {
-//            prettyPrint = true
-//            isLenient = true
-//            ignoreUnknownKeys = true
-//        })
-//    }
 
     val ollamaService = OllamaService()
     val prototypeService = PrototypeService(ollamaService)
