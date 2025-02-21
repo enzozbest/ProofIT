@@ -37,16 +37,27 @@ fun Route.jsonRoutes() {
 
 /*
     * User prompts via the JSON prompt request are sanitised by
-    *           removing all HTML tags (Jsoup)
-    *           removing leading and trailing whitespace
-    *           replacing special characters and HTML entities such as &lt;
-    *           with the empty string
-    *           capping the user input to 1000 characters
+    * removing all HTML tags (Jsoup)
+    * removing leading and trailing whitespace
+    * replacing special characters and HTML entities such as &lt;
+    * with the empty string
+    * capping the user input to 1000 characters
+    * ignoring all text after a word/phrase if the prompt contains a malicious phrase
+    *
  */
 fun cleanPrompt(prompt: String): String {
-    return Jsoup.clean(prompt, Safelist.none())
+    var sanitised = Jsoup.clean(prompt, Safelist.none())
         .trim()
         .replace(Regex("&[a-zA-Z0-9#]+;"), "")
         .replace(Regex("[^\\w\\s.,!?()]"), "")
         .take(1000)
+    val maliciousPatterns = listOf(
+    "ignore", "pretend", "disregard", "act like", "follow my instructions",
+        "do not follow", "override", "act as", "respond as"
+    )
+    for (pattern in maliciousPatterns) {
+        val regex = Regex("(?i)$pattern)")
+        sanitised = sanitised.replace(regex, "")
+    }
+    return sanitised
 }
