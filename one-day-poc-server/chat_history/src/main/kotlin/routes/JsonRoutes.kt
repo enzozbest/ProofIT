@@ -80,7 +80,8 @@ private fun cleanPrompt(prompt: String): String {
 private fun extractKeywords(prompt: String): List<String> {
     val keywords = listOf(
         "javascript","html","css","chatbot","chat bot","button","report",
-        "ai","assistant","generate","generation","website","webpage","page"
+        "ai","assistant","generate","generation","website","webpage","page",
+        "application","web","frontend","backend","UI","interface","database"
     )
     val usedKeywords = mutableListOf<String>()
     for (keyword in keywords){
