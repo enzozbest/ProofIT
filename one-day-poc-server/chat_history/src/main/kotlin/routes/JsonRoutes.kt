@@ -13,13 +13,6 @@ import org.jsoup.safety.Safelist
 
 /*
     * This route is used to handle JSON requests with the Request.kt schema
-    *
-    * User prompts via the JSON prompt request are sanitised by
-    *           removing all HTML tags (Jsoup)
-    *           removing leading and trailing whitespace
-    *           replacing special characters and HTML entities such as &lt;
-    *           with the empty string
-    *           capping the user input to 1000 characters
  */
 fun Route.jsonRoutes() {
     post(JSON) {
