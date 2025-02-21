@@ -55,4 +55,29 @@ class SanitiseInputTest : BaseAuthenticationServer() {
         val responseBody = response.bodyAsText()
         assertTrue(responseBody.contains("Simple test prompt  with HTML."))
     }
+
+    @Test
+    fun `Test keyword extraction`() = testApplication {
+        setupTestApplication()
+
+        val requestData = """
+            {
+                "prompt": "I would like to make an ai assistant that users can interact with on my page",
+                "userID": "user123",
+                "time": "2025-02-02T12:00:00"
+            }
+        """
+
+
+        val response = client.post(JSON) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody(requestData)
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val responseBody = response.bodyAsText()
+        assertTrue(responseBody.contains("I would like to make an ai assistant that users can interact with on my page"))
+    }
+
 }
