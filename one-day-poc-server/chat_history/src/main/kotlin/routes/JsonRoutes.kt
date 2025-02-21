@@ -19,7 +19,7 @@ fun Route.jsonRoutes() {
         try {
             val request = call.receive<Request>()
             println("Received request: $request")
-            val prompt = cleanPrompt(request.prompt)
+            val prompt = processPrompt(request.prompt)
             val response = Response(
                 time = LocalDateTime.now().toString(),
                 message = "${prompt}, ${request.userID}!")
@@ -35,9 +35,12 @@ fun Route.jsonRoutes() {
     }
 }
 
-private fun processPrompt(prompt: String) {
+//For now, just return the sanitised prompt,later we can decide about the keywords
+private fun processPrompt(prompt: String):String {
     val sanitisedPrompt = cleanPrompt(prompt)
     val keywords = extractKeywords(sanitisedPrompt)
+    println("Keywords are: $keywords")
+    return sanitisedPrompt
 }
 
 /*
@@ -77,7 +80,7 @@ private fun cleanPrompt(prompt: String): String {
 private fun extractKeywords(prompt: String): List<String> {
     val keywords = listOf(
         "javascript","html","css","chatbot","chat bot","button","report",
-        "ai","assistant","generate","generation","website"
+        "ai","assistant","generate","generation","website","webpage","page"
     )
     val usedKeywords = mutableListOf<String>()
     for (keyword in keywords){
