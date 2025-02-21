@@ -81,11 +81,12 @@ private fun extractKeywords(prompt: String): List<String> {
     val keywords = listOf(
         "javascript","html","css","chatbot","chat bot","button","report",
         "ai","assistant","generate","generation","website","webpage","page",
-        "application","web","frontend","backend","UI","interface","database"
+        "application","web","frontend","backend","ui","interface","database"
     )
     val usedKeywords = mutableListOf<String>()
+    val lowercasePrompt = prompt.lowercase()
     for (keyword in keywords){
-        if (keyword in prompt){
+        if (keyword in lowercasePrompt){
             usedKeywords.add(keyword)
         }
     }

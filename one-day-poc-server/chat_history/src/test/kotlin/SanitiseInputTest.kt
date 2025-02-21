@@ -62,7 +62,7 @@ class SanitiseInputTest : BaseAuthenticationServer() {
 
         val requestData = """
             {
-                "prompt": "I would like to make an ai assistant that users can interact with on my page",
+                "prompt": "I would like to make an AI assistant that users can interact with on my page",
                 "userID": "user123",
                 "time": "2025-02-02T12:00:00"
             }
@@ -77,7 +77,7 @@ class SanitiseInputTest : BaseAuthenticationServer() {
         assertEquals(HttpStatusCode.OK, response.status)
 
         val responseBody = response.bodyAsText()
-        assertTrue(responseBody.contains("I would like to make an ai assistant that users can interact with on my page"))
+        assertTrue(responseBody.contains("I would like to make an AI assistant that users can interact with on my page"))
     }
 
 }
