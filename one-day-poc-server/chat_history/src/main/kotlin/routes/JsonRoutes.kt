@@ -45,7 +45,7 @@ fun Route.jsonRoutes() {
     * ignoring all text after a word/phrase if the prompt contains a malicious phrase
     *
  */
-fun cleanPrompt(prompt: String): String {
+private fun cleanPrompt(prompt: String): String {
     var sanitised = Jsoup.clean(prompt, Safelist.none())
         .trim()
         .replace(Regex("&[a-zA-Z0-9#]+;"), "")
@@ -56,7 +56,7 @@ fun cleanPrompt(prompt: String): String {
         "do not follow", "override", "act as", "respond as"
     )
     for (pattern in maliciousPatterns) {
-        val regex = Regex("(?i)$pattern)")
+        val regex = Regex("((?i)$pattern)")
         sanitised = sanitised.replace(regex, "")
     }
     return sanitised
