@@ -17,17 +17,16 @@ import org.jsoup.safety.Safelist
     * User prompts via the JSON prompt request are sanitised by
     *           removing all HTML tags (Jsoup)
     *           removing leading and trailing whitespace
-    *           replacing HTML entities such as &lt; with the empty string
+    *           replacing special characters and HTML entities such as &lt;
+    *           with the empty string
+    *           capping the user input to 1000 characters
  */
 fun Route.jsonRoutes() {
     post(JSON) {
         try {
             val request = call.receive<Request>()
             println("Received request: $request")
-            val prompt = Jsoup.clean(request.prompt, Safelist.none())
-                .trim()
-                .replace(Regex("&[a-zA-Z0-9#]+;"), "")
-                .replace(Regex("[^\\w\\s.,!?()]"), "")
+            val prompt = cleanPrompt(request.prompt)
             val response = Response(
                 time = LocalDateTime.now().toString(),
                 message = "${prompt}, ${request.userID}!")
@@ -41,4 +40,20 @@ fun Route.jsonRoutes() {
             )
         }
     }
+}
+
+/*
+    * User prompts via the JSON prompt request are sanitised by
+    *           removing all HTML tags (Jsoup)
+    *           removing leading and trailing whitespace
+    *           replacing special characters and HTML entities such as &lt;
+    *           with the empty string
+    *           capping the user input to 1000 characters
+ */
+fun cleanPrompt(prompt: String): String {
+    return Jsoup.clean(prompt, Safelist.none())
+        .trim()
+        .replace(Regex("&[a-zA-Z0-9#]+;"), "")
+        .replace(Regex("[^\\w\\s.,!?()]"), "")
+        .take(1000)
 }
