@@ -35,6 +35,11 @@ fun Route.jsonRoutes() {
     }
 }
 
+private fun processPrompt(prompt: String) {
+    val sanitisedPrompt = cleanPrompt(prompt)
+    val keywords = extractKeywords(sanitisedPrompt)
+}
+
 /*
     * User prompts via the JSON prompt request are sanitised by
     * removing all HTML tags (Jsoup)
@@ -60,4 +65,25 @@ private fun cleanPrompt(prompt: String): String {
         sanitised = sanitised.replace(regex, "")
     }
     return sanitised
+}
+
+/*
+    * This method extracts keywords from the user prompt submitted
+    * These words will be added to a list and eventually passed to the llm
+    * with the sanitised prompt
+    *
+    * The keywords can later be expanded when our use cases expand
+ */
+private fun extractKeywords(prompt: String): List<String> {
+    val keywords = listOf(
+        "javascript","html","css","chatbot","chat bot","button","report",
+        "ai","assistant","generate","generation","website"
+    )
+    val usedKeywords = mutableListOf<String>()
+    for (keyword in keywords){
+        if (keyword in prompt){
+            usedKeywords.add(keyword)
+        }
+    }
+    return usedKeywords
 }
