@@ -1,3 +1,6 @@
+val ktorVersion: String by rootProject.extra
+val kotlinVersion: String by rootProject.extra
+
 plugins {
     kotlin("jvm")
 }
@@ -10,6 +13,8 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
     testImplementation(kotlin("test"))
 }
 
