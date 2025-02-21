@@ -127,10 +127,13 @@ open class OllamaService {
         val jsonPrinter = Json { prettyPrint = true }
         println("Formatted JSON Response:\n" + jsonPrinter.encodeToString(ollamaResponse))
 
-        return runCatching {
+        val baseResponse = runCatching {
             Json.decodeFromString<LlmResponse>(ollamaResponse.response)
         }.getOrElse {
-            throw IllegalArgumentException("Invalid JSON response from Ollama: ${it.message}")
+            throw IllegalArgumentException("Invalid JSON: ${it.message}")
         }
+
+        val finalResponse = baseResponse.copy(rawLLMText = ollamaResponse.response)
+        return finalResponse
     }
 }
