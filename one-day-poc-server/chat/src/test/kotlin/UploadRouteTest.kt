@@ -1,11 +1,11 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.chat_history.routes.generateTimestampedFileName
+import kcl.seg.rtt.chat.routes.generateTimestampedFileName
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertNotNull

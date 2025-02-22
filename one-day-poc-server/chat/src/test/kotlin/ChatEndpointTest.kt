@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.BeforeEach

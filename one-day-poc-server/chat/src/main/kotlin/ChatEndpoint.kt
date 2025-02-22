@@ -1,8 +1,8 @@
-package kcl.seg.rtt.chat_history
+package kcl.seg.rtt.chat
 
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import kcl.seg.rtt.chat_history.routes.*
+import kcl.seg.rtt.chat.routes.*
 import io.ktor.server.auth.*
 
 const val CHAT = "/api/chat"
