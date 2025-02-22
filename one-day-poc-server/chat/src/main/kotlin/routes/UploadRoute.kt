@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat_history.routes
+package kcl.seg.rtt.chat.routes
 
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -6,14 +6,14 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
-import kcl.seg.rtt.chat_history.Request
-import kcl.seg.rtt.chat_history.Response
+import kcl.seg.rtt.chat.Request
+import kcl.seg.rtt.chat.Response
 import kotlinx.io.readByteArray
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
 import io.ktor.server.application.ApplicationCall
-import kcl.seg.rtt.chat_history.UPLOAD
+import kcl.seg.rtt.chat.UPLOAD
 
 /*
     * This route is used to upload files to the server, can be of any type#

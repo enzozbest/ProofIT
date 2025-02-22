@@ -48,10 +48,16 @@ private fun Route.generatePrototype(prototypeService: PrototypeService) {
                     call.respond(HttpStatusCode.OK, llmResponse)
                 }
                 .onFailure { error ->
-                    call.respondError(error)
+                    call.respond(
+                        HttpStatusCode.BadRequest,
+                        ErrorResponse("Failed to generate: ${error.message}")
+                    )
                 }
         } catch (e: Exception) {
-            call.respondError(e)
+            call.respond(
+                HttpStatusCode.BadRequest,
+                ErrorResponse("Invalid request format: ${e.message}")
+            )
         }
     }
 }

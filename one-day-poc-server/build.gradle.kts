@@ -136,7 +136,7 @@ dependencies {
     implementation(project(":database"))
     implementation(project(":routes"))
     implementation(project(":utils"))
-    implementation(project(":chat_history"))
+    implementation(project(":chat"))
     implementation("org.jsoup:jsoup:1.15.3")
 }
 
