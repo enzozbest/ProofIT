@@ -10,6 +10,12 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
+object VectorDbConstants {
+    const val VECTOR_DB_URL = "http://localhost:7000/embeddings"
+    const val STORE_EMVEDDING_URL = "$VECTOR_DB_URL/new"
+    const val QUERY_EMBEDDINGS_URL = VECTOR_DB_URL
+}
+
 object VectorDatabaseClient {
     private val client = HttpClient(CIO)
 
@@ -29,7 +35,7 @@ object VectorDatabaseClient {
             )
         val response =
             client.post(jsonData) {
-                url("http://localhost:7000/embeddings/new")
+                url(VectorDbConstants.STORE_EMVEDDING_URL)
             }
         val json = Json.decodeFromString<JsonObject>(response.bodyAsText())
         return json["status"]?.jsonPrimitive?.content == "success"
@@ -44,7 +50,7 @@ object VectorDatabaseClient {
     ): List<String> {
         val jsonData = Json.encodeToString(mapOf("vector" to vector, "topK" to topK))
         val response =
-            client.post("http://localhost:7000/embeddings/") {
+            client.post(VectorDbConstants.QUERY_EMBEDDINGS_URL) {
                 setBody(jsonData)
             }
         val json = Json.decodeFromString<JsonObject>(response.bodyAsText())
