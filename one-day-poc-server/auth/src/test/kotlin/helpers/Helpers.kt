@@ -101,9 +101,9 @@ object AuthenticationTestHelpers {
                         expiresIn = Long.MAX_VALUE,
                         refreshToken = null,
                         extraParameters =
-                            Parameters.build {
-                                append("id_token", generateTestJwtToken())
-                            },
+                        Parameters.build {
+                            append("id_token", generateTestJwtToken())
+                        },
                     )
             }
         }

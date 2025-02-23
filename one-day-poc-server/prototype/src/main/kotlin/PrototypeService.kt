@@ -55,7 +55,11 @@ open class PrototypeService(private val ollamaService: OllamaService) {
             TemplateManager.storeNewTemplateEmbeddings(rawText)
         }
 
-        // Also validate the "regular" code or site portion
+
+        // TODO: Need to implement real compiler check here based off of parsed response
+        // whether this will be by string, or by parsing the large string into separate files
+
+        // temp check
         val compiledOk = runCompileCheckOnSite(llmResult.getOrNull())
         if (!compiledOk) {
             return Result.failure(RuntimeException("Site code failed to compile or run. Regenerate needed."))
