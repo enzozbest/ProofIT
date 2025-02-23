@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import faiss
 import numpy as np
 from flask_cors import CORS
+from sentence_transformers import SentenceTransformer
 
 VECTOR_DIMENSION = 512
 
@@ -12,6 +13,35 @@ dimension = VECTOR_DIMENSION
 index = faiss.IndexFlatL2(dimension)
 
 vector_store = {}
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+@app.route('/embeddings/create', methods=['POST'])
+def create_embedding():
+    data = request.json
+
+    if "prompt" in data:
+        prompt = data["prompt"]
+
+        try:
+            embedding = model.encode(prompt)
+            embedding_list = embedding.tolist()
+
+            return jsonify({
+                "status": "success",
+                "embedding": embedding_list
+            })
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "message": f"Error generating embedding: {str(e)}"
+            })
+
+    else:
+        return jsonify({
+            "status": "error",
+            "message": "No prompt provided"
+        })
 
 @app.route('/embeddings/new', methods=['POST'])
 def new_embedding():
