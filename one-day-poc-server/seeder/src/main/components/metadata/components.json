@@ -1,0 +1,9 @@
+{
+  "components": [
+    {
+      "id": "navbar",
+      "descriptiveName": "Responsive navigation bar with logo and menu items",
+      "filePath": "components/navbar.txt"
+    }
+  ]
+}

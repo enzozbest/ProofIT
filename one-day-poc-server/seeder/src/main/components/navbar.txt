@@ -1,0 +1,65 @@
+import React, { useState } from 'react';
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navStyle = {
+    backgroundColor: '#333',
+    padding: '1rem',
+    color: 'white'
+  };
+
+  const containerStyle = {
+    maxWidth: '1200px',
+    margin: '0 auto',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  };
+
+  const logoStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold'
+  };
+
+  const navItemsStyle = {
+    display: 'flex',
+    gap: '2rem'
+  };
+
+  const linkStyle = {
+    color: 'white',
+    textDecoration: 'none',
+    ':hover': {
+      color: '#ddd'
+    }
+  };
+
+  const menuButtonStyle = {
+    display: 'none',
+    background: 'none',
+    border: 'none',
+    color: 'white',
+    cursor: 'pointer',
+    padding: '0.5rem',
+    '@media (max-width: 768px)': {
+      display: 'block'
+    }
+  };
+
+  return (
+    <nav style={navStyle}>
+      <div style={containerStyle}>
+        <div style={logoStyle}>Logo</div>
+        <div style={navItemsStyle}>
+          <a href="/" style={linkStyle}>Home</a>
+          <a href="/about" style={linkStyle}>About</a>
+          <a href="/services" style={linkStyle}>Services</a>
+          <a href="/contact" style={linkStyle}>Contact</a>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

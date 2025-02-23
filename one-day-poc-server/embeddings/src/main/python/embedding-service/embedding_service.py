@@ -18,10 +18,15 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 @app.route('/embeddings/create', methods=['POST'])
 def create_embedding():
+    """
+    Converts input text into vector embeddings using a huggingface sentence transformer.
+    """
+
     data = request.json
 
-    if "prompt" in data:
-        prompt = data["prompt"]
+    # text is whatever needs to be embedded (e.g. user prompt or a component)
+    if "text" in data:
+        prompt = data["text"]
 
         try:
             embedding = model.encode(prompt)
