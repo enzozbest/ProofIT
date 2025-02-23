@@ -12,7 +12,7 @@ import kotlinx.serialization.json.jsonPrimitive
 
 object VectorDbConstants {
     const val VECTOR_DB_URL = "http://localhost:7000/embeddings"
-    const val STORE_EMVEDDING_URL = "$VECTOR_DB_URL/new"
+    const val STORE_EMBEDDING_URL = "$VECTOR_DB_URL/new"
     const val QUERY_EMBEDDINGS_URL = VECTOR_DB_URL
 }
 
@@ -35,7 +35,7 @@ object VectorDatabaseClient {
             )
         val response =
             client.post(jsonData) {
-                url(VectorDbConstants.STORE_EMVEDDING_URL)
+                url(VectorDbConstants.STORE_EMBEDDING_URL)
             }
         val json = Json.decodeFromString<JsonObject>(response.bodyAsText())
         return json["status"]?.jsonPrimitive?.content == "success"
