@@ -10,7 +10,7 @@ object EmbeddingService {
 
     suspend fun <T> embed(): List<Float> = emptyList()
 
-    suspend fun <T> embedAndStore(): Boolean = false
+    suspend fun embedAndStore(name: String, code: String): Boolean = false
 
     suspend fun queryEmbeddings(): List<String> = emptyList()
 }
