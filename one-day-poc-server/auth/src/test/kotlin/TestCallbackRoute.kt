@@ -91,9 +91,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                                Parameters.build {
-                                    append("id_token", "")
-                                },
+                            Parameters.build {
+                                append("id_token", "")
+                            },
                         )
                 }
             }
@@ -118,9 +118,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                                Parameters.build {
-                                    append("id_token", generateTestJwtTokenNoSub())
-                                },
+                            Parameters.build {
+                                append("id_token", generateTestJwtTokenNoSub())
+                            },
                         )
                 }
             }
@@ -163,9 +163,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                                Parameters.build {
-                                    append("id_token", generateTestJwtTokenNoGroups())
-                                },
+                            Parameters.build {
+                                append("id_token", generateTestJwtTokenNoGroups())
+                            },
                         )
                 }
             }
@@ -213,9 +213,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                                Parameters.build {
-                                    append("id_token", generateTestJwtTokenAdminFalse())
-                                },
+                            Parameters.build {
+                                append("id_token", generateTestJwtTokenAdminFalse())
+                            },
                         )
                 }
             }
