@@ -3,16 +3,42 @@ import faiss
 import numpy as np
 from flask_cors import CORS
 from sentence_transformers import SentenceTransformer
+import pickle
+
+FAISS_FILE = "faiss.index"
+MAPPINGS_FILE = "mappings.pkl"
 
 VECTOR_DIMENSION = 512
 
 app = Flask(__name__)
 CORS(app)
 
-dimension = VECTOR_DIMENSION
-index = faiss.IndexFlatL2(dimension)
-
+index = None
 vector_store = {}
+
+@app.before_first_request
+def load_data():
+    """
+    Retrieve persisted data from disk. These will be embeddings and corresponding mappings.
+    """
+    global index, vector_store
+    try:
+        index = faiss.read_index(FAISS_FILE)
+        with open(MAPPINGS_FILE, "rb") as f:
+            vector_store = pickle.load(f)
+    except FileNotFoundError:
+            print("Could not load data. Creating new index and mapping.")
+            index = faiss.IndexFlatL2(VECTOR_DIMENSION)
+            vector_store = {}
+
+def save_data():
+    """
+    Save data into disk for persistence.
+    """
+    faiss.write_index(index, FAISS_FILE)
+    with open(MAPPINGS_FILE, "wb") as f:
+        pickle.dump(vector_store, f)
+    print("Saved index and mapping data to disk.")
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
@@ -54,8 +80,8 @@ def new_embedding():
         return jsonify({"status": "error", "message": "Index is not trained."})
     return jsonify({"status": "success", "message": "Vector added to the DB."})
 
-@app.route('/embeddings/search', methods=['GET'])
-def query_vector():
+@app.route('/embeddings/semantic-search', methods=['POST'])
+def semantic_search():
     data = request.json
     base = np.array(data["embedding"], dtype=np.float32).reshape(1, -1)
     top_k = data.get("topK", 5)
@@ -64,20 +90,17 @@ def query_vector():
         return jsonify({"status": "error", "message": "Index is empty."})
 
     distances, indices = index.search(base, top_k)
-    results = [vector_store[idx] for idx in indices[0] if idx in vector_store]
-    #TODO: retrieve some information about the template embedding that allows us to get the actual template.
-    # This may be the name, or some ID we assign to them.
-
+    results = str([vector_store[idx] for idx in indices[0] if idx in vector_store])
     return jsonify({"status": "success", "matches": results})
 
-def store_embedding(name: str, vector: np.ndarray) -> Bool:
+def store_embedding(name: str, vector: np.ndarray) -> bool:
     if not index.is_trained:
         return False
-
     vector = vector.reshape(1, -1)
     index.add(vector)
     vector_store[len(vector_store)] = name
     return True
 
 if __name__ == '__main__':
+    atexit.register(save_data)
     app.run(host="0.0.0.0", port=7000)
