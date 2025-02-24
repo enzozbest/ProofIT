@@ -16,18 +16,15 @@ vector_store = {}
 
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-@app.route('/embeddings/create', methods=['POST'])
+@app.route('/embeddings/embed', methods=['POST'])
 def create_embedding():
     """
     Converts input text into vector embeddings using a huggingface sentence transformer.
     """
 
     data = request.json
-
-    # text is whatever needs to be embedded (e.g. user prompt or a component)
     if "text" in data:
         prompt = data["text"]
-
         try:
             embedding = model.encode(prompt)
             embedding_list = embedding.tolist()
@@ -51,15 +48,20 @@ def create_embedding():
 @app.route('/embeddings/new', methods=['POST'])
 def new_embedding():
     data = request.json
-    name = data["name"]
-    vector = np.array(data["vector"], dtype=np.float32).reshape(1, -1)
-
-    if index.is_trained():
-        index.add(vector)
-        vector_store[len(vector_store)] = name
-        return jsonify({"status": "success", "message": "Vector added."})
-    else:
+    embedded = create_embedding(request)
+    success = store_embedding(name = data["name"], vector = embedded)
+    if not success:
         return jsonify({"status": "error", "message": "Index is not trained."})
+    return jsonify({"status": "success", "message": "Vector added to the DB."})
+
+def store_embedding(name: str, vector: np.ndarray) -> Bool:
+    if not index.is_trained:
+        return False
+
+    vector = vector.reshape(1, -1)
+    index.add(vector)
+    vector_store[len(vector_store)] = name
+    return True
 
 @app.route('/embeddings/', methods=['GET'])
 def query_vector():
