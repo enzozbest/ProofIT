@@ -6,12 +6,14 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 
 object EmbeddingConstants {
     const val EMBEDDING_SERVICE_URL = "http://localhost:7000/embeddings/"
     const val EMBED_URL = "$EMBEDDING_SERVICE_URL/embed"
     const val EMBED_AND_STORE_URL = "$EMBEDDING_SERVICE_URL/new"
+    const val SEMANTIC_SEARCH_URL = "$EMBEDDING_SERVICE_URL/semantic-search"
 }
 
 @Serializable
@@ -55,8 +57,21 @@ object EmbeddingService {
         return json?.let { response -> response["status"]?.let { it.jsonPrimitive.content == "success" } } ?: false
     }
 
-    suspend fun getEmbedding(name: String): List<Float> = emptyList()
-
     suspend fun semanticSearch(embedding: List<Float>): List<String> {
+        val responseText =
+            httpClient
+                .post(EmbeddingConstants.SEMANTIC_SEARCH_URL) {
+                    setBody(Json.encodeToString(mapOf("embedding" to embedding)))
+                }.bodyAsText()
+        val json = runCatching { Json.decodeFromString<JsonObject>(responseText) }.getOrNull()
+
+        return json?.let { response ->
+            check(
+                response["status"]?.let { it.jsonPrimitive.content == "success" }
+                    ?: false,
+            ) { "Failed to perform semantic search!" }
+
+            response["matches"]?.let { array -> array.jsonArray.map { it.jsonPrimitive.content } }
+        } ?: emptyList()
     }
 }
