@@ -3,7 +3,6 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -58,5 +57,6 @@ object EmbeddingService {
 
     suspend fun getEmbedding(name: String): List<Float> = emptyList()
 
-    suspend fun semanticSearch(embedding: List<Float>): List<String> = emptyList()
+    suspend fun semanticSearch(embedding: List<Float>): List<String> {
+    }
 }
