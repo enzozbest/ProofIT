@@ -8,7 +8,7 @@ object KeywordLoader {
         Json.decodeFromString<KeywordList>(fileContent).keywords
     }
 
-    fun getKeywords(): List<String> = keywords
+    fun getKeywordsList(): List<String> = keywords
 }
 
 @kotlinx.serialization.Serializable
