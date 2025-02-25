@@ -1,106 +1,62 @@
-from flask import Flask, request, jsonify
-import faiss
+import atexit
+
 import numpy as np
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from sentence_transformers import SentenceTransformer
-import pickle
-
-FAISS_FILE = "faiss.index"
-MAPPINGS_FILE = "mappings.pkl"
-
-VECTOR_DIMENSION = 512
+from data_handler import load_data, save_data
+from embedder import embed
+import vector_store
 
 app = Flask(__name__)
 CORS(app)
 
-index = None
-vector_store = {}
+first_request = True
 
-@app.before_first_request
-def load_data():
-    """
-    Retrieve persisted data from disk. These will be embeddings and corresponding mappings.
-    """
-    global index, vector_store
-    try:
-        index = faiss.read_index(FAISS_FILE)
-        with open(MAPPINGS_FILE, "rb") as f:
-            vector_store = pickle.load(f)
-    except FileNotFoundError:
-            print("Could not load data. Creating new index and mapping.")
-            index = faiss.IndexFlatL2(VECTOR_DIMENSION)
-            vector_store = {}
-
-def save_data():
-    """
-    Save data into disk for persistence.
-    """
-    faiss.write_index(index, FAISS_FILE)
-    with open(MAPPINGS_FILE, "wb") as f:
-        pickle.dump(vector_store, f)
-    print("Saved index and mapping data to disk.")
-
-model = SentenceTransformer('all-MiniLM-L6-v2')
+@app.before_request
+def startup_once():
+    global first_request
+    if first_request:
+        vector_store.index, vector_store.vector_store = load_data()
+        first_request = False
 
 @app.route('/embeddings/embed', methods=['POST'])
-def create_embedding():
-    """
-    Converts input text into vector embeddings using a huggingface sentence transformer.
-    """
-
+def embed_route():
     data = request.json
-    if "text" in data:
-        prompt = data["text"]
-        try:
-            embedding = model.encode(prompt)
-            embedding_list = embedding.tolist()
-
-            return jsonify({
-                "status": "success",
-                "embedding": embedding_list
-            })
-        except Exception as e:
-            return jsonify({
-                "status": "error",
-                "message": f"Error generating embedding: {str(e)}"
-            })
-
-    else:
+    if not "text" in data:
         return jsonify({
             "status": "error",
             "message": "No prompt provided"
         })
+    text = data["text"]
+    embedding = embed(text)
+    if not embedding:
+        return jsonify({"status": "error", "message": f"Error embedding: {text}"})
+    return jsonify({"status": "success", "embedding": embedding})
 
 @app.route('/embeddings/new', methods=['POST'])
-def new_embedding():
+def embed_and_store_route():
     data = request.json
-    embedded = create_embedding(request)
-    success = store_embedding(name = data["name"], vector = embedded)
+    if not "text" in data:
+        return jsonify({"status": "error", "message": "No prompt provided"})
+
+    embedding = embed(data["text"])
+    success = vector_store.store_embedding(name = data["name"], vector = np.array(embedding))
     if not success:
         return jsonify({"status": "error", "message": "Index is not trained."})
-    return jsonify({"status": "success", "message": "Vector added to the DB."})
+    return jsonify({"status": "success", "message": "Vector added to the DB successfully."})
 
 @app.route('/embeddings/semantic-search', methods=['POST'])
-def semantic_search():
+def semantic_search_route():
     data = request.json
-    base = np.array(data["embedding"], dtype=np.float32).reshape(1, -1)
-    top_k = data.get("topK", 5)
+    if not "embedding" in data:
+        return jsonify({"status": "error", "message": "No embedding provided for semantic search!"})
 
-    if index.ntotal == 0:
-        return jsonify({"status": "error", "message": "Index is empty."})
-
-    distances, indices = index.search(base, top_k)
-    results = str([vector_store[idx] for idx in indices[0] if idx in vector_store])
+    results = vector_store.semantic_search(data)
+    if results == -1:
+        return jsonify({"status": "error", "message": f"No matches found for : {str(data)}"})
     return jsonify({"status": "success", "matches": results})
 
-def store_embedding(name: str, vector: np.ndarray) -> bool:
-    if not index.is_trained:
-        return False
-    vector = vector.reshape(1, -1)
-    index.add(vector)
-    vector_store[len(vector_store)] = name
-    return True
 
 if __name__ == '__main__':
-    atexit.register(save_data)
+    atexit.register(save_data, vector_store.index, vector_store.vector_store)
     app.run(host="0.0.0.0", port=7000)

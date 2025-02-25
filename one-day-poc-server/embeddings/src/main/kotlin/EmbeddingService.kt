@@ -37,7 +37,7 @@ object EmbeddingService {
 
         val embedResponse = runCatching { Json.decodeFromString<EmbedResponse>(responseText) }.getOrNull()
         return embedResponse?.let { response ->
-            check(response.status == "success") { "Failed to embed provided data!" }
+            check(response.status == "success") { "Failed to embed provided data!" } // Throws exception
             response.embedding?.let { embedding ->
                 embedding.split(",").map { it.toFloat() }
             } ?: emptyList()
@@ -69,7 +69,7 @@ object EmbeddingService {
             check(
                 response["status"]?.let { it.jsonPrimitive.content == "success" }
                     ?: false,
-            ) { "Failed to perform semantic search!" }
+            ) { "Failed to perform semantic search!" } // Throws exception
 
             response["matches"]?.let { array -> array.jsonArray.map { it.jsonPrimitive.content } }
         } ?: emptyList()
