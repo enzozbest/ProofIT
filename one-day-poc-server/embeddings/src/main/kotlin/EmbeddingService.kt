@@ -6,18 +6,19 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 object EmbeddingService {
-    private val httpClient by lazy { HttpClient(CIO) }
+    internal var httpClient = HttpClient(CIO)
 
     suspend fun embed(
         data: String,
         name: String,
     ): EmbeddingServiceResponse {
         val payload = mapOf("text" to data, "name" to name)
-        val responseText =
+        val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_URL) {
                     setBody(Json.encodeToString(payload))
-                }.bodyAsText()
+                }
+        val responseText = response.bodyAsText()
         val embedResponse =
             runCatching { Json.decodeFromString<EmbeddingServiceResponse>(responseText) }.getOrElse {
                 throw IllegalStateException("Failed to parse response!")
@@ -30,12 +31,13 @@ object EmbeddingService {
         data: String,
     ): EmbeddingStoreResponse {
         val payload = mapOf("name" to name, "text" to data)
-        val responseText =
+        val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_AND_STORE_URL) {
                     setBody(Json.encodeToString(payload))
-                }.bodyAsText()
+                }
 
+        val responseText = response.bodyAsText()
         val storeResponse =
             runCatching { Json.decodeFromString<EmbeddingStoreResponse>(responseText) }.getOrElse {
                 throw IllegalStateException("Failed to parse response!")
@@ -45,11 +47,13 @@ object EmbeddingService {
 
     suspend fun semanticSearch(embedding: List<Float>): SemanticSearchResponse {
         val payload = mapOf("embedding" to embedding)
-        val responseText =
+        val response =
             httpClient
                 .post(EmbeddingConstants.SEMANTIC_SEARCH_URL) {
                     setBody(Json.encodeToString(payload))
-                }.bodyAsText()
+                }
+
+        val responseText = response.bodyAsText()
         val searchResponse =
             runCatching { Json.decodeFromString<SemanticSearchResponse>(responseText) }.getOrElse {
                 throw IllegalStateException("Failed to parse response!")

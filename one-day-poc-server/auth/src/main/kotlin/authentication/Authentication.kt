@@ -45,7 +45,7 @@ private fun Application.configureAuthentication(configFilePath: String) {
             configureJWTValidator(config)
         }
     } catch (e: DuplicatePluginException) {
-        error("Authentication plugin already installed!")
+        print("Authentication plugin already installed!")
     }
 }
 
