@@ -4,7 +4,7 @@ import java.io.File
 
 @Serializable
 data class ComponentMetadata(
-    val components: List<Component>
+    val components: List<Component>,
 )
 
 @Serializable
@@ -13,7 +13,9 @@ data class Component(
     val fileName: String,
 )
 
-class Seeder(private val embeddingService: EmbeddingService) {
+class Seeder(
+    private val embeddingService: EmbeddingService,
+) {
     private fun readComponentMetadata(): ComponentMetadata {
         val metadataFile = File("src/main/components/metadata/components.json")
         return Json.decodeFromString(metadataFile.readText())
@@ -24,7 +26,6 @@ class Seeder(private val embeddingService: EmbeddingService) {
         return componentFile.readText()
     }
 
-
     suspend fun seedComponents() {
         val metadata = readComponentMetadata()
 
@@ -34,7 +35,7 @@ class Seeder(private val embeddingService: EmbeddingService) {
 
             embeddingService.embedAndStore(
                 name = component.descriptiveName,
-                code = code
+                data = code,
             )
         }
     }
