@@ -89,19 +89,11 @@ private fun cleanPrompt(prompt: String): String {
     * This method extracts keywords from the user prompt submitted
     * These words will be added to a list and eventually passed to the llm
     * with the sanitised prompt
-    *
-    * The keywords can later be expanded when our use cases expand
  */
 private fun extractKeywords(prompt: String): List<String> {
-    val keywords = KeywordLoader.getKeywords()
-    val usedKeywords = mutableListOf<String>()
+    val keywordSet = KeywordLoader.getKeywordsList().toSet()
     val lowercasePrompt = prompt.lowercase()
-    for (keyword in keywords){
-        if (keyword in lowercasePrompt){
-            usedKeywords.add(keyword)
-        }
-    }
-    return usedKeywords
+    return keywordSet.filter { it in lowercasePrompt }
 }
 
 private suspend fun makePrototypeRequest(prompt: String): HttpResponse {
