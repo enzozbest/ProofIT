@@ -12,6 +12,7 @@ import io.ktor.server.routing.*
 import kcl.seg.rtt.chat.JSON
 import kcl.seg.rtt.chat.Request
 import kcl.seg.rtt.chat.Response
+import kcl.seg.rtt.chat.utils.KeywordLoader
 import java.time.LocalDateTime
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
@@ -92,11 +93,7 @@ private fun cleanPrompt(prompt: String): String {
     * The keywords can later be expanded when our use cases expand
  */
 private fun extractKeywords(prompt: String): List<String> {
-    val keywords = listOf(
-        "javascript","html","css","chatbot","chat bot","button","report",
-        "ai","assistant","generate","generation","website","webpage","page",
-        "application","web","frontend","backend","ui","interface","database"
-    )
+    val keywords = KeywordLoader.getKeywords()
     val usedKeywords = mutableListOf<String>()
     val lowercasePrompt = prompt.lowercase()
     for (keyword in keywords){
