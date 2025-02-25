@@ -1,0 +1,13 @@
+export const TypingIndicator = () => {
+  return (
+    <div className="flex justify-start mb-4">
+      <div className="bg-gray-100 rounded-lg px-4 py-2">
+        <div className="typing-indicator">
+          <span>.</span>
+          <span>.</span>
+          <span>.</span>
+        </div>
+      </div>
+    </div>
+  );
+};
