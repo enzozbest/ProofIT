@@ -2,9 +2,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class Seeder(
-    private val embeddingService: EmbeddingService,
-) {
+object Seeder {
+    private val embeddingService = EmbeddingService
+
     suspend fun processComponentLibrary(directoryPath: String) {
         val directory = validateDirectory(directoryPath)
         val jsonFiles = findJsonFiles(directory)
