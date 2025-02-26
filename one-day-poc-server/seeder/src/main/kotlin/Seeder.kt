@@ -1,42 +1,64 @@
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
-
-@Serializable
-data class ComponentMetadata(
-    val components: List<Component>,
-)
-
-@Serializable
-data class Component(
-    val descriptiveName: String,
-    val fileName: String,
-)
 
 class Seeder(
     private val embeddingService: EmbeddingService,
 ) {
-    private fun readComponentMetadata(): ComponentMetadata {
-        val metadataFile = File("src/main/components/metadata/components.json")
-        return Json.decodeFromString(metadataFile.readText())
-    }
+    suspend fun processComponentLibrary(directoryPath: String) {
+        val directory = validateDirectory(directoryPath)
+        val jsonFiles = findJsonFiles(directory)
 
-    private fun readComponentFile(fileName: String): String {
-        val componentFile = File("src/main/components/$fileName")
-        return componentFile.readText()
-    }
-
-    suspend fun seedComponents() {
-        val metadata = readComponentMetadata()
-
-        metadata.components.forEach { component ->
-            // Read component code
-            val code = readComponentFile(component.fileName)
-
-            embeddingService.embedAndStore(
-                name = component.descriptiveName,
-                data = code,
-            )
+        withContext(Dispatchers.IO) {
+            jsonFiles.forEach { file ->
+                processFile(file)
+            }
         }
     }
+
+    private fun validateDirectory(directoryPath: String): File {
+        val directory = File(directoryPath)
+        if (!directory.exists() || !directory.isDirectory) {
+            throw IllegalArgumentException("Invalid directory path: $directoryPath")
+        }
+        return directory
+    }
+
+    private suspend fun processFile(file: File) {
+        try {
+            val jsonContent = file.readText()
+
+            if (isJsonLd(jsonContent)) {
+                try {
+                    val response = embeddingService.embedAndStore(file.nameWithoutExtension, jsonContent)
+
+                    if (response.status != "success") {
+                        println("Embedding failed for ${file.name}: ${response.message ?: "Unknown error"}")
+                    }
+                } catch (e: Exception) {
+                    println("Error embedding ${file.name}: ${e.message}")
+                }
+            }
+        } catch (e: Exception) {
+            println("Error processing file ${file.name}: ${e.message}")
+        }
+    }
+
+    private fun findJsonFiles(directory: File): List<File> {
+        return directory.listFiles()
+            ?.filter { it.extension.equals("json", ignoreCase = true) }
+            ?: emptyList()
+    }
+
+    /**
+     * Simple regex check to see if the content is JSON-LD
+     * This avoids full JSON parsing
+     */
+    private fun isJsonLd(content: String): Boolean {
+        val contextPattern = "\"@context\"\\s*:".toRegex()
+        val typePattern = "\"@type\"\\s*:".toRegex()
+
+        return contextPattern.containsMatchIn(content) && typePattern.containsMatchIn(content)
+    }
+
 }
