@@ -3,9 +3,9 @@ import atexit
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from embedding_service.data_handler import load_data, save_data
-from embedding_service.embedder import embed
-from embedding_service import vector_store
+from data_handler import load_data, save_data
+from embedder import embed
+import vector_store
 
 app = Flask(__name__)
 CORS(app)
