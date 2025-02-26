@@ -49,7 +49,11 @@ export function MessageBox({ sentMessages }) {
                                 </Markdown>
                             )}
 
-                            <TypographyMuted> {msg.timestamp.split(",")[1]} </TypographyMuted>
+                            <TypographyMuted> {new Date(msg.timestamp).toLocaleString("en-GB",{
+                                hour: "2-digit",
+                                minute:"2-digit",
+                                hour12: true
+                            })} </TypographyMuted>
                         </div>
                     ) : (
                         <div
@@ -76,7 +80,11 @@ export function MessageBox({ sentMessages }) {
                                 </Markdown>
                             )}
 
-                            <TypographyMuted> {msg.timestamp.split(",")[1]}</TypographyMuted>
+                            <TypographyMuted> {new Date(msg.timestamp).toLocaleString("en-GB",{
+                                hour: "2-digit",
+                                minute:"2-digit",
+                                hour12: true
+                            })} </TypographyMuted>
                         </div>
                     )
                 ))}
