@@ -2,15 +2,29 @@ package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.http.*
-import io.ktor.http.auth.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.http.HttpMethod
+import io.ktor.http.auth.parseAuthorizationHeader
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.auth.OAuthServerSettings
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.auth.oauth
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.util.concurrent.TimeUnit
+
+object JWTConstants {
+    const val LEEWAY: Long = 10
+    const val JWK_PROVIDER_CACHE_SIZE: Long = 10
+    const val JWK_PROVIDER_EXPIRES_IN: Long = 24
+    const val JWK_PROVIDER_BUCKET_SIZE: Long = 10
+}
 
 object Authenticators {
     private lateinit var jwkProvider: JwkProvider
@@ -42,10 +56,9 @@ object Authenticators {
     }
 
     /**
-     * Configures the JWT settings for the application.
-     * Settings are loaded from a JSON file containing the relevant fields. In this case, the JSON file is expected to
-     * contain the jwtIssuer field. This is a JWKS Domain from which the application will retrieve the signing key for the JWT.
-     *
+     * Configures the JWT settings for the application. Settings are loaded from a JSON file containing
+     * the relevant fields. In this case, the JSON file is expected to contain the jwtIssuer field.
+     * This is a JWKS Domain from which the application will retrieve the signing key for the JWT.
      * For authorisation, a JWT is expected either in the Authorization header or in am AuthenticatedSession cookie
      *
      * @param config The JSON object containing the configuration settings for the JWT validator.
@@ -54,15 +67,16 @@ object Authenticators {
         val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
         jwkProvider =
             JwkProviderBuilder(issuer)
-                .cached(10, 24, TimeUnit.HOURS)
-                .rateLimited(10, 1, TimeUnit.MINUTES)
+                .cached(JWTConstants.JWK_PROVIDER_CACHE_SIZE, JWTConstants.JWK_PROVIDER_EXPIRES_IN, TimeUnit.HOURS)
+                .rateLimited(JWTConstants.JWK_PROVIDER_BUCKET_SIZE, 1, TimeUnit.MINUTES)
                 .build()
 
         generateVerifier(jwkProvider, issuer)
     }
-    /* Line 61 above is marked as partially covered because of the function it calls. That function uses an inline lambda,
-     * which most coverage tools struggle to appropriately judge in regard to execution status.
-     * */
+    /* Line 61 above is marked as partially covered because of the function it calls.
+     * That function uses an inline lambda, which most coverage tools struggle to appropriately
+     * judge in regard to execution status.
+     */
 
     private fun AuthenticationConfig.generateVerifier(
         jwkProvider: JwkProvider,
@@ -82,7 +96,7 @@ object Authenticators {
                 }
             }
             verifier(jwkProvider, issuer) {
-                acceptLeeway(10)
+                acceptLeeway(JWTConstants.LEEWAY)
             }
             validate { credential ->
                 credential.payload
