@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from embedding_service.embedder import embed, normalize
+from information_retrieval.vector_search.embedder import embed, normalize
 
 
 def test_embed_valid_text():

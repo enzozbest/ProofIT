@@ -1,7 +1,7 @@
 import pytest
 import faiss
 from unittest import mock
-from embedding_service.data_handler import load_data, save_data, FAISS_FILE, MAPPINGS_FILE, VECTOR_DIMENSION  # Replace 'your_module'
+from information_retrieval.data_handler import load_data, save_data, FAISS_FILE, MAPPINGS_FILE, VECTOR_DIMENSION  # Replace 'your_module'
 
 @pytest.fixture
 def mock_faiss_index():
