@@ -2,15 +2,13 @@ import numpy as np
 
 index, store = None, {}
 
-def semantic_search(data):
-    base = np.array(data["embedding"], dtype=np.float32).reshape(1, -1)
-    top_k = data.get("topK", 5)
-
+def semantic_search(embedding: list, top_k: int):
+    base = np.array(embedding, dtype=np.float32).reshape(1, -1)
     if index.ntotal == 0:
-        return -1
+        return []
 
     distances, indices = index.search(base, top_k)
-    results = str([store[idx] for idx in indices[0] if idx in store])
+    results = [store[idx] for idx in indices[0] if idx in store]
     return results
 
 def store_embedding(name: str, vector: np.array) -> bool:
