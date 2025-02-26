@@ -1,19 +1,32 @@
 package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwt.JWT
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
-import io.ktor.util.date.*
+import io.ktor.http.ContentType
+import io.ktor.http.Cookie
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.auth.OAuthAccessTokenResponse
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authentication
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
+import io.ktor.server.sessions.clear
+import io.ktor.server.sessions.sessions
+import io.ktor.server.sessions.set
+import io.ktor.util.date.GMTDate
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_CHECK_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
 import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.USER_INFO_ROUTE
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import redis.Redis
@@ -85,9 +98,9 @@ private fun Route.setLogOutEndpoint(route: String) {
 
 /**
  * Sets up JWT validation route.
- * This route checks for credentials in two places: first the AuthenticatedSession cookie, then the Authorization header.
- * If the credentials are found and the token is valid, the route responds with a JWTValidationResponse object.
- * Otherwise, the route responds with an Unauthorized status code.
+ * This route checks for credentials in two places: first the AuthenticatedSession cookie,
+ * then the Authorization header. If the credentials are found and the token is valid, the route responds
+ * with a JWTValidationResponse object. Otherwise, the route responds with an Unauthorized status code.
  * @param validationRoute The route (as a string) to set up the JWT validation on.
  */
 fun Route.setUpJWTValidation(validationRoute: String) {
@@ -145,7 +158,7 @@ fun Route.setUpUserInfoRoute(
         val token =
             try {
                 Json.decodeFromString<AuthenticatedSession>(sessionJson).token
-            } catch (e: Exception) {
+            } catch (e: SerializationException) {
                 return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token format")
             }
 
@@ -179,24 +192,24 @@ fun Route.setUpCallbackRoute(
 ) {
     get(route) {
         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()
-        if (principal == null) {
-            call.respond(HttpStatusCode.Unauthorized) // Authentication failed, do not grant access.
-            return@get
-        }
-        val token: String? = principal.extraParameters["id_token"]
-        try {
-            val decoded = JWT.decode(token ?: return@get call.respond(HttpStatusCode.Unauthorized))
-            val userId: String =
-                decoded.getClaim("sub").asString() ?: return@get call.respond(HttpStatusCode.Unauthorized)
-            val admin: Boolean =
-                decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+        val token: String =
+            principal?.let {
+                it.extraParameters["id_token"]
+            } ?: return@get call.respond(HttpStatusCode.Unauthorized) // Authentication failed, do not grant access.
 
-            call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
-            cacheSession(token, JWTValidationResponse(userId, admin))
-            val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
-            call.respondRedirect("$redirectDomain$redirectUrl")
-        } catch (e: Exception) {
-            return@get call.respond(HttpStatusCode.Unauthorized) // JWT token is invalid
-        }
+        val decoded =
+            runCatching { JWT.decode(token) }.getOrElse {
+                return@get call.respond(HttpStatusCode.Unauthorized)
+            }
+
+        val userId: String =
+            decoded.getClaim("sub").asString() ?: return@get call.respond(HttpStatusCode.Unauthorized)
+        val admin: Boolean =
+            decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+
+        call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
+        cacheSession(token, JWTValidationResponse(userId, admin))
+        val redirectUrl = call.request.queryParameters["redirect"] ?: "/"
+        call.respondRedirect("$redirectDomain$redirectUrl")
     }
 }
