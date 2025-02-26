@@ -47,7 +47,7 @@ const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessagePr
         if (!message.trim()) return;
         setPrototype(true);
         setPrototypeId(prototypeId+1);
-        const currentTime = new Date().toLocaleString();
+        const currentTime = new Date().toISOString();
 
         const newMessage: Message = {
             role: 'User',
@@ -70,7 +70,7 @@ const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessagePr
 
     useEffect(() => {
         if (llmResponse) {
-            const currentTime = new Date().toLocaleString();
+            const currentTime = new Date().toISOString();
 
             const newLLMMessage: Message = {
                 role: 'LLM',
