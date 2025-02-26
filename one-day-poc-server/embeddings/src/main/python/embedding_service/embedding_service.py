@@ -3,9 +3,9 @@ import atexit
 import numpy as np
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from data_handler import load_data, save_data
-from embedder import embed
-import vector_store
+from embedding_service.data_handler import load_data, save_data
+from embedding_service.embedder import embed
+from embedding_service import vector_store
 
 app = Flask(__name__)
 CORS(app)
@@ -16,7 +16,7 @@ first_request = True
 def startup_once():
     global first_request
     if first_request:
-        vector_store.index, vector_store.vector_store = load_data()
+        vector_store.index, vector_store.store = load_data()
         first_request = False
 
 @app.route('/embeddings/embed', methods=['POST'])
@@ -58,5 +58,5 @@ def semantic_search_route():
 
 
 if __name__ == '__main__':
-    atexit.register(save_data, vector_store.index, vector_store.vector_store)
+    atexit.register(save_data, vector_store.index, vector_store.store)
     app.run(host="0.0.0.0", port=7000)
