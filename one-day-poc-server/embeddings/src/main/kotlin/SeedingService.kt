@@ -2,6 +2,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.net.URL
 
 object SeedingService {
     var logger: Logger = LoggerFactory.getLogger(Seeder::class.java)
@@ -29,5 +30,9 @@ object SeedingService {
         } catch (e: Exception) {
             logger.error("ERROR: Failed to initialize component library: ${e.message}")
         }
+    }
+
+    internal fun getResourceUrl(path: String): URL? {
+        return SeedingService::class.java.classLoader.getResource(path)
     }
 }
