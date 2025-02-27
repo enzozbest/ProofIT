@@ -29,7 +29,12 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      */
     open suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
         val requirementsPrompt = createFunctionalRequirementsPrompt(prompt,keywords)
-        val requirements = ollamaService.generateResponse(requirementsPrompt).response
+        val response = ollamaService.generateResponse(requirementsPrompt)
+        var requirements = ""
+        if (response.isSuccess) {
+            val llmResponse = response.getOrThrow()
+            requirements = llmResponse.mainFile
+        }
         val fullPrompt = createPrompt(requirements)
         return ollamaService.generateResponse(fullPrompt)
     }
