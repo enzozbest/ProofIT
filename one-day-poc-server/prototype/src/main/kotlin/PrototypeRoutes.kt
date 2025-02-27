@@ -17,7 +17,10 @@ object PrototypeRoutes {
 
 // Request and Response DTOs
 @Serializable
-data class GenerateRequest(val prompt: String)
+data class GenerateRequest(
+    val prompt: String,
+    val keywords: List<String>
+)
 
 
 @Serializable
@@ -43,7 +46,7 @@ private fun Route.generatePrototype(prototypeService: PrototypeService) {
     post(PrototypeRoutes.GENERATE) {
         try {
             val request = call.receive<GenerateRequest>()
-            prototypeService.generatePrototype(request.prompt)
+            prototypeService.generatePrototype(request.prompt, request.keywords)
                 .onSuccess { llmResponse ->
                     call.respond(HttpStatusCode.OK, llmResponse)
                 }
