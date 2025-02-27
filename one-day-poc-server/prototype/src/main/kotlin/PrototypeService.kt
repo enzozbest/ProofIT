@@ -27,7 +27,7 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      * @param prompt User requirements for the prototype
      * @return Result containing prototype structure or failure with error details
      */
-    open suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
+    open suspend fun generatePrototype(prompt: String, keywords: List<String>): Result<LlmResponse> {
         val requirementsPrompt = createFunctionalRequirementsPrompt(prompt,keywords)
         val response = ollamaService.generateResponse(requirementsPrompt)
         var requirements = ""
@@ -78,7 +78,7 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      * @param keywords Generated from the original user input
      * @return Formatted prompt with system instructions
      */
-    private fun createFunctionalRequirementsPrompt(userPrompt: String, keywords: String): String {
+    private fun createFunctionalRequirementsPrompt(userPrompt: String, keywords: List<String>): String {
         return """
             You are an AI that generates software prototypes formatted for WebContainers.  
             Your response must be **a single valid JSON object** and contain nothing else—no explanations, preambles, or additional text. 
