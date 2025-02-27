@@ -3,7 +3,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 object Seeder {
-    private val embeddingService = EmbeddingService
+    private val embeddingService = TemplateService
 
     suspend fun processComponentLibrary(directoryPath: String) {
         val directory = validateDirectory(directoryPath)
@@ -30,7 +30,7 @@ object Seeder {
 
             if (isJsonLd(jsonContent)) {
                 try {
-                    val response = embeddingService.embedAndStore(file.nameWithoutExtension, jsonContent)
+                    val response = embeddingService.storeTemplate(file.nameWithoutExtension, jsonContent)
 
                     if (response.status != "success") {
                         println("Embedding failed for ${file.name}: ${response.message ?: "Unknown error"}")
@@ -44,11 +44,11 @@ object Seeder {
         }
     }
 
-    private fun findJsonFiles(directory: File): List<File> {
-        return directory.listFiles()
+    private fun findJsonFiles(directory: File): List<File> =
+        directory
+            .listFiles()
             ?.filter { it.extension.equals("json", ignoreCase = true) }
             ?: emptyList()
-    }
 
     /**
      * Simple regex check to see if the content is JSON-LD
@@ -60,5 +60,4 @@ object Seeder {
 
         return contextPattern.containsMatchIn(content) && typePattern.containsMatchIn(content)
     }
-
 }
