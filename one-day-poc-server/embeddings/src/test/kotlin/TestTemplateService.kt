@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
 
-class TestEmbeddingService {
+class TestTemplateService {
     private val embedResponseSuccessJson =
         """
         {"status":"success", "embedding":"0.1,0.2,0.3"}
@@ -40,9 +40,9 @@ class TestEmbeddingService {
                 }
 
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
-            val response = EmbeddingService.embed("Test text", "Test name")
+            val response = TemplateService.embed("Test text", "Test name")
             assertEquals("success", response.status)
             val floats = response.embedding?.split(",")?.map { it.toFloat() } ?: emptyList()
             assertEquals(listOf(0.1f, 0.2f, 0.3f), floats)
@@ -60,10 +60,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.embed("Test text", "Test name")
+                TemplateService.embed("Test text", "Test name")
             }
         }
 
@@ -79,10 +79,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.embed("Test text", "Test name")
+                TemplateService.embed("Test text", "Test name")
             }
         }
 
@@ -103,9 +103,9 @@ class TestEmbeddingService {
                     }
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
-            val response = EmbeddingService.embedAndStore("Test name", "Test text")
+            val response = TemplateService.storeTemplate("Test name", "Test text")
             assertEquals("success", response.status)
         }
 
@@ -121,10 +121,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.embedAndStore("Test name", "Test text")
+                TemplateService.storeTemplate("Test name", "Test text")
             }
         }
 
@@ -140,10 +140,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.embedAndStore("Test name", "Test text")
+                TemplateService.storeTemplate("Test name", "Test text")
             }
         }
 
@@ -164,9 +164,9 @@ class TestEmbeddingService {
                     }
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
-            val response = EmbeddingService.semanticSearch(listOf(0.1f, 0.2f, 0.3f))
+            val response = TemplateService.search(listOf(0.1f, 0.2f, 0.3f), "Test query")
             assertEquals("success", response.status)
             assertEquals(listOf("TemplateA", "TemplateB"), response.matches)
         }
@@ -175,7 +175,7 @@ class TestEmbeddingService {
     fun `Test semanticSearch throws exception if response is not formatted correctly`(): Unit =
         runBlocking {
             val engine =
-                MockEngine { request ->
+                MockEngine { _ ->
                     respond(
                         content = "invalid json",
                         status = HttpStatusCode.OK,
@@ -183,10 +183,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.semanticSearch(listOf(0.1f, 0.2f, 0.3f))
+                TemplateService.search(listOf(0.1f, 0.2f, 0.3f), "Test query")
             }
         }
 
@@ -194,7 +194,7 @@ class TestEmbeddingService {
     fun `Test semanticSearch throws exception if response is empty`(): Unit =
         runBlocking {
             val engine =
-                MockEngine { request ->
+                MockEngine { _ ->
                     respond(
                         content = "",
                         status = HttpStatusCode.OK,
@@ -202,10 +202,10 @@ class TestEmbeddingService {
                     )
                 }
             val client = HttpClient(engine)
-            EmbeddingService.httpClient = client
+            TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                EmbeddingService.semanticSearch(listOf(0.1f, 0.2f, 0.3f))
+                TemplateService.search(listOf(0.1f, 0.2f, 0.3f), "Test query")
             }
         }
 }
