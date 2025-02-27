@@ -12,7 +12,7 @@ object SeedingService {
      */
     suspend fun seedComponents() {
         val seeder = Seeder
-        val resourceUrl = SeedingService::class.java.classLoader.getResource("components/metadata")
+        val resourceUrl = getResourceUrl("components/metadata")
 
         if (resourceUrl == null) {
             logger.error("ERROR: Components metadata directory not found in resources")
