@@ -24,6 +24,11 @@ import org.jsoup.safety.Safelist
 private var client = HttpClient(CIO)
 private var ENDPOINT = "http://localhost:8000/api/prototype/generate"
 
+data class SanitisedPromptResult(
+    val prompt: String,
+    val keywords: List<String>
+)
+
 internal fun setTestClient(testClient: HttpClient) {
     client = testClient
 }
@@ -50,12 +55,11 @@ private suspend fun handleJsonRequest(request: Request, call: ApplicationCall) {
     handlePrototypeResponse(prototypeResponse, call)
 }
 
-//For now, just return the sanitised prompt,later we can decide about the keywords
-internal fun sanitisePrompt(prompt: String):String {
+internal fun sanitisePrompt(prompt: String): SanitisedPromptResult {
     val sanitisedPrompt = cleanPrompt(prompt)
     val keywords = extractKeywords(sanitisedPrompt)
     println("Keywords are: $keywords")
-    return sanitisedPrompt
+    return SanitisedPromptResult(sanitisedPrompt, keywords)
 }
 
 /*
@@ -96,10 +100,13 @@ private fun extractKeywords(prompt: String): List<String> {
     return keywordSet.filter { it in lowercasePrompt }
 }
 
-private suspend fun makePrototypeRequest(prompt: String): HttpResponse {
+private suspend fun makePrototypeRequest(sanitisedResult: SanitisedPromptResult): HttpResponse {
     return client.post(ENDPOINT) {
         contentType(ContentType.Application.Json)
-        setBody("""{"prompt": "$prompt"}""")
+        setBody("""{
+            |"prompt": "${sanitisedResult.prompt}"
+            |"keywords": "${sanitisedResult.keywords}"
+            |}""".trimMargin())
     }
 }
 
