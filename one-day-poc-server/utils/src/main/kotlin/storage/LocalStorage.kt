@@ -31,7 +31,7 @@ object LocalStorage {
      */
     fun getFile(path: String): ByteArray? =
         runCatching {
-            Path(path).toFile().toString().toByteArray()
+            Path(path).toFile().readBytes()
         }.getOrNull()
 
     /**
