@@ -1,7 +1,11 @@
 import kotlinx.coroutines.runBlocking
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 
 object SeedingService {
+    var logger: Logger = LoggerFactory.getLogger(Seeder::class.java)
+
     /**
      * Seeds the component library by processing all JSON-LD files in the given directory.
      */
@@ -10,7 +14,7 @@ object SeedingService {
         val resourceUrl = SeedingService::class.java.classLoader.getResource("components/metadata")
 
         if (resourceUrl == null) {
-            println("ERROR: Components metadata directory not found in resources")
+            logger.error("ERROR: Components metadata directory not found in resources")
             return
         }
 
@@ -22,9 +26,8 @@ object SeedingService {
             runBlocking {
                 seeder.processComponentLibrary(metadataPath)
             }
-            println("Component library initialization complete")
         } catch (e: Exception) {
-            println("ERROR: Failed to initialize component library: ${e.message}")
+            logger.error("ERROR: Failed to initialize component library: ${e.message}")
         }
     }
 }
