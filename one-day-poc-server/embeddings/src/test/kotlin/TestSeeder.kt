@@ -15,7 +15,7 @@ class TestSeeder {
 
     @BeforeEach
     fun setUp() {
-        mockkObject(EmbeddingService)
+        mockkObject(TemplateService)
 
         originalLogger = Seeder.logger
         mockLogger = mockk<Logger>(relaxed = true)
@@ -32,8 +32,8 @@ class TestSeeder {
     fun `processComponentLibrary should process valid directory`() = runBlocking {
         // Mock the embedding service response
         coEvery {
-            EmbeddingService.embedAndStore(any(), any())
-        } returns EmbeddingStoreResponse("success")
+            TemplateService.storeTemplate(any(), any())
+        } returns StoreTemplateResponse("success")
 
         val tempDirPath = createTempDirectory(prefix = "test")
         val tempDir = File(tempDirPath.pathString)
@@ -52,7 +52,7 @@ class TestSeeder {
             Seeder.processComponentLibrary(tempDir.absolutePath)
 
             coVerify {
-                EmbeddingService.embedAndStore("test", any())
+                TemplateService.storeTemplate("test", any())
             }
         } finally {
             tempDir.deleteRecursively()
@@ -71,8 +71,8 @@ class TestSeeder {
     @Test
     fun `processComponentLibrary should process only JSON-LD files`() = runBlocking {
         coEvery {
-            EmbeddingService.embedAndStore(any(), any())
-        } returns EmbeddingStoreResponse("success")
+            TemplateService.storeTemplate(any(), any())
+        } returns StoreTemplateResponse("success")
 
         val tempDirPath = createTempDirectory(prefix = "test")
         val tempDir = File(tempDirPath.pathString)
@@ -102,12 +102,12 @@ class TestSeeder {
 
             // Verify embedAndStore was called only once (for the JSON-LD file)
             coVerify(exactly = 1) {
-                EmbeddingService.embedAndStore(any(), any())
+                TemplateService.storeTemplate(any(), any())
             }
 
             // Verify embedAndStore was called with the correct file name
             coVerify {
-                EmbeddingService.embedAndStore("test-ld", any())
+                TemplateService.storeTemplate("test-ld", any())
             }
         } finally {
             tempDir.deleteRecursively()
@@ -117,7 +117,7 @@ class TestSeeder {
     @Test
     fun `processComponentLibrary should handle embedding service errors`() = runBlocking {
         coEvery {
-            EmbeddingService.embedAndStore(any(), any())
+            TemplateService.storeTemplate(any(), any())
         } throws RuntimeException("Test exception")
 
         val tempDirPath = createTempDirectory(prefix = "test")
@@ -138,7 +138,7 @@ class TestSeeder {
 
             // Verify embedAndStore was called
             coVerify {
-                EmbeddingService.embedAndStore("test", any())
+                TemplateService.storeTemplate("test", any())
             }
 
             verify { mockLogger.error(any()) }
@@ -150,8 +150,8 @@ class TestSeeder {
     @Test
     fun `processComponentLibrary should handle failed embedding responses`() = runBlocking {
         coEvery {
-            EmbeddingService.embedAndStore(any(), any())
-        } returns EmbeddingStoreResponse("failed", "Test failure")
+            TemplateService.storeTemplate(any(), any())
+        } returns StoreTemplateResponse("failed", "Test failure")
 
         val tempDirPath = createTempDirectory(prefix = "test")
         val tempDir = File(tempDirPath.pathString)
@@ -171,7 +171,7 @@ class TestSeeder {
             Seeder.processComponentLibrary(tempDir.absolutePath)
 
             coVerify {
-                EmbeddingService.embedAndStore("test", any())
+                TemplateService.storeTemplate("test", any())
             }
 
             verify { mockLogger.error(any()) }

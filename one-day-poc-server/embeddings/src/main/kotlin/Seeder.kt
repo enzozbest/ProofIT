@@ -6,7 +6,7 @@ import java.io.File
 
 object Seeder {
     var logger: Logger = LoggerFactory.getLogger(Seeder::class.java)
-    private val embeddingService = EmbeddingService
+    private val embeddingService = TemplateService
 
     suspend fun processComponentLibrary(directoryPath: String) {
         val directory = validateDirectory(directoryPath)
@@ -33,7 +33,7 @@ object Seeder {
 
             if (isJsonLd(jsonContent)) {
                 try {
-                    val response = embeddingService.embedAndStore(file.nameWithoutExtension, jsonContent)
+                    val response = embeddingService.storeTemplate(file.nameWithoutExtension, jsonContent)
 
                     if (response.status != "success") {
                         logger.error("Embedding failed for ${file.name}: ${response.message}")
