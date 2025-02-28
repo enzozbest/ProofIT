@@ -1,11 +1,5 @@
 package kcl.seg.rtt.prototype
 
-import org.jsoup.Jsoup
-import org.jsoup.parser.Parser
-import kotlin.io.path.createTempFile
-import kotlin.io.path.writeText
-import java.nio.file.Path
-
 
 /**
  * Result object indicating whether the new template was validated successfully or not.
@@ -15,6 +9,7 @@ data class TemplateValidationResult(
     val success: Boolean,
     val errorMessage: String? = null
 )
+
 
 /**
  * Handles new template detection and validation logic.
@@ -65,70 +60,6 @@ object TemplateManager {
         return TemplateValidationResult(success = true)
     }
 
-    private fun checkPythonSyntax(pythonCode: String): Boolean {
-        val tempPath: Path = createTempFile(prefix = "pythonSnippet", suffix = ".py")
-
-        tempPath.writeText(pythonCode)
-
-        val process = ProcessBuilder("python", "-m", "py_compile", tempPath.toString())
-            .redirectErrorStream(true)
-            .start()
-
-        val exitCode = process.waitFor()
-        return exitCode == 0
-    }
-
-    private fun checkCssSyntax(cssCode: String): Boolean {
-        val tempPath = createTempFile("cssSnippet", ".css")
-
-        tempPath.writeText(cssCode)
-        val process = ProcessBuilder("npx", "stylelint", tempPath.toString())
-            .redirectErrorStream(true)
-            .start()
-
-        val exitCode = process.waitFor()
-        return exitCode == 0
-    }
-
-    private fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean {
-        return try {
-
-            // Usually Jsoup tries to "tolerate" bad HTML.
-            Jsoup.parse(htmlCode, "", Parser.htmlParser())
-            true
-        } catch (e: Exception) {
-            // if you want to check for certain warnings, handle it here.
-            false
-        }
-    }
-
-    private fun checkJavaScriptSyntax(jsCode: String): Boolean {
-        val tempPath = createTempFile("jsSnippet", ".js")
-        tempPath.writeText(jsCode)
-
-        val process = ProcessBuilder("node", "--check", tempPath.toString())
-            .redirectErrorStream(true)
-            .start()
-
-        val exitCode = process.waitFor()
-        return exitCode == 0
-    }
-
-
-    /**
-     * Dummy function to simulate a "compile" or "run" check on the template code.
-     * Returns true if it "works," false if there's an error.
-     */
-    private fun runCompilerCheck(code: String, language: String): Boolean {
-        return when (language.lowercase()) {
-            "python" -> checkPythonSyntax(code)
-            "javascript" -> checkJavaScriptSyntax(code)
-            "css" -> checkCssSyntax(code)
-            "html" -> checkHtmlSyntaxWithJsoup(code)
-            else -> false // or throw an exception
-        }
-    }
-
     /**
      * If the new template is validated, call the embedding function
      * to store it in a DB, or S3, etc.
@@ -141,4 +72,5 @@ object TemplateManager {
         // val vector = embeddingService.generateVector(llmRawText)
         // database.saveTemplateVector(vector)
     }
+
 }
