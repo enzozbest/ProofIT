@@ -13,7 +13,6 @@ import kotlinx.serialization.Serializable
 data class LlmResponse(
     val mainFile: String,
     val files: Map<String, FileContent>,
-    val rawLLMText: String? = null
 )
 
 @Serializable
@@ -41,33 +40,36 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      *         if any validation step fails (e.g., new template invalid, code compile error).
      */
     suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
+
         val fullPrompt = createPrompt(prompt)
         val llmResult = ollamaService.generateResponse(fullPrompt)
+        val responseObj = llmResult.getOrNull() ?: return llmResult
 
-        val rawText = llmResult.getOrNull()?.rawLLMText?: "" // or something appropriate
-        if (TemplateManager.detectNewTemplate(rawText)) {
-            val validation = TemplateManager.validateNewTemplate(rawText)
-            if (!validation.success) {
-                // fail the result so the LLM can regenerate
-                return Result.failure(RuntimeException("Template validation failed: ${validation.errorMessage}"))
+        // 2) For each language snippet in LlmResponse.snippets, run a compile check
+        for ((language, fileContent) in responseObj.files) {
+            // Extract the actual snippet string
+            val codeSnippet = fileContent.content
+
+            // 1) Syntax / compile check
+            if (!runCompilerCheck(codeSnippet, language)) {
+                return Result.failure(
+                    RuntimeException("Compile or syntax check failed for language=$language")
+                )
             }
-            // if success, store embeddings
-            TemplateManager.storeNewTemplateEmbeddings(rawText)
-        }
 
-
-        // TODO: Need to implement real compiler check here based off of parsed response
-        // whether this will be by string, or by parsing the large string into separate files
-
-        // temp check
-        val compiledOk = runCompileCheckOnSite(llmResult.getOrNull())
-        if (!compiledOk) {
-            return Result.failure(RuntimeException("Site code failed to compile or run. Regenerate needed."))
+            // 2) Security checks
+            val isSafe = secureCodeCheck(codeSnippet, language)
+            if (!isSafe) {
+                return Result.failure(
+                    RuntimeException("Code is not safe for language=$language")
+                )
+            }
         }
 
 
         return llmResult
     }
+
 
     /**
      * Performs a naive "compile" or validation check on the files within the given [response].
