@@ -29,7 +29,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
 
     implementation(project(":auth"))
-    implementation(project(":prototype"))
+    implementation(project(":prompting"))
     implementation(project(":utils"))
 }
 

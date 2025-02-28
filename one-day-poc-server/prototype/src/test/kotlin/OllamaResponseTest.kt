@@ -13,20 +13,20 @@ class OllamaResponseTest {
     fun `Test OllamaResponse Class`() {
         val response = OllamaResponse("model", "created_at", "response", false, "done_reason")
         assertEquals("model", response.model)
-        assertEquals("created_at", response.created_at)
+        assertEquals("created_at", response.createdAt)
         assertEquals("response", response.response)
         assertFalse(response.done)
-        assertEquals("done_reason", response.done_reason)
+        assertEquals("done_reason", response.doneReason)
     }
 
     @Test
     fun `Test OllamaResponse serialises to JSON`() {
         val response = OllamaResponse("model", "created_at", "response", false, "done_reason")
         val json = Json.encodeToString(response)
-        val expected = """{"model":"model","created_at":"created_at","response":"response","done":false,"done_reason":"done_reason"}"""
+        val expected =
+            """{"model":"model","created_at":"created_at","response":"response","done":false,"done_reason":"done_reason"}"""
         assertEquals(expected, json)
     }
-
 
     @Test
     fun `Test OllamaResponse de-serialises from JSON`() {
