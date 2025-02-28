@@ -44,7 +44,7 @@ fun secureCodeCheck(code: String, language: String): Boolean {
         return false
     }
 
-    // If you intend to run the code, consider a sandbox here
+    // Consider sandbox here to run code in a safe environment
 
     // All checks passed
     return true
@@ -109,7 +109,7 @@ fun scanForDangerousPatterns(code: String, language: String): Boolean {
  */
 fun sanitizeHtml(originalHtml: String): String {
     // Using Jsoup's "clean" with a relatively permissive safelist
-    // You can pick from Whitelist.none(), Whitelist.basic(), etc.
+    // We can pick from Whitelist.none(), Whitelist.basic(), etc.
     return Jsoup.clean(originalHtml, Safelist.relaxed())
 }
 
