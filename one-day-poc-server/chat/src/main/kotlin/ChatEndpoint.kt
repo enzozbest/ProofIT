@@ -1,9 +1,9 @@
 package kcl.seg.rtt.chat
 
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import kcl.seg.rtt.chat.routes.*
-import io.ktor.server.auth.*
 
 const val CHAT = "/api/chat"
 const val GET = "$CHAT/get"
@@ -23,17 +23,16 @@ class ChatEndpoint {
             uploadDirectory = DEFAULT_UPLOAD_DIR
         }
 
-        fun getUploadDirectory(): String {
-            return uploadDirectory
-        }
+        fun getUploadDirectory(): String = uploadDirectory
     }
 }
 
 fun Application.chatModule() {
     routing {
+        jsonRoutes()
         authenticate("jwt-verifier") {
             chatRoutes()
-            jsonRoutes()
+
             uploadRoutes(ChatEndpoint.getUploadDirectory())
         }
     }

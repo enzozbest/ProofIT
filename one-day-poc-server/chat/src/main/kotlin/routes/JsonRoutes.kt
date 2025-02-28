@@ -25,10 +25,16 @@ internal fun setTestEndpoint(endpoint: String) {
 
 fun Route.jsonRoutes() {
     post(JSON) {
-        runCatching {
-            val request = call.receive<Request>()
-            handleJsonRequest(request, call)
-        }.onFailure { call.respondText("Invalid request! ${call.request}", status = HttpStatusCode.BadRequest) }
+        val request: Request =
+            runCatching {
+                call.receive<Request>()
+            }.getOrElse {
+                return@post call.respondText(
+                    "Invalid request ${it.message}",
+                    status = HttpStatusCode.BadRequest,
+                )
+            }
+        handleJsonRequest(request, call)
     }
 }
 
