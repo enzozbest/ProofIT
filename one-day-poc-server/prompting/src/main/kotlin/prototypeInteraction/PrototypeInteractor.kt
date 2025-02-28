@@ -1,10 +1,11 @@
 package kcl.seg.rtt.prompting.prototypeInteraction
 
-import kcl.seg.rtt.prototype.LlmResponse
+import kcl.seg.rtt.prototype.OllamaResponse
+import kcl.seg.rtt.prototype.PrototypeMain
 
 object PrototypeInteractor {
     suspend fun prompt(
         prompt: String,
         model: String,
-    ): LlmResponse? = null
+    ): OllamaResponse? = PrototypeMain(model).prompt(prompt)
 }
