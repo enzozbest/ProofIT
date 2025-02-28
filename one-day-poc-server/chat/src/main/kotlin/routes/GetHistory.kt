@@ -1,11 +1,12 @@
 package kcl.seg.rtt.chat.routes
 
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import kcl.seg.rtt.chat.GET
 
 /*
-    * This is a placeholder for the chat history route.
+ * This is a placeholder for the chat history route.
  */
 fun Route.chatRoutes() {
     get(GET) {

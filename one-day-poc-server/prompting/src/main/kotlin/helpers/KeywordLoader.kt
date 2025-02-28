@@ -1,5 +1,6 @@
-package kcl.seg.rtt.chat.utils
+package helpers
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 object KeywordLoader {
@@ -11,5 +12,7 @@ object KeywordLoader {
     fun getKeywordsList(): List<String> = keywords
 }
 
-@kotlinx.serialization.Serializable
-data class KeywordList(val keywords: List<String>)
+@Serializable
+data class KeywordList(
+    val keywords: List<String>,
+)
