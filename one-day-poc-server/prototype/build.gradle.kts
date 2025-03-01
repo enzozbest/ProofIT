@@ -25,6 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-client-plugins:$ktorVersion")
     implementation("org.jetbrains.exposed:exposed-core:0.41.1")
     implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
+    implementation("org.jsoup:jsoup:1.16.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
     testImplementation("io.ktor:ktor-client-mock:3.0.3")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")

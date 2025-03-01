@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
@@ -190,7 +189,7 @@ class TestAuthentication {
                 "n": "$modulus",
                 "e": "$exponent"
             }
-            """.trimIndent()
+        """.trimIndent()
     }
 
     private fun setUpMockJWKSEndpoint(port: Int) {
