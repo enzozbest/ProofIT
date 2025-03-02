@@ -41,43 +41,24 @@ export function ChatBox({ message, setMessage, handleSend, setError}) {
     }
 
     return (
-        <div
-            style={{
-                display: "flex",
-                padding: "10px",
-                borderTop: "1px solid #ccc",
-            }}
-        >
-            <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="How can we help you today?"
-                onKeyDown={handleKeyDown}
-                style={{
-                    flex: 1,
-                    padding: "10px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px",
-                    marginRight: "10px",
-                }}
-            />
-            <button
-                disabled = {!message}
-                onClick={handleButton}
-                style={{
-                    padding: "10px 20px",
-                    backgroundColor: "#3f0f6e",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                }}
-            >
-                Send
-            </button>
+    <div className="flex p-2.5 border-t border-gray-300 text-secondary-foreground ">
+    <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="How can we help you today?"
+        onKeyDown={handleKeyDown}
+        className="flex-1 p-2.5 rounded-sm mr-2.5 focus:outline-none focus:ring-2 focus:ring-muted/50"
+    />
+    <button
+        type = "button"
+      disabled={!message}
+      onClick={handleButton}
+      className="py-2.5 px-5 bg-secondary text-white border-0 rounded-sm cursor-pointer disabled:opacity-50"
+    >
+      Send
+    </button>
+    </div>
 
-        
-        </div>
     );
 }
