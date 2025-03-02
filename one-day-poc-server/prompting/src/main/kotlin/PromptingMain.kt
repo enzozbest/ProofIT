@@ -1,15 +1,18 @@
 package kcl.seg.rtt.prompting
 
 import helpers.SanitisationTools
+import io.ktor.server.routing.*
 import kcl.seg.rtt.prompting.helpers.PromptingTools
 import kcl.seg.rtt.prompting.prototypeInteraction.PrototypeInteractor
+import kcl.seg.rtt.prototype.FileContent
+import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PromptException
+import kcl.seg.rtt.prototype.secureCodeCheck
+import kcl.seg.rtt.webcontainer.WebContainerState
+import kcl.seg.rtt.webcontainer.parseCode
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import java.time.Instant
 
 data class ChatResponse(
@@ -45,6 +48,18 @@ class PromptingMain(
         return response?.let {
             println(response)
             val jsonResponse = runCatching { Json.decodeFromString<JsonObject>(response.response) }.getOrNull()
+            val languageMap: Map<String, String> = jsonResponse?.mapValues {
+                val codeElement = it.value
+                // if it's just a primitive string, you can do:
+                codeElement.jsonPrimitive.contentOrNull ?: ""
+            } ?: emptyMap()
+            val llmResponse = LlmResponse(
+                // Possibly discard mainFile or set it to "N/A"
+                mainFile = response.response,
+                files = languageMap.mapValues { (_, snippet) -> FileContent(snippet) }
+            )
+            onSiteSecurityCheck(llmResponse)
+            WebContainerState.updateResponse(llmResponse)
             // Webcontainer.send(webContainerResponse())
             val chatResponse = chatResponse(jsonResponse ?: JsonObject(emptyMap()))
             println(chatResponse)
@@ -62,6 +77,15 @@ class PromptingMain(
             response = "Here is your prototype: ${jsonResponse.jsonPrimitive.content}",
             time = Instant.now().toString(),
         )
+
+    private fun onSiteSecurityCheck(llmResponse: LlmResponse) {
+        for ((language, fileContent) in llmResponse.files) {
+            val codeSnippet = fileContent.content
+            if (!secureCodeCheck(codeSnippet, language)) {
+                throw RuntimeException("Code is not safe for language=$language")
+            }
+        }
+    }
 
     private fun webContainerResponse() {
         // TODO extract web container response from model response

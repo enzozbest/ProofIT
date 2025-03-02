@@ -43,29 +43,6 @@ open class PrototypeService(private val ollamaService: OllamaService) {
 
         val fullPrompt = createPrompt(prompt)
         val llmResult = ollamaService.generateResponse(fullPrompt)
-        val responseObj = llmResult.getOrNull() ?: return llmResult
-
-        // 2) For each language snippet in LlmResponse.snippets, run a compile check
-        for ((language, fileContent) in responseObj.files) {
-            // Extract the actual snippet string
-            val codeSnippet = fileContent.content
-
-            // 1) Syntax / compile check
-            if (!runCompilerCheck(codeSnippet, language)) {
-                return Result.failure(
-                    RuntimeException("Compile or syntax check failed for language=$language")
-                )
-            }
-
-            // 2) Security checks
-            val isSafe = secureCodeCheck(codeSnippet, language)
-            if (!isSafe) {
-                return Result.failure(
-                    RuntimeException("Code is not safe for language=$language")
-                )
-            }
-        }
-
 
         return llmResult
     }
