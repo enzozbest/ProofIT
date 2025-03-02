@@ -137,6 +137,7 @@ dependencies {
     implementation(project(":routes"))
     implementation(project(":utils"))
     implementation(project(":chat"))
+    implementation(project(":prompting"))
     implementation("org.jsoup:jsoup:1.15.3")
 }
 
