@@ -1,12 +1,19 @@
 package kcl.seg.rtt.prompting.helpers
 
 object PromptingTools {
+    /**
+     * Creates functional requirements following the user prompt and extracted keywords
+     *
+     * @param prompt Generated from the original user input
+     * @param keywords Extracted from the original user input
+     * @return Formatted prompt with system instructions
+     */
     fun functionalRequirementsPrompt(
         prompt: String,
         keywords: List<String>,
     ): String =
         """
-        You are an AI that generates software prototypes formatted for WebContainers.
+        You are an AI that generates functional requirements for a software protoype, formatted for WebContainers.
         Your response must be **a single valid JSON object** and contain nothing else—no explanations, preambles, or additional text.
         You should generate functional requirements, ensuring to add all functionality you think the user would want and make it interactive from the very start, even with dummy values.
         Do not include the phrase "\n" in your list of functional requirements
@@ -41,7 +48,7 @@ object PromptingTools {
         If you are creating a multi page website, please provide only one file with all HTML CSS and JS 
         Different pages must be represented by different divs with a class of "page" and only one div with a class of "active" 
         Do not include "\n" in the files
-        You should generate the code off the functional requirements in the user prompt and include dummy values to allow immediate testing
+        You should generate the code from the functional requirements in the user prompt and include dummy values to allow immediate testing
         
         ### JSON Structure:
         - `"mainFile"`: Specifies the main entry file (e.g., `"index.js"`).
