@@ -1,82 +1,82 @@
 package kcl.seg.rtt.webcontainer
 
-import kotlinx.serialization.Serializable
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import io.ktor.http.*
 import io.ktor.server.routing.*
+import io.ktor.http.*
+import kcl.seg.rtt.prototype.LlmResponse
 
-
-// Data class to hold prototype content
-// Can change to relevant languages
-@Serializable
-data class WebContainerContent(
-    val html: String,
-    val css: String,
-    val js: String
-)
-
-@Serializable
-class WebContainer {
-
-
-    /**
-     * Parses the prototype content from the given [prototypeString].
-     *
-     * @param prototypeString The string to parse.
-     * @return The parsed [WebContainerContent].
-     */
-    private fun parsePrototype(prototypeString: String) : String{
-        // Change based off our LLM Response
-        return prototypeString
+// Add this singleton object to store the latest response
+object WebContainerState {
+    private var latestResponse: LlmResponse? = null
+    
+    fun updateResponse(response: LlmResponse) {
+        latestResponse = response
     }
+    
+    fun getLatestResponse(): LlmResponse? = latestResponse
+}
 
-    /**
-     * Attempts to retrieve the "id" parameter from [call].
-     * If missing or blank, responds with [HttpStatusCode.BadRequest] and returns `null`.
-     *
-     * @param call The [ApplicationCall] for the current request.
-     * @param errorMessage Optional custom error message for missing/blank ID.
-     * @return The ID string if valid, otherwise `null` (and an HTTP 400 response is sent).
-     */
-    suspend fun getValidPrototypeIdOrRespond(call: ApplicationCall, errorMessage: String = "Missing ID."): String? {
-        val id = call.parameters["id"]
-        if (id.isNullOrBlank()) {
-            call.respond(HttpStatusCode.BadRequest, errorMessage)
-            return null
-        }
-        return id
-    }
-
-    /**
-     * Defines the routes for the WebContainer.
-     *
-     * @see getValidPrototypeIdOrRespond
-     */
-    fun Route.webcontainerRoutes() {
-        get("/webcontainer/{id}") {
-            // Reuse the ID validator function
-            val prototypeId = getValidPrototypeIdOrRespond(call) ?: return@get
-
-            val content = "<html><body><h1>Hello from Prototype $prototypeId</h1></body></html>"
-            parsePrototype(content)
-            if (content.isNullOrEmpty()) {
-                call.respond(HttpStatusCode.NotFound, "No content for $prototypeId")
-            } else {
-                call.respondText(content, ContentType.Text.Html)
+/**
+ * Defines routes to serve code snippets from an [LlmResponse]
+ * at /prototype/<language>.
+ */
+fun Route.parseCode(llmResponse: LlmResponse) {
+    // For each language key in llmResponse.files, set up a GET route
+    llmResponse.files.forEach { (language, fileContent) ->
+        get("/prototype/$language") {
+            val codeSnippet = fileContent.content
+            // Determine ContentType based on language
+            val contentType = when (language.lowercase()) {
+                "html" -> ContentType.Text.Html
+                "css" -> ContentType.Text.CSS
+                "js", "javascript" -> ContentType.Text.JavaScript
+                else -> ContentType.Text.Plain  // python, etc. served as text
             }
+
+            call.respondText(codeSnippet, contentType)
         }
     }
 }
 
 // Extension function for Application
-fun Application.configureWebContainer() {
-
+fun Application.WebContainer() {
     routing {
-        val webContainer = WebContainer()
-        with(webContainer) { webcontainerRoutes() }
-
+        route("/prototype") {
+            get("/{language}") {
+                val language = call.parameters["language"] ?: return@get call.respondText(
+                    "Missing language parameter", 
+                    status = HttpStatusCode.BadRequest
+                )
+                
+                val response = WebContainerState.getLatestResponse()
+                if (response == null) {
+                    call.respondText(
+                        "No prototype available yet", 
+                        status = HttpStatusCode.NotFound
+                    )
+                    return@get
+                }
+                
+                val fileContent = response.files[language]
+                if (fileContent == null) {
+                    call.respondText(
+                        "No content available for language: $language", 
+                        status = HttpStatusCode.NotFound
+                    )
+                    return@get
+                }
+                
+                // Determine ContentType based on language
+                val contentType = when (language.lowercase()) {
+                    "html" -> ContentType.Text.Html
+                    "css" -> ContentType.Text.CSS
+                    "js", "javascript" -> ContentType.Text.JavaScript
+                    else -> ContentType.Text.Plain
+                }
+                
+                call.respondText(fileContent.content, contentType)
+            }
+        }
     }
 }
-
-
