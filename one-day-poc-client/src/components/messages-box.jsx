@@ -20,29 +20,13 @@ export function MessageBox({ sentMessages }) {
     return(
         <>
             {/* Message List */}
-            <div
-                style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    padding: "10px",
-                    display: "flex",
-                    flexDirection: "column",
-                }}
-            >
+            <div className="flex flex-col flex-1 overflow-y-auto p-2.5 text-secondary-foreground">
                 {/*List of messages*/}
                 {sentMessages.map((msg, index) => (
                     msg.role === "User" ? (
                         <div
                             key={index}
-                            style={{
-                                padding: "10px",
-                                backgroundColor: "#f1f1f1",
-                                borderRadius: "5px",
-                                marginBottom: "10px",
-                                alignSelf: "flex-end",
-                                wordWrap: "break-word",
-                                maxWidth: "70%",
-                            }}
+                            className="p-2.5 bg-[#f1f1f1] rounded mb-2.5 self-end break-words max-w-[70%]"
                         >
                             
                             {msg.content && (
@@ -70,15 +54,7 @@ export function MessageBox({ sentMessages }) {
                     ) : (
                         <div
                             key={index}
-                            style={{
-                                padding: "10px",
-                                backgroundColor: "#f1f1f1",
-                                borderRadius: "5px",
-                                marginBottom: "10px",
-                                alignSelf: "flex-start",
-                                wordWrap: "break-word",
-                                maxWidth: "70%",
-                            }}
+                            className="p-2.5 bg-[#f1f1f1] rounded mb-2.5 self-start break-words max-w-[70%]"
                         >
                             {msg.content && (
                                 <Markdown
