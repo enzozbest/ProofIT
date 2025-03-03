@@ -39,13 +39,13 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      * @return A [Result] containing an [LlmResponse] if all validations succeed, or a failed [Result]
      *         if any validation step fails (e.g., new template invalid, code compile error).
      */
-    suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
+    // suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
 
-        val fullPrompt = createPrompt(prompt)
-        val llmResult = ollamaService.generateResponse(fullPrompt)
+    //     val fullPrompt = createPrompt(prompt)
+    //     val llmResult = ollamaService.generateResponse(fullPrompt)
 
-        return llmResult
-    }
+    //     return llmResult
+    // }
 
 
     /**
