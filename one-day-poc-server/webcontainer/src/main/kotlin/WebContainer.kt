@@ -40,7 +40,7 @@ fun Route.parseCode(llmResponse: LlmResponse) {
 }
 
 // Extension function for Application
-fun Application.WebContainer() {
+fun Application.configureWebContainer() {
     routing {
         route("/prototype") {
             get("/{language}") {

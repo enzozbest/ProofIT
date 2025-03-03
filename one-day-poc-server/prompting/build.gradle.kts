@@ -19,6 +19,7 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation(project(":prototype"))
+    implementation(project(":webcontainer"))
     testImplementation(kotlin("test"))
 }
 
