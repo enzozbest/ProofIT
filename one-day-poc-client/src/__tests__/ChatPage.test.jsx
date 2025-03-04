@@ -1,22 +1,30 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
-import { ChatScreen } from '../pages/ChatScreen';
-import { ChatBox } from "../components/chat-box";
-import { MessageBox } from "../components/messages-box";
+import { render, screen, waitFor } from '@testing-library/react'
+import ChatScreen from '../pages/ChatScreen';
 import '@testing-library/jest-dom';
+import { MemoryRouter } from "react-router-dom";
+import { vi, test, expect } from "vitest";
 
 import userEvent from '@testing-library/user-event';
 
-global.fetch = jest.fn();
+globalThis.fetch = vi.fn();
 
 test("Renders chat page", () => {
-    render(<ChatScreen/>);
+    render(
+        <MemoryRouter>
+            <ChatScreen />
+        </MemoryRouter>
+    );
     const element = screen.getByPlaceholderText(/How can we help you today?/i);
     expect(element).toBeInTheDocument();
 });
 
 
 test("Enter text in chat", async () =>{
-    render(<ChatScreen/>);
+    render(
+        <MemoryRouter>
+            <ChatScreen />
+        </MemoryRouter>
+    );
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -24,7 +32,11 @@ test("Enter text in chat", async () =>{
 })
 
 test("Press enter button", async () =>{
-    render(<ChatScreen/>);
+    render(
+        <MemoryRouter>
+            <ChatScreen />
+        </MemoryRouter>
+    );
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -37,9 +49,13 @@ test("Press enter button", async () =>{
 test("Valid post request", async () =>{
     fetch.mockResolvedValueOnce({
         ok: true,
-        text: jest.fn().mockResolvedValue("Mock LLM response"),
+        text: vi.fn().mockResolvedValue("Mock LLM response"),
     });
-    render(<ChatScreen/>);
+    render(
+        <MemoryRouter>
+            <ChatScreen />
+        </MemoryRouter>
+    );
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
@@ -58,9 +74,13 @@ test("Valid post request", async () =>{
 test("Invalid post request", async () =>{
     fetch.mockResolvedValueOnce({
         ok: false,
-        text: jest.fn().mockResolvedValue("Mock LLM response"),
+        text: vi.fn().mockResolvedValue("Mock LLM response"),
     });
-    render(<ChatScreen/>);
+    render(
+        <MemoryRouter>
+            <ChatScreen />
+        </MemoryRouter>
+    );
 
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await userEvent.type(userchat, 'Hello!')
