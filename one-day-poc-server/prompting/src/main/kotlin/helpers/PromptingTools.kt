@@ -4,6 +4,8 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 
 object PromptingTools {
+    private val newLineRegex = Regex("(\\n|\\\\n)")
+
     /**
      * Creates functional requirements following the user prompt and extracted keywords
      *
@@ -55,7 +57,6 @@ object PromptingTools {
                     
         If you decide to create multiple pages, each page must be represented by a different div with a class of "page".
         Only one div must have a class of "active". 
-        You must not not include "\n" anywhere in your response.
         You must not include ANY comments in any part of your answer. Your code must be completely uncommented and undocumented.
         You should generate the code from the functional requirements given below, as well as the semantics of the user prompt. 
         You must include dummy values wherever needed to allow immediate testing.
@@ -118,7 +119,7 @@ object PromptingTools {
      */
     fun formatResponseJson(response: String): JsonObject =
         runCatching {
-            val noNewLines = response.replace("\\n", "")
+            val noNewLines = response.removeComments().replace(newLineRegex, "")
             Json.decodeFromString<JsonObject>(noNewLines) // Attempt to return the response as is.
         }.getOrElse {
             val cleaned = cleanLlmResponse(response) // If it fails, clean the response first and try again.
@@ -137,6 +138,16 @@ object PromptingTools {
                     .indexOf('}') // As a "forwards" index pointing to the character just after the last '}'
 
         val jsonString = response.substring(openingBrace, closingBrace)
-        return jsonString.trim().replace("\\n", "")
+        val cleaned = jsonString.removeComments().replace(newLineRegex, "").trim()
+        return cleaned
+    }
+
+    /**
+     * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
+     */
+    private fun String.removeComments(): String {
+        val cStyleCommentRegex = Regex("""(//.*?$|/\*[\s\S]*?\*/)""", RegexOption.MULTILINE)
+        val pythonStyleCommentRegex = Regex("""#.*$""")
+        return this.replace(cStyleCommentRegex, "").replace(pythonStyleCommentRegex, "")
     }
 }
