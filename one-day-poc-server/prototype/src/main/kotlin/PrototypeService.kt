@@ -16,11 +16,13 @@ data class LlmResponse(
 )
 
 @Serializable
-data class FileContent(val content: String)
+data class FileContent(
+    val content: String,
+)
 
-
-open class PrototypeService(private val ollamaService: OllamaService) {
-
+open class PrototypeService(
+    private val ollamaService: OllamaService,
+) {
     /**
      * Generates a software prototype using the LLM service [ollamaService] based on the given [prompt].
      *
@@ -39,14 +41,6 @@ open class PrototypeService(private val ollamaService: OllamaService) {
      * @return A [Result] containing an [LlmResponse] if all validations succeed, or a failed [Result]
      *         if any validation step fails (e.g., new template invalid, code compile error).
      */
-    // suspend fun generatePrototype(prompt: String): Result<LlmResponse> {
-
-    //     val fullPrompt = createPrompt(prompt)
-    //     val llmResult = ollamaService.generateResponse(fullPrompt)
-
-    //     return llmResult
-    // }
-
 
     /**
      * Performs a naive "compile" or validation check on the files within the given [response].
@@ -66,40 +60,9 @@ open class PrototypeService(private val ollamaService: OllamaService) {
         return !response.files.values.any { it.content.contains("ERROR", ignoreCase = true) }
     }
 
-    /**
-     * Creates a prompt combining user input with system instructions for WebContainers format
-     *
-     * @param userPrompt Original user input
-     * @return Formatted prompt with system instructions
-     */
-    private fun createPrompt(userPrompt: String): String {
-        return """
-            You are an AI that generates software prototypes formatted for WebContainers.  
-            Your response must be **a single valid JSON object** and contain nothing else—no explanations, preambles, or additional text.
-            
-            If you are creating a multi page website, please provide only one file with all HTML CSS and JS
-            Different pages must be represented by different divs with a class of "page" and only one div with a class of "active"
-
-            ### JSON Structure:
-            - `"mainFile"`: Specifies the main entry file (e.g., `"index.js"`).
-            - `"files"`: An object where each key is a filename and the value is an object containing:
-            - `"content"`: The full content of the file.
-            - `"package.json"`: Must be included with all required dependencies.
-            - Ensure that:
-                - All scripts use `"npm start"` for execution.
-                - Static files (if any) are served correctly.
-
-            Now, generate a JSON response for the following request:
-
-            **User Request:**  
-            "$userPrompt"
-        """.trimIndent()
-    }
-
     open fun retrievePrototype(id: String): String {
         // Later, this will query the DB or S3, etc.
         // For now, just return a minimal HTML snippet (or null).
         return "<html><body><h1>Hello from Prototype $id</h1></body></html>"
     }
-
 }

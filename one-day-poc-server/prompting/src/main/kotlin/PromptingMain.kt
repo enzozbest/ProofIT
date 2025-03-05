@@ -1,18 +1,16 @@
 package kcl.seg.rtt.prompting
 
 import helpers.SanitisationTools
-import io.ktor.server.routing.*
 import kcl.seg.rtt.prompting.helpers.PromptingTools
 import kcl.seg.rtt.prompting.prototypeInteraction.PrototypeInteractor
-import kcl.seg.rtt.prototype.FileContent
 import kcl.seg.rtt.prototype.LlmResponse
-import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck
-import kcl.seg.rtt.webcontainer.WebContainerState
-import kcl.seg.rtt.webcontainer.parseCode
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.time.Instant
 
 data class ChatResponse(
@@ -23,60 +21,76 @@ data class ChatResponse(
 class PromptingMain(
     private val model: String = "deepseek-coder-v2",
 ) {
-    fun run(userPrompt: String): ChatResponse? {
-        val clean = SanitisationTools.sanitisePrompt(userPrompt)
-        val freqsPrompt = PromptingTools.functionalRequirementsPrompt(clean.prompt, clean.keywords)
+    fun run(userPrompt: String): ChatResponse {
+        val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
+        val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
         // First LLM call
-        val freqs: OllamaResponse? = promptLlm(freqsPrompt)
+        val freqs: JsonObject = promptLlm(freqsPrompt)
 
         // TODO: Integrate Template retrieval
-
-        val prototypePrompt =
-            freqs?.let {
-                val freqsJson = Json.decodeFromString<JsonObject>(freqs.response)
-                PromptingTools.prototypePrompt(
-                    userPrompt,
-                    freqsJson["requirements"]?.jsonArray?.joinToString(" ") ?: "",
-                    freqsJson["keywords"]?.jsonArray?.joinToString(" ") ?: "",
-                )
-            } ?: throw PromptException("Failed to generate system prompt")
+        val prototypePrompt = prototypePrompt(userPrompt, freqs)
 
         // Second LLM call
-        val response: OllamaResponse? = promptLlm(prototypePrompt)
-
-        return response?.let {
-            println(response)
-            val jsonResponse = runCatching { Json.decodeFromString<JsonObject>(response.response) }.getOrNull()
-            val languageMap: Map<String, String> = jsonResponse?.mapValues {
-                val codeElement = it.value
-                // if it's just a primitive string, you can do:
-                codeElement.jsonPrimitive.contentOrNull ?: ""
-            } ?: emptyMap()
-            val llmResponse = LlmResponse(
-                // Possibly discard mainFile or set it to "N/A"
-                mainFile = response.response,
-                files = languageMap.mapValues { (_, snippet) -> FileContent(snippet) }
-            )
-            onSiteSecurityCheck(llmResponse)
-            WebContainerState.updateResponse(llmResponse)
-            // Webcontainer.send(webContainerResponse())
-            val chatResponse = chatResponse(jsonResponse ?: JsonObject(emptyMap()))
-            println(chatResponse)
-            chatResponse
-        }
+        val response: JsonObject = promptLlm(prototypePrompt)
+        println(response["code"])
+        return chatResponse(response)
     }
 
-    private fun promptLlm(prompt: String): OllamaResponse? =
+    private fun prototypePrompt(
+        userPrompt: String,
+        freqsResponse: JsonObject,
+    ): String {
+        val reqs =
+            runCatching {
+                (freqsResponse["requirements"] as JsonArray).joinToString(" ")
+            }.getOrElse {
+                throw PromptException("Failed to extract requirements from LLM response")
+            }
+        val keywords =
+            runCatching {
+                (freqsResponse["keywords"] as JsonArray).joinToString(" ")
+            }.getOrElse {
+                throw PromptException("Failed to extract keywords from LLM response")
+            }
+        return PromptingTools.prototypePrompt(
+            userPrompt,
+            reqs,
+            keywords,
+        )
+    }
+
+    private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
-            PrototypeInteractor.prompt(prompt, model)
+            val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
+            PromptingTools.formatResponseJson(llmResponse.response)
         }
 
-    private fun chatResponse(jsonResponse: JsonObject): ChatResponse =
-        ChatResponse(
-            response = "Here is your prototype: ${jsonResponse.jsonPrimitive.content}",
+    /**
+     * Extracts the functional requirements from the LLM response and returns them as a ChatResponse.
+     * @param response The LLM response.
+     * @return A ChatResponse containing the functional requirements.
+     * @throws PromptException If the requirements could not be found or were returned in an unrecognised format.
+     */
+    private fun chatResponse(response: JsonObject): ChatResponse {
+        val reqs =
+            when (val jsonReqs = response["requirements"]) {
+                is JsonArray -> {
+                    if (jsonReqs.isEmpty()) {
+                        throw PromptException("No requirements found in LLM response")
+                    }
+                    jsonReqs.joinToString(", ")
+                }
+
+                is JsonPrimitive -> jsonReqs.content
+                else -> throw PromptException("Requirements could not be found or were returned in an unrecognised format.")
+            }
+
+        return ChatResponse(
+            response = "These are the functional requirements fulfilled by this prototype: $reqs",
             time = Instant.now().toString(),
         )
+    }
 
     private fun onSiteSecurityCheck(llmResponse: LlmResponse) {
         for ((language, fileContent) in llmResponse.files) {

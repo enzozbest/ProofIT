@@ -29,10 +29,9 @@ class ChatEndpoint {
 
 fun Application.chatModule() {
     routing {
-        jsonRoutes()
         authenticate("jwt-verifier") {
             chatRoutes()
-
+            jsonRoutes()
             uploadRoutes(ChatEndpoint.getUploadDirectory())
         }
     }
