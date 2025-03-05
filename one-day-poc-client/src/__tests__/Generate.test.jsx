@@ -26,7 +26,7 @@ test("Renders generate page", ()=>{
     expect(element).toBeInTheDocument();
 })
 
-test("Sidebar toggle", ()=>{
+test("Chat screen toggles", ()=>{
     render(
         <MemoryRouter>
             <Page />
@@ -38,5 +38,14 @@ test("Sidebar toggle", ()=>{
 
     fireEvent.click(toggleButton);
     expect(chatScreenDiv).toHaveClass('opacity-0');
-
 })
+
+/*
+test("Prototype frame displays", ()=>{
+    render(
+        <MemoryRouter>
+            <Page />
+        </MemoryRouter>
+    );
+
+})*/
