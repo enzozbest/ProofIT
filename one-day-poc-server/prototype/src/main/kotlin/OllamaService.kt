@@ -40,9 +40,9 @@ object OllamaService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
     private const val OLLAMA_PORT = 11434
     private const val OLLAMA_HOST = "localhost"
-    private const val REQUEST_TIMEOUT_MILLIS = 600_000L
-    private const val CONNECT_TIMEOUT_MILLIS = 30_000L
-    private const val SOCKET_TIMEOUT_MILLIS = 600_000L
+    private const val REQUEST_TIMEOUT_MILLIS = 600_000_000L
+    private const val CONNECT_TIMEOUT_MILLIS = 30_000_000L
+    private const val SOCKET_TIMEOUT_MILLIS = 600_000_000L
 
     val client =
         HttpClient(CIO) {

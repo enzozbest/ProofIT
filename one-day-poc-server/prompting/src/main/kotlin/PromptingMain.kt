@@ -62,6 +62,7 @@ class PromptingMain(
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
             val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
+            println(llmResponse.response)
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 
