@@ -8,7 +8,6 @@ import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import java.time.Instant
@@ -19,7 +18,7 @@ data class ChatResponse(
 )
 
 class PromptingMain(
-    private val model: String = "deepseek-coder-v2",
+    private val model: String = "deepseek-r1:32b",
 ) {
     fun run(userPrompt: String): ChatResponse {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
@@ -33,7 +32,7 @@ class PromptingMain(
 
         // Second LLM call
         val response: JsonObject = promptLlm(prototypePrompt)
-        println(response["code"])
+        println(response)
         return chatResponse(response)
     }
 

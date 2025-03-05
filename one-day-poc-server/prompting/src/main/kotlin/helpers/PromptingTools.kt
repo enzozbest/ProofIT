@@ -18,25 +18,53 @@ object PromptingTools {
         keywords: List<String>,
     ): String =
         """
-        You are a software engineer tasked with generating functional requirements for a software prototype formatted for WebContainers.
-        You must respond with **a single valid JSON object**, containing nothing else: no explanations, preambles, or additional text.
-        The first character of your response must be "{" and the last character "}". You must not use the phrase "\n" anywhere in your response.
-        You must generate functional requirements for all functionality you think the user wants based on their prompt given below.
-        Functional requirements must include making the prototype interactive from the very start, with dummy values where needed.
-        Functional requirements are **Strings** of text that describe one piece of functionality that the software must have. 
-        They must be formatted as strings, and must not be anything else.
-        Do not include the phrase "\n" anywhere in your response.
-        
-        ### JSON Structure:
-        -A key-value pair where the key is `"requirements"` and the value is a list of functional requirements.
-        -A key-value pair where the key is `"keywords"` and the value is a list of relevant keywords from the functional requirements you generated.
-        
-        Now, generate a JSON response for the following request:
-        
+        You are an expert software requirements engineer tasked with generating precise, actionable functional requirements for a software prototype that will run in WebContainers.
+
+        ### Response Format
+        Respond with a single valid JSON object only. No explanations, comments, or additional text.
+
+        ### Requirements Guidelines
+        1. Requirements must be:
+           - Specific, measurable, and testable
+           - Self-contained (one requirement = one functionality)
+           - Implementation-independent
+           - Written in active voice
+           - Clear and unambiguous
+
+        2. Each requirement must follow this pattern:
+           - Start with "The system shall..."
+           - Describe a single, atomic functionality
+           - Include acceptance criteria where applicable
+           - Specify user interactions and expected system responses
+
+        3. Interactive Elements:
+           - Every UI component must have associated user interactions
+           - Include data validation rules where applicable
+           - Specify error handling and feedback mechanisms
+           - Define initial/dummy values for immediate testing
+
+        ### JSON Structure Example
+        {
+            "requirements": [
+                "The system shall display a login form with email and password fields",
+                "The system shall validate email format before form submission",
+                "The system shall provide error feedback for invalid inputs"
+            ],
+            "keywords": ["authentication", "validation", "user feedback"]
+        }
+
+        ### Your Task
+        Generate comprehensive requirements based on:
+        1. The user's request below
+        2. The provided keywords
+        3. Industry best practices for similar systems
+        4. Common user expectations
+
         **User Request:**
         "$prompt"
-        --KEYWORDS--
-        "$keywords"
+
+        **Keywords:**
+        $keywords
         """.trimIndent()
 
     /**
@@ -51,59 +79,82 @@ object PromptingTools {
         templates: String,
     ): String =
         """
-        You are a programmer that generates software prototypes formatted for WebContainers.  
-        You must respond with **a single valid JSON object**. You must not include anything else in your response:
-        no explanations, preambles, additional text, or formatting character sequences. 
-                    
-        If you decide to create multiple pages, each page must be represented by a different div with a class of "page".
-        Only one div must have a class of "active". 
-        You must not include ANY comments in any part of your answer. Your code must be completely uncommented and undocumented.
-        You should generate the code from the functional requirements given below, as well as the semantics of the user prompt. 
-        You must include dummy values wherever needed to allow immediate testing.
-        You are free to structure the code as you wish. You may use any programming languages, libraries, or frameworks.
-        Common languages include HTML, CSS, JavaScript, and JSON, Python, Java, Kotlin, C++, C.
-        Common frameworks for JavaScript include React, Angular, Vue, Express, Bootstrap, Tailwind, ect.
-        Common frameworks for Python include Django, Flask, etc,
-        Common frameworks for Java include Spring, etc.
-        A common framework for C++ is Qt.
-        A common framework for Kotlin is Ktor.
-        You need not be constrained by those, you may wish to use other languages or frameworks.
-        
-        ### JSON Structure:
-        - `"requirements"`: The functional requirements your code fulfils as a list of strings.
-        - `"mainFile"`: Specifies the main entry language (e.g., `"html"`).
-        - `"files"`: An object containing the following:
-            - For each language used, a key-value pair in which a key is a language identifier and the value is an object containing:
-                -A key-value pair in which the key is "code" and the value the corresponding code.
-                - A key-value pair in which the key is "frameworks" and the value is a list of frameworks used, if any.
-                - A key-value pair in which the key is "dependencies" and the value is a list of dependencies used, if any.
-            
-        Example response format:
-        ```json
+        You are an expert software architect specializing in creating high-quality, production-ready prototypes for WebContainers.
+
+        ### Response Format
+        Provide a single valid JSON object. No additional text, comments, or explanations.
+
+        ### Code Quality Requirements
+        1. Architecture:
+           - Follow SOLID principles
+           - Use clean architecture patterns
+           - Implement proper separation of concerns
+           - Ensure modularity and reusability
+
+        2. User Interface:
+           - Implement responsive design
+           - Follow accessibility standards (WCAG 2.1)
+           - Use semantic HTML elements
+           - Ensure consistent styling
+           - Pages must use <div class="page"> with one having class="active"
+
+        3. Code Standards:
+           - Write clean, self-documenting code (no comments needed)
+           - Use meaningful variable/function names
+           - Follow language-specific best practices
+           - Implement proper error handling
+           - Include input validation
+           - Use type safety where applicable
+
+        4. Interactivity:
+           - Add event listeners for user interactions
+           - Implement immediate feedback mechanisms
+           - Include loading states
+           - Handle edge cases
+           - Use dummy data for immediate testing
+
+        ### Technology Stack
+        Choose appropriate technologies from:
+        - Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript
+        - Frameworks: React, Vue, Angular, Svelte
+        - Styling: Tailwind, Bootstrap, Material-UI
+        - Backend: Node.js, Python, Java, Kotlin, C++
+        - Backend Frameworks: Express, Django, Spring, Ktor
+        - Testing: Jest, Cypress, JUnit, PyTest
+
+        ### JSON Structure
         {
-        "requirements": ["The software must adhere to SOLID design principles"]
-         "mainFile": "hmtl",
+            "requirements": [
+                "The system implements user authentication with email/password"
+            ],
+            "mainFile": "html",
             "files": {
                 "html": {
-                    "code": "<html>...</html>"
-                    "frameworks": [],
-                    "dependencies": []
+                    "code": "<div class='page active'>...</div>",
+                    "frameworks": ["React"],
+                    "dependencies": ["react", "react-dom"]
                 },
                 "css": {
-                    "code": !body { ... }",
+                    "code": ".page { ... }",
                     "frameworks": ["Tailwind"],
                     "dependencies": []
                 },
-                "JavaScript": {
-                    "code": "document.addEventListener('DOMContentLoaded', function() { ... });",
+                "javascript": {
+                    "code": "const App = () => { ... }",
                     "frameworks": ["React"],
-                    "dependencies": ["React"]
-                 }
+                    "dependencies": ["axios"]
+                }
             }
         }
-        ```
-        
-        Now, generate a JSON response for the following user prompt and functional requirements.
+
+        ### Your Task
+        Generate production-quality code based on:
+        1. User requirements below
+        2. Provided functional requirements
+        3. Available templates
+        4. Modern development best practices
+        You must provide a complete answer, with all necessary files and dependencies. Code must be written in 
+        full, not just placeholders or using the phrase "...".
 
         **User Prompt:** "$userPrompt"   
         **Functional Requirements:** "$requirements"
@@ -122,7 +173,8 @@ object PromptingTools {
             val noNewLines = response.removeComments().replace(newLineRegex, "")
             Json.decodeFromString<JsonObject>(noNewLines) // Attempt to return the response as is.
         }.getOrElse {
-            val cleaned = cleanLlmResponse(response) // If it fails, clean the response first and try again.
+            val cleaned = cleanLlmResponse(response)
+            println(cleaned) // If it fails, clean the response first and try again.
             Json.decodeFromString<JsonObject>(cleaned)
         }
 
