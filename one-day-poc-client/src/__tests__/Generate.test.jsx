@@ -2,6 +2,8 @@ import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Page from '../pages/Generate';
+import ChatScreen from "@/pages/ChatScreen.js";
+import userEvent from "@testing-library/user-event";
 
 beforeAll(() => {
     globalThis.window.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -39,6 +41,7 @@ test("Chat screen toggles", ()=>{
     fireEvent.click(toggleButton);
     expect(chatScreenDiv).toHaveClass('opacity-0');
 })
+
 
 /*
 test("Prototype frame displays", ()=>{
