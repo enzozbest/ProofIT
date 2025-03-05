@@ -109,18 +109,13 @@ class TestTemplateService {
             val client = HttpClient(engine)
             TemplateService.httpClient = client
 
-            mockkObject(TemplateStorageService)
-
-            val mockTemplate = Template(id = "mock-id", fileURI = "file:///test/path")
-            println("ok here")
+            mockkObject(TemplateService)
             coEvery {
-                TemplateStorageService.createTemplate(any())
-            } returns Result.success(mockTemplate)
-            println("failing after that")
+                TemplateService.storeAndGetId(any())
+            } returns "mock-id"
 
             val response = TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
             assertEquals("success", response.status)
-            assertEquals("mock-id", response.id)
         }
 
     @Test

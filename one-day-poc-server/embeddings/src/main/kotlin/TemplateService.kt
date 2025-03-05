@@ -5,6 +5,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import tables.templates.Template
 
 object TemplateService {
     internal var httpClient = HttpClient(CIO)
@@ -54,25 +55,28 @@ object TemplateService {
                 }
 
         val responseText = response.bodyAsText()
-        val storeResponse =
-            runCatching { Json.decodeFromString<StoreTemplateResponse>(responseText) }.getOrElse {
-                throw IllegalStateException("Failed to parse response!")
-            }
 
-        val templateResult = TemplateStorageService.createTemplate(fileURI)
-
-        println("templateResult: $templateResult")
-
-        if (templateResult.isSuccess) {
-            val template = templateResult.getOrNull()
-            if (template != null) {
-                return storeResponse.copy(id = template.id)
-            }
+        val storeResponse = try {
+            Json.decodeFromString<StoreTemplateResponse>(responseText)
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to parse response!", e)
         }
 
-        val exception = templateResult.exceptionOrNull()
-            ?: Exception("Unknown error during template creation")
-        throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
+        val templateId = storeAndGetId(fileURI)
+
+        return storeResponse.copy(id = templateId)
+    }
+
+    internal suspend fun storeAndGetId(fileURI: String): String? {
+        val templateResult = TemplateStorageService.createTemplate(fileURI)
+
+        if (templateResult.isFailure) {
+            val exception = templateResult.exceptionOrNull()
+                ?: Exception("Unknown error during template creation")
+            throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
+        }
+
+        return templateResult.getOrNull()?.id
     }
 
     suspend fun search(
