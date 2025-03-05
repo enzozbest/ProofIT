@@ -105,9 +105,10 @@ export default function Page() {
                 setPrototypeId={setPrototypeId} />
           </div>
           <div className="flex h-full items-center justify-center">
-            <button 
-              onClick={() => setIsVisible(!isVisible)}
-              className="bg-[#060a28]">
+            <button
+                data-testid="toggle-button"
+                onClick={() => setIsVisible(!isVisible)}
+                className="bg-[#060a28]">
             <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
                                         isVisible ? "rotate-180": "rotate-0"}`} />
             </button>
