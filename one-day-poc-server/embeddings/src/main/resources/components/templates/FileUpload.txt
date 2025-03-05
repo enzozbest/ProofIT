@@ -1,0 +1,54 @@
+import { useState } from 'react';
+import { Upload } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+export const FileUpload = () => {
+  const [isDragging, setIsDragging] = useState(false);
+  const { toast } = useToast();
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    await handleFiles(files);
+  };
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    await handleFiles(files);
+  };
+  const handleFiles = async (files: File[]) => {
+    // For now, just show that files were received
+    toast({
+      title: "Files received",
+      description: `${files.length} file(s) uploaded to knowledge bank`,
+    });
+  };
+  return (
+    <div
+      className={`relative rounded-lg border-2 border-dashed p-6 transition-colors duration-200 ease-in-out ${
+        isDragging ? 'border-primary bg-primary/5' : 'border-gray-200'
+      }`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <input
+        type="file"
+        multiple
+        className="absolute inset-0 z-50 opacity-0 cursor-pointer"
+        onChange={handleFileInput}
+      />
+      <div className="flex flex-col items-center justify-center gap-2">
+        <Upload className="h-8 w-8 text-gray-400" />
+        <p className="text-sm text-gray-500">
+          Drag and drop files here, or click to select files
+        </p>
+      </div>
+    </div>
+  );
+};

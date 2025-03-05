@@ -1,10 +1,9 @@
 package kcl.seg.rtt.auth.authentication
 
 import com.auth0.jwt.JWT
-import com.auth0.jwt.exceptions.JWTDecodeException
-import io.ktor.http.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
+import io.ktor.server.routing.RoutingContext
 import kcl.seg.rtt.utils.json.PoCJSON
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -16,7 +15,7 @@ import okhttp3.Request
 import okhttp3.Response
 import redis.Redis
 import java.time.Instant
-import java.util.*
+import java.util.Date
 
 /**
  * Data class representing the information of a user's authenticated session in the API.
@@ -135,24 +134,15 @@ fun checkCache(token: String): JWTValidationResponse? {
  * @param token The token to be validated.
  * @return A [JWTValidationResponse] object if the token is valid, or null if it is not.
  */
-fun validateJWT(token: String?): JWTValidationResponse? {
-    val decoded =
-        try {
-            JWT.decode(
-                token ?: return null, // No token
-            )
-        } catch (exception: JWTDecodeException) {
-            return null // Invalid token
+fun validateJWT(token: String?): JWTValidationResponse? =
+    runCatching { JWT.decode(token) }
+        .getOrNull()
+        ?.takeIf { it.expiresAt.after(Date.from(Instant.now())) }
+        ?.let { decoded ->
+            val userId = decoded.getClaim("sub").asString()
+            val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+            userId?.let { JWTValidationResponse(it, admin) }
         }
-
-    if (decoded.expiresAt.before(Date.from(Instant.now()))) {
-        return null // Expired token
-    }
-
-    val userId = decoded.getClaim("sub").asString() ?: return null // No user ID
-    val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
-    return JWTValidationResponse(userId, admin) // Valid token
-}
 
 /**
  * Function to respond to an authentication request made through the /api/auth/check.
