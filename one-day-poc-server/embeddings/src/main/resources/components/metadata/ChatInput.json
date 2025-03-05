@@ -1,0 +1,16 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "SoftwareSourceCode",
+  "name": "ChatInput",
+  "description": "A chat input component with a text field and send button for submitting messages in a chat interface",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  },
+  "framework": {
+    "@type": "SoftwareApplication",
+    "name": "React"
+  },
+  "applicationCategory": "User Interface Component",
+  "keywords": ["chat", "input", "message", "form", "ui component"]
+}

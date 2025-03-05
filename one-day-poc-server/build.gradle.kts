@@ -163,7 +163,7 @@ tasks.register<Exec>("startDocker") {
 allprojects {
     plugins.withType<JavaPlugin> {
         extensions.configure<JavaPluginExtension> {
-            toolchain.languageVersion.set(JavaLanguageVersion.of(23))
+            toolchain.languageVersion.set(JavaLanguageVersion.of(19))
         }
     }
 }
