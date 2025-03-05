@@ -4,6 +4,7 @@ import { MemoryRouter } from "react-router-dom";
 import Page from '../pages/Generate';
 import ChatScreen from "@/pages/ChatScreen.js";
 import userEvent from "@testing-library/user-event";
+import React from "react";
 
 beforeAll(() => {
     globalThis.window.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -42,13 +43,18 @@ test("Chat screen toggles", ()=>{
     expect(chatScreenDiv).toHaveClass('opacity-0');
 })
 
-
-/*
-test("Prototype frame displays", ()=>{
+test("Prototype frame displays", async ()=>{
+    const setPrototypeMock = vi.fn();
+    vi.spyOn(React, 'useState').mockImplementationOnce(() => [true, setPrototypeMock]);
     render(
         <MemoryRouter>
             <Page />
         </MemoryRouter>
     );
 
-})*/
+    await waitFor(() => {
+        const prototypeDiv = document.querySelector(".flex-1.h-full.rounded-xl");
+        expect(prototypeDiv).not.toBeNull();
+        expect(prototypeDiv.children.length).toBeGreaterThan(0);
+    });
+})
