@@ -2,6 +2,7 @@ import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import LandingPage from '../pages/LandingPage';
+import userEvent from "@testing-library/user-event";
 
 beforeEach(() => {
     vi.resetAllMocks()
@@ -40,6 +41,10 @@ test("Unauthenticated users can't see new prompts",async()=>{
         json: () => Promise.resolve({ userId: null, isAdmin: false }),
     }));
 
+    fetch.mockResolvedValueOnce({
+        ok: false,
+        json: () => Promise.resolve("Mock LLM response"),
+    });
     render(
         <MemoryRouter>
             <LandingPage />
@@ -50,4 +55,41 @@ test("Unauthenticated users can't see new prompts",async()=>{
 
     const promptElement = screen.queryByText(/Generating Code For An Application/i);
     expect(promptElement).not.toBeInTheDocument();
+})
+
+test("Prompts are sent via the enter key",async()=>{
+    vi.doMock("react-router-dom", async () => {
+        const actual = await vi.importActual("react-router-dom");
+        return {
+            ...actual,
+            useNavigate: vi.fn(),
+        };
+    });
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        json: () => Promise.resolve({ userId: null, isAdmin: false }),
+    }));
+
+    fetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve("Mock LLM response"),
+    });
+
+    const { useNavigate } = await import("react-router-dom");
+    const mockNavigate = vi.fn();
+    useNavigate.mockReturnValue(mockNavigate)
+
+    render(
+        <MemoryRouter>
+            <LandingPage />
+        </MemoryRouter>
+    );
+
+    const userinput = screen.getByPlaceholderText(/Tell us what we can do for you?/i);
+    await userEvent.type(userinput, 'Hello!')
+    await userEvent.keyboard('{Enter}')
+
+    await waitFor(() => {
+        expect(userinput).toHaveValue('Hello!')
+    },{timeout: 3000})
 })
