@@ -1,7 +1,5 @@
 package kcl.seg.rtt.chat.routes
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -12,16 +10,7 @@ import kcl.seg.rtt.chat.JSON
 import kcl.seg.rtt.chat.Request
 import kcl.seg.rtt.prompting.PromptingMain
 
-private var client = HttpClient(CIO)
-private var endpoint = "http://localhost:8000/api/prototype/generate"
-
-internal fun setTestClient(testClient: HttpClient) {
-    client = testClient
-}
-
-internal fun setTestEndpoint(endpoint: String) {
-    kcl.seg.rtt.chat.routes.endpoint = endpoint
-}
+private var promptingMainInstance: PromptingMain = PromptingMain()
 
 fun Route.jsonRoutes() {
     post(JSON) {
@@ -42,17 +31,17 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
-    call.respondText(PromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
+    call.respondText(getPromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
 }
 
-// private suspend fun makePromptRequest(): HttpResponse =
-//    client.post(ENDPOINT) {
-//        contentType(ContentType.Application.Json)
-//        setBody(
-//            """{
-//            |"prompt": "${sanitisedResult.prompt}"
-//            |"keywords": "${sanitisedResult.keywords}"
-//            |}
-//            """.trimMargin(),
-//        )
-//    }
+private fun getPromptingMain(): PromptingMain {
+    return promptingMainInstance
+}
+
+internal fun setPromptingMain(promptObject: PromptingMain) {
+    promptingMainInstance = promptObject
+}
+
+internal fun resetPromptingMain() {
+    promptingMainInstance = PromptingMain()
+}

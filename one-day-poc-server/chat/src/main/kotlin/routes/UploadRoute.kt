@@ -10,10 +10,12 @@ import io.ktor.utils.io.*
 import kcl.seg.rtt.chat.Request
 import kcl.seg.rtt.chat.UPLOAD
 import kotlinx.io.readByteArray
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
 
+@Serializable
 data class Response(
     val time: String,
     val message: String,

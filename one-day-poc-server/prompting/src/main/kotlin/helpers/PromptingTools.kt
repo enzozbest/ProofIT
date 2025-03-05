@@ -60,13 +60,39 @@ object PromptingTools {
         You should generate the code from the functional requirements given below, as well as the semantics of the user prompt. 
         You must include dummy values wherever needed to allow immediate testing.
         
+        Different pages must be represented by different divs with a class of "page" and only one div with a class of "active" 
+        Do not include "\n" in the files
+        You should generate the code from the functional requirements in the user prompt and include dummy values to allow immediate testing
+
         ### JSON Structure:
         - `"code"`: The code for the prototype. It must be compatible with WebContainers.
         - `"requirements"`: The functional requirements your code fulfils.
-        Now, generate a JSON response for the following functional requirements:
-        - Do not escape any characters in your response, unless strictly necessary to make a valid JSON file.
+        - `"mainFile"`: Specifies the main entry language (e.g., `"html"`).
+        - `"files"`: An object where each key is a language identifier and the value is the corresponding code:
+        - `"package.json"`: Must be included with all required dependencies.
+        - Ensure that:
+        - All scripts use `"npm start"` for execution.
+        - Static files (if any) are served correctly.
 
-        **User Prompt:** "$userPrompt"   
+        - Common languages include: 
+        - "html", "css", "js", "python", "typescript", "php", etc.
+        
+        Example response format (but not limited to these languages):
+        ```json
+        {
+        "mainFile": "A counter application with increment and decrement buttons",
+        "files": {
+            "html": "<html>...</html>",
+            "css": "body { ... }",
+            "js": "document.addEventListener('DOMContentLoaded', function() { ... });",
+            "package.json": "{ \"name\": \"counter-app\", \"dependencies\": {...} }"
+        }
+        }
+        ```
+        
+        Now, generate a JSON response for the following functional requirements:
+
+        **User Request:** "$userPrompt"   
         **Requirements:** "$requirements"
         **Templates:** "$templates"
         """.trimIndent()
