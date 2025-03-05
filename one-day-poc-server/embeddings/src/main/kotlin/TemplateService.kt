@@ -38,10 +38,12 @@ object TemplateService {
      * Stores the given template.
      * The template will be stored for keyword search, and embedded and stored for semantic search.
      * @param name The identifier of the template.
+     * @param fileURI file path for the template.
      * @param data The data to store (JSON-LD annotation of a template).
      */
     suspend fun storeTemplate(
         name: String,
+        fileURI: String,
         data: String,
     ): StoreTemplateResponse {
         val payload = mapOf("name" to name, "text" to data)
@@ -56,7 +58,16 @@ object TemplateService {
             runCatching { Json.decodeFromString<StoreTemplateResponse>(responseText) }.getOrElse {
                 throw IllegalStateException("Failed to parse response!")
             }
-        return storeResponse
+
+        return TemplateStorageService.createTemplate(fileURI).fold(
+            onSuccess = { template ->
+                // Return a copy of the response with the template ID added
+                storeResponse.copy(id = template.id)
+            },
+            onFailure = { exception ->
+                throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
+            }
+        )
     }
 
     suspend fun search(
