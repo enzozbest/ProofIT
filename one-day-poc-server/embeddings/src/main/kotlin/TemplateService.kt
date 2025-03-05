@@ -59,15 +59,20 @@ object TemplateService {
                 throw IllegalStateException("Failed to parse response!")
             }
 
-        return TemplateStorageService.createTemplate(fileURI).fold(
-            onSuccess = { template ->
-                // Return a copy of the response with the template ID added
-                storeResponse.copy(id = template.id)
-            },
-            onFailure = { exception ->
-                throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
+        val templateResult = TemplateStorageService.createTemplate(fileURI)
+
+        println("templateResult: $templateResult")
+
+        if (templateResult.isSuccess) {
+            val template = templateResult.getOrNull()
+            if (template != null) {
+                return storeResponse.copy(id = template.id)
             }
-        )
+        }
+
+        val exception = templateResult.exceptionOrNull()
+            ?: Exception("Unknown error during template creation")
+        throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
     }
 
     suspend fun search(
