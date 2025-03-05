@@ -40,8 +40,11 @@ test("Enter text in chat", async () =>{
     expect(userchat).toHaveValue('Hello!')
 })
 
-/*
 test("Press enter button", async () =>{
+    fetch.mockResolvedValueOnce({
+        ok: true,
+        text: vi.fn().mockResolvedValue("Mock LLM response"),
+    });
     render(
         <MemoryRouter>
             <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
@@ -54,7 +57,7 @@ test("Press enter button", async () =>{
     await waitFor(() => {
         expect(userchat).toHaveValue('')
     },{timeout: 3000})
-})*/
+})
 
 test("Valid post request", async () =>{
     fetch.mockResolvedValueOnce({
@@ -79,15 +82,9 @@ test("Valid post request", async () =>{
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        /*body: JSON.stringify({
-            userID: expect.any(String),
-            time: expect.any(String),
-            prompt: "Hello!",
-        }),*/
         body:expect.any(String),
     });
 })
-
 
 test("Invalid post request", async () =>{
     fetch.mockResolvedValueOnce({
