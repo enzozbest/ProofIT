@@ -10,6 +10,8 @@ import kcl.seg.rtt.chat.JSON
 import kcl.seg.rtt.chat.Request
 import kcl.seg.rtt.prompting.PromptingMain
 
+private var promptingMainInstance: PromptingMain = PromptingMain()
+
 fun Route.jsonRoutes() {
     post(JSON) {
         val request: Request =
@@ -29,5 +31,17 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
-    call.respondText(PromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
+    call.respondText(getPromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
+}
+
+private fun getPromptingMain(): PromptingMain {
+    return promptingMainInstance
+}
+
+internal fun setPromptingMain(promptObject: PromptingMain) {
+    promptingMainInstance = promptObject
+}
+
+internal fun resetPromptingMain() {
+    promptingMainInstance = PromptingMain()
 }
