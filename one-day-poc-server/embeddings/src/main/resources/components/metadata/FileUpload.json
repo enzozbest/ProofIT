@@ -1,0 +1,16 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "SoftwareSourceCode",
+  "name": "FileUpload",
+  "description": "A file upload component that supports both drag-and-drop and click-to-upload functionality with visual feedback",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  },
+  "framework": {
+    "@type": "SoftwareApplication",
+    "name": "React"
+  },
+  "applicationCategory": "User Interface Component",
+  "keywords": ["file upload", "drag and drop", "input", "ui component", "toast notification"]
+}
