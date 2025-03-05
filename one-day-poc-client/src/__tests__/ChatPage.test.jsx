@@ -9,10 +9,7 @@ globalThis.fetch = vi.fn();
 const mockSetPrototype = vi.fn();
 const mockSetPrototypeId = vi.fn();
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-vi.mock('react-router-dom', () => ({
-    ...vi.importActual('react-router-dom'),
-    useLocation: vi.fn(),
-}));
+
 
 
 // Ensure mocks are reset before each test
@@ -136,4 +133,29 @@ test("Clicking send button sends a message", async () =>{
         headers: { "Content-Type": "application/json" },
         body:expect.any(String),
     });
+})
+
+test("Initial message set", async ()=>{
+    const mockInitialMessage = 'Hello!';
+
+    const handleSend = vi.fn();
+    render(
+        <MemoryRouter>
+            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+        </MemoryRouter>
+    );
+
+    const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
+    await userEvent.type(userchat, 'Hello!')
+    const sendButton = screen.getByText("Send");
+    fireEvent.click(sendButton);
+    await waitFor(() => {
+        expect(userchat).toHaveValue('')
+    },{timeout: 3000})
+    await userEvent.type(userchat, 'Hello!');
+    fireEvent.click(sendButton);
+    await waitFor(() => {
+        expect(userchat).toHaveValue('Hello!')
+    },{timeout: 3000})
+    expect(handleSend).toHaveBeenCalledTimes(1);
 })
