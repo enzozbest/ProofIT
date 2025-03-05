@@ -53,47 +53,58 @@ object PromptingTools {
         You must respond with **a single valid JSON object**. You must not include anything else in your response:
         no explanations, preambles, additional text, or formatting character sequences. 
                     
-        If you decide to create a multi page website, you must provide only one file with all HTML CSS and JS. 
-        Different pages must be represented by different divs, each with a class of "page". Only one div must have a class of "active". 
+        If you decide to create multiple pages, each page must be represented by a different div with a class of "page".
+        Only one div must have a class of "active". 
         You must not not include "\n" anywhere in your response.
         You must not include ANY comments in any part of your answer. Your code must be completely uncommented and undocumented.
         You should generate the code from the functional requirements given below, as well as the semantics of the user prompt. 
         You must include dummy values wherever needed to allow immediate testing.
+        You are free to structure the code as you wish. You may use any programming languages, libraries, or frameworks.
+        Common languages include HTML, CSS, JavaScript, and JSON, Python, Java, Kotlin, C++, C.
+        Common frameworks for JavaScript include React, Angular, Vue, Express, Bootstrap, Tailwind, ect.
+        Common frameworks for Python include Django, Flask, etc,
+        Common frameworks for Java include Spring, etc.
+        A common framework for C++ is Qt.
+        A common framework for Kotlin is Ktor.
+        You need not be constrained by those, you may wish to use other languages or frameworks.
         
-        Different pages must be represented by different divs with a class of "page" and only one div with a class of "active" 
-        Do not include "\n" in the files
-        You should generate the code from the functional requirements in the user prompt and include dummy values to allow immediate testing
-
         ### JSON Structure:
-        - `"code"`: The code for the prototype. It must be compatible with WebContainers.
         - `"requirements"`: The functional requirements your code fulfils.
         - `"mainFile"`: Specifies the main entry language (e.g., `"html"`).
-        - `"files"`: An object where each key is a language identifier and the value is the corresponding code:
-        - `"package.json"`: Must be included with all required dependencies.
-        - Ensure that:
-        - All scripts use `"npm start"` for execution.
-        - Static files (if any) are served correctly.
-
-        - Common languages include: 
-        - "html", "css", "js", "python", "typescript", "php", etc.
-        
-        Example response format (but not limited to these languages):
+        - `"files"`: An object containing the following:
+            - For each language used, a key-value pair in which a key is a language identifier and the value is an object containing:
+                -A key-value pair in which the key is "code" and the value the corresponding code.
+                - A key-value pair in which the key is "frameworks" and the value is a list of frameworks used, if any.
+                - A key-value pair in which the key is "dependencies" and the value is a list of dependencies used, if any.
+            
+        Example response format:
         ```json
         {
-        "mainFile": "A counter application with increment and decrement buttons",
-        "files": {
-            "html": "<html>...</html>",
-            "css": "body { ... }",
-            "js": "document.addEventListener('DOMContentLoaded', function() { ... });",
-            "package.json": "{ \"name\": \"counter-app\", \"dependencies\": {...} }"
-        }
+         "mainFile": "hmtl",
+            "files": {
+                "html": {
+                    "code": "<html>...</html>"
+                    "frameworks": [],
+                    "dependencies": [],
+                },
+                "css": {
+                    "code": !body { ... }",
+                    "frameworks": ["Tailwind"],
+                    "dependencies": [],
+                },
+                "JavaScript": {
+                    "code": "document.addEventListener('DOMContentLoaded', function() { ... });",
+                    "frameworks": ["React"],
+                    "dependencies": ["React"],
+                 }
+            }
         }
         ```
         
-        Now, generate a JSON response for the following functional requirements:
+        Now, generate a JSON response for the following user prompt and functional requirements.
 
-        **User Request:** "$userPrompt"   
-        **Requirements:** "$requirements"
+        **User Prompt:** "$userPrompt"   
+        **Functional Requirements:** "$requirements"
         **Templates:** "$templates"
         """.trimIndent()
 
