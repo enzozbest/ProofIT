@@ -10,8 +10,6 @@ const mockSetPrototype = vi.fn();
 const mockSetPrototypeId = vi.fn();
 const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-
-
 // Ensure mocks are reset before each test
 beforeEach(() => {
     vi.resetAllMocks()
@@ -135,27 +133,63 @@ test("Clicking send button sends a message", async () =>{
     });
 })
 
-test("Initial message set", async ()=>{
-    const mockInitialMessage = 'Hello!';
 
-    const handleSend = vi.fn();
+test("Initial message set when page loads", async ()=>{
+    vi.doMock("react-router-dom", async () => {
+        const actual = await vi.importActual("react-router-dom");
+        return {
+            ...actual,
+            useLocation: vi.fn().mockReturnValue({
+                pathname: "/generate",
+                state: { initialMessage: "Test initial message" },
+            }),
+        };
+    });
+
+    const ChatScreen = (await import("../pages/ChatScreen")).default;
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
         </MemoryRouter>
     );
-
+    
     const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
-    await userEvent.type(userchat, 'Hello!')
-    const sendButton = screen.getByText("Send");
-    fireEvent.click(sendButton);
     await waitFor(() => {
         expect(userchat).toHaveValue('')
     },{timeout: 3000})
-    await userEvent.type(userchat, 'Hello!');
-    fireEvent.click(sendButton);
+
+})
+
+test("Can't send message until initial message set", async ()=>{
+    vi.doMock("react-router-dom", async () => {
+        const actual = await vi.importActual("react-router-dom");
+        return {
+            ...actual,
+            useLocation: vi.fn().mockReturnValue({
+                pathname: "/generate",
+                state: { initialMessage: "" },
+            }),
+        };
+    });
+
+    const ChatScreen = (await import("../pages/ChatScreen")).default;
+    render(
+        <MemoryRouter>
+            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+        </MemoryRouter>
+    );
+
+
+    const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
     await waitFor(() => {
-        expect(userchat).toHaveValue('Hello!')
+        expect(userchat).toHaveValue('')
     },{timeout: 3000})
-    expect(handleSend).toHaveBeenCalledTimes(1);
+
+    await userEvent.type(userchat, 'Test initial message')
+    await userEvent.keyboard('{Enter}')
+
+    await waitFor(() => {
+        expect(userchat).toHaveValue('Test initial message')
+    },{timeout: 3000})
+
 })
