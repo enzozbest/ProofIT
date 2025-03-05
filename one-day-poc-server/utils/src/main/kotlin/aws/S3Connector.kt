@@ -10,7 +10,7 @@ import aws.sdk.kotlin.services.sts.StsClient
 import aws.sdk.kotlin.services.sts.model.AssumeRoleRequest
 import aws.smithy.kotlin.runtime.auth.awscredentials.Credentials
 import aws.smithy.kotlin.runtime.content.asByteStream
-import aws.smithy.kotlin.runtime.content.decodeToString
+import aws.smithy.kotlin.runtime.content.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
@@ -98,7 +98,7 @@ object S3Service {
      * @param bucketName The name of the bucket to upload the file to.
      * @param file The file to upload.
      * @param key The key to use for the file in the bucket.
-     * @return The URL of the uploaded file.
+     * @return The URL of the uploaded file if the call succeeds, or an empty string otherwise.
      */
     suspend fun uploadFile(
         bucketName: String,
@@ -117,29 +117,33 @@ object S3Service {
                 this.contentType = contentType
             }
         ensureClient()
-        s3client.putObject(request)
-        return "https://$bucketName.s3.amazonaws.com/$key"
+        return kotlin
+            .runCatching { s3client.putObject(request) }
+            .getOrNull()
+            ?.let { "https://$bucketName.s3.amazonaws.com/$key" } ?: ""
     }
 
     /**
-     * Function to retrieve a file from S3 for use in-memory. Files are retrieved as Strings.
+     * Function to retrieve a file from S3 for use in-memory.
      * @param bucketName The name of the bucket to retrieve the file from.
      * @param key The key of the file to retrieve.
-     * @return The contents of the file as a String.
+     * @return The contents of the file as a ByteArray.
      */
     suspend fun getFile(
         bucketName: String,
         key: String,
-    ): String {
+    ): ByteArray? {
         val request =
             GetObjectRequest {
                 this.bucket = bucketName
                 this.key = key
             }
         ensureClient()
-        return s3client.getObject(request) { response ->
-            response.body?.decodeToString().toString()
-        }
+        return runCatching {
+            s3client.getObject(request) { response ->
+                response.body?.toByteArray()
+            }
+        }.getOrNull()
     }
 
     /**
@@ -158,9 +162,9 @@ object S3Service {
                 this.key = key
             }
         ensureClient()
-        s3client.deleteObject(request).also {
-            return true
-        }
+        return runCatching {
+            s3client.deleteObject(request)
+        }.isSuccess
     }
 
     /**
@@ -174,6 +178,8 @@ object S3Service {
             ListObjectsV2Request {
                 this.bucket = bucketName
             }
-        return s3client.listObjectsV2(request).contents?.mapNotNull { it.key } ?: emptyList()
+        return kotlin
+            .runCatching { s3client.listObjectsV2(request).contents?.mapNotNull { it.key } ?: emptyList() }
+            .getOrNull() ?: emptyList()
     }
 }

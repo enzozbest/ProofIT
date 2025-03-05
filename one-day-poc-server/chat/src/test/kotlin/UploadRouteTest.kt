@@ -15,6 +15,13 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Response(
+    val message: String,
+    val time: String
+)
 
 class UploadRoutesTest : BaseAuthenticationServer() {
 
