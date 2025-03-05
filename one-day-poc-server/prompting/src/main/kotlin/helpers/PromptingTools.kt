@@ -69,7 +69,7 @@ object PromptingTools {
         You need not be constrained by those, you may wish to use other languages or frameworks.
         
         ### JSON Structure:
-        - `"requirements"`: The functional requirements your code fulfils.
+        - `"requirements"`: The functional requirements your code fulfils as a list of strings.
         - `"mainFile"`: Specifies the main entry language (e.g., `"html"`).
         - `"files"`: An object containing the following:
             - For each language used, a key-value pair in which a key is a language identifier and the value is an object containing:
@@ -80,22 +80,23 @@ object PromptingTools {
         Example response format:
         ```json
         {
+        "requirements": ["The software must adhere to SOLID design principles"]
          "mainFile": "hmtl",
             "files": {
                 "html": {
                     "code": "<html>...</html>"
                     "frameworks": [],
-                    "dependencies": [],
+                    "dependencies": []
                 },
                 "css": {
                     "code": !body { ... }",
                     "frameworks": ["Tailwind"],
-                    "dependencies": [],
+                    "dependencies": []
                 },
                 "JavaScript": {
                     "code": "document.addEventListener('DOMContentLoaded', function() { ... });",
                     "frameworks": ["React"],
-                    "dependencies": ["React"],
+                    "dependencies": ["React"]
                  }
             }
         }
