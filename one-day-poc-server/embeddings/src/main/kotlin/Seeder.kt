@@ -33,15 +33,15 @@ object Seeder {
 
             if (isJsonLd(jsonContent)) {
                 try {
-                    val response = embeddingService.storeTemplate(file.nameWithoutExtension, jsonContent)
+                    val fileURI = file.toURI().toString()
+
+                    val response = embeddingService.storeTemplate(file.nameWithoutExtension, fileURI, jsonContent)
 
                     if (response.status != "success") {
                         logger.error("Embedding failed for ${file.name}: ${response.message}")
-                        println("Embedding failed for ${file.name}")
                     }
                 } catch (e: Exception) {
                     logger.error("Error embedding ${file.name}: ${e.message}")
-                    println("Error embedding ${file.name}")
                 }
             }
         } catch (e: Exception) {
