@@ -4,7 +4,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkConstructor
 import io.mockk.unmockkAll
-import kcl.seg.rtt.prompting.prototypeInteraction.PrototypeInteractor
+import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
 import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PrototypeMain
 import kotlinx.coroutines.runBlocking

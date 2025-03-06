@@ -1,4 +1,4 @@
-package kcl.seg.rtt.prompting.prototypeInteraction
+package kcl.seg.rtt.prompting.helpers
 
 import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PrototypeMain
