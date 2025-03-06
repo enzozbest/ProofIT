@@ -24,7 +24,6 @@ describe('MessageBox Component', () => {
 
     render(<MessageBox sentMessages={mockMessages} />);
 
-    // Check if scrollIntoView was called
     expect(scrollIntoViewMock).toHaveBeenCalled();
   });
 
@@ -89,7 +88,6 @@ describe('MessageBox Component', () => {
       <MessageBox sentMessages={mockMessagesWithCode} />
     );
 
-    // Find pre elements with the correct classes
     const preElements = container.querySelectorAll(
       'pre.whitespace-pre-wrap.pt-2'
     );
@@ -101,13 +99,11 @@ describe('MessageBox Component', () => {
       <MessageBox sentMessages={mockMessagesWithCode} />
     );
 
-    // Check for the main message container
     const messageContainer = container.querySelector(
       'div[style*="align-self: flex-start"]'
     );
     expect(messageContainer).toBeInTheDocument();
 
-    // Check for Markdown component rendering
     const markdownContent = messageContainer?.querySelector('div > *'); // First child of the message container
     expect(markdownContent).toBeInTheDocument();
   });
@@ -119,5 +115,69 @@ describe('MessageBox Component', () => {
       return element.textContent.trim() === '10:01 AM';
     });
     expect(timestamp).toBeInTheDocument();
+  });
+
+  const mockMessagesWithEmptyContent = [
+    {
+      role: 'User',
+      content: '',
+      timestamp: '2023-10-01, 10:00 AM',
+    },
+    {
+      role: 'Bot',
+      content: undefined,
+      timestamp: '2023-10-01, 10:01 AM',
+    },
+    {
+      role: 'User',
+      content: null,
+      timestamp: '2023-10-01, 10:02 AM',
+    },
+  ];
+
+  test('handles messages with empty content gracefully', () => {
+    const { container, debug } = render(
+      <MessageBox sentMessages={mockMessagesWithEmptyContent} />
+    );
+
+    const timestamp1 = screen.getByText('10:00 AM');
+    const timestamp2 = screen.getByText('10:01 AM');
+    const timestamp3 = screen.getByText('10:02 AM');
+    expect(timestamp1).toBeInTheDocument();
+    expect(timestamp2).toBeInTheDocument();
+    expect(timestamp3).toBeInTheDocument();
+
+    [timestamp1, timestamp2, timestamp3].forEach((timestamp) => {
+      const messageContainer = timestamp.parentElement;
+      expect(messageContainer).toHaveStyle('padding: 10px');
+      expect(messageContainer).toHaveStyle(
+        'background-color: rgb(241, 241, 241)'
+      );
+      expect(messageContainer).toHaveStyle('border-radius: 5px');
+      expect(messageContainer).toHaveStyle('max-width: 70%');
+    });
+  });
+
+  test('handles messages with null content gracefully', () => {
+    const mockMessagesWithNullContent = [
+      {
+        role: 'User',
+        content: null,
+        timestamp: '2023-10-01, 10:00 AM',
+      },
+    ];
+
+    render(<MessageBox sentMessages={mockMessagesWithNullContent} />);
+
+    const timestamp = screen.getByText('10:00 AM');
+    expect(timestamp).toBeInTheDocument();
+
+    const messageContainer = timestamp.parentElement;
+    expect(messageContainer).toHaveStyle('padding: 10px');
+    expect(messageContainer).toHaveStyle(
+      'background-color: rgb(241, 241, 241)'
+    );
+    expect(messageContainer).toHaveStyle('border-radius: 5px');
+    expect(messageContainer).toHaveStyle('max-width: 70%');
   });
 });
