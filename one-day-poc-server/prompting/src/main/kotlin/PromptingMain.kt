@@ -6,6 +6,8 @@ import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck
+import kcl.seg.rtt.prototype.convertJsonToLlmResponse
+import kcl.seg.rtt.webcontainer.WebContainerState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -32,6 +34,15 @@ class PromptingMain(
 
         // Second LLM call
         val response: JsonObject = promptLlm(prototypePrompt)
+
+        // Convert the JSON response to an LlmResponse object
+        val llmResponse = convertJsonToLlmResponse(response)
+
+        // Run security checks on the actual LlmResponse
+        onSiteSecurityCheck(llmResponse)
+
+        WebContainerState.updateResponse(llmResponse)
+
         println(response)
         return chatResponse(response)
     }

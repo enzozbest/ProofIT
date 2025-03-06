@@ -1,6 +1,8 @@
 package kcl.seg.rtt.prototype
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Represents a structured response from the LLM containing prototype file information.
@@ -20,49 +22,46 @@ data class FileContent(
     val content: String,
 )
 
-open class PrototypeService(
-    private val ollamaService: OllamaService,
-) {
-    /**
-     * Generates a software prototype using the LLM service [ollamaService] based on the given [prompt].
-     *
-     * Steps:
-     * 1. Creates a full prompt string via [createPrompt].
-     * 2. Calls [ollamaService.generateResponse] with that prompt, returning an [LlmResponse] wrapped in [Result].
-     * 3. Checks if the generated response contains a "new template" declaration:
-     *    - If so, validates the template with [TemplateManager.validateNewTemplate].
-     *    - On successful validation, calls [TemplateManager.storeNewTemplateEmbeddings].
-     * 4. Performs a fake compilation check with [runCompileCheckOnSite] to ensure the final code/site is valid.
-     *
-     * If any checks fail, this function returns a failed [Result] with a relevant [RuntimeException],
-     * allowing the caller to prompt the LLM to regenerate or handle the error further.
-     *
-     * @param prompt The raw user prompt specifying what the LLM should generate.
-     * @return A [Result] containing an [LlmResponse] if all validations succeed, or a failed [Result]
-     *         if any validation step fails (e.g., new template invalid, code compile error).
-     */
 
-    /**
-     * Performs a naive "compile" or validation check on the files within the given [response].
-     *
-     * Currently, this method:
-     * 1. Returns false if [response] is null.
-     * 2. Inspects each file in [response.files], failing if any file content contains "ERROR" (case-insensitive).
-     *
-     * @param response The [LlmResponse] to be checked. May be null, in which case it fails immediately.
-     * @return True if the response is non-null and no file contains "ERROR"; false otherwise.
-     */
-    private fun runCompileCheckOnSite(response: LlmResponse?): Boolean {
-        // TODO: parse the "files" in LlmResponse and run some checks.
-        if (response == null) return false
-
-        // naive approach
-        return !response.files.values.any { it.content.contains("ERROR", ignoreCase = true) }
-    }
-
-    open fun retrievePrototype(id: String): String {
-        // Later, this will query the DB or S3, etc.
-        // For now, just return a minimal HTML snippet (or null).
-        return "<html><body><h1>Hello from Prototype $id</h1></body></html>"
+/**
+ * Converts a JsonObject to an LlmResponse object for security checking.
+ * 
+ * @param json The JsonObject containing the LLM response with files
+ * @return An LlmResponse object containing the parsed files
+ * @throws PromptException If the required fields are missing or malformed
+ */
+fun convertJsonToLlmResponse(json: JsonObject): LlmResponse {
+    try {
+        // Convert each file entry to a map of language -> FileContent
+        val files = mutableMapOf<String, FileContent>()
+        
+        (json["files"] as? JsonObject 
+            ?: throw PromptException("Missing 'files' field in LLM response")).entries.forEach { (language, fileContentJson) ->
+            val content = when (fileContentJson) {
+                is JsonObject -> {
+                    // Look for "code" field first (as per prompt), then try "content" for backward compatibility
+                    (fileContentJson["code"] as? JsonPrimitive)?.content
+                        ?: (fileContentJson["content"] as? JsonPrimitive)?.content
+                        ?: throw PromptException("Missing 'code' or 'content' field in file for language: $language")
+                }
+                is JsonPrimitive -> {
+                    // If it's directly a string content
+                    fileContentJson.content
+                }
+                else -> throw PromptException("Unexpected format for file content in language: $language")
+            }
+            
+            files[language] = FileContent(content)
+        }
+        
+        // Set default mainFile to "index.html" if not provided
+        val mainFile = (json["mainFile"] as? JsonPrimitive)?.content ?: "html"
+        return LlmResponse(mainFile, files)            
+    } catch (e: Exception) {
+        when (e) {
+            is PromptException -> throw e
+            else -> throw PromptException("Failed to parse LLM response: ${e.message}")
+        }
     }
 }
+
