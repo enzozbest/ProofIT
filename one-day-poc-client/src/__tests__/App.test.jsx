@@ -1,11 +1,17 @@
-import { render, screen, waitFor,fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import App from '../App';
-import '@testing-library/jest-dom';
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, BrowserRouter } from "react-router-dom";
 import { vi, test, expect } from "vitest";
+import { createRoot } from 'react-dom/client';
+import '../main';
+
+vi.mock('react-dom/client', () => ({
+    createRoot: vi.fn(() => ({
+        render: vi.fn(),
+    })),
+}));
 
 test("Renders base page", () => {
-
     render(
         <MemoryRouter>
             <App />
@@ -13,3 +19,7 @@ test("Renders base page", () => {
     );
     expect(screen.getByText(/Enabling you from/i)).toBeInTheDocument();
 });
+
+test("Main component renders",()=>{
+    expect(createRoot).toHaveBeenCalled();
+})
