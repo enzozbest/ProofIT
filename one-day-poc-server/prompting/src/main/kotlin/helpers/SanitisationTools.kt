@@ -4,15 +4,13 @@ import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
 
 object SanitisationTools {
+    const val MAX_PROMPT_LENGTH = 1000
+
     /**
-     * User prompts via the JSON prompt request are sanitised by
-     * removing all HTML tags (Jsoup)
-     * removing leading and trailing whitespace
-     * replacing special characters and HTML entities such as &lt;
-     * with the empty string
-     * capping the user input to 1000 characters
-     * ignoring all text after a word/phrase if the prompt contains a malicious phrase
-     *
+     * User prompts via the JSON prompt request are sanitised by removing all HTML tags (Jsoup), removing leading
+     * and trailing whitespace replacing special characters and HTML entities such as &lt with the empty string.
+     * The user input is capped the user input to [MAX_PROMPT_LENGTH] characters, ignoring all text after a word/phrase
+     * if the prompt contains a malicious phrase.
      */
     private fun cleanPrompt(prompt: String): String {
         var sanitised =
@@ -21,7 +19,7 @@ object SanitisationTools {
                 .trim()
                 .replace(Regex("&[a-zA-Z0-9#]+;"), "")
                 .replace(Regex("[^\\w\\s.,!?()]"), "")
-                .take(1000)
+                .take(MAX_PROMPT_LENGTH)
         val maliciousPatterns =
             listOf(
                 "ignore",
@@ -35,7 +33,8 @@ object SanitisationTools {
                 "respond as",
             )
         for (pattern in maliciousPatterns) {
-            val regex = Regex("((?i)$pattern)")
+            val escapedPattern = pattern.replace(" ", "\\s+")
+            val regex = Regex("(?i)$escapedPattern(?:\\s+\\w+)?")
             sanitised = sanitised.replace(regex, "")
         }
         return sanitised
