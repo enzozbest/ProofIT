@@ -2,7 +2,7 @@ package kcl.seg.rtt.prompting
 
 import helpers.SanitisationTools
 import kcl.seg.rtt.prompting.helpers.PromptingTools
-import kcl.seg.rtt.prompting.prototypeInteraction.PrototypeInteractor
+import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck

@@ -4,7 +4,7 @@ import helpers.SanitisationTools
 import helpers.SanitisedPromptResult
 import io.mockk.*
 import kcl.seg.rtt.prompting.helpers.PromptingTools
-import kcl.seg.rtt.prompting.prototypeInteraction.PrototypeInteractor
+import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
 import kcl.seg.rtt.prototype.FileContent
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.OllamaResponse
@@ -81,13 +81,14 @@ class PromptingMainTest {
 
         coEvery {
             PrototypeInteractor.prompt(any(), any())
-        } returns OllamaResponse(
-            model = "test-model",
-            created_at = "2024-01-01",
-            response = "mock response",
-            done = true,
-            done_reason = "test"
-        )
+        } returns
+            OllamaResponse(
+                model = "test-model",
+                created_at = "2024-01-01",
+                response = "mock response",
+                done = true,
+                done_reason = "test",
+            )
 
         every { PromptingTools.formatResponseJson("mock response") } returnsMany listOf(freqsResponse, finalResponse)
 
@@ -169,12 +170,14 @@ class PromptingMainTest {
                 put("wrong_key", JsonPrimitive("value"))
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
+        val method =
+            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            method.invoke(promptingMain, userPrompt, invalidResponse)
-        }
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                method.invoke(promptingMain, userPrompt, invalidResponse)
+            }
 
         assertTrue(exception.cause is PromptException)
         assertEquals("Failed to extract requirements from LLM response", exception.cause?.message)
@@ -189,12 +192,14 @@ class PromptingMainTest {
                 // missing keywords field
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
+        val method =
+            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            method.invoke(promptingMain, userPrompt, invalidResponse)
-        }
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                method.invoke(promptingMain, userPrompt, invalidResponse)
+            }
 
         assertTrue(exception.cause is PromptException)
         assertEquals("Failed to extract keywords from LLM response", exception.cause?.message)
@@ -203,27 +208,31 @@ class PromptingMainTest {
     @Test
     fun `test promptLlm with successful response`() {
         val prompt = "test prompt"
-        val expectedJson = buildJsonObject {
-            put("test", JsonPrimitive("value"))
-        }
+        val expectedJson =
+            buildJsonObject {
+                put("test", JsonPrimitive("value"))
+            }
 
-        coEvery { 
-            PrototypeInteractor.prompt(prompt, any()) 
-        } returns OllamaResponse(
-            model = "test-model",
-            created_at = "2024-01-01",
-            response = "test response",
-            done = true,
-            done_reason = "test"
-        )
+        coEvery {
+            PrototypeInteractor.prompt(prompt, any())
+        } returns
+            OllamaResponse(
+                model = "test-model",
+                created_at = "2024-01-01",
+                response = "test response",
+                done = true,
+                done_reason = "test",
+            )
 
         every { PromptingTools.formatResponseJson("test response") } returns expectedJson
 
-        val result = runBlocking {
-            promptingMain::class.java.getDeclaredMethod("promptLlm", String::class.java)
-                .apply { isAccessible = true }
-                .invoke(promptingMain, prompt) as JsonObject
-        }
+        val result =
+            runBlocking {
+                promptingMain::class.java
+                    .getDeclaredMethod("promptLlm", String::class.java)
+                    .apply { isAccessible = true }
+                    .invoke(promptingMain, prompt) as JsonObject
+            }
 
         assertEquals(expectedJson, result)
     }
@@ -237,11 +246,12 @@ class PromptingMainTest {
         val method = promptingMain::class.java.getDeclaredMethod("promptLlm", String::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            runBlocking {
-                method.invoke(promptingMain, prompt)
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                runBlocking {
+                    method.invoke(promptingMain, prompt)
+                }
             }
-        }
 
         assertTrue(exception.cause is PromptException)
         assertEquals("LLM did not respond!", exception.cause?.message)
@@ -251,21 +261,23 @@ class PromptingMainTest {
     fun `test promptLlm when JSON formatting fails`() {
         val prompt = "test prompt"
 
-        coEvery { 
-            PrototypeInteractor.prompt(prompt, any()) 
-        } returns OllamaResponse(
-            model = "test-model",
-            created_at = "2024-01-01",
-            response = "invalid json",
-            done = true,
-            done_reason = "test"
-        )
+        coEvery {
+            PrototypeInteractor.prompt(prompt, any())
+        } returns
+            OllamaResponse(
+                model = "test-model",
+                created_at = "2024-01-01",
+                response = "invalid json",
+                done = true,
+                done_reason = "test",
+            )
 
         every { PromptingTools.formatResponseJson("invalid json") } throws Exception("Invalid JSON")
 
         assertThrows<Exception> {
             runBlocking {
-                promptingMain::class.java.getDeclaredMethod("promptLlm", String::class.java)
+                promptingMain::class.java
+                    .getDeclaredMethod("promptLlm", String::class.java)
                     .apply { isAccessible = true }
                     .invoke(promptingMain, prompt)
             }
@@ -274,9 +286,10 @@ class PromptingMainTest {
 
     @Test
     fun `test chatResponse with JsonArray`() {
-        val response = buildJsonObject {
-            put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
-        }
+        val response =
+            buildJsonObject {
+                put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
+            }
 
         val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
         method.isAccessible = true
@@ -284,15 +297,16 @@ class PromptingMainTest {
 
         assertEquals(
             "These are the functional requirements fulfilled by this prototype: req1, req2",
-            result.response
+            result.response,
         )
     }
 
     @Test
     fun `test chatResponse with JsonPrimitive`() {
-        val response = buildJsonObject {
-            put("requirements", JsonPrimitive("single requirement"))
-        }
+        val response =
+            buildJsonObject {
+                put("requirements", JsonPrimitive("single requirement"))
+            }
 
         val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
         method.isAccessible = true
@@ -300,22 +314,24 @@ class PromptingMainTest {
 
         assertEquals(
             "These are the functional requirements fulfilled by this prototype: single requirement",
-            result.response
+            result.response,
         )
     }
 
     @Test
     fun `test chatResponse with empty JsonArray`() {
-        val response = buildJsonObject {
-            put("requirements", JsonArray(emptyList()))
-        }
+        val response =
+            buildJsonObject {
+                put("requirements", JsonArray(emptyList()))
+            }
 
         val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            method.invoke(promptingMain, response)
-        }
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                method.invoke(promptingMain, response)
+            }
 
         assertTrue(exception.cause is PromptException)
         assertEquals("No requirements found in LLM response", exception.cause?.message)
@@ -323,33 +339,40 @@ class PromptingMainTest {
 
     @Test
     fun `test chatResponse with invalid type`() {
-        val response = buildJsonObject {
-            put("requirements", JsonObject(emptyMap()))
-        }
+        val response =
+            buildJsonObject {
+                put("requirements", JsonObject(emptyMap()))
+            }
 
         val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            method.invoke(promptingMain, response)
-        }
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                method.invoke(promptingMain, response)
+            }
 
         assertTrue(exception.cause is PromptException)
-        assertEquals("Requirements could not be found or were returned in an unrecognised format.", exception.cause?.message)
+        assertEquals(
+            "Requirements could not be found or were returned in an unrecognised format.",
+            exception.cause?.message,
+        )
     }
 
     @Test
     fun `test onSiteSecurityCheck with safe code`() {
-        val llmResponse = LlmResponse(
-            mainFile = "index.js",
-            files = mapOf<String, FileContent>(
-                "index.js" to FileContent("console.log('Hello')"),
-                "style.css" to FileContent("body { color: black; }")
+        val llmResponse =
+            LlmResponse(
+                mainFile = "index.js",
+                files =
+                    mapOf<String, FileContent>(
+                        "index.js" to FileContent("console.log('Hello')"),
+                        "style.css" to FileContent("body { color: black; }"),
+                    ),
             )
-        )
 
         mockkStatic(::secureCodeCheck)
-        every { 
+        every {
             secureCodeCheck(any(), any())
         } returns true
 
@@ -357,7 +380,7 @@ class PromptingMainTest {
         method.isAccessible = true
         method.invoke(promptingMain, llmResponse)
 
-        verify(exactly = 2) { 
+        verify(exactly = 2) {
             secureCodeCheck(any(), any())
         }
         unmockkStatic(::secureCodeCheck)
@@ -365,33 +388,36 @@ class PromptingMainTest {
 
     @Test
     fun `test onSiteSecurityCheck with unsafe code`() {
-        val llmResponse = LlmResponse(
-            mainFile = "index.js",
-            files = mapOf<String, FileContent>(
-                "index.js" to FileContent("console.log('Hello')"),
-                "malicious.js" to FileContent("eval('malicious code')")
+        val llmResponse =
+            LlmResponse(
+                mainFile = "index.js",
+                files =
+                    mapOf<String, FileContent>(
+                        "index.js" to FileContent("console.log('Hello')"),
+                        "malicious.js" to FileContent("eval('malicious code')"),
+                    ),
             )
-        )
 
         mockkStatic(::secureCodeCheck)
-        every { 
+        every {
             secureCodeCheck(eq("console.log('Hello')"), eq("index.js"))
         } returns true
-        every { 
+        every {
             secureCodeCheck(eq("eval('malicious code')"), eq("malicious.js"))
         } returns false
 
         val method = PromptingMain::class.java.getDeclaredMethod("onSiteSecurityCheck", LlmResponse::class.java)
         method.isAccessible = true
 
-        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
-            method.invoke(promptingMain, llmResponse)
-        }
+        val exception =
+            assertThrows<java.lang.reflect.InvocationTargetException> {
+                method.invoke(promptingMain, llmResponse)
+            }
 
         assertTrue(exception.cause is RuntimeException)
         assertEquals("Code is not safe for language=malicious.js", exception.cause?.message)
 
-        verify { 
+        verify {
             secureCodeCheck(eq("console.log('Hello')"), eq("index.js"))
             secureCodeCheck(eq("eval('malicious code')"), eq("malicious.js"))
         }
