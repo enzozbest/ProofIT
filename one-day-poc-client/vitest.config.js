@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // Ensures `@` refers to `src/`
+      "@": path.resolve(__dirname, "src"),
     },
   },
   test: {
@@ -19,6 +19,16 @@ export default defineConfig({
     setupFiles: './src/setupTests.js',
     coverage: {
       reporter: ['text', 'html', 'lcov'],
+    exclude:[
+        'postcss.config.js',
+        'tailwind.config.js',
+        '.eslintrc.js',
+        'eslint.config.js',
+        'vite.config.js',
+        'vitest.config.js',
+        'src/__tests__',
+        'src/components/ui'
+        ]
     },
   },
 });
