@@ -93,3 +93,40 @@ test("Prompts are sent via the enter key",async()=>{
         expect(userinput).toHaveValue('Hello!')
     },{timeout: 3000})
 })
+
+test("Sign in button activates authentication",async()=>{
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        json: () => Promise.resolve({ userId: 1, isAdmin: false }),
+    }));
+
+    render(
+        <MemoryRouter>
+            <LandingPage />
+        </MemoryRouter>
+    );
+
+    const signinButton = screen.getByRole("button", { name: "Sign In" });
+    fireEvent.click(signinButton);
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/auth/check', expect.any(Object)));
+})
+
+test("Sign out button triggers logging out",async()=>{
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        json: () => Promise.resolve({ userId: 1, isAdmin: false }),
+    }));
+
+    render(
+        <MemoryRouter>
+            <LandingPage />
+        </MemoryRouter>
+    );
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
+        "http://localhost:8000/api/auth/check",
+        expect.any(Object)
+    ));
+
+    const signoutButton = screen.getByRole("button", { name: "Log Out" });
+    fireEvent.click(signoutButton);
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/auth/logout', expect.any(Object)));
+})
