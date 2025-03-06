@@ -79,7 +79,7 @@ class PromptingMain(
                     if (jsonReqs.isEmpty()) {
                         throw PromptException("No requirements found in LLM response")
                     }
-                    jsonReqs.joinToString(", ")
+                    jsonReqs.map { (it as JsonPrimitive).content }.joinToString(", ")
                 }
 
                 is JsonPrimitive -> jsonReqs.content
