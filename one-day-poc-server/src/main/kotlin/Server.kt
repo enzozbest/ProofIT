@@ -35,6 +35,9 @@ private fun Application.configureCORS(
             allowHost(host.first, schemes = host.second)
         }
 
+        // for iframe embedding
+        allowNonSimpleContentTypes = true
+
         allowCredentials = credentials
     }
 }

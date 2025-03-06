@@ -5,7 +5,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ prototypeId, width = '1
     const [url, setUrl] = useState('');
 
     useEffect(() => {
-        setUrl(`http://localhost:8000/webcontainer/${prototypeId}`);
+        setUrl(`http://localhost:8000/webcontainer/`);
     }, [prototypeId]);
 
 

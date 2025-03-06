@@ -157,7 +157,7 @@ tasks.named("run") {
 tasks.register<Exec>("startDocker") {
     group = "docker"
     description = "Starts the PostgreSQL docker container"
-    commandLine("docker-compose", "up", "-d")
+    commandLine("sh", "-c", "docker compose up -d || docker-compose up -d")
 }
 
 allprojects {

@@ -6,9 +6,8 @@ import io.ktor.server.routing.*
 import io.ktor.http.*
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.FileContent
-import kotlinx.serialization.json.JsonObject
 
-// Hardcoded website content for testing
+// Create test response with the hardcoded website (keeping for testing)
 private val TEST_HTML = """
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +15,9 @@ private val TEST_HTML = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Counter</title>
-    <link rel="stylesheet" href="/prototype/css">
+    <style>
+    /* CSS will be embedded here by the server */
+    </style>
 </head>
 <body>
     <div class="container">
@@ -30,7 +31,9 @@ private val TEST_HTML = """
             <button id="increment">+</button>
         </div>
     </div>
-    <script src="/prototype/js"></script>
+    <script>
+    /* JS will be embedded here by the server */
+    </script>
 </body>
 </html>
 """.trimIndent()
@@ -158,7 +161,7 @@ resetBtn.addEventListener('click', () => {
 updateDisplay();
 """.trimIndent()
 
-// Create test response with the hardcoded website
+// Create test LlmResponse with the hardcoded website
 private val TEST_RESPONSE = LlmResponse(
     mainFile = "index.html",
     files = mapOf(
@@ -168,7 +171,7 @@ private val TEST_RESPONSE = LlmResponse(
     )
 )
 
-// Modified singleton to use hardcoded response by default
+// Singleton to store the latest LlmResponse
 object WebContainerState {
     private var latestResponse: LlmResponse? = TEST_RESPONSE
     
@@ -176,8 +179,7 @@ object WebContainerState {
         latestResponse = response
     }
     
-    // fun getLatestResponse(): LlmResponse? = latestResponse
-    fun getLatestResponse(): LlmResponse = TEST_RESPONSE
+    fun getLatestResponse(): LlmResponse? = latestResponse
     
     // Reset to test response for testing
     fun resetToTestResponse() {
@@ -186,82 +188,62 @@ object WebContainerState {
 }
 
 /**
- * Defines routes to serve code snippets from an [LlmResponse]
- * at /prototype/<language>.
+ * Creates a complete HTML page with embedded CSS and JS
  */
-fun Route.parseCode(llmResponse: LlmResponse) {
-    // For each language key in llmResponse.files, set up a GET route
-    llmResponse.files.forEach { (language, fileContent) ->
-        get("/prototype/$language") {
-            val codeSnippet = fileContent.content
-            // Determine ContentType based on language
-            val contentType = when (language.lowercase()) {
-                "html" -> ContentType.Text.Html
-                "css" -> ContentType.Text.CSS
-                "js", "javascript" -> ContentType.Text.JavaScript
-                else -> ContentType.Text.Plain  // python, etc. served as text
-            }
-
-            call.respondText(codeSnippet, contentType)
-        }
+private fun buildCompleteHtml(response: LlmResponse): String {
+    val html = response.files["html"]?.content ?: return "No HTML content available"
+    val css = response.files["css"]?.content ?: ""
+    val js = response.files["js"]?.content ?: ""
+    
+    // Detect if HTML already has style and script tags
+    val hasStyleTag = html.contains("<style")
+    val hasScriptTag = html.contains("<script")
+    
+    // If HTML already has style/script tags, return as is
+    if (hasStyleTag && hasScriptTag) {
+        return html
     }
+    
+    // Insert CSS into style tag
+    val htmlWithCss = if (hasStyleTag) {
+        html
+    } else {
+        html.replace("</head>", "<style>\n$css\n</style>\n</head>")
+    }
+    
+    // Insert JS into script tag
+    val completeHtml = if (hasScriptTag) {
+        htmlWithCss
+    } else {
+        htmlWithCss.replace("</body>", "<script>\n$js\n</script>\n</body>")
+    }
+    
+    return completeHtml
 }
 
-// Add a separate function for root redirect to ensure it's registered first
+// Simple root redirect
 fun Application.configureRootRedirect() {
     routing {
         get("/") {
-            log.info("Root path handler called")
-            val response = WebContainerState.getLatestResponse()
-            if (response != null && response.files.containsKey("html")) {
-                log.info("Redirecting to /prototype/html")
-                call.respondRedirect("/prototype/html")
-            } else {
-                call.respondText("No prototype generated yet", status = HttpStatusCode.NotFound)
-            }
+            call.respondRedirect("/webcontainer")
         }
     }
 }
 
-// Extension function for Application
 fun Application.configureWebContainer() {
-    log.info("Configuring WebContainer routes") // Add logging
     routing {
-        route("/prototype") {
-            get("/{language}") {
-                val language = call.parameters["language"] ?: return@get call.respondText(
-                    "Missing language parameter", 
-                    status = HttpStatusCode.BadRequest
+        get("/webcontainer") {
+            val response = WebContainerState.getLatestResponse()
+            if (response == null) {
+                call.respondText(
+                    "No prototype available yet", 
+                    status = HttpStatusCode.NotFound
                 )
-                
-                val response = WebContainerState.getLatestResponse()
-                if (response == null) {
-                    call.respondText(
-                        "No prototype available yet", 
-                        status = HttpStatusCode.NotFound
-                    )
-                    return@get
-                }
-                
-                val fileContent = response.files[language]
-                if (fileContent == null) {
-                    call.respondText(
-                        "No content available for language: $language", 
-                        status = HttpStatusCode.NotFound
-                    )
-                    return@get
-                }
-                
-                // Determine ContentType based on language
-                val contentType = when (language.lowercase()) {
-                    "html" -> ContentType.Text.Html
-                    "css" -> ContentType.Text.CSS
-                    "js", "javascript" -> ContentType.Text.JavaScript
-                    else -> ContentType.Text.Plain
-                }
-                
-                call.respondText(fileContent.content, contentType)
+                return@get
             }
+            
+            val completeHtml = buildCompleteHtml(response)
+            call.respondText(completeHtml, ContentType.Text.Html)
         }
     }
 }
