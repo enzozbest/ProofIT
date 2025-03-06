@@ -44,7 +44,7 @@ class LlmResponseTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `Test AuthenticatedSession deserialization missing a field`() {
+    fun `Test LlmResponse deserialization missing a field`() {
         val json = """{"mainFile":"mainFile"}"""
         assertFailsWith<MissingFieldException> {
             Json.decodeFromString<LlmResponse>(json)
