@@ -44,6 +44,9 @@ class PromptingMain(
         WebContainerState.updateResponse(llmResponse)
 
         println(response)
+
+        // TODO: Send to webcontainer
+
         return chatResponse(response)
     }
 
