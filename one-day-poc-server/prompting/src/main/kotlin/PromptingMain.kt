@@ -5,8 +5,8 @@ import kcl.seg.rtt.prompting.helpers.PromptingTools
 import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.PromptException
-import kcl.seg.rtt.prototype.secureCodeCheck
 import kcl.seg.rtt.prototype.convertJsonToLlmResponse
+import kcl.seg.rtt.prototype.secureCodeCheck
 import kcl.seg.rtt.webcontainer.WebContainerState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
@@ -33,21 +33,13 @@ class PromptingMain(
         val prototypePrompt = prototypePrompt(userPrompt, freqs)
 
         // Second LLM call
-        val response: JsonObject = promptLlm(prototypePrompt)
+        val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
-        // Convert the JSON response to an LlmResponse object
-        val llmResponse = convertJsonToLlmResponse(response)
+        // Send prototype response to web container for displaying
+        // TODO: webContainerResponse(prototypeResponse)
 
-        // Run security checks on the actual LlmResponse
-        onSiteSecurityCheck(llmResponse)
-
-        WebContainerState.updateResponse(llmResponse)
-
-        println(response)
-
-        // TODO: Send to webcontainer
-
-        return chatResponse(response)
+        // Return chat response to chatbot
+        return chatResponse(prototypeResponse)
     }
 
     private fun prototypePrompt(
@@ -73,6 +65,9 @@ class PromptingMain(
         )
     }
 
+    /**
+     * Prompts the LLM with the given prompt and returns the response as a JsonObject.
+     */
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
             val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
@@ -93,7 +88,7 @@ class PromptingMain(
                     if (jsonReqs.isEmpty()) {
                         throw PromptException("No requirements found in LLM response")
                     }
-                    jsonReqs.map { (it as JsonPrimitive).content }.joinToString(", ")
+                    jsonReqs.joinToString(", ") { (it as JsonPrimitive).content }
                 }
 
                 is JsonPrimitive -> jsonReqs.content
@@ -106,6 +101,11 @@ class PromptingMain(
         )
     }
 
+    /**
+     * Checks the security of the code snippets in the LLM response.
+     * @param llmResponse The LLM response.
+     * @throws RuntimeException If the code is not safe for any of the languages used.
+     */
     private fun onSiteSecurityCheck(llmResponse: LlmResponse) {
         for ((language, fileContent) in llmResponse.files) {
             val codeSnippet = fileContent.content
@@ -115,7 +115,12 @@ class PromptingMain(
         }
     }
 
-    private fun webContainerResponse() {
-        // TODO extract web container response from model response
+    /**
+     * Sends the prototype response to the web container for display.
+     */
+    private fun webContainerResponse(prototypeResponse: JsonObject) {
+        val llmResponseObject = convertJsonToLlmResponse(prototypeResponse)
+        onSiteSecurityCheck(llmResponseObject)
+        WebContainerState.updateResponse(llmResponseObject)
     }
 }
