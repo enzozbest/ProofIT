@@ -10,6 +10,8 @@ import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck
+import kcl.seg.rtt.prototype.convertJsonToLlmResponse
+import kcl.seg.rtt.webcontainer.WebContainerState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.AfterEach
@@ -425,10 +427,57 @@ class PromptingMainTest {
     }
 
     @Test
-    fun `test webContainerResponse`() {
-        // Test the empty function to ensure coverage
-        val method = PromptingMain::class.java.getDeclaredMethod("webContainerResponse")
-        method.isAccessible = true
-        method.invoke(promptingMain)
+    fun `test run method flow`() {
+        val userPrompt = "Create a hello world app"
+        val sanitisedPrompt = SanitisedPromptResult("Create a hello world app", listOf("hello", "world"))
+        val freqsPrompt = "Functional requirements prompt"
+
+        val freqsResponse = buildJsonObject {
+            putJsonArray("requirements") { add("Display hello world") }
+            putJsonArray("keywords") { add("hello"); add("world") }
+        }
+
+        val prototypeResponse = buildJsonObject {
+            putJsonArray("requirements") { add("Display hello world") }
+        }
+
+        mockkObject(SanitisationTools)
+        mockkObject(PromptingTools)
+        mockkObject(PrototypeInteractor)
+
+        every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitisedPrompt
+        every { PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords) } returns freqsPrompt
+        every { runBlocking { PrototypeInteractor.prompt(any(), any()) } } returns OllamaResponse(
+            model = "deepseek-r1:32b",
+            created_at = "2024-03-07T21:53:03Z",
+            response = "response",
+            done = true,
+            done_reason = "stop"
+        )
+        every { PromptingTools.formatResponseJson("response") } returnsMany listOf(freqsResponse, prototypeResponse)
+
+        val result = promptingMain.run(userPrompt)
+
+        verifyOrder { 
+            SanitisationTools.sanitisePrompt(userPrompt)
+            PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
+            runBlocking { PrototypeInteractor.prompt(freqsPrompt, "deepseek-r1:32b") }
+            PromptingTools.formatResponseJson("response")
+            runBlocking { PrototypeInteractor.prompt(any(), "deepseek-r1:32b") }
+            PromptingTools.formatResponseJson("response")
+        }
+
+        verify(exactly = 1) {
+            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+        }
+
+        assertEquals(
+            "These are the functional requirements fulfilled by this prototype: Display hello world",
+            result.response
+        )
+
+        unmockkObject(SanitisationTools)
+        unmockkObject(PromptingTools)
+        unmockkObject(PrototypeInteractor)
     }
 }

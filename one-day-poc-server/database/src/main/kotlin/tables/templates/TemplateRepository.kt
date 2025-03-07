@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory
 class TemplateRepository(
     private val db: Database,
 ) {
-    var logger = LoggerFactory.getLogger(TemplateRepository::class.java)
+    companion object {
+        private val IO_DISPATCHER = Dispatchers.IO
+    }
+
+    val logger = LoggerFactory.getLogger(TemplateRepository::class.java)
 
     /**
      * Function to save a Template to the database
@@ -17,9 +21,18 @@ class TemplateRepository(
      */
     suspend fun saveTemplateToDB(template: Template): Result<Unit> =
         runCatching {
-            newSuspendedTransaction(Dispatchers.IO, db) {
-                TemplateEntity.new(template.id) {
-                    fileURI = template.fileURI
+            if (template.id.isBlank()) {
+                throw IllegalArgumentException("Template ID cannot be empty")
+            }
+
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val existingTemplate = TemplateEntity.findById(template.id)
+                if (existingTemplate != null) {
+                    existingTemplate.fileURI = template.fileURI
+                } else {
+                    TemplateEntity.new(template.id) {
+                        fileURI = template.fileURI
+                    }
                 }
             }
         }
@@ -30,12 +43,11 @@ class TemplateRepository(
      * @return A Result object containing the Prototype if it exists, or null if it does not
      */
     suspend fun getTemplateFromDB(id: String): Template? =
-        try {
-            newSuspendedTransaction(Dispatchers.IO, db) {
+        runCatching {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
                 TemplateEntity.findById(id)?.toTemplate()
             }
-        } catch (e: Exception) {
+        }.onFailure { e ->
             logger.error("Error retrieving template with ID $id: ${e.message}", e)
-            null
-        }
+        }.getOrNull()
 }
