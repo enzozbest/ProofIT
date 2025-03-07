@@ -62,21 +62,9 @@ object TemplateService {
             throw IllegalStateException("Failed to parse response!", e)
         }
 
-        val templateId = storeAndGetId(fileURI)
+        val templateId = TemplateStorageService.createTemplate(fileURI)
 
         return storeResponse.copy(id = templateId)
-    }
-
-    internal suspend fun storeAndGetId(fileURI: String): String? {
-        val templateResult = TemplateStorageService.createTemplate(fileURI)
-
-        if (templateResult.isFailure) {
-            val exception = templateResult.exceptionOrNull()
-                ?: Exception("Unknown error during template creation")
-            throw IllegalStateException("Failed to store template in database: ${exception.message}", exception)
-        }
-
-        return templateResult.getOrNull()?.id
     }
 
     suspend fun search(
