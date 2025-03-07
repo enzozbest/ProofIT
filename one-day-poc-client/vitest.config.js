@@ -30,7 +30,8 @@ export default defineConfig({
                 'vite.config.js',
                 'vitest.config.js',
                 'src/__tests__',
-                'src/components/ui'
+                'src/components/ui',
+                'src/types'
             ]
         },
     },
