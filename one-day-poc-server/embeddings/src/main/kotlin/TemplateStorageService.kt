@@ -9,21 +9,26 @@ import io.ktor.server.plugins.*
  * Uses DatabaseManager to access the TemplateRepository.
  */
 object TemplateStorageService {
-    private val logger = LoggerFactory.getLogger(TemplateService::class.java)
+    var logger = LoggerFactory.getLogger(TemplateService::class.java)
 
     /**
      * Creates a new template and stores it in the database.
      *
      * @param fileURI The URI of the template file
-     * @return Result containing the created template or an error
+     * @return template id or null
      */
-    suspend fun createTemplate(fileURI: String): Result<Template> {
+    suspend fun createTemplate(fileURI: String): String? {
         val templateId = UUID.randomUUID().toString()
         val template = Template(id = templateId, fileURI = fileURI)
 
         val result = DatabaseManager.templateRepository().saveTemplateToDB(template)
 
-        return result.map { template }
+        if (result.isSuccess) {
+            return templateId
+        } else {
+            logger.info("Failed to store template $templateId")
+            return null
+        }
     }
 
     /**
@@ -32,16 +37,23 @@ object TemplateStorageService {
      * @param id The ID of the template to retrieve
      * @return Result containing the found template or null if not found
      */
-    suspend fun getTemplateById(templateId: UUID): Result<Template?> {
+    suspend fun getTemplateById(templateId: UUID): Template? {
         val uuidString = templateId.toString()
 
-        return DatabaseManager.templateRepository().getTemplateFromDB(uuidString)
-            .mapCatching { template ->
-                template ?: throw NotFoundException("No template found with ID: $uuidString")
+        return try {
+            val template = DatabaseManager.templateRepository().getTemplateFromDB(uuidString)
+
+            if (template == null) {
+                logger.info("Failed to get template with the following id: $uuidString")
+                null
+            } else {
+                template
             }
-            .onFailure {
-                logger.error("Error retrieving template with ID $uuidString: ${it.message}", it)
-            }
+
+        } catch (e: Exception) {
+            logger.error("Error retrieving template with ID $uuidString: ${e.message}", e)
+            null
+        }
     }
 
 }

@@ -6,9 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
-import tables.templates.Template
 import io.mockk.mockkObject
-import io.mockk.verify
 
 class TestTemplateService {
     private val embedResponseSuccessJson =
@@ -109,9 +107,9 @@ class TestTemplateService {
             val client = HttpClient(engine)
             TemplateService.httpClient = client
 
-            mockkObject(TemplateService)
+            mockkObject(TemplateStorageService)
             coEvery {
-                TemplateService.storeAndGetId(any())
+                TemplateStorageService.createTemplate(any())
             } returns "mock-id"
 
             val response = TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
