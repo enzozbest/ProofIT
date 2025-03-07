@@ -29,7 +29,7 @@ const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessagePr
                 body: JSON.stringify(messagePayload)
             });
 
-            if (!response.ok) {
+            if (!response?.ok) {
                 throw new Error('Network response was not ok');
             }
 
@@ -39,32 +39,29 @@ const ChatMessage = ({ setPrototype, setPrototypeId, prototypeId }:ChatMessagePr
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage("Error. Please check your connection and try again.");
-            throw error;
+            return ""; // Return empty string instead of throwing
         }
     };
 
     const handleSend = async (messageToSend: string = message): Promise<void> => {
-        if (!message.trim()) return;
-        setPrototype(true);
-        setPrototypeId(prototypeId+1);
-        const currentTime = new Date().toLocaleString();
-
-        const newMessage: Message = {
-            role: 'User',
-            content: messageToSend,
-            timestamp: currentTime
-        };
-
-        setSentMessages((prevMessages) => [...prevMessages, newMessage]);
-
+        if (!messageToSend.trim()) return;
         try {
+            setPrototype(true);
+            setPrototypeId(prototypeId+1);
+            const currentTime = new Date().toLocaleString();
+
+            const newMessage: Message = {
+                role: 'User',
+                content: messageToSend,
+                timestamp: currentTime
+            };
+
+            setSentMessages((prevMessages) => [...prevMessages, newMessage]);
             await postMessage(messageToSend);
             setMessage("");
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage("Error. Please check your connection and try again.");
-            throw error;
-            
         }
     };
 

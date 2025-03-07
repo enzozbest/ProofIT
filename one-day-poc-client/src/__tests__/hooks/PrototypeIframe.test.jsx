@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import PrototypeFrame from '../hooks/PrototypeFrame';
+import PrototypeFrame from '../../hooks/PrototypeFrame.js';
 
 test("renders the iframe", () => {
     render(<PrototypeFrame />);

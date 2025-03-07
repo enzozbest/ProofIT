@@ -1,8 +1,8 @@
 import react from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
-import { MessageBox } from '../components/messages-box';
-import './message-box.mock';
+import { MessageBox } from '../../components/messages-box.jsx';
+import '../mocks/message-box.mock.jsx';
 
 describe('MessageBox Component', () => {
   const mockMessages = [

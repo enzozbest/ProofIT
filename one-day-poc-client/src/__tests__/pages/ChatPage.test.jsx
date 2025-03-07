@@ -1,5 +1,5 @@
 import { render, screen, waitFor,fireEvent } from '@testing-library/react'
-import ChatScreen from '../pages/ChatScreen';
+import ChatScreen from '../../pages/ChatScreen.js';
 import '@testing-library/jest-dom';
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { vi, test, expect, beforeEach } from "vitest";
@@ -146,7 +146,7 @@ test("Initial message set when page loads", async ()=>{
         };
     });
 
-    const ChatScreen = (await import("../pages/ChatScreen")).default;
+    const ChatScreen = (await import("../../pages/ChatScreen.js")).default;
     render(
         <MemoryRouter>
             <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
@@ -172,7 +172,7 @@ test("Can't send message until initial message set", async ()=>{
         };
     });
 
-    const ChatScreen = (await import("../pages/ChatScreen")).default;
+    const ChatScreen = (await import("../../pages/ChatScreen.js")).default;
     render(
         <MemoryRouter>
             <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />

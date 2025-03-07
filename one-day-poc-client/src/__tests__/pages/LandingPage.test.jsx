@@ -1,7 +1,7 @@
 import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import LandingPage from '../pages/LandingPage';
+import LandingPage from '../../pages/LandingPage.js';
 import userEvent from "@testing-library/user-event";
 
 beforeEach(() => {
