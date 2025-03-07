@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":prototype"))
     implementation(project(":webcontainer"))
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.8")
+    testImplementation(project(":utils"))
 }
 
 tasks.test {
