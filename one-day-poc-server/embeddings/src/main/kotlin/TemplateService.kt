@@ -5,6 +5,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import tables.templates.Template
 
 object TemplateService {
     internal var httpClient = HttpClient(CIO)
@@ -38,10 +39,12 @@ object TemplateService {
      * Stores the given template.
      * The template will be stored for keyword search, and embedded and stored for semantic search.
      * @param name The identifier of the template.
+     * @param fileURI file path for the template.
      * @param data The data to store (JSON-LD annotation of a template).
      */
     suspend fun storeTemplate(
         name: String,
+        fileURI: String,
         data: String,
     ): StoreTemplateResponse {
         val payload = mapOf("name" to name, "text" to data)
@@ -52,11 +55,16 @@ object TemplateService {
                 }
 
         val responseText = response.bodyAsText()
-        val storeResponse =
-            runCatching { Json.decodeFromString<StoreTemplateResponse>(responseText) }.getOrElse {
-                throw IllegalStateException("Failed to parse response!")
-            }
-        return storeResponse
+
+        val storeResponse = try {
+            Json.decodeFromString<StoreTemplateResponse>(responseText)
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to parse response!", e)
+        }
+
+        val templateId = TemplateStorageService.createTemplate(fileURI)
+
+        return storeResponse.copy(id = templateId)
     }
 
     suspend fun search(

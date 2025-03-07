@@ -16,6 +16,7 @@ data class TemplateEmbedResponse(
 @Serializable
 data class StoreTemplateResponse(
     val status: String,
+    val id: String? = null,
     val message: String? = null,
 )
 
