@@ -14,6 +14,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":database"))
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")

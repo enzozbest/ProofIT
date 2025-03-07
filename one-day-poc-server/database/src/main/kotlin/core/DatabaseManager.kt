@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
+import tables.templates.TemplateRepository
 import kotlin.math.max
 
 /**
@@ -28,6 +29,7 @@ data class DatabaseCredentials(
  */
 object DatabaseManager {
     private lateinit var database: Database
+    private val templateRepository by lazy { TemplateRepository(database) }
 
     /**
      * Initializes the database connection and runs the necessary migrations.
@@ -43,6 +45,17 @@ object DatabaseManager {
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    /**
+     * Provides access to the template repository
+     * @return The template repository instance
+     */
+    fun templateRepository(): TemplateRepository {
+        if (!this::database.isInitialized) {
+            throw IllegalStateException("Database connection not initialized. Call init() first.")
+        }
+        return templateRepository
     }
 
     /**
