@@ -1,8 +1,8 @@
 import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import Page from '../pages/Generate';
-import ChatScreen from "@/pages/ChatScreen.js";
+import Page from '../../pages/Generate.js';
+import ChatScreen from "@/pages/ChatScreen.tsx";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 

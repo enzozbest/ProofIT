@@ -1,8 +1,8 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import * as React from 'react';
-import { useIsMobile } from '../hooks/use-mobile';
-import './use-mobile.mock';
+import { useIsMobile } from '../../hooks/use-mobile';
+import '../mocks/use-mobile.mock';
 
 const TestComponent = () => {
   const isMobile = useIsMobile();

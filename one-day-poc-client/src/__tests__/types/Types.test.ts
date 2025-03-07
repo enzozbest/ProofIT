@@ -5,7 +5,7 @@ import {
   ChatMessageProps,
   PrototypeFrameProps,
   MessagePayload,
-} from '../hooks/Types';
+} from '../../hooks/Types';
 
 describe('Types', () => {
   test('test for a valid Message interface', () => {
