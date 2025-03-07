@@ -28,8 +28,19 @@ data class DatabaseCredentials(
  * It initializes the database connection and runs the necessary migrations.
  */
 object DatabaseManager {
-    private lateinit var database: Database
-    private val templateRepository by lazy { TemplateRepository(database) }
+    private var database: Database? = null
+    private var templateRepository: TemplateRepository? = null
+    private var dataSource: HikariDataSource? = null
+
+    /**
+     * Resets the database manager state. Used for testing purposes.
+     */
+    internal fun reset() {
+        dataSource?.close()
+        database = null
+        dataSource = null
+        templateRepository = null
+    }
 
     /**
      * Initializes the database connection and runs the necessary migrations.
@@ -41,7 +52,9 @@ object DatabaseManager {
 
         return try {
             configureFlyway(credentials)
-            setupDatabase(credentials)
+            val newDatabase = setupDatabase(credentials)
+            database = newDatabase
+            newDatabase
         } catch (e: Exception) {
             throw e
         }
@@ -52,10 +65,8 @@ object DatabaseManager {
      * @return The template repository instance
      */
     fun templateRepository(): TemplateRepository {
-        if (!this::database.isInitialized) {
-            throw IllegalStateException("Database connection not initialized. Call init() first.")
-        }
-        return templateRepository
+        val db = database ?: throw IllegalStateException("Database connection not initialized. Call init() first.")
+        return templateRepository ?: TemplateRepository(db).also { templateRepository = it }
     }
 
     /**
@@ -71,7 +82,8 @@ object DatabaseManager {
             transactionIsolation = "TRANSACTION_REPEATABLE_READ"
             driverClassName = "org.postgresql.Driver"
         }
-        return Database.connect(HikariDataSource(config))
+        dataSource = HikariDataSource(config)
+        return Database.connect(dataSource!!)
     }
 
     /**
