@@ -21,9 +21,9 @@ const OldPrompts: FC = () => {
       {oldPrompts.map((item, index) => (
         <button
           key={index}
-          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent text-white text-left whitespace-normal hover:bg-white/20 hover:border-white hover:text-white transition duration-300 w-[220px] flex flex-col items-start"
+          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent  text-left whitespace-normal hover:bg-white/20 hover:border-white hover: transition duration-300 w-[220px] flex flex-col items-start"
         >
-          <MessageCircle size={24} className="text-white mb-2" />
+          <MessageCircle size={24} className=" mb-2" />
           <span className="font-medium line-clamp-3 overflow-hidden text-ellipsis">
             {item.text}
           </span>

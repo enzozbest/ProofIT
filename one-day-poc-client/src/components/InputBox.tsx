@@ -36,21 +36,21 @@ const InputBox: FC = () => {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-white resize-none overflow-y-auto"
+          className="flex-1 bg-transparent px-4 py-3  outline-none placeholder-white resize-none overflow-y-auto"
           style={{ minHeight: '45px', maxHeight: '150px' }}
       />
             <button
                 className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
                 type="button"
             >
-                <Paperclip size={22} className="text-white" />
+                <Paperclip size={22} className="" />
             </button>
             <button
                 className="p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2"
                 type="button"
                 onClick={handleSubmit}
             >
-                <SendHorizontal size={22} className="text-white" />
+                <SendHorizontal size={22} className="" />
             </button>
         </div>
     );
