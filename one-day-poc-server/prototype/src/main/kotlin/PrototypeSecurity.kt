@@ -1,8 +1,8 @@
-basically when trying to run this, apparently when doing on site security chck the html kept failing, despite the code being a very very simple website can you see why this may be happening. check the test response code in webcontainer against the checks in prortotypesecurity which are called in prompting main upon each language and see what may be failing, are the checks too much. my friend said maybe some regex requires the \n therepackage kcl.seg.rtt.prototype
+package kcl.seg.rtt.prototype
 
-import org.jsoup.Jsoup
 import org.jsoup.parser.Parser
 import org.jsoup.safety.Safelist
+import org.jsoup.Jsoup
 import java.nio.file.Path
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -146,7 +146,7 @@ fun runCompilerCheck(code: String, language: String): Boolean {
  * @param pythonCode The raw Python code snippet to be checked.
  * @return True if the code passed Python's syntax check, false otherwise.
  */
-private fun checkPythonSyntax(pythonCode: String): Boolean {
+fun checkPythonSyntax(pythonCode: String): Boolean {
     val tempPath: Path = createTempFile(prefix = "pythonSnippet", suffix = ".py")
     tempPath.writeText(pythonCode)
 
@@ -182,7 +182,7 @@ private fun checkPythonSyntax(pythonCode: String): Boolean {
  * @param cssCode The raw CSS snippet to validate.
  * @return True if stylelint found no serious syntax issues, false otherwise.
  */
-private fun checkCssSyntax(cssCode: String): Boolean {
+fun checkCssSyntax(cssCode: String): Boolean {
     val tempPath = createTempFile("cssSnippet", ".css")
 
     tempPath.writeText(cssCode)
@@ -216,7 +216,7 @@ private fun checkCssSyntax(cssCode: String): Boolean {
  * @param htmlCode The HTML content to parse.
  * @return True if Jsoup could parse it without throwing an exception, false otherwise.
  */
-private fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean {
+fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean {
     return try {
         Jsoup.parse(htmlCode, "", Parser.htmlParser())
         true
@@ -236,7 +236,7 @@ private fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean {
  * @param jsCode The JavaScript code snippet to validate.
  * @return True if Node.js found no syntax errors, otherwise false.
  */
-private fun checkJavaScriptSyntax(jsCode: String): Boolean {
+fun checkJavaScriptSyntax(jsCode: String): Boolean {
     val tempPath = createTempFile("jsSnippet", ".js")
     tempPath.writeText(jsCode)
 
