@@ -56,7 +56,7 @@ const data = {
       url: "#",
       icon: History,
       isActive: true,
-      className: "bg-[#060a28]",
+      className: "bg-transparent",
       items: [
         {
           title: "Chat 1",
@@ -118,7 +118,7 @@ const data = {
       title: "Settings",
       url: "#",
       icon: Settings2,
-      className: "bg-[#060a28]",
+      className: "bg-transparent",
       items: [
         {
           title: "General",
@@ -160,7 +160,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" className="bg-[#060a28]" {...props}>
+    <Sidebar collapsible="icon" className="bg-background" {...props}>
       <SidebarHeader>
         {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>

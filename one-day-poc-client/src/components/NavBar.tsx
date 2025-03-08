@@ -27,8 +27,8 @@ const NavBar: React.FC<NavBarProps> = ({
 
   return (
     <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-10 py-6 z-10">
-      <div className="flex items-center gap-2 text-xl text-white">
-        <BotMessageSquare className="w-6 h-6 text-white" />
+      <div className="flex items-center gap-2 text-xl ">
+        <BotMessageSquare className="w-6 h-6 " />
         <span className="font-normal">
           PROOF -<span className="font-bold"> IT!</span>
         </span>
@@ -38,14 +38,14 @@ const NavBar: React.FC<NavBarProps> = ({
         {isAuthenticated ? (
           <button
             onClick={handleSignOut}
-            className="border-2 border-white bg-transparent text-white px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
+            className="border-2 border-white bg-transparent  px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Log Out
           </button>
         ) : (
           <button
             onClick={handleSignIn}
-            className="border-2 border-white text-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
+            className="border-2 border-white  bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Sign In
           </button>
