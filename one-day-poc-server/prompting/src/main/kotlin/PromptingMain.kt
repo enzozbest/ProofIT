@@ -36,7 +36,7 @@ class PromptingMain(
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
         // Send prototype response to web container for displaying
-        // TODO: webContainerResponse(prototypeResponse)
+        webContainerResponse(prototypeResponse)
 
         // Return chat response to chatbot
         return chatResponse(prototypeResponse)
@@ -120,7 +120,7 @@ class PromptingMain(
      */
     private fun webContainerResponse(prototypeResponse: JsonObject) {
         val llmResponseObject = convertJsonToLlmResponse(prototypeResponse)
-        onSiteSecurityCheck(llmResponseObject)
+        // onSiteSecurityCheck(llmResponseObject)
         WebContainerState.updateResponse(llmResponseObject)
     }
 }
