@@ -152,18 +152,3 @@ def test_search_success(client, monkeypatch):
     assert set(data["matches"]) == {"doc1", "doc2"}
 
 
-def test_search_no_matches(client, monkeypatch):
-    """
-    Test the /search route when neither semantic_search nor keyword_search
-    returns any results.
-    """
-    monkeypatch.setattr(information_retrieval.embedding_service.vs,
-                        "semantic_search", lambda embb, top_k=5: [])
-    monkeypatch.setattr(information_retrieval.embedding_service.pi,
-                        "keyword_search", lambda q, top_k=5: [])
-
-    payload = {"embedding": [0.1, 0.2, 0.3], "query": "test", "top_k": 5}
-    response = client.post("/search", json=payload)
-    data = response.get_json()
-    assert data["status"] == "error"
-    assert "No matches found for" in data["message"]

@@ -4,10 +4,12 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kcl.seg.rtt.chat.routes.setPromptingMain
@@ -61,8 +63,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
     @Test
     fun `Test successful json route with valid request`() = testApplication {
-        val mockPromptingMain = mock<PromptingMain> {
-            on { run(any()) } doReturn ChatResponse("This is a test response", "2025-01-01T12:00:00")
+        val mockPromptingMain = mock<PromptingMain>()
+        runBlocking {
+            whenever(mockPromptingMain.run(any())).thenReturn(ChatResponse("This is a test response", "2025-01-01T12:00:00"))
         }
 
         try {
@@ -107,8 +110,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
     @Test
     fun `Test json route with error response from PromptingMain`() = testApplication {
-        val mockPromptingMain = mock<PromptingMain> {
-            on { run(any()) } doReturn ChatResponse("Error processing prompt", "2025-01-01T12:00:00")
+        val mockPromptingMain = mock<PromptingMain>()
+        runBlocking {
+            whenever(mockPromptingMain.run(any())).thenReturn(ChatResponse("Error processing prompt", "2025-01-01T12:00:00"))
         }
 
         try {
@@ -137,8 +141,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
     @Test
     fun `Test successful request parsing`() = testApplication {
-        val mockPromptingMain = mock<PromptingMain> {
-            on { run(any()) } doReturn ChatResponse("Valid response", "2025-01-01T12:00:00")
+        val mockPromptingMain = mock<PromptingMain>()
+        runBlocking {
+            whenever(mockPromptingMain.run(any())).thenReturn(ChatResponse("Valid response", "2025-01-01T12:00:00"))
         }
 
         try {
