@@ -1,3 +1,4 @@
+import core.DatabaseCredentials
 import helpers.MockEnvironment
 import helpers.MockEnvironment.generateEnvironmentFile
 import io.mockk.clearAllMocks
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame
 
@@ -17,7 +19,7 @@ class PoCDatabaseTest {
         MockEnvironment.postgresContainer.start()
         EnvironmentLoader.reset()
         generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.envFile)
+        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
         clearAllMocks()
     }
 
@@ -37,5 +39,14 @@ class PoCDatabaseTest {
         val db1 = PoCDatabase.database
         val db2 = PoCDatabase.database
         assertSame(db1, db2)
+    }
+
+    @Test
+    fun `Test DatabaseCredentials class initialises with correct default values`() {
+        val credentials = DatabaseCredentials("url", "username", "password")
+        assertEquals("url", credentials.url)
+        assertEquals("username", credentials.username)
+        assertEquals("password", credentials.password)
+        assertEquals(10, credentials.maxPoolSize)
     }
 }
