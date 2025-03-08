@@ -3,8 +3,20 @@ import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Page from '../../pages/Generate.js';
 import ChatScreen from "@/pages/ChatScreen.tsx";
+import { NavUser } from '@/components/nav-user.tsx';
+import { useSidebar } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+
+vi.mock("@/components/ui/sidebar", async (importOriginal) => {
+    const actual = await importOriginal();
+    return {
+        ...actual,
+        useSidebar: vi.fn().mockReturnValue({isMobile: false}),
+    };
+});
+
 
 beforeAll(() => {
     globalThis.window.matchMedia = vi.fn().mockImplementation((query) => ({
@@ -17,6 +29,8 @@ beforeAll(() => {
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
     }));
+
+    vi.clearAllMocks();
 });
 
 test("Renders generate page", ()=>{
@@ -57,4 +71,29 @@ test("Prototype frame displays", async ()=>{
         expect(prototypeDiv).not.toBeNull();
         //expect(prototypeDiv.children.length).toBeGreaterThan(0);
     });
+})
+
+test("Mobile sidebar renders correctly", async()=>{
+    useSidebar.mockReturnValue({ isMobile: true });
+
+    render(
+        <SidebarProvider>
+            <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
+        </SidebarProvider>
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
+})
+
+test("Non-mobile sidebar renders correctly", async()=>{
+    useSidebar.mockReturnValue({ isMobile: false });
+    render(
+        <SidebarProvider>
+            <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
+        </SidebarProvider>
+    );
+
+    const button = screen.getByRole("button");
+    expect(button).toBeInTheDocument();
 })
