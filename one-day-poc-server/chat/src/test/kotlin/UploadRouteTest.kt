@@ -17,12 +17,6 @@ import kotlin.test.assertTrue
 import kotlin.test.assertFalse
 import kotlinx.serialization.Serializable
 
-//@Serializable
-//data class Response(
-//    val message: String,
-//    val time: String
-//)
-
 class UploadRoutesTest : BaseAuthenticationServer() {
 
     @BeforeEach
@@ -257,5 +251,13 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         assertTrue(
             fileNameParts?.get(1)?.substringBefore(".txt")?.toLongOrNull() != null,
             "Filename should contain timestamp")
+    }
+
+    @Test
+    fun `Test Response class is serializable`() {
+        val response = Response("time", "message")
+        val json = Json.encodeToString(Response.serializer(), response)
+        val deserialized = Json.decodeFromString(Response.serializer(), json)
+        assertEquals(response, deserialized)
     }
 }
