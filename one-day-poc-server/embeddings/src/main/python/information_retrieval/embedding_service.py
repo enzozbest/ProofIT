@@ -58,6 +58,4 @@ def search_route():
     vector_results = vs.semantic_search(data["embedding"], top_k=top_k)
     keyword_results = pi.keyword_search(data["query"], top_k=top_k)
     results = list(set(vector_results + keyword_results))
-    if len(results) <= 0:
-        return jsonify({"status": "error", "message": f"No matches found for : {str(data)}"})
     return jsonify({"status": "success", "matches": results})

@@ -12,52 +12,33 @@ class TestDataClassSerialization {
 
     @Test
     fun `Test EmbeddingServiceResponse with values`() {
-        val embeddingServiceResponse = TemplateEmbedResponse(status = "success", embedding = "0.1,0.2,0.3")
+        val embeddingServiceResponse = TemplateEmbedResponse(status = "success", embedding = listOf(0.1f, 0.2f, 0.3f))
         assertEquals("success", embeddingServiceResponse.status)
-        assertEquals("0.1,0.2,0.3", embeddingServiceResponse.embedding)
-    }
-
-    @Test
-    fun `Test EmbeddingServiceResponse with null`() {
-        val embeddingServiceResponse = TemplateEmbedResponse(status = "success", embedding = null)
-        assertEquals("success", embeddingServiceResponse.status)
-        assertNull(embeddingServiceResponse.embedding)
+        assertEquals(listOf(0.1f, 0.2f, 0.3f), embeddingServiceResponse.embedding)
     }
 
     @Test
     fun `Test EmbeddingServiceResponse serialisation with all values provided`() {
-        val response = TemplateEmbedResponse(status = "success", embedding = "0.1,0.2,0.3")
+        val response = TemplateEmbedResponse(status = "success", embedding = listOf(0.1f, 0.2f, 0.3f))
         val encoded = json.encodeToString(response)
-        val expectedJson = """{"status":"success","embedding":"0.1,0.2,0.3"}"""
+        val expectedJson = """{"status":"success","embedding":[0.1,0.2,0.3]}"""
         assertEquals(expectedJson, encoded)
 
         val decoded = json.decodeFromString<TemplateEmbedResponse>(encoded)
         assertEquals(response, decoded)
-    }
-
-    @Test
-    fun `Test EmbeddingServiceResponse serialisation with null`() {
-        val response = TemplateEmbedResponse(status = "error", embedding = null)
-        val encoded = json.encodeToString(response)
-        val expectedJson = """{"status":"error"}"""
-        assertEquals(expectedJson, encoded)
-
-        val decoded = json.decodeFromString<TemplateEmbedResponse>(encoded)
-        assertEquals(response, decoded)
-        assertNull(decoded.embedding)
     }
 
     @Test
     fun `Test EmbeddingServiceResponse deserialization`() {
-        val json = """{"status": "success","embedding": "1f,2f,2f"}"""
-        val expected = TemplateEmbedResponse(status = "success", embedding = "1f,2f,2f")
+        val json = """{"status": "success","embedding":[1, 2, 3]}"""
+        val expected = TemplateEmbedResponse(status = "success", embedding = listOf(1f, 2f, 3f))
         assertEquals(expected, Json.decodeFromString<TemplateEmbedResponse>(json))
     }
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
     fun `Test EmbeddingServiceResponse deserialization missing a field`() {
-        val json = """{"embedding": "1f,2f,2f"}"""
+        val json = """{"embedding": [1,2,2]}"""
         assertFailsWith<MissingFieldException> {
             Json.decodeFromString<TemplateEmbedResponse>(json)
         }

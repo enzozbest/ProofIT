@@ -1,8 +1,9 @@
 package kcl.seg.rtt.prompting
 
 import helpers.SanitisationTools
-import kcl.seg.rtt.prompting.helpers.PromptingTools
 import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
+import kcl.seg.rtt.prompting.helpers.promptEngineering.PromptingTools
+import kcl.seg.rtt.prompting.helpers.templates.TemplateInteractor
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.convertJsonToLlmResponse
@@ -20,23 +21,23 @@ data class ChatResponse(
 )
 
 class PromptingMain(
-    private val model: String = "deepseek-r1:32b",
+    private val model: String = "qwen2.5-coder:14b",
 ) {
-    fun run(userPrompt: String): ChatResponse {
+    suspend fun run(userPrompt: String): ChatResponse {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
         // First LLM call
         val freqs: JsonObject = promptLlm(freqsPrompt)
 
-        // TODO: Integrate Template retrieval
         val prototypePrompt = prototypePrompt(userPrompt, freqs)
+        TemplateInteractor.fetchTemplates(prototypePrompt) // Get templates from Python service.
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
         // Send prototype response to web container for displaying
-        webContainerResponse(prototypeResponse)
+        // webContainerResponse(prototypeResponse)
 
         // Return chat response to chatbot
         return chatResponse(prototypeResponse)

@@ -1,4 +1,4 @@
-package kcl.seg.rtt.prompting.helpers
+package kcl.seg.rtt.prompting.helpers.promptEngineering
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -94,7 +94,6 @@ object PromptingTools {
         2. User Interface:
            - Implement responsive design
            - Follow accessibility standards (WCAG 2.1)
-           - Use semantic HTML elements
            - Ensure consistent styling
            - Pages must use <div class="page"> with one having class="active"
 
@@ -122,7 +121,7 @@ object PromptingTools {
         - Backend Frameworks: Express, Django, Spring, Ktor
         - Testing: Jest, Cypress, JUnit, PyTest
 
-        ### JSON Structure
+        ### JSON Structure Example
         {
             "requirements": [
                 "The system implements user authentication with email/password"

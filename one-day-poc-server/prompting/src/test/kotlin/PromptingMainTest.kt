@@ -3,15 +3,14 @@ package kcl.seg.rtt.prompting
 import helpers.SanitisationTools
 import helpers.SanitisedPromptResult
 import io.mockk.*
-import kcl.seg.rtt.prompting.helpers.PromptingTools
 import kcl.seg.rtt.prompting.helpers.PrototypeInteractor
+import kcl.seg.rtt.prompting.helpers.promptEngineering.PromptingTools
+import kcl.seg.rtt.prompting.helpers.templates.TemplateInteractor
 import kcl.seg.rtt.prototype.FileContent
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.OllamaResponse
 import kcl.seg.rtt.prototype.PromptException
 import kcl.seg.rtt.prototype.secureCodeCheck
-import kcl.seg.rtt.prototype.convertJsonToLlmResponse
-import kcl.seg.rtt.webcontainer.WebContainerState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.AfterEach
@@ -30,6 +29,7 @@ class PromptingMainTest {
         mockkObject(SanitisationTools)
         mockkObject(PromptingTools)
         mockkObject(PrototypeInteractor)
+        mockkObject(TemplateInteractor)
         promptingMain = PromptingMain()
     }
 
@@ -92,9 +92,13 @@ class PromptingMainTest {
                 done_reason = "test",
             )
 
+        coEvery {
+            TemplateInteractor.fetchTemplates(any())
+        } returns emptyList()
+
         every { PromptingTools.formatResponseJson("mock response") } returnsMany listOf(freqsResponse, finalResponse)
 
-        val result = promptingMain.run(userPrompt)
+        val result = runBlocking { promptingMain.run(userPrompt) }
 
         assertEquals(
             "These are the functional requirements fulfilled by this prototype: final req1, final req2",
@@ -110,9 +114,10 @@ class PromptingMainTest {
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
         every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns "prompt"
         coEvery { PrototypeInteractor.prompt(any(), any()) } returns null
+        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
 
         assertThrows<PromptException> {
-            promptingMain.run(userPrompt)
+            runBlocking { promptingMain.run(userPrompt) }
         }
     }
 
@@ -136,10 +141,11 @@ class PromptingMainTest {
                 done = true,
                 done_reason = "test",
             )
+        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
         every { PromptingTools.formatResponseJson(any()) } returns invalidResponse
 
         assertThrows<PromptException> {
-            promptingMain.run(userPrompt)
+            runBlocking { promptingMain.run(userPrompt) }
         }
     }
 
@@ -432,38 +438,53 @@ class PromptingMainTest {
         val sanitisedPrompt = SanitisedPromptResult("Create a hello world app", listOf("hello", "world"))
         val freqsPrompt = "Functional requirements prompt"
 
-        val freqsResponse = buildJsonObject {
-            putJsonArray("requirements") { add("Display hello world") }
-            putJsonArray("keywords") { add("hello"); add("world") }
-        }
+        val freqsResponse =
+            buildJsonObject {
+                putJsonArray("requirements") { add("Display hello world") }
+                putJsonArray("keywords") {
+                    add("hello")
+                    add("world")
+                }
+            }
 
-        val prototypeResponse = buildJsonObject {
-            putJsonArray("requirements") { add("Display hello world") }
-        }
+        val prototypeResponse =
+            buildJsonObject {
+                putJsonArray("requirements") { add("Display hello world") }
+            }
 
         mockkObject(SanitisationTools)
         mockkObject(PromptingTools)
         mockkObject(PrototypeInteractor)
+        mockkObject(TemplateInteractor)
 
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitisedPrompt
-        every { PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords) } returns freqsPrompt
-        every { runBlocking { PrototypeInteractor.prompt(any(), any()) } } returns OllamaResponse(
-            model = "deepseek-r1:32b",
-            created_at = "2024-03-07T21:53:03Z",
-            response = "response",
-            done = true,
-            done_reason = "stop"
-        )
+        every {
+            PromptingTools.functionalRequirementsPrompt(
+                sanitisedPrompt.prompt,
+                sanitisedPrompt.keywords,
+            )
+        } returns freqsPrompt
+        every { runBlocking { PrototypeInteractor.prompt(any(), any()) } } returns
+            OllamaResponse(
+                model = "deepseek-r1:32b",
+                created_at = "2024-03-07T21:53:03Z",
+                response = "response",
+                done = true,
+                done_reason = "stop",
+            )
+        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
         every { PromptingTools.formatResponseJson("response") } returnsMany listOf(freqsResponse, prototypeResponse)
 
-        val result = promptingMain.run(userPrompt)
+        val result = runBlocking { promptingMain.run(userPrompt) }
 
-        verifyOrder { 
+        verifyOrder {
             SanitisationTools.sanitisePrompt(userPrompt)
             PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
-            runBlocking { PrototypeInteractor.prompt(freqsPrompt, "deepseek-r1:32b") }
+            runBlocking { PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
-            runBlocking { PrototypeInteractor.prompt(any(), "deepseek-r1:32b") }
+            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+            runBlocking { TemplateInteractor.fetchTemplates(any()) }
+            runBlocking { PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
         }
 
@@ -473,7 +494,7 @@ class PromptingMainTest {
 
         assertEquals(
             "These are the functional requirements fulfilled by this prototype: Display hello world",
-            result.response
+            result.response,
         )
 
         unmockkObject(SanitisationTools)

@@ -10,7 +10,7 @@ object EmbeddingConstants {
 @Serializable
 data class TemplateEmbedResponse(
     val status: String,
-    val embedding: String? = null,
+    val embedding: List<Float> = emptyList(),
 )
 
 @Serializable

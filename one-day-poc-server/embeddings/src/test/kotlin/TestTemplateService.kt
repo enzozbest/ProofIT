@@ -2,16 +2,16 @@ import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.mockk.coEvery
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
-import io.mockk.mockkObject
 
 class TestTemplateService {
     private val embedResponseSuccessJson =
         """
-        {"status":"success", "embedding":"0.1,0.2,0.3"}
+        {"status":"success", "embedding":[0.1,0.2,0.3]}
         """.trimIndent()
 
     private val embedStoreResponseSuccessJson =
@@ -46,7 +46,7 @@ class TestTemplateService {
 
             val response = TemplateService.embed("Test text", "Test name")
             assertEquals("success", response.status)
-            val floats = response.embedding?.split(",")?.map { it.toFloat() } ?: emptyList()
+            val floats = response.embedding
             assertEquals(listOf(0.1f, 0.2f, 0.3f), floats)
         }
 
@@ -131,7 +131,7 @@ class TestTemplateService {
             TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                TemplateService.storeTemplate("Test name", "file:///test/path",  "Test text")
+                TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
             }
         }
 
@@ -150,7 +150,7 @@ class TestTemplateService {
             TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                TemplateService.storeTemplate("Test name", "file:///test/path",  "Test text")
+                TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
             }
         }
 
