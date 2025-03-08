@@ -26,7 +26,7 @@ export function MessageBox({ sentMessages }) {
                     msg.role === "User" ? (
                         <div
                             key={index}
-                            className="p-2.5 bg-[#f1f1f1] rounded mb-2.5 self-end break-words max-w-[70%]"
+                            className="p-2.5 bg-muted/90 rounded mb-2.5 self-end break-words max-w-[70%]"
                         >
                             
                             {msg.content && (
@@ -54,7 +54,7 @@ export function MessageBox({ sentMessages }) {
                     ) : (
                         <div
                             key={index}
-                            className="p-2.5 bg-[#f1f1f1] rounded mb-2.5 self-start break-words max-w-[70%]"
+                            className="p-2.5 bg-transparent rounded mb-2.5 self-start break-words w-full"
                         >
                             {msg.content && (
                                 <Markdown
