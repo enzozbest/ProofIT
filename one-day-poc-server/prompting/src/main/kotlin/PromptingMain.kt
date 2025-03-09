@@ -30,8 +30,10 @@ class PromptingMain(
         // First LLM call
         val freqs: JsonObject = promptLlm(freqsPrompt)
 
-        val prototypePrompt = prototypePrompt(userPrompt, freqs)
-        TemplateInteractor.fetchTemplates(prototypePrompt) // Get templates from Python service.
+        val fetchTemplatesPrompt =
+            prototypePrompt(userPrompt, freqs) // Same as the prototype prompt, with no templates.
+        val templates = TemplateInteractor.fetchTemplates(fetchTemplatesPrompt)
+        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
@@ -46,6 +48,7 @@ class PromptingMain(
     private fun prototypePrompt(
         userPrompt: String,
         freqsResponse: JsonObject,
+        templates: List<String> = emptyList(),
     ): String {
         val reqs =
             runCatching {
@@ -53,16 +56,10 @@ class PromptingMain(
             }.getOrElse {
                 throw PromptException("Failed to extract requirements from LLM response")
             }
-        val keywords =
-            runCatching {
-                (freqsResponse["keywords"] as JsonArray).joinToString(" ")
-            }.getOrElse {
-                throw PromptException("Failed to extract keywords from LLM response")
-            }
         return PromptingTools.prototypePrompt(
             userPrompt,
             reqs,
-            keywords,
+            templates,
         )
     }
 

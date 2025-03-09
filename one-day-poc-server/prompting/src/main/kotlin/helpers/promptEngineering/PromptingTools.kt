@@ -76,7 +76,7 @@ object PromptingTools {
     fun prototypePrompt(
         userPrompt: String,
         requirements: String,
-        templates: String,
+        templates: List<String>,
     ): String =
         """
         You are an expert software architect specializing in creating high-quality, production-ready prototypes for WebContainers.
@@ -152,7 +152,9 @@ object PromptingTools {
         2. Provided functional requirements
         3. Available templates
         4. Modern development best practices
-        You must provide a complete answer, with all necessary files and dependencies. Code must be written in 
+        5. Modern styling practices. You must style the components to make them visually appealing using whatever styling framework you choose.
+        6. If templates are provided, your styling must be consistent with the provided templates.
+        You must provide a complete answer, with all necessary files and dependencies, including the version of the dependencies. Code must be written in 
         full, not just placeholders or using the phrase "...".
 
         **User Prompt:** "$userPrompt"   
