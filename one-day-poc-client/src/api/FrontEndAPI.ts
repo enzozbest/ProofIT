@@ -1,4 +1,4 @@
-import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse } from "./Types";
+import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "./Types";
 
 type ChatCallback = (chatResponse: ChatResponse) => void;
 type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;
@@ -28,13 +28,19 @@ export async function sendChatMessage(
     onPrototypeResponse: PrototypeCallback
 ): Promise<void> {
     try {
+        const messagePayload: MessagePayload = {
+            userID: "user123",
+            time: message.timestamp,
+            prompt: message.content
+        };
+
         const response = await fetch("http://localhost:8000/api/chat/json", {
             method: 'POST',
             credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(message)
+            body: JSON.stringify(messagePayload)
         });
 
         if (!response.ok) {
