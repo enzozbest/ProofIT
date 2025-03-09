@@ -30,3 +30,9 @@ export interface ChatResponse {
 export interface PrototypeResponse {
     files: FileTree;
 }
+
+export interface MessagePayload {
+    userID: string;
+    time: string;
+    prompt: string;
+}
