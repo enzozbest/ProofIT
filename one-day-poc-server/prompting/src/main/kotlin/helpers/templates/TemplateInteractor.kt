@@ -17,8 +17,8 @@ object TemplateInteractor {
      * @return A list of template contents as strings
      */
     suspend fun fetchTemplates(prompt: String): List<String> {
-        val embedding = TemplateService.embed(prompt, "prompt").embedding
-        val templateIds = TemplateService.search(embedding, prompt).matches
+        val embedding = runCatching { TemplateService.embed(prompt, "prompt").embedding }.getOrElse { emptyList() }
+        val templateIds = runCatching { TemplateService.search(embedding, prompt).matches }.getOrElse { emptyList() }
 
         return templateIds.mapNotNull { id ->
             getTemplateContent(id)
