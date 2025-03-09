@@ -1,3 +1,15 @@
+import { Dispatch, SetStateAction } from 'react';
+
+interface WebContainerFile {
+    file: {
+        contents: string;
+    };
+}
+
+interface FileTree {
+    [key: string]: WebContainerFile;
+}
+
 export type MessageRole = 'User' | 'LLM';
 
 export interface Message {
@@ -6,10 +18,10 @@ export interface Message {
     timestamp: string;
 }
 
-export interface MessagePayload {
-    userID: string;
-    time: string;
-    prompt: string;
+export interface ChatResponse {
+    message: string;
+    role: MessageRole;
+    timestamp: string;
 }
 
 export interface ChatHookReturn {
@@ -23,13 +35,11 @@ export interface ChatHookReturn {
 }
 
 export interface ChatMessageProps {
-    setPrototype: React.Dispatch<React.SetStateAction<boolean>>;
-    setPrototypeId: React.Dispatch<React.SetStateAction<number>>;
-    prototypeId: number;
+    setPrototype: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface PrototypeFrameProps {
-    prototypeId: number;
-    width?:string;
-    height?:string;
+    files?: FileTree;
+    width?: string;
+    height?: string;
 }
