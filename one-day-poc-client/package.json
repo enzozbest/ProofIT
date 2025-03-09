@@ -25,6 +25,7 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.7",
     "@testing-library/user-event": "^14.6.1",
+    "@webcontainer/api": "^1.5.1-internal.9",
     "autoprefixer": "^10.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
