@@ -95,15 +95,10 @@ export default function Page() {
           </div>
         </header>
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
-    
-          <div className= {`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
-                           isVisible ? "opacity-100 max-w-[450px]" : "opacity-0 max-w-0"}`}>
-            <ChatScreen
-                showPrototype={showPrototype}
-                prototypeId={prototypeId}
-                setPrototype={setPrototype}
-                setPrototypeId={setPrototypeId} />
-          </div>
+          <ChatScreen
+              showPrototype={showPrototype}
+              setPrototype={setPrototype}
+          />
           <div className="flex h-full items-center justify-center">
             <button 
               onClick={() => setIsVisible(!isVisible)}
@@ -113,7 +108,7 @@ export default function Page() {
             </button>
           </div>
           <div className="flex-1 h-full rounded-xl" style={{ backgroundColor: "#7e808f" }}>
-            { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
+            { showPrototype ? <PrototypeFrame /> : null }
           </div>
         </div>
          

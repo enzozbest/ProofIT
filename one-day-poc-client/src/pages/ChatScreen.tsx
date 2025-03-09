@@ -8,8 +8,7 @@ import { ChatScreenProps } from "./Types";
 
 import {toast} from 'sonner'
 
-
-const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, prototypeId, setPrototype, setPrototypeId }) =>{
+const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype }) =>{
 
     const {
         message,
@@ -18,7 +17,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, prototypeId, set
         handleSend,
         errorMessage,
         setErrorMessage,
-    } = ChatMessage({setPrototype, setPrototypeId, prototypeId});
+    } = ChatMessage({setPrototype});
 
 
     useEffect(() => {
