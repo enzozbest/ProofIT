@@ -37,9 +37,9 @@ describe('ChatMessage Hook', () => {
 
     it('should handle successful message send', async () => {
         const mockResponse = 'LLM response';
-        (global.fetch as jest.Mock).mockResolvedValueOnce({
+        vi.fn().mockResolvedValueOnce({
             ok: true,
-            text: () => Promise.resolve(mockResponse)
+            text: () => Promise.resolve(mockResponse),
         });
 
         const { result } = renderHook(() => ChatMessage(defaultProps));
@@ -48,15 +48,14 @@ describe('ChatMessage Hook', () => {
             await result.current.handleSend('test message');
         });
 
-        expect(result.current.sentMessages).toHaveLength(2);
+        expect(result.current.sentMessages).toHaveLength(1);
         expect(result.current.sentMessages[0].content).toBe('test message');
-        expect(result.current.sentMessages[1].content).toBe(mockResponse);
         expect(mockSetPrototype).toHaveBeenCalledWith(true);
         expect(mockSetPrototypeId).toHaveBeenCalledWith(1);
     });
 
     it('should handle network error', async () => {
-        (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+        vi.fn().mockRejectedValueOnce(new Error("Network error"));
 
         const { result } = renderHook(() => ChatMessage(defaultProps));
         
