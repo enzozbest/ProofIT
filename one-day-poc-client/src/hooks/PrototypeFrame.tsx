@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { PrototypeFrameProps } from './Types';
-import { WebContainer } from '@webcontainer/api';
-import { getPrototypeFiles } from '../api/FrontEndAPI';
+import { useWebContainer } from './useWebContainer';
 
 /**
  * PrototypeFrame Component
  * 
  * Renders a prototype in an isolated WebContainer environment within an iframe.
  * This component handles:
- * - Booting up a WebContainer instance
  * - Loading prototype files from the server
  * - Setting up a development environment with necessary dependencies
  * - Starting a development server
@@ -21,106 +19,94 @@ import { getPrototypeFiles } from '../api/FrontEndAPI';
  */
 const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files, width = '100%', height = '100%' }) => {
     const [url, setUrl] = useState('');
-    const [webcontainerInstance, setWebcontainerInstance] = useState<WebContainer | null>(null);
+    const [status, setStatus] = useState('Initialising...');
+    const { instance: webcontainerInstance, loading, error } = useWebContainer();
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
     /**
-     * Effect to initialise WebContainer on component mount
-     * Boots up a new WebContainer instance and stores it in state
+     * Effect to set up server-ready listener
      */
     useEffect(() => {
-        async function bootWebContainer() {
-            try {
-                if (!webcontainerInstance) {
-                    const instance = await WebContainer.boot();
-                    setWebcontainerInstance(instance);
-                    console.log('WebContainer booted successfully');
-                }
-            } catch (error) {
-                console.error('Failed to boot WebContainer:', error);
-            }
-        }
+        if (!webcontainerInstance) return;
         
-        bootWebContainer();
-
-        return () => {
-            if (webcontainerInstance) {
-                // idk yet if we will need to clean up anything but this is where it's done
-                console.log('WebContainer cleanup');
-            }
-        };
-    }, []); // Empty dependency array for single mount
+        webcontainerInstance.on('server-ready', (port, serverUrl) => {
+            console.log('Server ready on port', port, 'at URL', serverUrl);
+            setUrl(serverUrl);
+            setStatus('Server running');
+        });
+        
+    }, [webcontainerInstance]);
 
     /**
      * Effect to load and mount prototype files when WebContainer is ready
-     * - Fetches prototype files from server
-     * - Sets up package.json if not provided
-     * - Mounts files in WebContainer
-     * - Installs dependencies
-     * - Starts development server
      */
     useEffect(() => {
         async function loadFiles() {
             if (!webcontainerInstance || !files) return;
+            
+            setStatus('Mounting files...');
 
             try {
-                if (!files['package.json']) {
-                    files['package.json'] = {
-                        file: {
-                            contents: JSON.stringify({
-                                name: 'prototype-app',
-                                type: 'module',
-                                scripts: {
-                                    dev: 'vite'
-                                },
-                                dependencies: {
-                                    'react': '^18.2.0',
-                                    'vite': '^4.0.0'
-                                }
-                            })
-                        }
-                    };
-                }
-
+                console.log('Mounting files...');
                 await webcontainerInstance.mount(files);
-
-                const installProcess = await webcontainerInstance.spawn('npm', ['install']);
-                await installProcess.exit;
-
-                const server = await webcontainerInstance.spawn('npm', ['run', 'dev']);
                 
-                server.output.pipeTo(new WritableStream({
-                    write(data) {
-                        const text = data.toString();
-                        if (text.includes('Local:')) {
-                            const matches = text.match(/http:\/\/localhost:\d+/);
-                            if (matches) {
-                                setUrl(matches[0]);
-                            }
-                        }
-                    }
-                }));
-            } catch (error) {
-                console.error('Failed to load files:', error);
+                setStatus('Installing dependencies...');
+                const installProcess = await webcontainerInstance.spawn('npm', ['install']);
+                const exitCode = await installProcess.exit;
+                
+                if (exitCode !== 0) {
+                    throw new Error(`npm install failed with exit code ${exitCode}`);
+                }
+                
+                setStatus('Starting development server...');
+                await webcontainerInstance.spawn('npm', ['run', 'dev']);
+                
+            } catch (error: unknown) {
+                console.error('Error:', error);
+    
+                let errorMessage = 'Unknown error occurred';
+                
+                if (error instanceof Error) {
+                    errorMessage = error.message;
+                } else if (typeof error === 'string') {
+                    errorMessage = error;
+                } else if (error && typeof error === 'object' && 'message' in error) {
+                    errorMessage = String(error.message);
+                }
+                
+                setStatus(`Error: ${errorMessage}`);
             }
         }
-
-        if (webcontainerInstance && files) {
+        
+        if (webcontainerInstance) {
             loadFiles();
         }
-    }, [webcontainerInstance, files]);
+    }, [webcontainerInstance]);
+
+    if (loading) {
+        return <div>Loading WebContainer...</div>;
+    }
+
+    if (error) {
+        return <div>Error initializing WebContainer: {error.message}</div>;
+    }
 
     return (
-        <iframe
-            src={url}
-            style={{
-                width: width,
-                height: height,
-                border: '1px solid #ccc',
-                borderRadius: '4px'
-            }}
-            title="Prototype Preview"
-            sandbox="allow-scripts allow-same-origin"
-        />
+        <div>
+            <div style={{ marginBottom: '10px' }}>Status: {status}</div>
+            <iframe
+                ref={iframeRef}
+                src={url}
+                style={{
+                    width: width,
+                    height: height,
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                }}
+                title="Prototype Preview"
+                sandbox="allow-scripts allow-same-origin"
+            />
+        </div>
     );
 };
 
