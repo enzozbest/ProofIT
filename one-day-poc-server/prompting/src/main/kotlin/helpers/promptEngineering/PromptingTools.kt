@@ -204,7 +204,7 @@ object PromptingTools {
      * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
      */
     fun String.removeComments(): String {
-        val cStyleCommentRegex = Regex("""(?<!:)//.*?\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
+        val cStyleCommentRegex = Regex("""(?<!:)//.*?\\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
         return this.replace(cStyleCommentRegex, "")
     }
 
