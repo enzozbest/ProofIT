@@ -191,7 +191,12 @@ object PromptingTools {
                     .indexOf('}') // As a "forwards" index pointing to the character just after the last '}'
 
         val jsonString = response.substring(openingBrace, closingBrace)
-        val cleaned = jsonString.removeComments().replace(newLineRegex, "").trim()
+        val cleaned =
+            jsonString
+                .removeComments()
+                .removeEscapedQuotations()
+                .replace(newLineRegex, "")
+                .trim()
         return cleaned
     }
 
@@ -199,8 +204,16 @@ object PromptingTools {
      * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
      */
     fun String.removeComments(): String {
-        val cStyleCommentRegex = Regex("""(//.*?\\n|/\*[\s\S]*?\*/)""", RegexOption.MULTILINE)
-        val pythonStyleCommentRegex = Regex("""#.*\\n""")
-        return this.replace(cStyleCommentRegex, "").replace(pythonStyleCommentRegex, "")
+        val cStyleCommentRegex = Regex("""(?<!:)//.*?\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
+        return this.replace(cStyleCommentRegex, "")
+    }
+
+    /**
+     * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
+     */
+    fun String.removeEscapedQuotations(): String {
+        val escapedDoubleQuotationsRegex = Regex("""(\\")""", RegexOption.MULTILINE)
+        val escapedSingleQuotationsRegex = Regex("""(\\')""", RegexOption.MULTILINE)
+        return this.replace(escapedDoubleQuotationsRegex, "\"").replace(escapedSingleQuotationsRegex, "'")
     }
 }
