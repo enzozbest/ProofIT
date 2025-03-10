@@ -1,11 +1,12 @@
 import ChatScreen from './ChatScreen'
 import PrototypeFrame from "@/hooks/PrototypeFrame";
-import * as React from "react";
 import { useState } from "react"
-
 import { AppSidebar } from "@/components/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
 
+import hardcoded from '../hooks/hardcoded.json';
+
+const testFiles = hardcoded;  // hardcoded for now TODO: change to dynamic
 
 import {
   Popover,
@@ -38,7 +39,7 @@ import {
 
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [showPrototype, setPrototype] = useState<boolean>(false);
+  const [showPrototype, setPrototype] = useState<boolean>(true);
   const [prototypeId, setPrototypeId] = useState<number>(0);
 
   return (
@@ -111,7 +112,7 @@ export default function Page() {
             </button>
           </div>
           <div className="flex-1 h-full rounded-xl" style={{ backgroundColor: "#7e808f" }}>
-            { showPrototype ? <PrototypeFrame /> : null }
+            { showPrototype ? <PrototypeFrame files={testFiles} /> : null }
           </div>
         </div>
          
