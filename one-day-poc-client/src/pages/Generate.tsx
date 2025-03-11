@@ -1,40 +1,31 @@
-import ChatScreen from './ChatScreen'
-import PrototypeFrame from "@/hooks/PrototypeFrame";
-import * as React from "react";
-import { useState } from "react"
+import ChatScreen from './ChatScreen';
+import PrototypeFrame from '@/hooks/PrototypeFrame';
+import * as React from 'react';
+import { useState } from 'react';
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { TypographySmall } from "@/components/ui/typography"
-
+import { AppSidebar } from '@/components/app-sidebar';
+import { TypographySmall } from '@/components/ui/typography';
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from '@/components/ui/popover';
 
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar';
 
-import {
-  Button
-} from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
-import { 
-  ChevronDownIcon, 
-  ChevronRightIcon,
-} from "@radix-ui/react-icons"
+import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 
-import {
-  Share,
-  Rocket
-} from "lucide-react";
+import { Share, Rocket } from 'lucide-react';
 
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
@@ -51,19 +42,15 @@ export default function Page() {
 
             <div className="flex-1 flex items-center  justify-center gap-2">
               <Popover>
-                <PopoverTrigger className="flex items-center gap-1 group bg-background ">
-                  <TypographySmall>
-                    Project name
-                  </TypographySmall>
-                  <ChevronDownIcon
-                    className="transition-transform duration-200 group-data-[state=open]:rotate-180"
-                  />
+                <PopoverTrigger className="flex items-center gap-1 group bg-background">
+                  <TypographySmall>Project name</TypographySmall>
+                  <ChevronDownIcon className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
                 </PopoverTrigger>
                 <PopoverContent>
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Rename project</Label>
-                  <Input id="name" placeholder="Name of your project" />
-                </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="name">Rename project</Label>
+                    <Input id="name" placeholder="Name of your project" />
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>
@@ -73,52 +60,63 @@ export default function Page() {
                 <Popover>
                   <PopoverTrigger className="flex items-center gap-2 group bg-background">
                     <Share size={14} />
-                    <TypographySmall>
-                      Export
-                    </TypographySmall>
-                    <ChevronDownIcon
-                      className="transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    />
+                    <TypographySmall>Export</TypographySmall>
+                    <ChevronDownIcon className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </PopoverTrigger>
                   <PopoverContent>
-                  <div className="flex flex-col space-y-1.5">
-                    <p> buttons tba</p>
-                  </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <p> buttons tba</p>
+                    </div>
                   </PopoverContent>
                 </Popover>
-                <Button className="gap-2">
-                  <Rocket size={14}/>
+                <Button
+                  variant="secondary"
+                  className="gap-2"
+                  style={{ backgroundColor: '#dfdfe6' }}
+                >
+                  <Rocket size={14} />
                   Deploy
-                  </Button>
+                </Button>
               </div>
             </div>
           </div>
         </header>
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
-    
-          <div className= {`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
-                           isVisible ? "opacity-100 max-w-[450px]" : "opacity-0 max-w-0"}`}>
+          <div
+            className={`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
+              isVisible ? 'opacity-100 max-w-[450px]' : 'opacity-0 max-w-0'
+            }`}
+          >
             <ChatScreen
-                showPrototype={showPrototype}
-                prototypeId={prototypeId}
-                setPrototype={setPrototype}
-                setPrototypeId={setPrototypeId} />
+              showPrototype={showPrototype}
+              prototypeId={prototypeId}
+              setPrototype={setPrototype}
+              setPrototypeId={setPrototypeId}
+            />
           </div>
           <div className="flex h-full items-center justify-center">
-            <button 
+            <button
+              data-testid="toggle-button"
               onClick={() => setIsVisible(!isVisible)}
-              className="bg-transparent">
-            <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
-                                        isVisible ? "rotate-180": "rotate-0"}`} />
+              className="bg-transparent"
+            >
+              <ChevronRightIcon
+                className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
+                  isVisible ? 'rotate-180' : 'rotate-0'
+                }`}
+              />
             </button>
           </div>
-          <div className="flex-1 h-full rounded-xl bg-muted/50">
-            { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
+          <div
+            className="flex-1 h-full rounded-xl"
+            style={{ backgroundColor: '#7e808f' }}
+          >
+            {showPrototype ? (
+              <PrototypeFrame prototypeId={prototypeId} />
+            ) : null}
           </div>
         </div>
-         
- 
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
