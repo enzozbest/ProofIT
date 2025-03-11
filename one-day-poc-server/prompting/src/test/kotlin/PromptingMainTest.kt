@@ -66,7 +66,7 @@ class PromptingMainTest {
             PromptingTools.prototypePrompt(
                 userPrompt = userPrompt,
                 requirements = "req1 req2",
-                templates = "key1 key2",
+                templates = listOf("key1", "key2"),
             )
         } returns prototypePrompt
 
@@ -482,14 +482,14 @@ class PromptingMainTest {
             PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
             runBlocking { PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
-            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", listOf("\"hello\" \"world\""))
             runBlocking { TemplateInteractor.fetchTemplates(any()) }
             runBlocking { PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
         }
 
         verify(exactly = 1) {
-            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", listOf("\"hello\" \"world\""))
         }
 
         assertEquals(
