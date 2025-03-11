@@ -145,7 +145,6 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation(project(":auth"))
     implementation(project(":prototype"))
-    implementation(project(":webcontainer"))
     implementation(project(":database"))
     implementation(project(":routes"))
     implementation(project(":utils"))

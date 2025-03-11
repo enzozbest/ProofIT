@@ -21,7 +21,6 @@ dependencies {
     implementation(project(":prototype"))
     implementation(project(":embeddings"))
     implementation(project(":database"))
-    implementation(project(":webcontainer"))
     implementation(project(":utils"))
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.8")
