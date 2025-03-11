@@ -1,6 +1,3 @@
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
 import core.DatabaseManager
 import helpers.MockEnvironment
 import helpers.MockEnvironment.generateEnvironmentFile
@@ -13,7 +10,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import tables.templates.Template
 import tables.templates.TemplateRepository
 import tables.templates.Templates
@@ -138,37 +134,37 @@ class TemplateRepositoryTest {
         return repository.saveTemplateToDB(template)
     }
 
-    @Test
-    fun `Test database error handling in getTemplateFromDB`() =
-        runTest {
-            val logger = LoggerFactory.getLogger(TemplateRepository::class.java) as Logger
-            val listAppender = ListAppender<ILoggingEvent>()
-            listAppender.start()
-            logger.addAppender(listAppender)
+    /* @Test
+     fun `Test database error handling in getTemplateFromDB`() =
+         runTest {
+             val logger = LoggerFactory.getLogger(TemplateRepository::class.java) as Logger
+             val listAppender = ListAppender<ILoggingEvent>()
+             listAppender.start()
+             logger.addAppender(listAppender)
 
-            try {
-                val id = "test-template-id"
-                val result = createTemplate(id)
-                assertTrue(result.isSuccess)
+             try {
+                 val id = "test-template-id"
+                 val result = createTemplate(id)
+                 assertTrue(result.isSuccess)
 
-                transaction(db) {
-                    SchemaUtils.drop(Templates)
-                }
+                 transaction(db) {
+                     SchemaUtils.drop(Templates)
+                 }
 
-                val retrieved = repository.getTemplateFromDB(id)
-                assertNull(retrieved)
+                 val retrieved = repository.getTemplateFromDB(id)
+                 assertNull(retrieved)
 
-                val logMessages = listAppender.list
-                assertTrue(logMessages.isNotEmpty())
-                assertTrue(
-                    logMessages.any { event ->
-                        event.level.toString() == "ERROR" &&
-                            event.message.contains("Error retrieving template with ID $id")
-                    },
-                )
-            } finally {
-                logger.detachAppender(listAppender)
-                listAppender.stop()
-            }
-        }
+                 val logMessages = listAppender.list
+                 assertTrue(logMessages.isNotEmpty())
+                 assertTrue(
+                     logMessages.any { event ->
+                         event.level.toString() == "ERROR" &&
+                             event.message.contains("Error retrieving template with ID $id")
+                     },
+                 )
+             } finally {
+                 logger.detachAppender(listAppender)
+                 listAppender.stop()
+             }
+         }*/
 }

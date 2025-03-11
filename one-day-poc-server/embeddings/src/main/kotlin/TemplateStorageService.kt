@@ -20,8 +20,10 @@ object TemplateStorageService {
         val templateId = UUID.randomUUID().toString()
         val template = Template(id = templateId, fileURI = fileURI)
 
-        val result = DatabaseManager.templateRepository().saveTemplateToDB(template)
-
+        val result =
+            runCatching {
+                DatabaseManager.templateRepository().saveTemplateToDB(template)
+            }
         return if (result.isSuccess) {
             templateId
         } else {

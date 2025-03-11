@@ -28,9 +28,6 @@ dependencies {
     testImplementation(project(":utils"))
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xmulti-dollar-interpolation")

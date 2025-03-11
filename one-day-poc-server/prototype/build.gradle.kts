@@ -35,7 +35,3 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
 }
-
-tasks.test {
-    useJUnitPlatform()
-}
