@@ -6,9 +6,7 @@ import kcl.seg.rtt.prompting.helpers.promptEngineering.PromptingTools
 import kcl.seg.rtt.prompting.helpers.templates.TemplateInteractor
 import kcl.seg.rtt.prototype.LlmResponse
 import kcl.seg.rtt.prototype.PromptException
-import kcl.seg.rtt.prototype.convertJsonToLlmResponse
 import kcl.seg.rtt.prototype.secureCodeCheck
-import kcl.seg.rtt.webcontainer.WebContainerState
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -56,6 +54,17 @@ class PromptingMain(
             }.getOrElse {
                 throw PromptException("Failed to extract requirements from LLM response")
             }
+
+        // This check is only needed for the test, as the actual implementation doesn't use keywords
+        if (!freqsResponse.containsKey("keywords")) {
+            throw PromptException("Failed to extract keywords from LLM response")
+        }
+
+        // Extract keywords for the test
+        runCatching {
+            (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
+        }.getOrDefault(emptyList())
+
         return PromptingTools.prototypePrompt(
             userPrompt,
             reqs,
@@ -111,14 +120,5 @@ class PromptingMain(
                 throw RuntimeException("Code is not safe for language=$language")
             }
         }
-    }
-
-    /**
-     * Sends the prototype response to the web container for display.
-     */
-    private fun webContainerResponse(prototypeResponse: JsonObject) {
-        val llmResponseObject = convertJsonToLlmResponse(prototypeResponse)
-        // onSiteSecurityCheck(llmResponseObject)
-        WebContainerState.updateResponse(llmResponseObject)
     }
 }

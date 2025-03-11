@@ -5,7 +5,6 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import tables.templates.Template
 
 object TemplateService {
     internal var httpClient = HttpClient(CIO)
@@ -56,11 +55,12 @@ object TemplateService {
 
         val responseText = response.bodyAsText()
 
-        val storeResponse = try {
-            Json.decodeFromString<StoreTemplateResponse>(responseText)
-        } catch (e: Exception) {
-            throw IllegalStateException("Failed to parse response!", e)
-        }
+        val storeResponse =
+            try {
+                Json.decodeFromString<StoreTemplateResponse>(responseText)
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to parse response!", e)
+            }
 
         val templateId = TemplateStorageService.createTemplate(fileURI)
 

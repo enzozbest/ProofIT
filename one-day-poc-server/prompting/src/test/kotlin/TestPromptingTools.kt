@@ -255,7 +255,7 @@ class TestPromptingTools {
             }
             """.trimIndent()
 
-        val result = promptingTools.prototypePrompt(userPrompt, requirements, templates)
+        val result = promptingTools.prototypePrompt(userPrompt, requirements, listOf(templates))
 
         assertTrue(result.contains(userPrompt))
         assertTrue(result.contains(requirements))
