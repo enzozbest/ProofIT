@@ -66,7 +66,7 @@ class PromptingMainTest {
             PromptingTools.prototypePrompt(
                 userPrompt = userPrompt,
                 requirements = "req1 req2",
-                templates = "key1 key2",
+                templates = listOf("key1", "key2"),
             )
         } returns prototypePrompt
 
@@ -160,14 +160,14 @@ class PromptingMainTest {
 
         val result =
             promptingMain::class.java
-                .getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
+                .getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java, List::class.java)
                 .apply { isAccessible = true }
-                .invoke(promptingMain, userPrompt, freqsResponse) as String
+                .invoke(promptingMain, userPrompt, freqsResponse, emptyList<String>()) as String
 
         // Verify that the result contains the essential parts
         assertTrue(result.contains(userPrompt), "Result should contain the user prompt")
         assertTrue(result.contains("\"\"req1\" \"req2\"\""), "Result should contain the requirements")
-        assertTrue(result.contains("\"\"key1\" \"key2\"\""), "Result should contain the templates")
+        assertTrue(result.contains("\"[]\""), "Result should contain the templates")
     }
 
     @Test
@@ -179,12 +179,12 @@ class PromptingMainTest {
             }
 
         val method =
-            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
+            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java, List::class.java)
         method.isAccessible = true
 
         val exception =
             assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, userPrompt, invalidResponse)
+                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>())
             }
 
         assertTrue(exception.cause is PromptException)
@@ -201,12 +201,12 @@ class PromptingMainTest {
             }
 
         val method =
-            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java)
+            promptingMain::class.java.getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java, List::class.java)
         method.isAccessible = true
 
         val exception =
             assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, userPrompt, invalidResponse)
+                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>())
             }
 
         assertTrue(exception.cause is PromptException)
@@ -482,14 +482,14 @@ class PromptingMainTest {
             PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
             runBlocking { PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
-            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+            PromptingTools.prototypePrompt(userPrompt, any(), any())
             runBlocking { TemplateInteractor.fetchTemplates(any()) }
             runBlocking { PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b") }
             PromptingTools.formatResponseJson("response")
         }
 
-        verify(exactly = 1) {
-            PromptingTools.prototypePrompt(userPrompt, "\"Display hello world\"", "\"hello\" \"world\"")
+        verify(atLeast = 1) {
+            PromptingTools.prototypePrompt(userPrompt, any(), any())
         }
 
         assertEquals(

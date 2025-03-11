@@ -205,7 +205,8 @@ object PromptingTools {
      */
     fun String.removeComments(): String {
         val cStyleCommentRegex = Regex("""(?<!:)//.*?\\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
-        return this.replace(cStyleCommentRegex, "")
+        val pythonStyleCommentRegex = Regex("""#.*?(?:\\n|$)""", RegexOption.MULTILINE)
+        return this.replace(cStyleCommentRegex, "").replace(pythonStyleCommentRegex, "")
     }
 
     /**
