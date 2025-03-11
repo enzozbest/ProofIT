@@ -22,8 +22,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PrototypeRepositoryTest {
-
-
     private lateinit var db: Database
     private lateinit var repository: PrototypeRepository
 
@@ -33,7 +31,7 @@ class PrototypeRepositoryTest {
 
         EnvironmentLoader.reset()
         generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.envFile)
+        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
 
         db = DatabaseManager.init()
         transaction(db) {
@@ -47,8 +45,8 @@ class PrototypeRepositoryTest {
         transaction(db) {
             SchemaUtils.drop(Prototypes)
         }
-        postgresContainer.stop()
-        File(MockEnvironment.envFile).delete()
+        File(MockEnvironment.ENV_FILE).delete()
+        MockEnvironment.stopContainer()
     }
 
     @Test
@@ -60,60 +58,63 @@ class PrototypeRepositoryTest {
     }
 
     @Test
-    fun `Test creates prototype`() = runTest {
-        val result = createPrototype()
-        assertTrue(result.isSuccess)
-    }
-
-    @Test
-    fun `Test retrieves prototype`() = runTest {
-        val id = UUID.randomUUID()
-        val result = createPrototype(id)
-        assertTrue(result.isSuccess)
-
-        transaction(db) {
-            val count = Prototypes.selectAll().count()
-            println("PTTS: $count")
+    fun `Test creates prototype`() =
+        runTest {
+            val result = createPrototype()
+            assertTrue(result.isSuccess)
         }
 
-        val retrieved = repository.getPrototype(id).getOrNull()
-        assertNotNull(retrieved)
-        assertEquals("Hello", retrieved.userPrompt)
-    }
+    @Test
+    fun `Test retrieves prototype`() =
+        runTest {
+            val id = UUID.randomUUID()
+            val result = createPrototype(id)
+            assertTrue(result.isSuccess)
+
+            transaction(db) {
+                val count = Prototypes.selectAll().count()
+                println("PTTS: $count")
+            }
+
+            val retrieved = repository.getPrototype(id).getOrNull()
+            assertNotNull(retrieved)
+            assertEquals("Hello", retrieved.userPrompt)
+        }
 
     @Test
-    fun `Test retrieve by user id`() = runTest {
-        val id1 = UUID.randomUUID()
-        val id2 = UUID.randomUUID()
+    fun `Test retrieve by user id`() =
+        runTest {
+            val id1 = UUID.randomUUID()
+            val id2 = UUID.randomUUID()
 
-        val result1 = createPrototype(id1)
-        assertTrue(result1.isSuccess)
+            val result1 = createPrototype(id1)
+            assertTrue(result1.isSuccess)
 
-        val result2 = createPrototype(id2)
-        assertTrue(result2.isSuccess)
+            val result2 = createPrototype(id2)
+            assertTrue(result2.isSuccess)
 
-        val results = repository.getPrototypesByUserId("testuserId").getOrNull()
-        assertNotNull(results)
-        assertEquals(2, results.size)
-    }
+            val results = repository.getPrototypesByUserId("testuserId").getOrNull()
+            assertNotNull(results)
+            assertEquals(2, results.size)
+        }
 
     @Test
-    fun `Test retrieve non-existent prototype`() = runTest {
-        val retrieved = repository.getPrototype(UUID.randomUUID()).getOrNull()
-        kotlin.test.assertNull(retrieved)
-    }
+    fun `Test retrieve non-existent prototype`() =
+        runTest {
+            val retrieved = repository.getPrototype(UUID.randomUUID()).getOrNull()
+            kotlin.test.assertNull(retrieved)
+        }
 
     private suspend fun createPrototype(id: UUID = UUID.randomUUID()): Result<Unit> {
-        val prototype = Prototype(
-            id = id,
-            userId = "testuserId",
-            userPrompt = "Hello",
-            fullPrompt = "Hello, World!",
-            s3key = "testKey",
-            createdAt = Instant.now()
-        )
+        val prototype =
+            Prototype(
+                id = id,
+                userId = "testuserId",
+                userPrompt = "Hello",
+                fullPrompt = "Hello, World!",
+                s3key = "testKey",
+                createdAt = Instant.now(),
+            )
         return repository.createPrototype(prototype)
     }
-
-
 }

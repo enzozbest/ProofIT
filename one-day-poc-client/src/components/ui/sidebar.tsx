@@ -270,7 +270,7 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
-      className={cn('h-7 w-7 hover:bg-foreground bg-background', className)}
+      className={cn('h-7 w-7 hover:bg-#dfdfe6', className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
@@ -305,7 +305,7 @@ const SidebarRail = React.forwardRef<
         'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
         '[[data-side=left][data-collapsible=offcanvas]_&]:-right-2',
         '[[data-side=right][data-collapsible=offcanvas]_&]:-left-2',
-        'bg-background',
+        'bg-#dfdfe6',
         className
       )}
       {...props}
@@ -562,7 +562,11 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), "bg-transparent", className)}
+        className={cn(
+          sidebarMenuButtonVariants({ variant, size }),
+          'bg-[#060a28]',
+          className
+        )}
         {...props}
       />
     );

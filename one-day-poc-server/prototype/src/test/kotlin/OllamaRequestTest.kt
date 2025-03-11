@@ -45,7 +45,7 @@ class OllamaRequestTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `Test AuthenticatedSession deserialization missing a field`() {
+    fun `Test OllamaRequest deserialization missing a field`() {
         val json = """{"model":"model", "prompt":"prompt"}"""
         assertFailsWith<MissingFieldException> {
             Json.decodeFromString<OllamaRequest>(json)

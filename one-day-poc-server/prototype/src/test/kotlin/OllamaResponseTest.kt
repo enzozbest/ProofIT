@@ -23,10 +23,10 @@ class OllamaResponseTest {
     fun `Test OllamaResponse serialises to JSON`() {
         val response = OllamaResponse("model", "created_at", "response", false, "done_reason")
         val json = Json.encodeToString(response)
-        val expected = """{"model":"model","created_at":"created_at","response":"response","done":false,"done_reason":"done_reason"}"""
+        val expected =
+            """{"model":"model","created_at":"created_at","response":"response","done":false,"done_reason":"done_reason"}"""
         assertEquals(expected, json)
     }
-
 
     @Test
     fun `Test OllamaResponse de-serialises from JSON`() {
@@ -47,7 +47,7 @@ class OllamaResponseTest {
 
     @OptIn(ExperimentalSerializationApi::class)
     @Test
-    fun `Test AuthenticatedSession deserialization missing a field`() {
+    fun `Test OllamaResponse deserialization missing a field`() {
         val json = """{"model":"model", "created_at":"created_at", "response":"response", "done":false}"""
         assertFailsWith<MissingFieldException> {
             Json.decodeFromString<OllamaResponse>(json)

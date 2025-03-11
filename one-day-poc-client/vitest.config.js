@@ -31,7 +31,7 @@ export default defineConfig({
                 'vitest.config.js',
                 'src/__tests__',
                 'src/components/ui',
-                'src/types'
+                'src/types',
             ]
         },
     },
