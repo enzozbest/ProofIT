@@ -38,7 +38,7 @@ const InputBox: FC = () => {
 
   const handleSubmit = () => {
     if (!isAuthenticated) {
-      handleSignIn(); // Redirect unauthenticated users to Cognito
+      handleSignIn();
       return;
     }
 
