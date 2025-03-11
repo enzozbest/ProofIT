@@ -13,7 +13,7 @@ fun Application.configurePlugins() {
         listOf(frontendHost),
         listOf(HttpMethod.Get, HttpMethod.Options),
         listOf(HttpHeaders.Authorization, HttpHeaders.ContentType),
-        credentials = true
+        credentials = true,
     )
     configureContentNegotiation()
 }
@@ -22,15 +22,21 @@ private fun Application.configureCORS(
     hosts: List<Pair<String, List<String>>>,
     methods: List<HttpMethod>,
     headers: List<String>,
-    credentials: Boolean = false
+    credentials: Boolean = false,
 ) {
     install(CORS) {
-        for (method in methods)
+        for (method in methods) {
             allowMethod(method)
-        for (header in headers)
+        }
+        for (header in headers) {
             allowHeader(header)
-        for (host in hosts)
+        }
+        for (host in hosts) {
             allowHost(host.first, schemes = host.second)
+        }
+
+        // for iframe embedding
+        allowNonSimpleContentTypes = true
 
         allowCredentials = credentials
     }

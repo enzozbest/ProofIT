@@ -6,11 +6,7 @@ plugins {
     id("application")
     id("io.gitlab.arturbosch.detekt") version "1.23.0"
     id("org.sonarqube") version "4.0.0.2929"
-    id("jacoco")
-}
-
-jacoco {
-    toolVersion = "0.8.12"
+    jacoco
 }
 
 tasks.register<JacocoReport>("jacocoMergedReport") {
@@ -87,9 +83,11 @@ allprojects {
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "io.gitlab.arturbosch.detekt")
-    apply(plugin = "jacoco")
+    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
+        apply(plugin = "jacoco")
+    }
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
+        implementation("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
         implementation("io.ktor:ktor-server-core:$ktorVersion")
         implementation("io.ktor:ktor-server-netty:$ktorVersion")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
@@ -111,14 +109,29 @@ subprojects {
         autoCorrect = true
         config.setFrom("$rootDir/detekt.yml")
     }
-    jacoco {
-        toolVersion = "0.8.10"
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        finalizedBy("jacocoTestReport")
     }
 
-    tasks.jacocoTestReport {
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
+    plugins.withType<JacocoPlugin> {
+        tasks.withType<JacocoReport> {
+            dependsOn(tasks.named<Test>("test"))
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+            classDirectories.setFrom(
+                sourceSets["main"].output.asFileTree.matching {
+                    exclude(
+                        """**/*${'$'}DefaultConstructorMarker.class""",
+                        """**/*${'$'}DefaultImpls.class""",
+                        """**/*${'$'}Companion.class""",
+                        """**/*${'$'}${'$'}serializer.class""",
+                    )
+                },
+            )
         }
     }
 }
@@ -132,16 +145,18 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation(project(":auth"))
     implementation(project(":prototype"))
-    implementation(project(":webcontainer"))
     implementation(project(":database"))
     implementation(project(":routes"))
     implementation(project(":utils"))
-    implementation(project(":chat_history"))
+    implementation(project(":chat"))
+    implementation(project(":prompting"))
     implementation("org.jsoup:jsoup:1.15.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.withType<Test> {
@@ -156,13 +171,13 @@ tasks.named("run") {
 tasks.register<Exec>("startDocker") {
     group = "docker"
     description = "Starts the PostgreSQL docker container"
-    commandLine("docker-compose", "up", "-d")
+    commandLine("sh", "-c", "docker compose up -d || docker-compose up -d")
 }
 
 allprojects {
     plugins.withType<JavaPlugin> {
         extensions.configure<JavaPluginExtension> {
-            toolchain.languageVersion.set(JavaLanguageVersion.of(23))
+            toolchain.languageVersion.set(JavaLanguageVersion.of(19))
         }
     }
 }

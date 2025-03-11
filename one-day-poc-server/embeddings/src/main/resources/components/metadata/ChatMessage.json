@@ -1,0 +1,16 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "SoftwareSourceCode",
+  "name": "ChatMessage",
+  "description": "A chat message component that displays either user or AI messages with different styling and timestamps",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  },
+  "framework": {
+    "@type": "SoftwareApplication",
+    "name": "React"
+  },
+  "applicationCategory": "User Interface Component",
+  "keywords": ["chat", "message", "conversation", "ui component", "memoized"]
+}

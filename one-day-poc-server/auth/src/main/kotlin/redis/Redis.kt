@@ -1,5 +1,6 @@
 package redis
 
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 
@@ -9,5 +10,5 @@ object Redis {
 
     private val redisPool = JedisPool(JedisPoolConfig(), REDIS_HOST, REDIS_PORT)
 
-    fun getRedisConnection() = redisPool.resource
+    fun getRedisConnection(): Jedis = redisPool.resource
 }

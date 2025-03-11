@@ -1,0 +1,16 @@
+{
+  "@context": "https://schema.org/",
+  "@type": "SoftwareSourceCode",
+  "name": "TypingIndicator",
+  "description": "A simple animated typing indicator component that displays three dots to show that someone is typing",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "TypeScript"
+  },
+  "framework": {
+    "@type": "SoftwareApplication",
+    "name": "React"
+  },
+  "applicationCategory": "User Interface Component",
+  "keywords": ["typing indicator", "loading", "animation", "chat", "ui component"]
+}

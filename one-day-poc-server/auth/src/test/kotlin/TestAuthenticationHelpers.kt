@@ -230,11 +230,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with non-JsonObject`() {
-        val json = """
-        [
-            {"UserAttributes": []}
-        ]
-        """.trimIndent()
+        val json =
+            """
+            [
+                {"UserAttributes": []}
+            ]
+            """.trimIndent()
         val response = createResponse(json)
         assertFailsWith<Exception> {
             generateUserInfo(response)
@@ -243,11 +244,12 @@ class TestAuthenticationHelpers {
 
     @Test
     fun `Test generateUserInfo with UserAttributes explicitly set to null`() {
-        val json = """
+        val json =
+            """
             {
                 "UserAttributes": null
             }
-        """.trimIndent()
+            """.trimIndent()
         val response = createResponse(json)
         assertFailsWith<Exception> {
             generateUserInfo(response)
@@ -257,7 +259,7 @@ class TestAuthenticationHelpers {
     @Test
     fun `Test sendRequest() returns a response`() {
         val mockWebServer = MockWebServer()
-        mockWebServer.start(port = 10000)
+        mockWebServer.start(port = 65530)
         mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("Success"))
 
         val request =
