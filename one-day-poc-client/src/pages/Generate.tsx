@@ -21,9 +21,10 @@ export default function Page() {
           />
           </div>
           <div className="flex h-full items-center justify-center">
-            <button 
-              onClick={() => setIsVisible(!isVisible)}
-              className="bg-transparent">
+            <button
+                data-testid="toggle-button"
+                onClick={() => setIsVisible(!isVisible)}
+                className="bg-transparent">
             <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
                                         isVisible ? "rotate-180": "rotate-0"}`} />
             </button>
