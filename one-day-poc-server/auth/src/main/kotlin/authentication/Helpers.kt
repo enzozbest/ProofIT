@@ -1,4 +1,4 @@
-package kcl.seg.rtt.auth.authentication
+package authentication
 
 import com.auth0.jwt.JWT
 import io.ktor.http.HttpStatusCode

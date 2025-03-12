@@ -1,4 +1,4 @@
-package kcl.seg.rtt.auth.authentication
+package authentication
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder

@@ -1,23 +1,23 @@
 package kcl.seg.rtt.chat
 
+import authentication.Authenticators.configureJWTValidator
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
 import kotlinx.serialization.json.*
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 
 abstract class BaseAuthenticationServer {
     companion object {
@@ -33,39 +33,40 @@ abstract class BaseAuthenticationServer {
 
         private fun startMockServer() {
             if (mockServer == null) {
-                mockServer = embeddedServer(Netty, port = TEST_PORT) {
-                    routing {
-                        get("/.well-known/jwks.json") {
-                            call.respondText(
-                                createJWKSResponse(),
-                                ContentType.Application.Json,
-                            )
+                mockServer =
+                    embeddedServer(Netty, port = TEST_PORT) {
+                        routing {
+                            get("/.well-known/jwks.json") {
+                                call.respondText(
+                                    createJWKSResponse(),
+                                    ContentType.Application.Json,
+                                )
+                            }
                         }
                     }
-                }
                 mockServer?.start(wait = false)
             }
         }
 
-        private fun createJWKSResponse(): String {
-            return Json.encodeToString(
+        private fun createJWKSResponse(): String =
+            Json.encodeToString(
                 JsonObject.serializer(),
                 JsonObject(
                     mapOf(
-                        "keys" to JsonArray(
-                            listOf(
-                                Json.parseToJsonElement(
-                                    createMockJWK(
-                                        "test-key-id",
-                                        rsaPublicKey,
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
+                        "keys" to
+                            JsonArray(
+                                listOf(
+                                    Json.parseToJsonElement(
+                                        createMockJWK(
+                                            "test-key-id",
+                                            rsaPublicKey,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                    ),
+                ),
             )
-        }
 
         private fun createMockJWK(
             keyId: String,
@@ -109,9 +110,7 @@ abstract class BaseAuthenticationServer {
         chatModule()
     }
 
-    protected fun ApplicationTestBuilder.setupTestApplication(
-        moduleConfig: Application.() -> Unit = { testModule() }
-    ) {
+    protected fun ApplicationTestBuilder.setupTestApplication(moduleConfig: Application.() -> Unit = { testModule() }) {
         val mockJWKSUrl = "http://localhost:$TEST_PORT"
 
         application {

@@ -1,5 +1,11 @@
-package kcl.seg.rtt.auth.authentication
+package authentication
 
+import authentication.AuthenticationRoutes.AUTHENTICATION_CHECK_ROUTE
+import authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.AuthenticationRoutes.CALL_BACK_ROUTE
+import authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
+import authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.AuthenticationRoutes.USER_INFO_ROUTE
 import com.auth0.jwt.JWT
 import io.ktor.http.ContentType
 import io.ktor.http.Cookie
@@ -20,12 +26,6 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 import io.ktor.util.date.GMTDate
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_CHECK_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.USER_INFO_ROUTE
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

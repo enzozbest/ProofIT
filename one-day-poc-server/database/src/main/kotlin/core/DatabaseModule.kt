@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.Database
 /**
  * Object to encapsulate database utilities
  */
-object PoCDatabase {
+internal object PoCDatabase {
     val database: Database by lazy { DatabaseManager.init() }
 }
-

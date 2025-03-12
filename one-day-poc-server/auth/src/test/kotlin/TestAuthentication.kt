@@ -1,3 +1,7 @@
+import authentication.AuthenticatedSession
+import authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.Authenticators.configureJWTValidator
+import authentication.authModule
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import helpers.AuthenticationTestHelpers.configureBasicAuthentication
@@ -13,10 +17,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
 import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
@@ -189,7 +189,7 @@ class TestAuthentication {
                 "n": "$modulus",
                 "e": "$exponent"
             }
-        """.trimIndent()
+            """.trimIndent()
     }
 
     private fun setUpMockJWKSEndpoint(port: Int) {
