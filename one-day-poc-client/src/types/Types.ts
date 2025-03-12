@@ -1,16 +1,13 @@
 import { Dispatch, SetStateAction } from 'react';
 
-// User and LLM message roles
-export type MessageRole = 'User' | 'Assistant' | 'LLM';
+export type MessageRole = 'User' | 'LLM';
 
-// Base message structure shared across the application
 export interface Message {
     role: MessageRole;
     content: string;
     timestamp: string;
 }
 
-// File system types compatible with WebContainer API
 export interface WebContainerFile {
     file: {
         contents: string;
@@ -29,7 +26,6 @@ export interface FileTree {
     [path: string]: FileSystemEntry;
 }
 
-// API communication types
 export interface ServerResponse {
     chat?: ChatResponse;
     prototype?: PrototypeResponse;
@@ -51,7 +47,6 @@ export interface MessagePayload {
     prompt: string;
 }
 
-// Component props types
 export interface ChatScreenProps {
     showPrototype: boolean;
     setPrototype: Dispatch<SetStateAction<boolean>>;
