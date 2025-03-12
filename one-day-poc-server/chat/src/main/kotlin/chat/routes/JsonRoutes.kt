@@ -1,13 +1,13 @@
-package kcl.seg.rtt.chat.routes
+package chat.routes
 
+import chat.JSON
+import chat.Request
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kcl.seg.rtt.chat.JSON
-import kcl.seg.rtt.chat.Request
 import kcl.seg.rtt.prompting.PromptingMain
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
@@ -34,9 +34,7 @@ private suspend fun handleJsonRequest(
     call.respondText(getPromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
 }
 
-private fun getPromptingMain(): PromptingMain {
-    return promptingMainInstance
-}
+private fun getPromptingMain(): PromptingMain = promptingMainInstance
 
 internal fun setPromptingMain(promptObject: PromptingMain) {
     promptingMainInstance = promptObject

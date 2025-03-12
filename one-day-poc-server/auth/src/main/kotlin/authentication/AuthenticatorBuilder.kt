@@ -26,7 +26,7 @@ internal object JWTConstants {
     const val JWK_PROVIDER_BUCKET_SIZE: Long = 10
 }
 
-internal object Authenticators {
+object Authenticators {
     private lateinit var jwkProvider: JwkProvider
 
     /**
@@ -63,7 +63,7 @@ internal object Authenticators {
      *
      * @param config The JSON object containing the configuration settings for the JWT validator.
      */
-    internal fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
+    fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
         val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
         jwkProvider =
             JwkProviderBuilder(issuer)

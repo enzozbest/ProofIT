@@ -1,5 +1,7 @@
-package kcl.seg.rtt.chat.routes
+package chat.routes
 
+import chat.Request
+import chat.UPLOAD
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.ApplicationCall
@@ -7,10 +9,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
-import kcl.seg.rtt.chat.Request
-import kcl.seg.rtt.chat.UPLOAD
 import kotlinx.io.readByteArray
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
@@ -92,7 +93,7 @@ private suspend fun handleMessagePart(
                 time = LocalDateTime.now().toString(),
                 message = "${uploadData.message?.prompt}, ${uploadData.message?.userID}!",
             )
-    } catch (e: kotlinx.serialization.SerializationException) {
+    } catch (e: SerializationException) {
         call.respondText(
             text = "Invalid request: ${e.message}",
             status = HttpStatusCode.BadRequest,

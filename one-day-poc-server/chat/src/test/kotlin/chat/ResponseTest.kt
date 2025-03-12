@@ -1,24 +1,26 @@
-package kcl.seg.rtt.chat
+package chat
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 
-@kotlinx.serialization.Serializable
+@Serializable
 data class Response(
     val message: String,
-    val time: String
+    val time: String,
 )
 
 class ResponseTest {
     @Test
     fun `Test Response creation with valid parameters`() {
-        val response = Response(
-            message = "Test message",
-            time = "2025-01-01T12:00:00"
-        )
+        val response =
+            Response(
+                message = "Test message",
+                time = "2025-01-01T12:00:00",
+            )
 
         assertEquals("Test message", response.message)
         assertEquals("2025-01-01T12:00:00", response.time)
@@ -26,10 +28,11 @@ class ResponseTest {
 
     @Test
     fun `Test Response serialization`() {
-        val response = Response(
-            message = "Test message",
-            time = "2025-01-01T12:00:00"
-        )
+        val response =
+            Response(
+                message = "Test message",
+                time = "2025-01-01T12:00:00",
+            )
 
         val jsonString = Json.encodeToString(Response.serializer(), response)
         val deserializedResponse = Json.decodeFromString(Response.serializer(), jsonString)
