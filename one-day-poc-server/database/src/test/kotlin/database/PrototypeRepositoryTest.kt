@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class PrototypeRepositoryTest {
     private lateinit var db: Database
@@ -104,6 +105,66 @@ class PrototypeRepositoryTest {
         runTest {
             val retrieved = repository.getPrototype(UUID.randomUUID()).getOrNull()
             assertNull(retrieved)
+        }
+
+    @Test
+    fun `Test createPrototype failure path`() =
+        runTest {
+            // Create a repository with an invalid database connection
+            val invalidDb = Database.connect(
+                url = "jdbc:postgresql://localhost:5432/nonexistentdb",
+                driver = "org.postgresql.Driver",
+                user = "invalid",
+                password = "invalid"
+            )
+            val invalidRepository = PrototypeRepository(invalidDb)
+
+            val prototype = Prototype(
+                id = UUID.randomUUID(),
+                userId = "testuserId",
+                userPrompt = "Hello",
+                fullPrompt = "Hello, World!",
+                s3key = "testKey",
+                createdAt = Instant.now(),
+            )
+
+            val result = invalidRepository.createPrototype(prototype)
+            assertFalse(result.isSuccess)
+            assertTrue(result.isFailure)
+        }
+
+    @Test
+    fun `Test getPrototype failure path`() =
+        runTest {
+            // Create a repository with an invalid database connection
+            val invalidDb = Database.connect(
+                url = "jdbc:postgresql://localhost:5432/nonexistentdb",
+                driver = "org.postgresql.Driver",
+                user = "invalid",
+                password = "invalid"
+            )
+            val invalidRepository = PrototypeRepository(invalidDb)
+
+            val result = invalidRepository.getPrototype(UUID.randomUUID())
+            assertFalse(result.isSuccess)
+            assertTrue(result.isFailure)
+        }
+
+    @Test
+    fun `Test getPrototypesByUserId failure path`() =
+        runTest {
+            // Create a repository with an invalid database connection
+            val invalidDb = Database.connect(
+                url = "jdbc:postgresql://localhost:5432/nonexistentdb",
+                driver = "org.postgresql.Driver",
+                user = "invalid",
+                password = "invalid"
+            )
+            val invalidRepository = PrototypeRepository(invalidDb)
+
+            val result = invalidRepository.getPrototypesByUserId("testuserId")
+            assertFalse(result.isSuccess)
+            assertTrue(result.isFailure)
         }
 
     private suspend fun createPrototype(id: UUID = UUID.randomUUID()): Result<Unit> {

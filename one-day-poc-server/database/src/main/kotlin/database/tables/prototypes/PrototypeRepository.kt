@@ -1,8 +1,5 @@
 package database.tables.prototypes
 
-import database.tables.prototypes.Prototype
-import database.tables.prototypes.PrototypeEntity
-import database.tables.prototypes.Prototypes
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder

@@ -1,15 +1,22 @@
 package templates
 
+import database.core.DatabaseManager
+import database.tables.templates.TemplateRepository
 import embeddings.EmbeddingConstants
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.mockk.coEvery
+import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 
 class TestTemplateService {
     private val embedResponseSuccessJson =
@@ -26,6 +33,16 @@ class TestTemplateService {
         """
         {"status":"success", "matches":["TemplateA", "TemplateB"]}
         """.trimIndent()
+
+    @BeforeEach
+    fun setUp() {
+        // No setup needed by default
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkAll()
+    }
 
     @Test
     fun `Test embed returns correct response on success`() =
@@ -92,7 +109,7 @@ class TestTemplateService {
         }
 
     @Test
-    fun `Test embedAndStore returns expected response on success`() =
+    fun `Test embedAndStore returns expected response on success`() {
         runBlocking {
             val engine =
                 MockEngine { request ->
@@ -110,14 +127,22 @@ class TestTemplateService {
             val client = HttpClient(engine)
             TemplateService.httpClient = client
 
-            mockkObject(TemplateStorageService)
+            // Setup DatabaseManager mock to allow createTemplate to work
+            mockkObject(DatabaseManager)
+            val mockRepo = mockk<TemplateRepository>()
+            coEvery { DatabaseManager.templateRepository() } returns mockRepo
             coEvery {
-                TemplateStorageService.createTemplate(any())
-            } returns "mock-id"
+                mockRepo.saveTemplateToDB(any())
+            } returns Result.success(Unit)
 
+            // Call the method that will use the real createTemplate function
             val response = TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
+
+            // Verify the response
             assertEquals("success", response.status)
+            assertNotNull(response.id)
         }
+    }
 
     @Test
     fun `Test embedAndStore throws exception when response is not formatted correctly`(): Unit =

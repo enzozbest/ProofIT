@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 import utils.environment.EnvironmentLoader
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -147,37 +148,41 @@ class TemplateRepositoryTest {
         return repository.saveTemplateToDB(template)
     }
 
-    /* @Test
-     fun `Test database error handling in getTemplateFromDB`() =
-         runTest {
-             val logger = LoggerFactory.getLogger(TemplateRepository::class.java) as Logger
-             val listAppender = ListAppender<ILoggingEvent>()
-             listAppender.start()
-             logger.addAppender(listAppender)
+    @Test
+    fun `Test saveTemplateToDB failure path`() =
+        runTest {
+            // Create a repository with an invalid database connection
+            val invalidDb = Database.connect(
+                url = "jdbc:postgresql://localhost:5432/nonexistentdb",
+                driver = "org.postgresql.Driver",
+                user = "invalid",
+                password = "invalid"
+            )
+            val invalidRepository = TemplateRepository(invalidDb)
 
-             try {
-                 val id = "test-template-id"
-                 val result = createTemplate(id)
-                 assertTrue(result.isSuccess)
+            val template = Template(
+                id = "test-template-id",
+                fileURI = "test-file-uri"
+            )
 
-                 transaction(db) {
-                     SchemaUtils.drop(Templates)
-                 }
+            val result = invalidRepository.saveTemplateToDB(template)
+            assertFalse(result.isSuccess)
+            assertTrue(result.isFailure)
+        }
 
-                 val retrieved = repository.getTemplateFromDB(id)
-                 assertNull(retrieved)
+    @Test
+    fun `Test getTemplateFromDB failure path`() =
+        runTest {
+            // Create a repository with an invalid database connection
+            val invalidDb = Database.connect(
+                url = "jdbc:postgresql://localhost:5432/nonexistentdb",
+                driver = "org.postgresql.Driver",
+                user = "invalid",
+                password = "invalid"
+            )
+            val invalidRepository = TemplateRepository(invalidDb)
 
-                 val logMessages = listAppender.list
-                 assertTrue(logMessages.isNotEmpty())
-                 assertTrue(
-                     logMessages.any { event ->
-                         event.level.toString() == "ERROR" &&
-                             event.message.contains("Error retrieving template with ID $id")
-                     },
-                 )
-             } finally {
-                 logger.detachAppender(listAppender)
-                 listAppender.stop()
-             }
-         }*/
+            val retrieved = invalidRepository.getTemplateFromDB("test-template-id")
+            assertNull(retrieved)
+        }
 }

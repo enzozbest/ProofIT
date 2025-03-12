@@ -2,7 +2,9 @@ package kcl.seg.rtt.prompting.helpers.helpers
 
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockkConstructor
+import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -39,10 +41,14 @@ class PrototypeInteractorTest {
                     done_reason = "stop",
                 )
 
-            coEvery { anyConstructed<PrototypeMain>().prompt(any()) } returns expectedResponse
+            // Use a more explicit mocking approach
+            coEvery { 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+            } returns expectedResponse
+
             val result = PrototypeInteractor.prompt(testPrompt, testModel)
             assertEquals(expectedResponse, result)
-            coVerify { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
         }
 
     @Test
@@ -51,12 +57,15 @@ class PrototypeInteractorTest {
             val testPrompt = "test prompt"
             val testModel = "llama2"
 
-            coEvery { anyConstructed<PrototypeMain>().prompt(any()) } returns null
+            // Use a more explicit mocking approach
+            coEvery { 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+            } returns null
 
             val result = PrototypeInteractor.prompt(testPrompt, testModel)
 
             assertNull(result)
-            coVerify { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
         }
 
     @Test
@@ -73,11 +82,14 @@ class PrototypeInteractorTest {
                     done_reason = "stop",
                 )
 
-            coEvery { anyConstructed<PrototypeMain>().prompt(any()) } returns expectedResponse
+            // Use a more explicit mocking approach
+            coEvery { 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+            } returns expectedResponse
 
             val result = PrototypeInteractor.prompt(testPrompt, testModel)
 
             assertEquals(expectedResponse, result)
-            coVerify { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
         }
 }
