@@ -44,7 +44,7 @@ object OllamaService {
     private const val CONNECT_TIMEOUT_MILLIS = 30_000_000L
     private const val SOCKET_TIMEOUT_MILLIS = 600_000_000L
 
-    val client =
+    var client =
         HttpClient(CIO) {
             install(HttpTimeout) {
                 requestTimeoutMillis = REQUEST_TIMEOUT_MILLIS
