@@ -1,8 +1,5 @@
 package prompting
 
-import kcl.seg.rtt.prototype.LlmResponse
-import kcl.seg.rtt.prototype.PromptException
-import kcl.seg.rtt.prototype.secureCodeCheck
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -11,6 +8,9 @@ import prompting.helpers.PrototypeInteractor
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
+import prototype.LlmResponse
+import prototype.helpers.PromptException
+import prototype.security.secureCodeCheck
 import java.time.Instant
 import kotlin.collections.iterator
 

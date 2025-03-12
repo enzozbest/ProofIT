@@ -1,3 +1,5 @@
+package utils
+
 import aws.sdk.kotlin.services.sts.StsClient
 import io.ktor.server.application.Application
 import kcl.seg.rtt.utils.aws.S3Manager

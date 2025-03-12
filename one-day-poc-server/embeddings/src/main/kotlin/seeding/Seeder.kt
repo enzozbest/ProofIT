@@ -55,7 +55,7 @@ internal object Seeder {
     private fun findJsonFiles(directory: File): List<File> =
         directory
             .listFiles()
-            ?.filter { it.extension.equals("json", ignoreCase = true) }
+            ?.filter { it.extension.equals("utils/json", ignoreCase = true) }
             ?: emptyList()
 
     /**

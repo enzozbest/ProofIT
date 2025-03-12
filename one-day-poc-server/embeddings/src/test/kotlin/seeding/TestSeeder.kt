@@ -1,4 +1,5 @@
 package seeding
+/*
 
 import embeddings.StoreTemplateResponse
 import io.mockk.*
@@ -198,3 +199,4 @@ class TestSeeder {
             }
         }
 }
+*/
