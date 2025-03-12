@@ -44,7 +44,6 @@ export async function sendChatMessage(
 
 
     } catch (error) {
-        onPrototypeResponse({ files: testFiles });
         console.error('API Error:', error);
         throw error;
     }
