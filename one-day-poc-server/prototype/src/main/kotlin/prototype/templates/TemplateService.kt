@@ -1,6 +1,7 @@
-//package kcl.seg.rtt.prototype
-//
-///**
+@file:Suppress("ktlint:standard:no-empty-file")
+
+package prototype.templates
+// /**
 // * Represents a prompt template.
 // *
 // * @property id A unique identifier for the template (e.g. "assistantV1").
@@ -10,13 +11,13 @@
 // *          "You are an AI assistant. The user wants help with {topic}.
 // *           Make sure to greet them as {username}."
 // */
-//data class Template(
+// data class Template(
 //    val id: String,
 //    val matchingKeywords: List<String>,
 //    val content: String
-//)
+// )
 //
-//object TemplateRepository {
+// object TemplateRepository {
 //    // For now, a static list of example templates.
 //    // In reality, you might load them from DB, S3, or a real config file.
 //    private val templates = listOf(
@@ -55,9 +56,9 @@
 //            }
 //        }
 //    }
-//}
+// }
 //
-///**
+// /**
 // * Replaces placeholders in [templateContent] with values from [placeholders].
 // *
 // * Placeholders are expected to look like {key}, e.g. {topic}, {username}.
@@ -66,22 +67,22 @@
 // * computes embeddings for the user prompt, compares them against embeddings
 // * for each template, and picks the best semantic match.
 // */
-//fun fillTemplateContent(templateContent: String, placeholders: Map<String, String>): String {
+// fun fillTemplateContent(templateContent: String, placeholders: Map<String, String>): String {
 //    var result = templateContent
 //    placeholders.forEach { (key, value) ->
 //        // naive approach: replace all occurrences of {key} with the actual [value]
 //        result = result.replace("{$key}", value, ignoreCase = false)
 //    }
 //    return result
-//}
+// }
 //
-///**
+// /**
 // * Given the raw [userPrompt], find a relevant template
 // * and fill it with the placeholders from [placeholderMap].
 // *
 // * If no template is found, returns null or a fallback string.
 // */
-//fun buildRefinedPrompt(userPrompt: String, placeholderMap: Map<String, String>): String? {
+// fun buildRefinedPrompt(userPrompt: String, placeholderMap: Map<String, String>): String? {
 //    // 1) Find a matching template
 //    val template = TemplateRepository.findRelevantTemplate(userPrompt)
 //        ?: return null // or "No matching template"
@@ -91,7 +92,7 @@
 //
 //    // 3) Return the final text that can be fed to the LLM
 //    return refined
-//}
+// }
 //
 //
 //

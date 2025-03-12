@@ -1,11 +1,6 @@
 package prompting
 
 import io.mockk.*
-import kcl.seg.rtt.prototype.FileContent
-import kcl.seg.rtt.prototype.LlmResponse
-import kcl.seg.rtt.prototype.OllamaResponse
-import kcl.seg.rtt.prototype.PromptException
-import kcl.seg.rtt.prototype.secureCodeCheck
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.AfterEach

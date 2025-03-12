@@ -1,4 +1,5 @@
-import kcl.seg.rtt.prototype.OllamaRequest
+package prototype.helpers
+
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString

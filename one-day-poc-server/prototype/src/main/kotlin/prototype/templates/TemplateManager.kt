@@ -1,20 +1,22 @@
-//package kcl.seg.rtt.prototype
+@file:Suppress("ktlint:standard:no-empty-file")
+
+package prototype.templates // package kcl.seg.rtt.prototype
 //
 //
-///**
+// /**
 // * Result object indicating whether the new template was validated successfully or not.
 // * If [success] == false, [errorMessage] should contain a reason.
 // */
-//data class TemplateValidationResult(
+// data class TemplateValidationResult(
 //    val success: Boolean,
 //    val errorMessage: String? = null
-//)
+// )
 //
 //
-///**
+// /**
 // * Handles new template detection and validation logic.
 // */
-//object TemplateManager {
+// object TemplateManager {
 //
 //    /**
 //     * Checks if the [llmRawText] includes a "new template" declaration, e.g., a "@metadata new_template" tag.
@@ -73,4 +75,4 @@
 //        // database.saveTemplateVector(vector)
 //    }
 //
-//}
+// }

@@ -1,4 +1,4 @@
-package kcl.seg.rtt.routes
+package routes
 
 import io.ktor.http.*
 import io.ktor.server.application.*

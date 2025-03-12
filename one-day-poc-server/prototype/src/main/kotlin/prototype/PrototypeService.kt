@@ -1,8 +1,9 @@
-package kcl.seg.rtt.prototype
+package prototype
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import prototype.helpers.PromptException
 
 /**
  * Represents a structured response from the LLM containing prototype file information.
@@ -22,10 +23,9 @@ data class FileContent(
     val content: String,
 )
 
-
 /**
  * Converts a JsonObject to an LlmResponse object for security checking.
- * 
+ *
  * @param json The JsonObject containing the LLM response with files
  * @return An LlmResponse object containing the parsed files
  * @throws PromptException If the required fields are missing or malformed
@@ -34,29 +34,34 @@ fun convertJsonToLlmResponse(json: JsonObject): LlmResponse {
     try {
         // Convert each file entry to a map of language -> FileContent
         val files = mutableMapOf<String, FileContent>()
-        
-        (json["files"] as? JsonObject 
-            ?: throw PromptException("Missing 'files' field in LLM response")).entries.forEach { (language, fileContentJson) ->
-            val content = when (fileContentJson) {
-                is JsonObject -> {
-                    // Look for "code" field first (as per prompt), then try "content" for backward compatibility
-                    (fileContentJson["code"] as? JsonPrimitive)?.content
-                        ?: (fileContentJson["content"] as? JsonPrimitive)?.content
-                        ?: throw PromptException("Missing 'code' or 'content' field in file for language: $language")
+
+        (
+            json["files"] as? JsonObject
+                ?: throw PromptException("Missing 'files' field in LLM response")
+        ).entries.forEach { (language, fileContentJson) ->
+            val content =
+                when (fileContentJson) {
+                    is JsonObject -> {
+                        // Look for "code" field first (as per prompt), then try "content" for backward compatibility
+                        (fileContentJson["code"] as? JsonPrimitive)?.content
+                            ?: (fileContentJson["content"] as? JsonPrimitive)?.content
+                            ?: throw PromptException("Missing 'code' or 'content' field in file for language: $language")
+                    }
+
+                    is JsonPrimitive -> {
+                        // If it's directly a string content
+                        fileContentJson.content
+                    }
+
+                    else -> throw PromptException("Unexpected format for file content in language: $language")
                 }
-                is JsonPrimitive -> {
-                    // If it's directly a string content
-                    fileContentJson.content
-                }
-                else -> throw PromptException("Unexpected format for file content in language: $language")
-            }
-            
+
             files[language] = FileContent(content)
         }
-        
+
         // Set default mainFile to "index.html" if not provided
         val mainFile = (json["mainFile"] as? JsonPrimitive)?.content ?: "html"
-        return LlmResponse(mainFile, files)            
+        return LlmResponse(mainFile, files)
     } catch (e: Exception) {
         when (e) {
             is PromptException -> throw e
@@ -64,4 +69,3 @@ fun convertJsonToLlmResponse(json: JsonObject): LlmResponse {
         }
     }
 }
-
