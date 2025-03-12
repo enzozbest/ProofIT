@@ -1,12 +1,8 @@
 import ChatScreen from './ChatScreen'
 import PrototypeFrame from "@/hooks/PrototypeFrame";
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
-
-import hardcoded from '../hooks/hardcoded.json';
-
-const testFiles = hardcoded;  // hardcoded for now TODO: change to dynamic
 
 import {
   Popover,
@@ -39,8 +35,32 @@ import {
 
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [showPrototype, setPrototype] = useState<boolean>(true);
-  const [prototypeId, setPrototypeId] = useState<number>(0);
+  const [showPrototype, setPrototype] = useState<boolean>(true); // this should be false once everything is working
+  const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
+  const [initialMessage, setInitialMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!window.crossOriginIsolated) {
+      const hasAttemptedReload = sessionStorage.getItem('attempted_isolation_reload') === 'true';
+      
+      if (!hasAttemptedReload) {
+        sessionStorage.setItem('attempted_isolation_reload', 'true');
+        console.log("Cross-origin isolation not detected. Reloading page to apply headers...");
+        window.location.reload();
+        return;
+      } else {
+        console.error("Failed to enable cross-origin isolation after reload. Check server headers.");
+        sessionStorage.removeItem('attempted_isolation_reload');
+      }
+    } else {
+      sessionStorage.removeItem('attempted_isolation_reload');
+    }
+
+    const savedMessage = sessionStorage.getItem('initialMessage');
+    if (savedMessage) {
+      setInitialMessage(savedMessage);
+    }
+  }, []);
 
   return (
     <SidebarProvider>
@@ -101,6 +121,8 @@ export default function Page() {
           <ChatScreen
               showPrototype={showPrototype}
               setPrototype={setPrototype}
+              setPrototypeFiles={setPrototypeFiles}
+              initialMessage={initialMessage}
           />
           </div>
           <div className="flex h-full items-center justify-center">
@@ -112,7 +134,7 @@ export default function Page() {
             </button>
           </div>
           <div className="flex-1 h-full rounded-xl" style={{ backgroundColor: "#7e808f" }}>
-            { showPrototype ? <PrototypeFrame files={testFiles} /> : null }
+            { showPrototype ? <PrototypeFrame files={prototypeFiles} /> : null }
           </div>
         </div>
          

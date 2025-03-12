@@ -1,11 +1,9 @@
 import React, { FC, useState, useRef, useEffect } from 'react';
 import { Paperclip, SendHorizontal } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const InputBox: FC = () => {
     const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -16,7 +14,8 @@ const InputBox: FC = () => {
 
     const handleSubmit = () => {
         if (text.trim()) {
-            navigate('/generate', { state: { initialMessage: text } });
+            sessionStorage.setItem('initialMessage', text);
+            window.location.href = '/generate';
         }
     };
 
@@ -29,16 +28,16 @@ const InputBox: FC = () => {
 
     return (
         <div className="flex items-center w-full max-w-5xl border-black rounded-2xl bg-gray-500 bg-opacity-50 px-5 py-5 shadow-lg">
-      <textarea
-          ref={textareaRef}
-          rows={1}
-          placeholder="Tell us what we can do for you?"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-white resize-none overflow-y-auto"
-          style={{ minHeight: '45px', maxHeight: '150px' }}
-      />
+            <textarea
+                ref={textareaRef}
+                rows={1}
+                placeholder="Tell us what we can do for you?"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder-white resize-none overflow-y-auto"
+                style={{ minHeight: '45px', maxHeight: '150px' }}
+            />
             <button
                 className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
                 type="button"

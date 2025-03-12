@@ -1,26 +1,11 @@
-import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "./Types";
+import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "../types/Types";
+
+import hardcoded from './hardcoded.json';
+
+const testFiles = hardcoded;  // hardcoded for now TODO: change to dynamic
 
 type ChatCallback = (chatResponse: ChatResponse) => void;
 type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;
-
-export async function getPrototypeFiles(prototypeId: string | number): Promise<FileTree> {
-    const response = await fetch(`/api/prototypes/${prototypeId}/files`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch prototype files');
-    }
-    const files = await response.json();
-    
-    const fileTree: FileTree = {};
-    for (const [fileName, content] of Object.entries(files)) {
-        fileTree[fileName] = {
-            file: {
-                contents: content as string
-            }
-        };
-    }
-    
-    return fileTree;
-}
 
 export async function sendChatMessage(
     message: Message,
@@ -53,9 +38,17 @@ export async function sendChatMessage(
             onChatResponse(serverResponse.chat);
         }
         
-        if (serverResponse.prototype) {
-            onPrototypeResponse(serverResponse.prototype);
+        // if (serverResponse.prototype) {
+            // onPrototypeResponse(serverResponse.prototype);
+        if(true){
+            onPrototypeResponse({ files: testFiles });
+        } else {
+            // For testing only: remove this in production
+            console.log('No prototype in response, using test files');
+            onPrototypeResponse({ files: testFiles });
         }
+
+
     } catch (error) {
         console.error('API Error:', error);
         throw error;

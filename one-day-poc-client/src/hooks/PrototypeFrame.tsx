@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PrototypeFrameProps } from './Types';
+import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './useWebContainer';
 
 /**

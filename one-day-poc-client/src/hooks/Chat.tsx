@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Message, ChatHookReturn, ChatMessageProps, MessageRole } from './Types';
+// import { Message, ChatHookReturn, ChatMessageProps, MessageRole } from './Types';
 import { sendChatMessage } from '../api/FrontEndAPI';
+import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
 
-const ChatMessage = ({ setPrototype }: ChatMessageProps): ChatHookReturn => {
+const ChatMessage = ({ setPrototype, setPrototypeFiles }: ChatMessageProps): ChatHookReturn => {
     const [message, setMessage] = useState<string>("");
     const [sentMessages, setSentMessages] = useState<Message[]>([]);
     const [llmResponse, setLlmResponse] = useState<string>("");
@@ -25,14 +26,15 @@ const ChatMessage = ({ setPrototype }: ChatMessageProps): ChatHookReturn => {
                 newMessage,
                 (chatResponse) => {
                     setLlmResponse(chatResponse.message);
-                    setSentMessages(prev => [...prev, {
-                        role: chatResponse.role,
-                        content: chatResponse.message,
-                        timestamp: chatResponse.timestamp
-                    } as Message]);
+                    // setSentMessages(prev => [...prev, {
+                    //     role: chatResponse.role,
+                    //     content: chatResponse.message,
+                    //     timestamp: chatResponse.timestamp
+                    // } as Message]);
                 },
-                () => {
+                (prototypeResponse) => {
                     setPrototype(true);
+                    setPrototypeFiles(prototypeResponse.files);
                 }
             );
             
