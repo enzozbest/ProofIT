@@ -7,6 +7,7 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
@@ -323,5 +324,245 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val json = Json.encodeToString(Response.serializer(), response)
         val deserialized = Json.decodeFromString(Response.serializer(), json)
         assertEquals(response, deserialized)
+    }
+
+    @Test
+    fun `Test generateTimestampedFileName with extension adds timestamp before extension`() {
+        val originalFileName = "test.jpg"
+        val result = generateTimestampedFileName(originalFileName)
+
+        assertTrue(result.matches(Regex("test_\\d+\\.jpg")))
+
+        val parts = result.substring(0, result.lastIndexOf('.')).split("_")
+        assertEquals(2, parts.size)
+        assertEquals("test", parts[0])
+        assertTrue(parts[1].toLongOrNull() != null)
+    }
+
+    @Test
+    fun `Test upload without file does not cause errors`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("description", "No File Attached")
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(response.bodyAsText().contains("No File Attached"))
+    }
+
+    @Test
+    fun `Test upload with form items but no file item`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("description", "Description Only")
+                        append("message", """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Hello"
+                        }
+                    """.trimIndent())
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        val responseJson = Json.decodeFromString<Response>(response.bodyAsText())
+        assertEquals("Hello, testUser!", responseJson.message)
+    }
+
+    @Test
+    fun `Test createUploadDirectory reuses existing directory`() = testApplication {
+        setupTestApplication()
+        val testDir = File("test_uploads")
+        testDir.mkdirs()
+
+        // Add a marker file to check if directory is reused
+        val markerFile = File(testDir, "marker.txt")
+        markerFile.writeText("marker")
+
+        client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            "test".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertTrue(markerFile.exists(), "Directory should be reused, not recreated")
+    }
+
+    @Test
+    fun `Test multipart upload without any parts`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {}
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        // It should return a default message since no specific parts are provided
+    }
+
+    @Test
+    fun `Test upload with multiple files`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            "first file content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"first.txt\"")
+                            }
+                        )
+                        append(
+                            "file",
+                            "second file content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"second.txt\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val testDir = File("test_uploads")
+        val files = testDir.listFiles() ?: emptyArray()
+
+        // Verify both files were uploaded
+        assertTrue(files.any { it.name.startsWith("first_") })
+        assertTrue(files.any { it.name.startsWith("second_") })
+    }
+
+    @Test
+    fun `Test upload with blank filename`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            "content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val testDir = File("test_uploads")
+        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
+        assertNotNull(uploadedFile, "File with generated name should exist")
+    }
+
+    @Test
+    fun `Test binary file upload`() = testApplication {
+        setupTestApplication()
+
+        // Create a sample binary content
+        val binaryContent = ByteArray(256) { it.toByte() }
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append(
+                            "file",
+                            binaryContent,
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "application/octet-stream")
+                                append(HttpHeaders.ContentDisposition, "filename=\"binary.dat\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        val testDir = File("test_uploads")
+        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("binary_") }
+        assertNotNull(uploadedFile, "Binary file should be uploaded")
+
+        if (uploadedFile != null) {
+            val uploadedContent = uploadedFile.readBytes()
+            assertTrue(binaryContent.contentEquals(uploadedContent), "Binary content should match")
+        }
+    }
+
+    @Test
+    fun `Test form item with unknown name is ignored`() = testApplication {
+        setupTestApplication()
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("unknownField", "This should be ignored")
+                        append(
+                            "file",
+                            "test content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        // Test passes if no errors occur
     }
 }
