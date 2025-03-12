@@ -104,6 +104,18 @@ class TemplateRepositoryTest {
         }
 
     @Test
+    fun `Test save template with empty id throws IllegalArgumentException`() =
+        runTest {
+            val result = createTemplate("")
+            assertTrue(result.isFailure)
+
+            val exception = result.exceptionOrNull()
+            assertNotNull(exception)
+            assertTrue(exception is IllegalArgumentException)
+            assertEquals("Failed requirement.", exception.message)
+        }
+
+    @Test
     fun `Test transaction rollback on error`() =
         runTest {
             val id = "test-template-id"
