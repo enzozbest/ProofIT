@@ -1,6 +1,10 @@
-import core.DatabaseManager
-import helpers.MockEnvironment
-import helpers.MockEnvironment.generateEnvironmentFile
+package database
+
+import database.core.DatabaseManager
+import database.helpers.MockEnvironment
+import database.tables.templates.Template
+import database.tables.templates.TemplateRepository
+import database.tables.templates.Templates
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
@@ -10,9 +14,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import tables.templates.Template
-import tables.templates.TemplateRepository
-import tables.templates.Templates
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -26,7 +27,7 @@ class TemplateRepositoryTest {
     @BeforeEach
     fun setUp() {
         EnvironmentLoader.reset()
-        generateEnvironmentFile()
+        MockEnvironment.generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
 
         db = DatabaseManager.init()

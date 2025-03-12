@@ -1,4 +1,4 @@
-package tables.templates
+package database.tables.templates
 
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
@@ -16,7 +16,7 @@ class TemplateRepository(
 
     /**
      * Function to save a Template to the database
-     * @param template The [Template] to save
+     * @param template The [tables.templates.Template] to save
      * @return A Result object containing the success or failure of the operation
      */
     suspend fun saveTemplateToDB(template: Template): Result<Unit> =
@@ -26,11 +26,11 @@ class TemplateRepository(
             }
 
             newSuspendedTransaction(IO_DISPATCHER, db) {
-                val existingTemplate = TemplateEntity.findById(template.id)
+                val existingTemplate = TemplateEntity.Companion.findById(template.id)
                 if (existingTemplate != null) {
                     existingTemplate.fileURI = template.fileURI
                 } else {
-                    TemplateEntity.new(template.id) {
+                    TemplateEntity.Companion.new(template.id) {
                         fileURI = template.fileURI
                     }
                 }
@@ -45,7 +45,7 @@ class TemplateRepository(
     suspend fun getTemplateFromDB(id: String): Template? =
         runCatching {
             newSuspendedTransaction(IO_DISPATCHER, db) {
-                TemplateEntity.findById(id)?.toTemplate()
+                TemplateEntity.Companion.findById(id)?.toTemplate()
             }
         }.onFailure { e ->
             logger.error("Error retrieving template with ID $id: ${e.message}", e)

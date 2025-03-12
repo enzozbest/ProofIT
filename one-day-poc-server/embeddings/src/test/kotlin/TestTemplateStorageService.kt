@@ -1,4 +1,5 @@
-import core.DatabaseManager
+import database.core.DatabaseManager
+import database.tables.templates.TemplateRepository
 import io.mockk.coEvery
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import tables.templates.Template
-import tables.templates.TemplateRepository
 import java.util.*
 
 class TestTemplateStorageService {

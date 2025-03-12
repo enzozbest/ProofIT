@@ -1,8 +1,8 @@
-package tables.prototypes
+package database.tables.prototypes
 
-import kcl.seg.rtt.database.repositories.Prototype
-import kcl.seg.rtt.database.repositories.PrototypeEntity
-import kcl.seg.rtt.database.repositories.Prototypes
+import database.tables.prototypes.Prototype
+import database.tables.prototypes.PrototypeEntity
+import database.tables.prototypes.Prototypes
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder
@@ -12,15 +12,16 @@ import java.util.*
 /**
  * Class to encapsulate functions related to storing a Prototype in the database
  */
-class PrototypeRepository(private val db: Database) {
-
+class PrototypeRepository(
+    private val db: Database,
+) {
     /**
      * Function to save a Prototype to the database
      * @param prototype The Prototype to save
      * @return A Result object containing the success or failure of the operation
      */
     suspend fun createPrototype(prototype: Prototype): Result<Unit> =
-        kotlin.runCatching {
+        runCatching {
             newSuspendedTransaction(Dispatchers.IO, db) {
                 PrototypeEntity.new(prototype.id) {
                     userId = prototype.userId
@@ -38,7 +39,7 @@ class PrototypeRepository(private val db: Database) {
      * @return A Result object containing the Prototype if it exists, or null if it does not
      */
     suspend fun getPrototype(id: UUID): Result<Prototype?> =
-        kotlin.runCatching {
+        runCatching {
             newSuspendedTransaction(Dispatchers.IO, db) {
                 PrototypeEntity.findById(id)?.toPrototype()
             }
@@ -55,11 +56,12 @@ class PrototypeRepository(private val db: Database) {
     suspend fun getPrototypesByUserId(
         userId: String,
         page: Int = 1,
-        pageSize: Int = 20
+        pageSize: Int = 20,
     ): Result<List<Prototype>> =
-        kotlin.runCatching {
+        runCatching {
             newSuspendedTransaction(Dispatchers.IO, db) {
-                PrototypeEntity.find { Prototypes.userId eq userId }
+                PrototypeEntity
+                    .find { Prototypes.userId eq userId }
                     .orderBy(Prototypes.createdAt to SortOrder.DESC)
                     .limit(pageSize, offset = ((page - 1) * pageSize).toLong())
                     .map { it.toPrototype() }
