@@ -59,16 +59,51 @@ class TestTemplateStorageService {
     @Test
     fun `createTemplate handles repository failure`() =
         runBlocking {
-            val templateId = "test-failure-id"
-            val result =
-                if (false) { // Simulate failure branch
-                    templateId
-                } else {
-                    TemplateStorageService.logger.info("Failed to store template $templateId")
-                    null
+            val fileURI = "file:///templates/sample-failure.json"
+
+            // Add debug logging
+            println("[DEBUG_LOG] Starting createTemplate handles repository failure test")
+
+            // Create a fresh mock for each test
+            unmockkAll()
+
+            // Mock the TemplateStorageService.logger to avoid issues with the real logger
+            val mockLogger = mockk<Logger>(relaxed = true)
+            val originalLogger = TemplateStorageService.logger
+            TemplateStorageService.logger = mockLogger
+
+            try {
+                // Mock the DatabaseManager
+                mockkObject(DatabaseManager)
+
+                // Create a strict mock for the repository
+                val mockRepo = mockk<TemplateRepository>(relaxed = false)
+
+                // Mock the templateRepository method to return our mock repository
+                coEvery { DatabaseManager.templateRepository() } returns mockRepo
+
+                // Mock the saveTemplateToDB method to throw an exception
+                coEvery { 
+                    mockRepo.saveTemplateToDB(any()) 
+                } answers { 
+                    println("[DEBUG_LOG] Mock throwing exception")
+                    throw RuntimeException("Database operation failed")
                 }
 
-            assertNull(result)
+                println("[DEBUG_LOG] Mocks set up, calling createTemplate")
+
+                // Call the function under test
+                val templateId = TemplateStorageService.createTemplate(fileURI)
+
+                println("[DEBUG_LOG] createTemplate returned: $templateId")
+
+                // Assert that the function returns null when the repository operation fails
+                assertNull(templateId)
+            } finally {
+                // Restore the original logger
+                TemplateStorageService.logger = originalLogger
+                unmockkAll()
+            }
         }
 
     @Test
@@ -89,6 +124,29 @@ class TestTemplateStorageService {
 
             val templateId = TemplateStorageService.createTemplate(fileURI)
 
+            assertNull(templateId)
+        }
+
+    @Test
+    fun `createTemplate handles DatabaseManager templateRepository exception when database not initialized`() =
+        runBlocking {
+            val fileURI = "file:///templates/sample-db-not-initialized.json"
+
+            // Create a fresh mock for each test
+            unmockkAll()
+
+            // Mock the DatabaseManager
+            mockkObject(DatabaseManager)
+
+            // Mock the templateRepository method to throw an IllegalStateException
+            coEvery { 
+                DatabaseManager.templateRepository() 
+            } throws IllegalStateException("Database connection not initialized. Call init() first.")
+
+            // Call the function under test
+            val templateId = TemplateStorageService.createTemplate(fileURI)
+
+            // Assert that the function returns null when DatabaseManager.templateRepository() throws an exception
             assertNull(templateId)
         }
 
@@ -132,6 +190,29 @@ class TestTemplateStorageService {
 
             val result = TemplateStorageService.getTemplateById(templateId)
 
+            assertNull(result)
+        }
+
+    @Test
+    fun `getTemplateById handles DatabaseManager templateRepository exception when database not initialized`() =
+        runBlocking {
+            val templateId = UUID.randomUUID()
+
+            // Create a fresh mock for each test
+            unmockkAll()
+
+            // Mock the DatabaseManager
+            mockkObject(DatabaseManager)
+
+            // Mock the templateRepository method to throw an IllegalStateException
+            coEvery { 
+                DatabaseManager.templateRepository() 
+            } throws IllegalStateException("Database connection not initialized. Call init() first.")
+
+            // Call the function under test
+            val result = TemplateStorageService.getTemplateById(templateId)
+
+            // Assert that the function returns null when DatabaseManager.templateRepository() throws an exception
             assertNull(result)
         }
 }
