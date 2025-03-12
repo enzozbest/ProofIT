@@ -218,4 +218,23 @@ class TestTemplateService {
                 TemplateService.search(listOf(0.1f, 0.2f, 0.3f), "Test query")
             }
         }
+
+    @Test // For coverage only!
+    fun `Test getHttpClient$embeddings function is called`() {
+        val client =
+            HttpClient(
+                MockEngine {
+                    respond(
+                        content = "",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString())),
+                    )
+                },
+            )
+        TemplateService.httpClient = client
+        val method = TemplateService::class.java.getDeclaredMethod("getHttpClient\$embeddings")
+        method.isAccessible = true
+        val retrievedClient = method.invoke(TemplateService)
+        assertEquals(client, retrievedClient)
+    }
 }

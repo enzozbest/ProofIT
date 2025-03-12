@@ -65,7 +65,7 @@ object DatabaseManager {
      * @return The template repository instance
      */
     fun templateRepository(): TemplateRepository {
-        val db = database ?: throw IllegalStateException("Database connection not initialized. Call init() first.")
+        val db = checkNotNull(database)
         return templateRepository ?: TemplateRepository(db).also { templateRepository = it }
     }
 
