@@ -34,7 +34,3 @@ dependencies {
     implementation(project(":prompting"))
     implementation(project(":utils"))
 }
-
-tasks.test {
-    useJUnitPlatform()
-}

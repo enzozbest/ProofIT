@@ -3,11 +3,11 @@ import { useState, useEffect } from "react";
 import { ChatBox } from "./chat-box";
 import { MessageBox } from "./messages-box";
 import  ChatMessage  from "@/hooks/Chat";
-import { ChatScreenProps } from "../../pages/Types";
+import { ChatScreenProps } from "../types/Types";
 
 import {toast} from 'sonner'
 
-const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype }) =>{
+const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage }) =>{
 
     const {
         message,
@@ -16,7 +16,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype }) 
         handleSend,
         errorMessage,
         setErrorMessage,
-    } = ChatMessage({setPrototype});
+    } = ChatMessage({setPrototype, setPrototypeFiles});
 
 
     useEffect(() => {
@@ -28,6 +28,19 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype }) 
             });
         }
     }, [errorMessage]);
+
+    useEffect(() => {
+        if (initialMessage) {
+            setMessage(initialMessage);
+            const timer = setTimeout(() => {
+                handleSend(initialMessage);
+                sessionStorage.removeItem('initialMessage');
+            }, 500);
+            
+            return () => clearTimeout(timer);
+        }
+    }, [initialMessage]);
+
     return (
         <div className="relative h-full flex flex-col">
 

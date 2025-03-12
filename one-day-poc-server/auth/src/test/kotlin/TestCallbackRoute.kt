@@ -1,3 +1,5 @@
+import authentication.AuthenticatedSession
+import authentication.setUpCallbackRoute
 import helpers.AuthenticationTestHelpers.configureTestCallbackRoute
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenAdminFalse
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoGroups
@@ -8,8 +10,6 @@ import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import java.net.URLDecoder
@@ -91,9 +91,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                            Parameters.build {
-                                append("id_token", "")
-                            },
+                                Parameters.build {
+                                    append("id_token", "")
+                                },
                         )
                 }
             }
@@ -118,9 +118,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                            Parameters.build {
-                                append("id_token", generateTestJwtTokenNoSub())
-                            },
+                                Parameters.build {
+                                    append("id_token", generateTestJwtTokenNoSub())
+                                },
                         )
                 }
             }
@@ -163,9 +163,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                            Parameters.build {
-                                append("id_token", generateTestJwtTokenNoGroups())
-                            },
+                                Parameters.build {
+                                    append("id_token", generateTestJwtTokenNoGroups())
+                                },
                         )
                 }
             }
@@ -213,9 +213,9 @@ class TestCallbackRoute {
                             expiresIn = Long.MAX_VALUE,
                             refreshToken = null,
                             extraParameters =
-                            Parameters.build {
-                                append("id_token", generateTestJwtTokenAdminFalse())
-                            },
+                                Parameters.build {
+                                    append("id_token", generateTestJwtTokenAdminFalse())
+                                },
                         )
                 }
             }
