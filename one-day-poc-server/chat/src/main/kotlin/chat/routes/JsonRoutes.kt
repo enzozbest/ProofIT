@@ -8,7 +8,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kcl.seg.rtt.prompting.PromptingMain
+import prompting.PromptingMain
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
