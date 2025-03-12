@@ -1,4 +1,4 @@
-package kcl.seg.rtt.utils.json
+package utils.json
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

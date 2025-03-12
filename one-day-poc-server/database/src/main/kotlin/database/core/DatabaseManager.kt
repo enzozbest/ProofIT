@@ -3,9 +3,9 @@ package database.core
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import database.tables.templates.TemplateRepository
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
+import utils.environment.EnvironmentLoader
 import kotlin.math.max
 
 /**

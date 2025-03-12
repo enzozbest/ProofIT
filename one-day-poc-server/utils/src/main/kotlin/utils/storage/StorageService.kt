@@ -1,6 +1,6 @@
 package utils.storage
 
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
+import utils.environment.EnvironmentLoader
 import java.io.File
 
 object StorageService {

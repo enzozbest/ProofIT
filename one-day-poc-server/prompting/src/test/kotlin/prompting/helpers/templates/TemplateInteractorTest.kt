@@ -3,7 +3,6 @@ package kcl.seg.rtt.prompting.helpers.templates
 import embeddings.TemplateEmbedResponse
 import embeddings.TemplateSearchResponse
 import io.mockk.*
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
@@ -13,6 +12,7 @@ import prompting.helpers.templates.TemplateInteractor
 import prompting.helpers.templates.TemplateStorageUtils
 import templates.TemplateService
 import templates.TemplateStorageService
+import utils.environment.EnvironmentLoader
 import java.util.UUID
 
 class TemplateInteractorTest {

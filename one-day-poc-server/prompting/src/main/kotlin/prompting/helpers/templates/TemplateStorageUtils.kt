@@ -1,7 +1,7 @@
 package prompting.helpers.templates
 
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import prompting.exceptions.TemplateRetrievalExcecption
+import utils.environment.EnvironmentLoader
 import utils.storage.StorageService
 import kotlin.io.path.createTempFile
 import kotlin.io.path.deleteIfExists

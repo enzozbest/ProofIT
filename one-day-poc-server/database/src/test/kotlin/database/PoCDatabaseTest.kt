@@ -4,11 +4,11 @@ import database.core.DatabaseCredentials
 import database.core.PoCDatabase
 import database.helpers.MockEnvironment
 import io.mockk.clearAllMocks
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import utils.environment.EnvironmentLoader
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertSame

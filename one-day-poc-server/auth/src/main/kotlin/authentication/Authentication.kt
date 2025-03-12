@@ -8,7 +8,7 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
-import kcl.seg.rtt.utils.json.PoCJSON
+import utils.json.PoCJSON
 import kotlin.collections.set
 
 internal object AuthenticationConstants {

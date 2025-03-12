@@ -1,4 +1,4 @@
-package kcl.seg.rtt.utils.aws
+package utils.aws
 
 import aws.sdk.kotlin.services.sts.StsClient
 import aws.sdk.kotlin.services.sts.model.AssumeRoleRequest

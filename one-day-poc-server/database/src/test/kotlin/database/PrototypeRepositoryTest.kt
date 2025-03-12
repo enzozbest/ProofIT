@@ -5,7 +5,6 @@ import database.helpers.MockEnvironment
 import database.tables.prototypes.Prototype
 import database.tables.prototypes.PrototypeRepository
 import database.tables.prototypes.Prototypes
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -14,6 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.environment.EnvironmentLoader
 import java.io.File
 import java.time.Instant
 import java.util.*
