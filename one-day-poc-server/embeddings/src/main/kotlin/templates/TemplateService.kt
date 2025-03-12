@@ -13,11 +13,21 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/**
+ * Service responsible for interacting with the embedding service API.
+ *
+ * This singleton object provides methods for embedding template data,
+ * storing templates, and performing semantic searches using embedded
+ * vector representations.
+ */
 object TemplateService {
     internal var httpClient = HttpClient(CIO)
 
     /**
      * Embeds the given data and returns the embedding.
+     *
+     * This method sends a request to the embedding service to generate a
+     * vector representation of the provided text data.
      *
      * @param data The data to embed.
      * @param name The identifier for the data.
@@ -42,8 +52,12 @@ object TemplateService {
     }
 
     /**
-     * Stores the given template.
-     * The template will be stored for keyword search, and embedded and stored for semantic search.
+     * Stores the given template in both the embedding service and local storage.
+     *
+     * This method performs two operations:
+     * 1. Sends the template to the embedding service to be embedded and stored for semantic search
+     * 2. Creates a local record of the template for file path reference
+     *
      * @param name The identifier of the template.
      * @param fileURI file path for the template.
      * @param data The data to store (JSON-LD annotation of a template).
@@ -74,6 +88,17 @@ object TemplateService {
         return storeResponse.copy(id = templateId)
     }
 
+    /**
+     * Performs a semantic search against stored templates using an embedding vector.
+     *
+     * This method sends a search request to the embedding service to find templates
+     * that are semantically similar to the provided embedding vector.
+     *
+     * @param embedding The vector representation to search with
+     * @param query The original text query corresponding to the embedding
+     * @return Search response containing matching template identifiers
+     * @throws IllegalStateException If the response from the embedding service cannot be parsed
+     */
     suspend fun search(
         embedding: List<Float>,
         query: String,

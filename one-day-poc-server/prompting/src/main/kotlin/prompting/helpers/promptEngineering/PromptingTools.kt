@@ -180,7 +180,13 @@ object PromptingTools {
         }
 
     /**
-     * Cleans a string by removing any leading or trailing characters that are not part of the JSON object.
+     * Extracts and cleans a JSON object from an LLM response string.
+     *
+     * Identifies the first opening '{' and last closing '}' brace to extract the JSON object,
+     * then removes comments, handles escaped quotations, and normalizes whitespace.
+     *
+     * @param response The raw string from an LLM that may contain a JSON object
+     * @return A cleaned string containing only the JSON object ready for parsing
      */
     private fun cleanLlmResponse(response: String): String {
         val openingBrace = response.indexOf('{')
@@ -201,7 +207,12 @@ object PromptingTools {
     }
 
     /**
-     * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
+     * Removes C-style and Python-style comments from a string.
+     *
+     * Uses regex with careful pattern matching to avoid false positives like URLs.
+     *
+     * @receiver String containing potential comments
+     * @return String with all comments removed
      */
     fun String.removeComments(): String {
         val cStyleCommentRegex = Regex("""(?<!:)//.*?\\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
@@ -210,7 +221,13 @@ object PromptingTools {
     }
 
     /**
-     * Removes comments from a string. This includes C-style comments (// and /* */) and Python-style comments (#).
+     * Normalizes escaped quotation marks in a string for improved JSON parsing.
+     *
+     * Particularly useful when processing JSON from LLMs with inconsistent escaping
+     * that might cause standard parsers to fail.
+     *
+     * @receiver String containing potentially escaped quotation marks
+     * @return String with normalized quotation marks
      */
     fun String.removeEscapedQuotations(): String {
         val escapedDoubleQuotationsRegex = Regex("""(\\")""", RegexOption.MULTILINE)
