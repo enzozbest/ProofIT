@@ -1,4 +1,4 @@
-package kcl.seg.rtt.prototype
+package prototype.helpers
 
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*

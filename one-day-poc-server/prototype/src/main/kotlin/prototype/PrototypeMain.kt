@@ -1,4 +1,8 @@
-package kcl.seg.rtt.prototype
+package prototype
+
+import prototype.helpers.OllamaRequest
+import prototype.helpers.OllamaResponse
+import prototype.helpers.OllamaService
 
 class PrototypeMain(
     private val model: String,

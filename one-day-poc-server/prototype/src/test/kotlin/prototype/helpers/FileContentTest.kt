@@ -1,9 +1,11 @@
-import kcl.seg.rtt.prototype.FileContent
+package prototype.helpers
+
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
+import prototype.FileContent
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 

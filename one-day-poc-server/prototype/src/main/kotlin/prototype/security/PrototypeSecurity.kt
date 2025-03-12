@@ -1,11 +1,10 @@
-package kcl.seg.rtt.prototype
+package prototype.security
 
-import org.jsoup.parser.Parser
-import org.jsoup.safety.Safelist
 import org.jsoup.Jsoup
-import java.nio.file.Path
+import org.jsoup.parser.Parser
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.nio.file.Path
 import kotlin.io.path.createTempFile
 import kotlin.io.path.writeText
 
@@ -17,7 +16,10 @@ import kotlin.io.path.writeText
  * @param language The language (e.g. "python", "javascript", "css", "html")
  * @return True if all checks pass, false otherwise
  */
-fun secureCodeCheck(code: String, language: String): Boolean {
+fun secureCodeCheck(
+    code: String,
+    language: String,
+): Boolean {
     // // 1) Check size limit
     // if (!checkCodeSizeLimit(code, maxBytes = 100_000)) {
     //     println("Code exceeds size limit.")
@@ -82,7 +84,7 @@ fun secureCodeCheck(code: String, language: String): Boolean {
 //         Regex("""(?i)\brequire\(.*child_process.*\)"""),
 //         Regex("""(?i)\bimport\s+child_process"""),
 //     )
-    
+
 //     // Merge global + language blocklists
 //     val patterns = mutableListOf<Regex>().apply {
 //         addAll(globalBlocklist)
@@ -127,15 +129,17 @@ fun secureCodeCheck(code: String, language: String): Boolean {
  * Runs a naive compile / syntax check for a few languages (python, js, css, html).
  * If you support more languages, extend this.
  */
-fun runCompilerCheck(code: String, language: String): Boolean {
-    return when (language.lowercase()) {
+fun runCompilerCheck(
+    code: String,
+    language: String,
+): Boolean =
+    when (language.lowercase()) {
         "python" -> checkPythonSyntax(code)
         "javascript" -> checkJavaScriptSyntax(code)
         "css" -> checkCssSyntax(code)
-        "html" -> checkHtmlSyntaxWithJsoup(code) 
+        "html" -> checkHtmlSyntaxWithJsoup(code)
         else -> false
     }
-}
 
 /**
  * Attempts to verify the Python syntax of [pythonCode] by writing it to a
@@ -150,9 +154,10 @@ fun checkPythonSyntax(pythonCode: String): Boolean {
     val tempPath: Path = createTempFile(prefix = "pythonSnippet", suffix = ".py")
     tempPath.writeText(pythonCode)
 
-    val process = ProcessBuilder("python", "-m", "py_compile", tempPath.toString())
-        .redirectErrorStream(true)
-        .start()
+    val process =
+        ProcessBuilder("python", "-m", "py_compile", tempPath.toString())
+            .redirectErrorStream(true)
+            .start()
 
     val reader = BufferedReader(InputStreamReader(process.inputStream))
     val errorOutput = StringBuilder()
@@ -162,11 +167,11 @@ fun checkPythonSyntax(pythonCode: String): Boolean {
     }
 
     val exitCode = process.waitFor()
-    
+
     if (exitCode != 0) {
         println("Python syntax error: ${errorOutput.toString().trim()}")
     }
-    
+
     return exitCode == 0
 }
 
@@ -186,9 +191,10 @@ fun checkCssSyntax(cssCode: String): Boolean {
     val tempPath = createTempFile("cssSnippet", ".css")
 
     tempPath.writeText(cssCode)
-    val process = ProcessBuilder("npx", "stylelint", tempPath.toString())
-        .redirectErrorStream(true)
-        .start()
+    val process =
+        ProcessBuilder("npx", "stylelint", tempPath.toString())
+            .redirectErrorStream(true)
+            .start()
 
     val reader = BufferedReader(InputStreamReader(process.inputStream))
     val errorOutput = StringBuilder()
@@ -198,11 +204,11 @@ fun checkCssSyntax(cssCode: String): Boolean {
     }
 
     val exitCode = process.waitFor()
-    
+
     if (exitCode != 0) {
         println("CSS validation error: ${errorOutput.toString().trim()}")
     }
-    
+
     return exitCode == 0
 }
 
@@ -216,15 +222,14 @@ fun checkCssSyntax(cssCode: String): Boolean {
  * @param htmlCode The HTML content to parse.
  * @return True if Jsoup could parse it without throwing an exception, false otherwise.
  */
-fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean {
-    return try {
+fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean =
+    try {
         Jsoup.parse(htmlCode, "", Parser.htmlParser())
         true
     } catch (e: Exception) {
         println("HTML parsing error: ${e.message}")
         false
     }
-}
 
 /**
  * Checks JavaScript syntax by creating a temporary `.js` file and running `node --check`.
@@ -240,9 +245,10 @@ fun checkJavaScriptSyntax(jsCode: String): Boolean {
     val tempPath = createTempFile("jsSnippet", ".js")
     tempPath.writeText(jsCode)
 
-    val process = ProcessBuilder("node", "--check", tempPath.toString())
-        .redirectErrorStream(true)
-        .start()
+    val process =
+        ProcessBuilder("node", "--check", tempPath.toString())
+            .redirectErrorStream(true)
+            .start()
 
     val reader = BufferedReader(InputStreamReader(process.inputStream))
     val errorOutput = StringBuilder()
@@ -252,10 +258,10 @@ fun checkJavaScriptSyntax(jsCode: String): Boolean {
     }
 
     val exitCode = process.waitFor()
-    
+
     if (exitCode != 0) {
         println("JavaScript syntax error: ${errorOutput.toString().trim()}")
     }
-    
+
     return exitCode == 0
 }

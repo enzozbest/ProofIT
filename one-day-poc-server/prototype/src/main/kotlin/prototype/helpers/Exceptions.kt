@@ -1,4 +1,4 @@
-package kcl.seg.rtt.prototype
+package prototype.helpers
 
 class OllamaException(
     message: String,
