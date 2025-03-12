@@ -84,7 +84,7 @@ object DatabaseManager {
      * @throws IllegalStateException If the database has not been initialized
      */
     fun templateRepository(): TemplateRepository {
-        val db = checkNotNull(database)
+        val db = checkNotNull(database) { "Database connection not initialized. Call init() first." }
         return templateRepository ?: TemplateRepository(db).also { templateRepository = it }
     }
 
