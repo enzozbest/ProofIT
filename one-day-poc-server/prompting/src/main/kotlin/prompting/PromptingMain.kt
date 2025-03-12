@@ -14,14 +14,47 @@ import prototype.security.secureCodeCheck
 import java.time.Instant
 import kotlin.collections.iterator
 
+/**
+ * Represents a response from the chat processing system.
+ *
+ * @property response The generated text response from the LLM
+ * @property time Timestamp string indicating when the response was created
+ */
 data class ChatResponse(
     val response: String,
     val time: String,
 )
 
+/**
+ * Main orchestrator for the multi-step prompting workflow.
+ *
+ * This class manages the entire process flow for generating responses from
+ * user prompts, including prompt sanitization, requirements extraction, template
+ * fetching, and final prototype generation.
+ *
+ * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
+ */
 class PromptingMain(
     private val model: String = "qwen2.5-coder:14b",
 ) {
+
+    /**
+     * Executes the complete prompting workflow for a user prompt.
+     *
+     * This method processes the user's prompt through multiple steps:
+     * 1. Sanitizes the input prompt to ensure safety
+     * 2. Generates a specialized prompt to extract functional requirements
+     * 3. Makes first LLM call to get requirements analysis
+     * 4. Creates a prompt for template retrieval and fetches matching templates
+     * 5. Creates a comprehensive prototype prompt with requirements and templates
+     * 6. Makes second LLM call to generate the final prototype response
+     * 7. Validates the response returned by the LLM
+     * 8. Formats and returns the final chat response
+     *
+     * @param userPrompt The raw text prompt from the user
+     * @return A ChatResponse object containing the generated response and timestamp
+     * @throws PromptException If any step in the prompting workflow fails
+     */
     suspend fun run(userPrompt: String): ChatResponse {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
@@ -44,6 +77,20 @@ class PromptingMain(
         return chatResponse(prototypeResponse)
     }
 
+    /**
+     * Creates a specialized prompt for generating a prototype based on requirements and templates.
+     *
+     * This method formats a prompt that includes:
+     * - The original user prompt
+     * - Extracted functional requirements
+     * - Optional templates for suggested components (if available)
+     *
+     * @param userPrompt The original text prompt from the user
+     * @param freqsResponse The JSON object containing extracted requirements data
+     * @param templates List of component templates to include (empty by default)
+     * @return A formatted prompt string ready to be sent to the LLM
+     * @throws PromptException If requirements or keywords cannot be extracted from freqsResponse
+     */
     private fun prototypePrompt(
         userPrompt: String,
         freqsResponse: JsonObject,
@@ -74,7 +121,11 @@ class PromptingMain(
     }
 
     /**
-     * Prompts the LLM with the given prompt and returns the response as a JsonObject.
+     * Sends a prompt to the LLM and processes the response into a JsonObject.
+     *
+     * @param prompt The formatted prompt text to send to the LLM
+     * @return A JsonObject containing the parsed response from the LLM
+     * @throws PromptException If the LLM does not respond or if the response cannot be parsed
      */
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
