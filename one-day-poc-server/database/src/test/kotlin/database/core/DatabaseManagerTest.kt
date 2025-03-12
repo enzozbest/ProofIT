@@ -5,11 +5,11 @@ import database.helpers.MockEnvironment
 import database.helpers.MockEnvironment.ENV_FILE
 import database.helpers.MockEnvironment.generateEnvironmentFile
 import database.tables.templates.TemplateRepository
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.flywaydb.core.api.FlywayException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import utils.environment.EnvironmentLoader
 import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

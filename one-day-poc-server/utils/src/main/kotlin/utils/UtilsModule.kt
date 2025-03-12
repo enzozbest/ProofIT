@@ -2,10 +2,10 @@ package utils
 
 import aws.sdk.kotlin.services.sts.StsClient
 import io.ktor.server.application.Application
-import kcl.seg.rtt.utils.aws.S3Manager
-import kcl.seg.rtt.utils.aws.S3Service
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
-import kcl.seg.rtt.utils.json.PoCJSON
+import utils.aws.S3Manager
+import utils.aws.S3Service
+import utils.environment.EnvironmentLoader
+import utils.json.PoCJSON
 
 fun Application.configureUtils() {
     val awsRegion = EnvironmentLoader.get("AWS_REGION")

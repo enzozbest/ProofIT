@@ -1,6 +1,6 @@
 package utils.storage
 
-import kcl.seg.rtt.utils.aws.S3Service
+import utils.aws.S3Service
 import java.io.File
 
 object S3Storage {

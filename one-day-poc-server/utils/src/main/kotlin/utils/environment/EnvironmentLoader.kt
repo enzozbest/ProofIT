@@ -1,4 +1,4 @@
-package kcl.seg.rtt.utils.environment
+package utils.environment
 
 import io.github.cdimascio.dotenv.Dotenv
 import java.io.File

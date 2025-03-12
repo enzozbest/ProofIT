@@ -1,8 +1,8 @@
 package prompting.helpers.templates
 
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import templates.TemplateService
 import templates.TemplateStorageService
+import utils.environment.EnvironmentLoader
 import java.util.UUID
 
 /**

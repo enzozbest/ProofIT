@@ -129,6 +129,8 @@ subprojects {
                         """**/*${'$'}DefaultImpls.class""",
                         """**/*${'$'}Companion.class""",
                         """**/*${'$'}${'$'}serializer.class""",
+                        """server/*""",
+                        """*/seeding/*""",
                     )
                 },
             )

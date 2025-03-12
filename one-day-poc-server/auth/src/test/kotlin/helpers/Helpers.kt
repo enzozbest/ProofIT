@@ -13,9 +13,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import utils.json.PoCJSON.readJsonFile
 import java.util.*
 
 class MockAuthenticationProvider<T : Any>(

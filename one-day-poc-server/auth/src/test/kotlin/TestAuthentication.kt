@@ -17,10 +17,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
-import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
+import utils.json.PoCJSON.readJsonFile
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -142,7 +141,10 @@ class TestAuthentication {
             val responseWithValidCookie =
                 client.get("test/protected") {
                     val session = AuthenticatedSession("id", createValidToken(6000), false)
-                    cookie("AuthenticatedSession", Json.encodeToString<AuthenticatedSession>(session))
+                    cookie(
+                        "AuthenticatedSession",
+                        Json.encodeToString(AuthenticatedSession.serializer(), session),
+                    )
                 }
             assertEquals(HttpStatusCode.OK, responseWithValidCookie.status)
             val responseWithInvalidToken =
