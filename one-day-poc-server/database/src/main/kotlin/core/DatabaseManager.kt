@@ -27,7 +27,7 @@ internal data class DatabaseCredentials(
  * DatabaseManager is an object that manages the connection to the database.
  * It initializes the database connection and runs the necessary migrations.
  */
-internal object DatabaseManager {
+object DatabaseManager {
     private var database: Database? = null
     private var templateRepository: TemplateRepository? = null
     private var dataSource: HikariDataSource? = null
@@ -35,7 +35,7 @@ internal object DatabaseManager {
     /**
      * Resets the database manager state. Used for testing purposes.
      */
-    internal fun reset() {
+    fun reset() {
         dataSource?.close()
         database = null
         dataSource = null
@@ -47,7 +47,7 @@ internal object DatabaseManager {
      *
      * @return The database connection.
      */
-    internal fun init(): Database {
+    fun init(): Database {
         val credentials = getDatabaseCredentials()
 
         return try {
@@ -64,7 +64,7 @@ internal object DatabaseManager {
      * Provides access to the template repository
      * @return The template repository instance
      */
-    internal fun templateRepository(): TemplateRepository {
+    fun templateRepository(): TemplateRepository {
         val db = database ?: throw IllegalStateException("Database connection not initialized. Call init() first.")
         return templateRepository ?: TemplateRepository(db).also { templateRepository = it }
     }

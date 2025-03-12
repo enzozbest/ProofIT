@@ -1,23 +1,30 @@
-package kcl.seg.rtt.chat
+package chat
 
 import authentication.Authenticators.configureJWTValidator
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.testing.*
-import kotlinx.serialization.json.*
+import io.ktor.http.ContentType
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.engine.EmbeddedServer
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.get
+import io.ktor.server.routing.routing
+import io.ktor.server.testing.ApplicationTestBuilder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
-import java.util.*
+import java.util.Base64
 
 abstract class BaseAuthenticationServer {
     companion object {
@@ -49,14 +56,14 @@ abstract class BaseAuthenticationServer {
         }
 
         private fun createJWKSResponse(): String =
-            Json.encodeToString(
-                JsonObject.serializer(),
+            Json.Default.encodeToString(
+                JsonObject.Companion.serializer(),
                 JsonObject(
                     mapOf(
                         "keys" to
                             JsonArray(
                                 listOf(
-                                    Json.parseToJsonElement(
+                                    Json.Default.parseToJsonElement(
                                         createMockJWK(
                                             "test-key-id",
                                             rsaPublicKey,
@@ -114,7 +121,7 @@ abstract class BaseAuthenticationServer {
         val mockJWKSUrl = "http://localhost:$TEST_PORT"
 
         application {
-            install(Authentication) {
+            install(Authentication.Companion) {
                 val jwtConfig = MockJsonConfig(mockJWKSUrl).getJson()
                 configureJWTValidator(jwtConfig)
             }

@@ -1,4 +1,4 @@
-package kcl.seg.rtt.chat
+package chat
 
 import kotlinx.serialization.Serializable
 
@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Request(
     val userID: String,
     val time: String,
-    val prompt: String
+    val prompt: String,
 )
