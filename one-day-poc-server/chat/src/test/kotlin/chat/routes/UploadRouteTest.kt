@@ -391,7 +391,6 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val testDir = File("test_uploads")
         testDir.mkdirs()
 
-        // Add a marker file to check if directory is reused
         val markerFile = File(testDir, "marker.txt")
         markerFile.writeText("marker")
 
@@ -430,7 +429,6 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        // It should return a default message since no specific parts are provided
     }
 
     @Test
@@ -468,7 +466,6 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         val testDir = File("test_uploads")
         val files = testDir.listFiles() ?: emptyArray()
 
-        // Verify both files were uploaded
         assertTrue(files.any { it.name.startsWith("first_") })
         assertTrue(files.any { it.name.startsWith("second_") })
     }
@@ -563,6 +560,5 @@ class UploadRoutesTest : BaseAuthenticationServer() {
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        // Test passes if no errors occur
     }
 }
