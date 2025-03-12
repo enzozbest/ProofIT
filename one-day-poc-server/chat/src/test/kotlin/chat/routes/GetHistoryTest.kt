@@ -54,9 +54,37 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 }
             }
         }
-        
+
         val response = client.get(GET)
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals("Hello, world!", response.bodyAsText())
     }
+
+    @Test
+    fun `Test chatRoutes function directly`() = testApplication {
+        application {
+            routing {
+                chatRoutes()
+            }
+        }
+
+        val response = client.get(GET)
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("Hello, world!", response.bodyAsText())
+    }
+
+    @Test
+    fun `Test chatRoutes extension function on Route object`() = testApplication {
+        application {
+            routing {
+                val route = this
+                route.chatRoutes()
+            }
+        }
+
+        val response = client.get(GET)
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("Hello, world!", response.bodyAsText())
+    }
+
 }
