@@ -43,7 +43,7 @@ object AuthenticationRoutes {
 /**
  * Configures the routes that will be used for authentication.
  */
-fun Application.configureAuthenticationRoutes(authName: String) {
+internal fun Application.configureAuthenticationRoutes(authName: String) {
     routing {
         authenticate(authName) {
             setAuthenticationEndpoint(AUTHENTICATION_ROUTE)
@@ -103,7 +103,7 @@ private fun Route.setLogOutEndpoint(route: String) {
  * with a JWTValidationResponse object. Otherwise, the route responds with an Unauthorized status code.
  * @param validationRoute The route (as a string) to set up the JWT validation on.
  */
-fun Route.setUpJWTValidation(validationRoute: String) {
+internal fun Route.setUpJWTValidation(validationRoute: String) {
     get(validationRoute) {
         val token: String? =
             call.request.cookies["AuthenticatedSession"]?.let {
@@ -121,7 +121,7 @@ fun Route.setUpJWTValidation(validationRoute: String) {
  * Otherwise, the route responds with an Unauthorized status code.
  * @param checkRoute The route (as a string) to set up the check on.
  */
-fun Route.setUpCheckEndpoint(checkRoute: String) {
+internal fun Route.setUpCheckEndpoint(checkRoute: String) {
     get(checkRoute) {
         val sessionCookie =
             call.request.cookies["AuthenticatedSession"]?.let { cookie ->
@@ -141,7 +141,7 @@ fun Route.setUpCheckEndpoint(checkRoute: String) {
 /**
  * Sets up a route to retrieve user information from the relevant authentication provider.
  */
-fun Route.setUpUserInfoRoute(
+internal fun Route.setUpUserInfoRoute(
     route: String,
     verifierUrl: String = "https://cognito-idp.eu-west-2.amazonaws.com/",
     contentType: String = "application/x-amz-json-1.1",
@@ -186,7 +186,7 @@ fun Route.setUpUserInfoRoute(
 /**
  * Sets up the callback route for the authentication process.
  */
-fun Route.setUpCallbackRoute(
+internal fun Route.setUpCallbackRoute(
     route: String,
     redirectDomain: String = "http://localhost:5173",
 ) {
@@ -205,7 +205,7 @@ fun Route.setUpCallbackRoute(
         val userId: String =
             decoded.getClaim("sub").asString() ?: return@get call.respond(HttpStatusCode.Unauthorized)
         val admin: Boolean =
-            decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+            decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") == true
 
         call.sessions.set(AuthenticatedSession(userId, principal.accessToken, admin))
         cacheSession(token, JWTValidationResponse(userId, admin))

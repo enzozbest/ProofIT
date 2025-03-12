@@ -19,14 +19,14 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import java.util.concurrent.TimeUnit
 
-object JWTConstants {
+internal object JWTConstants {
     const val LEEWAY: Long = 10
     const val JWK_PROVIDER_CACHE_SIZE: Long = 10
     const val JWK_PROVIDER_EXPIRES_IN: Long = 24
     const val JWK_PROVIDER_BUCKET_SIZE: Long = 10
 }
 
-object Authenticators {
+internal object Authenticators {
     private lateinit var jwkProvider: JwkProvider
 
     /**
@@ -36,7 +36,7 @@ object Authenticators {
      *
      * @param config The JSON object containing the configuration settings for the OAuth provider.
      */
-    fun AuthenticationConfig.configureOAuth(config: JsonObject) {
+    internal fun AuthenticationConfig.configureOAuth(config: JsonObject) {
         val providerLookupData = config["providerLookup"]!!.jsonObject
         oauth(config["name"]!!.jsonPrimitive.content) {
             urlProvider = { config["urlProvider"]!!.jsonPrimitive.content }
@@ -63,7 +63,7 @@ object Authenticators {
      *
      * @param config The JSON object containing the configuration settings for the JWT validator.
      */
-    fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
+    internal fun AuthenticationConfig.configureJWTValidator(config: JsonObject) {
         val issuer = config["jwtIssuer"]!!.jsonPrimitive.content
         jwkProvider =
             JwkProviderBuilder(issuer)
@@ -108,6 +108,6 @@ object Authenticators {
     }
 }
 /*
-* Line 91 above is marked as partially covered because of a known issue with coverage tools and some cases of Kotlin's
+* Line above is marked as partially covered because of a known issue with coverage tools and some cases of Kotlin's
 * inlined lambdas. The line is fully covered by the tests, but most coverages tools will not mark it as such.
 * */

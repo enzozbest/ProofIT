@@ -21,7 +21,7 @@ import java.util.Date
  * Data class representing the information of a user's authenticated session in the API.
  */
 @Serializable
-data class AuthenticatedSession(
+internal data class AuthenticatedSession(
     val userId: String,
     val token: String,
     val admin: Boolean?,
@@ -31,7 +31,7 @@ data class AuthenticatedSession(
  * Data class representing user's information which is relevant for the client application.
  */
 @Serializable
-data class CognitoUserInfo(
+internal data class CognitoUserInfo(
     val name: String,
     val email: String,
     val dob: String,
@@ -41,7 +41,7 @@ data class CognitoUserInfo(
  * Data class representing the response of a validation request to the JWT verifier.
  */
 @Serializable
-data class JWTValidationResponse(
+internal data class JWTValidationResponse(
     val userId: String,
     val admin: Boolean?,
 )
@@ -51,7 +51,7 @@ data class JWTValidationResponse(
  * @param response The response from the Cognito API.
  * @return A [CognitoUserInfo] object.
  */
-fun generateUserInfo(response: Response): CognitoUserInfo {
+internal fun generateUserInfo(response: Response): CognitoUserInfo {
     val jsonResponse = Json.parseToJsonElement(response.body.string()).jsonObject
     val attributes = jsonResponse["UserAttributes"]?.jsonArray ?: return CognitoUserInfo("", "", "")
 
@@ -71,7 +71,7 @@ fun generateUserInfo(response: Response): CognitoUserInfo {
  * @param amzApi The Amazon API to be used.
  * @return A [Request] object.
  */
-fun buildUserInfoRequest(
+internal fun buildUserInfoRequest(
     token: String = "",
     verifierUrl: String,
     contentType: String,
@@ -96,7 +96,7 @@ fun buildUserInfoRequest(
  * Extension function on [Request] objects to send the request and return the response.
  * @return The response of the request.
  */
-fun Request.sendRequest(): Response = OkHttpClient().newCall(this).execute()
+internal fun Request.sendRequest(): Response = OkHttpClient().newCall(this).execute()
 
 /**
  * Function to cache a session in Redis.
@@ -104,7 +104,7 @@ fun Request.sendRequest(): Response = OkHttpClient().newCall(this).execute()
  * @param authData The authentication data to be cached.
  * @param expirySeconds The expiry time of the cache in seconds.
  */
-fun cacheSession(
+internal fun cacheSession(
     token: String,
     authData: JWTValidationResponse,
     expirySeconds: Long = 3600,
@@ -119,7 +119,7 @@ fun cacheSession(
  * @param token The token to be checked.
  * @return The authentication data if it exists in the cache, or null if it does not.
  */
-fun checkCache(token: String): JWTValidationResponse? {
+internal fun checkCache(token: String): JWTValidationResponse? {
     Redis.getRedisConnection().use { jedis ->
         val cachedData = jedis["auth:$token"] ?: return null
         return Json.decodeFromString<JWTValidationResponse>(cachedData)
@@ -134,13 +134,13 @@ fun checkCache(token: String): JWTValidationResponse? {
  * @param token The token to be validated.
  * @return A [JWTValidationResponse] object if the token is valid, or null if it is not.
  */
-fun validateJWT(token: String?): JWTValidationResponse? =
+internal fun validateJWT(token: String?): JWTValidationResponse? =
     runCatching { JWT.decode(token) }
         .getOrNull()
         ?.takeIf { it.expiresAt.after(Date.from(Instant.now())) }
         ?.let { decoded ->
             val userId = decoded.getClaim("sub").asString()
-            val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") ?: false
+            val admin = decoded.getClaim("cognito:groups").asList(String::class.java)?.contains("admin_users") == true
             userId?.let { JWTValidationResponse(it, admin) }
         }
 
@@ -148,7 +148,7 @@ fun validateJWT(token: String?): JWTValidationResponse? =
  * Function to respond to an authentication request made through the /api/auth/check.
  * @param response The response to be sent. If null, the response will be an Unauthorized status.
  */
-suspend fun RoutingContext.respondAuthenticationCheckRequest(
+internal suspend fun RoutingContext.respondAuthenticationCheckRequest(
     response: JWTValidationResponse?,
     token: String?,
 ) {
