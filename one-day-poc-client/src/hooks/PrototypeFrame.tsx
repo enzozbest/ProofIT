@@ -47,8 +47,15 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files, width = '100%', 
             setStatus('Mounting files...');
 
             try {
-                console.log('Mounting files...');
-                await webcontainerInstance.mount(files);
+                console.log('Files to mount:', JSON.stringify(files, null, 2));
+                
+                const mountPromise = webcontainerInstance.mount(files);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Mounting files timed out after 10 seconds')), 10000)
+                );
+                
+                await Promise.race([mountPromise, timeoutPromise]);
+                console.log('Files mounted successfully');
                 
                 setStatus('Installing dependencies...');
                 const installProcess = await webcontainerInstance.spawn('npm', ['install']);
@@ -59,7 +66,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files, width = '100%', 
                 }
                 
                 setStatus('Starting development server...');
-                await webcontainerInstance.spawn('npm', ['run', 'dev']);
+                await webcontainerInstance.spawn('npm', ['run', 'start']);
                 
             } catch (error: unknown) {
                 console.error('Error:', error);
@@ -78,10 +85,19 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files, width = '100%', 
             }
         }
         
-        if (webcontainerInstance) {
+        if (webcontainerInstance && files) {
+            console.log("WebContainer and files are both available, mounting files", { 
+              hasFiles: !!files,
+              hasWebContainer: !!webcontainerInstance 
+            });
             loadFiles();
+        } else {
+            console.log("Cannot mount files yet:", { 
+              hasFiles: !!files,
+              hasWebContainer: !!webcontainerInstance 
+            });
         }
-    }, [webcontainerInstance]);
+    }, [webcontainerInstance, files]);
 
     if (loading) {
         return <div>Loading WebContainer...</div>;
@@ -92,14 +108,14 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files, width = '100%', 
     }
 
     return (
-        <div>
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ marginBottom: '10px' }}>Status: {status}</div>
             <iframe
                 ref={iframeRef}
                 src={url}
                 style={{
-                    width: width,
-                    height: height,
+                    flexGrow: 1,
+                    width: '100%',
                     border: '1px solid #ccc',
                     borderRadius: '4px'
                 }}

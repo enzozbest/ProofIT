@@ -2,7 +2,7 @@ import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, Mes
 
 import hardcoded from './hardcoded.json';
 
-const testFiles = hardcoded;  // hardcoded for now TODO: change to dynamic
+const testFiles = hardcoded;  // keep for now but the system is dynamic now, displays response from server
 
 type ChatCallback = (chatResponse: ChatResponse) => void;
 type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;
@@ -38,18 +38,13 @@ export async function sendChatMessage(
             onChatResponse(serverResponse.chat);
         }
         
-        // if (serverResponse.prototype) {
-            // onPrototypeResponse(serverResponse.prototype);
-        if(true){
-            onPrototypeResponse({ files: testFiles });
-        } else {
-            // For testing only: remove this in production
-            console.log('No prototype in response, using test files');
-            onPrototypeResponse({ files: testFiles });
+        if (serverResponse.prototype) {
+            onPrototypeResponse(serverResponse.prototype);
         }
 
 
     } catch (error) {
+        onPrototypeResponse({ files: testFiles });
         console.error('API Error:', error);
         throw error;
     }
