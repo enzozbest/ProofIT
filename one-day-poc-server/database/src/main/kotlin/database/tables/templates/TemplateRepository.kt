@@ -21,9 +21,7 @@ class TemplateRepository(
      */
     suspend fun saveTemplateToDB(template: Template): Result<Unit> =
         runCatching {
-            if (template.id.isBlank()) {
-                throw IllegalArgumentException("Template ID cannot be empty")
-            }
+            require(!template.id.isBlank())
 
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val existingTemplate = TemplateEntity.Companion.findById(template.id)

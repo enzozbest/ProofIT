@@ -21,15 +21,14 @@ object TemplateStorageService {
     suspend fun createTemplate(fileURI: String): String? {
         val templateId = UUID.randomUUID().toString()
         val template = Template(id = templateId, fileURI = fileURI)
-
         val result =
             runCatching {
                 DatabaseManager.templateRepository().saveTemplateToDB(template)
             }
+
         return if (result.isSuccess) {
             templateId
         } else {
-            logger.info("Failed to store template $templateId")
             null
         }
     }
