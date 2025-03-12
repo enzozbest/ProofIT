@@ -5,13 +5,13 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.prompting.ChatResponse
-import kcl.seg.rtt.prompting.PromptingMain
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import prompting.ChatResponse
+import prompting.PromptingMain
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
