@@ -47,7 +47,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
 
     @Test
     fun `Test respondText function directly`() = testApplication {
-        // Configure an application with ONLY your route, no authentication
         application {
             routing {
                 get(GET) {
@@ -55,8 +54,7 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 }
             }
         }
-
-        // Make a simple request directly to this route
+        
         val response = client.get(GET)
         assertEquals(HttpStatusCode.OK, response.status)
         assertEquals("Hello, world!", response.bodyAsText())

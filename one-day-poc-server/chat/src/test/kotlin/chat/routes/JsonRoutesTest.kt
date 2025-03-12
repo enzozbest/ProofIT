@@ -227,7 +227,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                // First call with mock
                 val firstResponse =
                     client.post("/api/chat/json") {
                         header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
@@ -245,10 +244,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals("Mock response", firstResponse.bodyAsText())
 
-                // Reset to default implementation
                 resetPromptingMain()
 
-                // Create a new application instance with the reset PromptingMain
                 val differentMock = mock<PromptingMain>()
                 runBlocking {
                     whenever(differentMock.run(any())).thenReturn(
@@ -259,7 +256,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-                // Verify that we get a different PromptingMain after reset
                 setPromptingMain(differentMock)
                 val secondResponse =
                     client.post("/api/chat/json") {
