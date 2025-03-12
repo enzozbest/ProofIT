@@ -1,4 +1,4 @@
-package kcl.seg.rtt.database.repositories
+package database.tables.prototypes
 
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
@@ -11,7 +11,7 @@ import java.util.*
 /**
  * Table for Prototypes
  */
-object Prototypes : UUIDTable("prototypes") {
+internal object Prototypes : UUIDTable("prototypes") {
     val userId = text("userId")
     val userPrompt = text("prompt")
     val fullPrompt = text("fullPrompt")
@@ -22,7 +22,9 @@ object Prototypes : UUIDTable("prototypes") {
 /**
  * Entity for Prototypes. This is used for Exposed to interact with the database via DAO.
  */
-class PrototypeEntity(id: EntityID<UUID>) : UUIDEntity(id) {
+class PrototypeEntity(
+    id: EntityID<UUID>,
+) : UUIDEntity(id) {
     companion object : UUIDEntityClass<PrototypeEntity>(Prototypes)
 
     var userId by Prototypes.userId
@@ -34,14 +36,15 @@ class PrototypeEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     /**
      * Converts the entity to a Prototype object
      */
-    fun toPrototype() = Prototype(
-        id = this.id.value,
-        userId = this.userId,
-        userPrompt = this.userPrompt,
-        fullPrompt = this.fullPrompt,
-        s3key = this.s3Key,
-        createdAt = this.createdAt
-    )
+    fun toPrototype() =
+        Prototype(
+            id = this.id.value,
+            userId = this.userId,
+            userPrompt = this.userPrompt,
+            fullPrompt = this.fullPrompt,
+            s3key = this.s3Key,
+            createdAt = this.createdAt,
+        )
 }
 
 /**
@@ -59,5 +62,5 @@ data class Prototype(
     var userPrompt: String,
     var fullPrompt: String,
     val s3key: String?,
-    val createdAt: Instant
+    val createdAt: Instant,
 )

@@ -1,8 +1,9 @@
-import core.DatabaseCredentials
-import helpers.MockEnvironment
-import helpers.MockEnvironment.generateEnvironmentFile
+package database
+
+import database.core.DatabaseCredentials
+import database.core.PoCDatabase
+import database.helpers.MockEnvironment
 import io.mockk.clearAllMocks
-import kcl.seg.rtt.database.core.PoCDatabase
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -18,7 +19,7 @@ class PoCDatabaseTest {
     fun setUp() {
         MockEnvironment.postgresContainer.start()
         EnvironmentLoader.reset()
-        generateEnvironmentFile()
+        MockEnvironment.generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
         clearAllMocks()
     }

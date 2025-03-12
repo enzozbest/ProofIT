@@ -1,11 +1,15 @@
-package core
+package database.core
 
 import com.zaxxer.hikari.HikariDataSource
-import helpers.MockEnvironment
+import database.helpers.MockEnvironment
+import database.helpers.MockEnvironment.ENV_FILE
+import database.helpers.MockEnvironment.generateEnvironmentFile
+import database.tables.templates.TemplateRepository
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
+import org.flywaydb.core.api.FlywayException
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
-import tables.templates.TemplateRepository
 import java.io.File
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -13,15 +17,15 @@ class DatabaseManagerTest {
     @BeforeAll
     fun setup() {
         // Ensure container is started and environment file is created with correct connection details
-        MockEnvironment.generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        generateEnvironmentFile()
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @BeforeEach
     fun setupEach() {
         // Reset state but keep container running
         DatabaseManager.reset()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @AfterEach
@@ -37,7 +41,7 @@ class DatabaseManagerTest {
         DatabaseManager.reset()
         EnvironmentLoader.reset()
         MockEnvironment.stopContainer()
-        File(MockEnvironment.ENV_FILE).delete()
+        File(ENV_FILE).delete()
     }
 
     @Test
@@ -75,8 +79,8 @@ class DatabaseManagerTest {
             DB_PASSWORD=${MockEnvironment.postgresContainer.password}
             DB_MAX_POOL_SIZE=10
             """.trimIndent()
-        File(MockEnvironment.ENV_FILE).writeText(invalidEnv)
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        File(ENV_FILE).writeText(invalidEnv)
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
 
         val exception =
             assertThrows<Exception> {
@@ -84,8 +88,8 @@ class DatabaseManagerTest {
             }
         assertNotNull(exception)
 
-        MockEnvironment.generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        generateEnvironmentFile()
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @Test
@@ -97,14 +101,14 @@ class DatabaseManagerTest {
             DB_PASSWORD=${MockEnvironment.postgresContainer.password}
             DB_MAX_POOL_SIZE=0
             """.trimIndent()
-        File(MockEnvironment.ENV_FILE).writeText(minPoolEnv)
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        File(ENV_FILE).writeText(minPoolEnv)
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
 
         val database = DatabaseManager.init()
         assertNotNull(database)
 
-        MockEnvironment.generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        generateEnvironmentFile()
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @Test
@@ -116,18 +120,18 @@ class DatabaseManagerTest {
             DB_PASSWORD=
             DB_MAX_POOL_SIZE=10
             """.trimIndent()
-        File(MockEnvironment.ENV_FILE).writeText(missingEnv)
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        File(ENV_FILE).writeText(missingEnv)
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
 
         val exception =
-            assertThrows<org.flywaydb.core.api.FlywayException> {
+            assertThrows<FlywayException> {
                 DatabaseManager.init()
             }
         assertNotNull(exception)
         assertTrue(exception.message?.isNotBlank() == true, "Exception message should not be empty")
 
-        MockEnvironment.generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        generateEnvironmentFile()
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @Test
@@ -139,14 +143,14 @@ class DatabaseManagerTest {
             DB_PASSWORD=${MockEnvironment.postgresContainer.password}
             DB_MAX_POOL_SIZE=5
             """.trimIndent()
-        File(MockEnvironment.ENV_FILE).writeText(connectionEnv)
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        File(ENV_FILE).writeText(connectionEnv)
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
 
         val database = DatabaseManager.init()
         assertNotNull(database)
 
         val result =
-            org.jetbrains.exposed.sql.transactions.transaction(database) {
+            transaction(database) {
                 exec("SELECT 1") {
                     it.next()
                     it.getInt(1)
@@ -154,8 +158,8 @@ class DatabaseManagerTest {
             }
         assertEquals(1, result)
 
-        MockEnvironment.generateEnvironmentFile()
-        EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
+        generateEnvironmentFile()
+        EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @Test
@@ -197,7 +201,7 @@ class DatabaseManagerTest {
         assertNotNull(database)
 
         val tablesExist =
-            org.jetbrains.exposed.sql.transactions.transaction(database) {
+            transaction(database) {
                 exec(
                     """
                         SELECT EXISTS (

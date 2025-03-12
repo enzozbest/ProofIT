@@ -1,4 +1,4 @@
-package tables.templates
+package database.tables.templates
 
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
@@ -8,7 +8,7 @@ import org.jetbrains.exposed.dao.id.IdTable
 /**
  * Table for Prototypes
  */
-object Templates : IdTable<String>("templates") {
+internal object Templates : IdTable<String>("templates") {
     override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
     val fileURI = text("fileURI")

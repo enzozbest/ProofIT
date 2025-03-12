@@ -1,9 +1,10 @@
-import core.DatabaseManager
-import helpers.MockEnvironment
-import helpers.MockEnvironment.generateEnvironmentFile
-import helpers.MockEnvironment.postgresContainer
-import kcl.seg.rtt.database.repositories.Prototype
-import kcl.seg.rtt.database.repositories.Prototypes
+package database
+
+import database.core.DatabaseManager
+import database.helpers.MockEnvironment
+import database.tables.prototypes.Prototype
+import database.tables.prototypes.PrototypeRepository
+import database.tables.prototypes.Prototypes
 import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
@@ -13,12 +14,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import tables.prototypes.PrototypeRepository
 import java.io.File
 import java.time.Instant
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class PrototypeRepositoryTest {
@@ -27,10 +28,10 @@ class PrototypeRepositoryTest {
 
     @BeforeEach
     fun setUp() {
-        postgresContainer.start()
+        MockEnvironment.postgresContainer.start()
 
         EnvironmentLoader.reset()
-        generateEnvironmentFile()
+        MockEnvironment.generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
 
         db = DatabaseManager.init()
@@ -102,7 +103,7 @@ class PrototypeRepositoryTest {
     fun `Test retrieve non-existent prototype`() =
         runTest {
             val retrieved = repository.getPrototype(UUID.randomUUID()).getOrNull()
-            kotlin.test.assertNull(retrieved)
+            assertNull(retrieved)
         }
 
     private suspend fun createPrototype(id: UUID = UUID.randomUUID()): Result<Unit> {

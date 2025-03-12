@@ -1,4 +1,4 @@
-package helpers
+package database.helpers
 
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.containers.wait.strategy.Wait
@@ -11,24 +11,26 @@ object MockEnvironment {
     private var container: PostgreSQLContainer<*>? = null
 
     val postgresContainer: PostgreSQLContainer<*>
-        get() = synchronized(lock) {
-            container ?: createAndStartContainer().also { container = it }
-        }
+        get() =
+            synchronized(lock) {
+                container ?: createAndStartContainer().also { container = it }
+            }
 
     private fun createAndStartContainer(): PostgreSQLContainer<*> {
-        val newContainer = PostgreSQLContainer("postgres:15").apply {
-            withDatabaseName("testdb")
-            withUsername("testuser")
-            withPassword("testpassword")
-            withStartupTimeout(Duration.ofSeconds(60))
-            waitingFor(
-                Wait
-                    .forLogMessage(".*database system is ready to accept connections.*\\n", 2)
-                    .withStartupTimeout(Duration.ofSeconds(60)),
-            )
-            withReuse(true)
-            setCommand("postgres", "-c", "fsync=off")
-        }
+        val newContainer =
+            PostgreSQLContainer("postgres:15").apply {
+                withDatabaseName("testdb")
+                withUsername("testuser")
+                withPassword("testpassword")
+                withStartupTimeout(Duration.ofSeconds(60))
+                waitingFor(
+                    Wait
+                        .forLogMessage(".*database system is ready to accept connections.*\\n", 2)
+                        .withStartupTimeout(Duration.ofSeconds(60)),
+                )
+                withReuse(true)
+                setCommand("postgres", "-c", "fsync=off")
+            }
 
         try {
             newContainer.start()

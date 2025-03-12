@@ -1,4 +1,4 @@
-import core.DatabaseManager
+import database.core.DatabaseManager
 import org.slf4j.LoggerFactory
 import tables.templates.Template
 import java.util.UUID
