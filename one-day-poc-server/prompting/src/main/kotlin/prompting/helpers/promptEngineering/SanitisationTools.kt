@@ -3,6 +3,12 @@ package prompting.helpers.promptEngineering
 import org.jsoup.Jsoup
 import org.jsoup.safety.Safelist
 
+/**
+ * A utility object providing tools for sanitizing user prompts to ensure safety and security.
+ *
+ * This object implements methods for cleaning prompt text, extracting significant keywords,
+ * and combining these operations for secure prompt processing.
+ */
 object SanitisationTools {
     const val MAX_PROMPT_LENGTH = 1000
 
@@ -51,6 +57,17 @@ object SanitisationTools {
         return keywordSet.filter { it in lowercasePrompt }
     }
 
+    /**
+     * Main entry point for prompt sanitization, combining cleaning and keyword extraction.
+     *
+     * This method processes a raw user prompt by:
+     * 1. Cleaning the prompt text to remove potentially harmful content
+     * 2. Extracting relevant keywords for further processing
+     * 3. Returning both in a structured result object
+     *
+     * @param prompt The raw user input to be sanitized
+     * @return A SanitisedPromptResult containing the cleaned prompt and extracted keywords
+     */
     internal fun sanitisePrompt(prompt: String): SanitisedPromptResult {
         val sanitisedPrompt = cleanPrompt(prompt)
         val keywords = extractKeywords(sanitisedPrompt)

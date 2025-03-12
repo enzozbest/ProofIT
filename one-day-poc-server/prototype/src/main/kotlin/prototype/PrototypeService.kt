@@ -18,6 +18,11 @@ data class LlmResponse(
     val files: Map<String, FileContent>,
 )
 
+/**
+ * Represents the content of a file in a serializable format.
+ *
+ * @property content The string content of the file
+ */
 @Serializable
 data class FileContent(
     val content: String,
