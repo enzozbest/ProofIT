@@ -13,7 +13,7 @@ import kcl.seg.rtt.auth.authentication.configureAuthenticationRoutes
 import kcl.seg.rtt.utils.json.PoCJSON
 import kotlin.collections.set
 
-object AuthenticationConstants {
+internal object AuthenticationConstants {
     const val DEFAULT_EXPIRATION_SECONDS = 600L
     const val CONFIGURATION_FILE_PATH = "auth/src/main/resources/cognito.json"
     const val DEFAULT_AUTHENTICATOR = "Cognito"
