@@ -4,7 +4,7 @@ import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 
-object Redis {
+internal object Redis {
     private const val REDIS_HOST = "localhost"
     private const val REDIS_PORT = 6379
 

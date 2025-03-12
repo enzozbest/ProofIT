@@ -1,3 +1,5 @@
+import authentication.AuthenticatedSession
+import authentication.setUpJWTValidation
 import helpers.AuthenticationTestHelpers
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -7,8 +9,6 @@ import io.ktor.server.application.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpJWTValidation
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test

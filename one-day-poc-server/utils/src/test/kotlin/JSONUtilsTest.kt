@@ -1,6 +1,6 @@
-import kcl.seg.rtt.utils.json.PoCJSON
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
+import utils.json.PoCJSON
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 

@@ -1,60 +1,44 @@
 import { useState, useEffect } from 'react';
-import { Message, ChatHookReturn, ChatMessageProps, MessageRole } from './Types';
+// import { Message, ChatHookReturn, ChatMessageProps, MessageRole } from './Types';
 import { sendChatMessage } from '../api/FrontEndAPI';
+import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
 
-const ChatMessage = ({ setPrototype }: ChatMessageProps): ChatHookReturn => {
+
+const ChatMessage = ({ setPrototype, setPrototypeFiles }: ChatMessageProps): ChatHookReturn => {
     const [message, setMessage] = useState<string>("");
     const [sentMessages, setSentMessages] = useState<Message[]>([]);
     const [llmResponse, setLlmResponse] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-
-    const postMessage = async (message: string): Promise<string> => {
-        try {
-            const messagePayload: MessagePayload = {
-                userID: "user123",  // hardcoded for now
-                time: new Date().toISOString(), // ISO 8601 format
-                prompt: message
-            };
-
-            const response = await fetch("http://localhost:8000/api/chat/json", {
-                method: 'POST',
-                credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(messagePayload)
-            });
-
-            if (!response?.ok) {
-                throw new Error('Network response was not ok');
-            }
-
-            const data = await response.text();
-            setLlmResponse(data);
-            return data;
-        } catch (error) {
-            console.error('Error:', error);
-            setErrorMessage("Error. Please check your connection and try again.");
-            return ""; // Return empty string instead of throwing
-        }
-    };
-
     const handleSend = async (messageToSend: string = message): Promise<void> => {
         if (!messageToSend.trim()) return;
+        
+        const currentTime = new Date().toISOString();
+
+        const newMessage: Message = {
+            role: 'User',
+            content: messageToSend,
+            timestamp: currentTime
+        };
+        setSentMessages((prevMessages) => [...prevMessages, newMessage]);
+
         try {
-            setPrototype(true);
-            setPrototypeId(prototypeId+1);
-            const currentTime = new Date().toLocaleString();
-
-            const newMessage: Message = {
-                role: 'User',
-                content: messageToSend,
-                timestamp: currentTime
-            };
-
-            setSentMessages((prevMessages) => [...prevMessages, newMessage]);
-            await postMessage(messageToSend);
+            await sendChatMessage(
+                newMessage,
+                (chatResponse) => {
+                    setLlmResponse(chatResponse.message);
+                    // setSentMessages(prev => [...prev, {
+                    //     role: chatResponse.role,
+                    //     content: chatResponse.message,
+                    //     timestamp: chatResponse.timestamp
+                    // } as Message]);
+                },
+                (prototypeResponse) => {
+                    setPrototype(true);
+                    setPrototypeFiles(prototypeResponse.files);
+                }
+            );
+            
             setMessage("");
         } catch (error) {
             console.error('Error:', error);

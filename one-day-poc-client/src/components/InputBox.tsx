@@ -1,11 +1,9 @@
 import React, { FC, useState, useRef, useEffect } from 'react';
 import { Paperclip, SendHorizontal } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const InputBox: FC = () => {
     const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         if (textareaRef.current) {
@@ -16,7 +14,8 @@ const InputBox: FC = () => {
 
     const handleSubmit = () => {
         if (text.trim()) {
-            navigate('/generate', { state: { initialMessage: text } });
+            sessionStorage.setItem('initialMessage', text);
+            window.location.href = '/generate';
         }
     };
 

@@ -13,4 +13,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"), // Ensures `@` refers to `src/`
     },
   },
+  server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
 })

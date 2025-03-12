@@ -1,19 +1,17 @@
-package kcl.seg.rtt.auth
+package authentication
 
+import authentication.Authenticators.configureJWTValidator
+import authentication.Authenticators.configureOAuth
 import io.ktor.server.application.Application
 import io.ktor.server.application.DuplicatePluginException
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
-import kcl.seg.rtt.auth.authentication.Authenticators.configureOAuth
-import kcl.seg.rtt.auth.authentication.configureAuthenticationRoutes
-import kcl.seg.rtt.utils.json.PoCJSON
+import utils.json.PoCJSON
 import kotlin.collections.set
 
-object AuthenticationConstants {
+internal object AuthenticationConstants {
     const val DEFAULT_EXPIRATION_SECONDS = 600L
     const val CONFIGURATION_FILE_PATH = "auth/src/main/resources/cognito.json"
     const val DEFAULT_AUTHENTICATOR = "Cognito"
