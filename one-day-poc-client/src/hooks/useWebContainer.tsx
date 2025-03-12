@@ -25,15 +25,6 @@ export function useWebContainer() {
   useEffect(() => {
     let mounted = true;
     
-    const isNavigation = sessionStorage.getItem('visited_generate') === 'true';
-    sessionStorage.setItem('visited_generate', 'true');
-    
-    if (isNavigation && !isCrossOriginIsolated()) {
-      console.log('Detected navigation without cross-origin isolation, reloading page...');
-      window.location.reload();
-      return;
-    }
-    
     async function initWebContainer() {
       try {
         if (!isCrossOriginIsolated()) {
@@ -83,14 +74,10 @@ export function useWebContainer() {
       }
     }
     
-    const initTimeout = setTimeout(() => {
-      console.log('Initializing WebContainer after delay');
-      initWebContainer();
-    }, 300);
+    initWebContainer();
     
     return () => {
       mounted = false;
-      clearTimeout(initTimeout);
     };
   }, []);
 
@@ -98,7 +85,6 @@ export function useWebContainer() {
     instance,
     loading,
     error,
-    isReady: !!instance && !loading,
-    isCrossOriginIsolated: isCrossOriginIsolated()
+    isReady: !!instance && !loading
   };
 }
