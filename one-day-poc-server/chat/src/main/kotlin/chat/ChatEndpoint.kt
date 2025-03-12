@@ -16,6 +16,14 @@ object ChatEndpoint {
     internal var UPLOAD_DIR: String = "uploads" // Do not use val for testing!
 }
 
+/**
+ * Configures the chat module with authenticated routes.
+ * 
+ * This function sets up all chat-related endpoints with JWT authentication.
+ * It registers routes for chat interactions, JSON processing, and file uploads.
+ * 
+ * @receiver The Application in which the module is installed
+ */
 fun Application.chatModule() {
     routing {
         authenticate("jwt-verifier") {

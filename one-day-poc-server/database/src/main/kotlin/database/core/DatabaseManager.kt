@@ -24,8 +24,12 @@ internal data class DatabaseCredentials(
 )
 
 /**
- * DatabaseManager is an object that manages the connection to the database.
- * It initializes the database connection and runs the necessary migrations.
+ * DatabaseManager is a singleton object responsible for managing database connections and repositories.
+ * 
+ * This manager handles the lifecycle of database connections, including initialization,
+ * configuration, and cleanup. It uses HikariCP for connection pooling and Flyway for
+ * database migrations. The object follows a lazy initialization pattern for resources
+ * and provides access to repository interfaces.
  */
 object DatabaseManager {
     private var database: Database? = null
@@ -33,7 +37,10 @@ object DatabaseManager {
     private var dataSource: HikariDataSource? = null
 
     /**
-     * Resets the database manager state. Used for testing purposes.
+     * Resets the database manager state by closing connections and clearing references.
+     * 
+     * This method is primarily used for testing purposes to ensure a clean state
+     * between test cases and prevent resource leaks.
      */
     fun reset() {
         dataSource?.close()
@@ -43,9 +50,16 @@ object DatabaseManager {
     }
 
     /**
-     * Initializes the database connection and runs the necessary migrations.
+     * Initializes the database connection and runs all necessary migrations.
+     * 
+     * This method performs the following steps:
+     * 1. Retrieves database credentials from environment variables
+     * 2. Configures and runs Flyway migrations to ensure schema is up-to-date
+     * 3. Sets up the database connection pool using HikariCP
+     * 4. Stores the database instance for future use
      *
-     * @return The database connection.
+     * @return The initialized Database connection instance
+     * @throws Exception If connection initialization fails for any reason
      */
     fun init(): Database {
         val credentials = getDatabaseCredentials()
@@ -61,8 +75,13 @@ object DatabaseManager {
     }
 
     /**
-     * Provides access to the template repository
+     * Provides access to the template repository using lazy initialization.
+     * 
+     * This method ensures the database is initialized before creating the repository
+     * and caches the repository instance for future calls.
+     *
      * @return The template repository instance
+     * @throws IllegalStateException If the database has not been initialized
      */
     fun templateRepository(): TemplateRepository {
         val db = checkNotNull(database)
@@ -70,7 +89,14 @@ object DatabaseManager {
     }
 
     /**
-     * Sets up the database connection.
+     * Sets up the database connection pool using HikariCP.
+     * 
+     * This method configures the connection pool with appropriate settings for
+     * performance and reliability, including transaction isolation levels and
+     * connection limits.
+     *
+     * @param credentials The database connection credentials
+     * @return A configured Database instance ready for use
      */
     private fun setupDatabase(credentials: DatabaseCredentials): Database {
         val config =
@@ -88,7 +114,13 @@ object DatabaseManager {
     }
 
     /**
-     * Retrieves the database credentials from the .env file.
+     * Retrieves the database credentials from environment variables.
+     * 
+     * This method loads database connection settings from the application's
+     * environment configuration using the EnvironmentLoader utility.
+     *
+     * @return A DatabaseCredentials object containing connection parameters
+     * @throws Exception If required environment variables are missing
      */
     private fun getDatabaseCredentials(): DatabaseCredentials =
         DatabaseCredentials(
@@ -99,7 +131,12 @@ object DatabaseManager {
         )
 
     /**
-     * Configures Flyway to run the necessary migrations.
+     * Configures and runs Flyway database migrations.
+     * 
+     * This method ensures the database schema is up-to-date by applying
+     * any pending migrations from the specified migrations directory.
+     *
+     * @param credentials The database connection credentials
      */
     private fun configureFlyway(credentials: DatabaseCredentials) {
         Flyway
