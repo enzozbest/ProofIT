@@ -5,6 +5,14 @@ let globalWebContainerInstance: WebContainer | null = null;
 let bootPromise: Promise<WebContainer> | null = null;
 
 /**
+ * Checks if the environment is properly configured for WebContainer
+ * @returns {boolean} Whether the environment supports WebContainer
+ */
+function isCrossOriginIsolated(): boolean {
+  return window.crossOriginIsolated === true;
+}
+
+/**
  * Custom hook to manage WebContainer instance lifecycle
  * 
  * @returns {Object} The WebContainer instance and loading state
@@ -19,6 +27,14 @@ export function useWebContainer() {
     
     async function initWebContainer() {
       try {
+        if (!isCrossOriginIsolated()) {
+          throw new Error(
+            'Cross-Origin Isolation is not enabled. WebContainer requires the following HTTP headers:\n' +
+            '- Cross-Origin-Embedder-Policy: require-corp\n' +
+            '- Cross-Origin-Opener-Policy: same-origin'
+          );
+        }
+
         if (globalWebContainerInstance) {
           if (mounted) {
             setInstance(globalWebContainerInstance);
