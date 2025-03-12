@@ -1,7 +1,7 @@
 package prompting.helpers
 
-import kcl.seg.rtt.prototype.OllamaResponse
-import kcl.seg.rtt.prototype.PrototypeMain
+import prototype.PrototypeMain
+import prototype.helpers.OllamaResponse
 
 object PrototypeInteractor {
     suspend fun prompt(

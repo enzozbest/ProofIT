@@ -12,6 +12,11 @@ import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.promptEngineering.SanitisedPromptResult
 import prompting.helpers.templates.TemplateInteractor
+import prototype.FileContent
+import prototype.LlmResponse
+import prototype.helpers.OllamaResponse
+import prototype.helpers.PromptException
+import prototype.security.secureCodeCheck
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

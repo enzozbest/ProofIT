@@ -1,4 +1,4 @@
-package storage
+package utils.storage
 
 import kcl.seg.rtt.utils.aws.S3Service
 import java.io.File

@@ -1,4 +1,4 @@
-package kcl.seg.rtt
+package server
 
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*

@@ -8,6 +8,7 @@ import kcl.seg.rtt.utils.aws.S3Service
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import utils.storage.S3Storage
 import java.io.File
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

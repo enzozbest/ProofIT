@@ -1,9 +1,9 @@
 package prompting
 
-import kcl.seg.rtt.prototype.convertJsonToLlmResponse
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import prototype.convertJsonToLlmResponse
 
 class LlmResponseConverterTest {
     private fun mockSecureCodeCheck(

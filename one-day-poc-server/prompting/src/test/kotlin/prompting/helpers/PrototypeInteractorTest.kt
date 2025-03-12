@@ -4,13 +4,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkConstructor
 import io.mockk.unmockkAll
-import kcl.seg.rtt.prototype.OllamaResponse
-import kcl.seg.rtt.prototype.PrototypeMain
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import prompting.helpers.PrototypeInteractor
+import prototype.PrototypeMain
+import prototype.helpers.OllamaResponse
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
