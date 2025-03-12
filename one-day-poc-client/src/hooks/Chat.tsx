@@ -21,7 +21,7 @@ const ChatMessage = ({ setPrototype, setPrototypeFiles }: ChatMessageProps): Cha
             timestamp: currentTime
         };
         setSentMessages((prevMessages) => [...prevMessages, newMessage]);
-
+        setMessage("");
         try {
             await sendChatMessage(
                 newMessage,
@@ -39,7 +39,7 @@ const ChatMessage = ({ setPrototype, setPrototypeFiles }: ChatMessageProps): Cha
                 }
             );
             
-            setMessage("");
+            
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage("Error. Please check your connection and try again.");
