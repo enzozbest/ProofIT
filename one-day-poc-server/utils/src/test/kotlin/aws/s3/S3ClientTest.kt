@@ -7,11 +7,11 @@ import aws.sdk.kotlin.services.sts.model.AssumeRoleResponse
 import aws.sdk.kotlin.services.sts.model.Credentials
 import aws.smithy.kotlin.runtime.time.Instant
 import io.mockk.*
-import kcl.seg.rtt.utils.aws.S3Manager
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
+import utils.aws.S3Manager
 import kotlin.time.Duration
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -100,7 +100,7 @@ class S3ClientTest {
     fun `Test returns empty credentials when config is incomplete`() =
         runBlocking {
             val s3ManagerWithInvalidConfig = S3Manager(buildJsonObject { }, mockStsClient)
-            val s3client = s3ManagerWithInvalidConfig.getClient()
+            s3ManagerWithInvalidConfig.getClient()
             val result = runBlocking { s3ManagerWithInvalidConfig.assumeS3SafeRole() }
             assertEquals(
                 aws.smithy.kotlin.runtime.auth.awscredentials
