@@ -11,14 +11,13 @@ import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.time.LocalDateTime
 
 /**
  * A serializable data class representing the response to be sent after file upload.
- * 
+ *
  * @property time Timestamp string indicating when the response was created
  * @property message Response message containing feedback about the upload
  */
@@ -30,11 +29,11 @@ data class Response(
 
 /**
  * Configures a POST route that handles multipart file upload requests.
- * 
+ *
  * This route processes uploaded files along with optional description and message data.
  * It stores files in the specified upload directory and generates a response with
- * information about the uploaded content. 
- * 
+ * information about the uploaded content.
+ *
  * @receiver The Route on which this endpoint will be registered
  * @param uploadDir Base directory path where uploaded files will be stored
  */
@@ -67,7 +66,6 @@ private data class UploadData(
     var response: Response? = null,
 )
 
-
 /**
  * Creates the upload directory if it doesn't exist.
  *
@@ -85,7 +83,7 @@ private fun createUploadDirectory(dir: String): File {
 
 /**
  * Processes each part of the multipart data according to its type.
- * 
+ *
  * This function dispatches different part types to appropriate handlers and ensures
  * that resources are properly disposed after processing.
  *
@@ -110,7 +108,7 @@ private suspend fun handlePart(
 
 /**
  * Processes form items from the multipart request.
- * 
+ *
  * Handles text data like descriptions and JSON messages.
  *
  * @param part The form item part to process
@@ -130,30 +128,31 @@ private suspend fun handleFormItem(
 
 /**
  * Processes a JSON message submitted with the upload.
- * 
+ *
  * Attempts to parse the message string into a Request object and generate a
  * response. If parsing fails, responds with an error message.
  *
  * @param value The JSON string to parse
  * @param uploadData Container for tracking upload processing state
  * @param call The ApplicationCall for responding in case of errors
- * @throws SerializationException If the JSON string cannot be parsed into a Request object
  */
 private suspend fun handleMessagePart(
     value: String,
     uploadData: UploadData,
     call: ApplicationCall,
 ) {
-    try {
+    runCatching {
         uploadData.message = Json.decodeFromString(value)
         uploadData.response =
-            Response(
-                time = LocalDateTime.now().toString(),
-                message = "${uploadData.message?.prompt}, ${uploadData.message?.userID}!",
-            )
-    } catch (e: SerializationException) {
+            uploadData.message?.let {
+                Response(
+                    time = LocalDateTime.now().toString(),
+                    message = "${it.prompt}, ${it.userID}!",
+                )
+            }
+    }.onFailure {
         call.respondText(
-            text = "Invalid request: ${e.message}",
+            text = "Invalid request: ${it.message}",
             status = HttpStatusCode.BadRequest,
         )
     }
@@ -161,7 +160,7 @@ private suspend fun handleMessagePart(
 
 /**
  * Processes an uploaded file item from the multipart request.
- * 
+ *
  * Reads the file data, generates a timestamped filename to prevent conflicts,
  * and saves the file to the upload directory.
  *
@@ -174,14 +173,14 @@ private suspend fun handleFileItem(
     uploadDir: File,
     uploadData: UploadData,
 ) {
-    uploadData.fileName = generateTimestampedFileName(part.originalFileName as String)
+    uploadData.fileName = generateTimestampedFileName(part.originalFileName)
     val fileBytes = part.provider().readRemaining().readByteArray()
     File("$uploadDir/${uploadData.fileName}").writeBytes(fileBytes)
 }
 
 /**
  * Sends an appropriate response after processing the upload.
- * 
+ *
  * If a structured response object is available, it will be sent as JSON.
  * Otherwise, a simple text response is sent containing the file description
  * and storage location.
@@ -200,7 +199,7 @@ private suspend fun respondToUpload(
 
 /**
  * Generates a unique filename by appending a timestamp to the original file name.
- * 
+ *
  * This prevents filename conflicts in the upload directory and preserves the original
  * file extension if present. If the original filename is null or blank, a generic
  * name with timestamp will be used.

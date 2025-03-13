@@ -1,7 +1,6 @@
 package prompting.helpers
 
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
@@ -103,5 +102,16 @@ class HelpersTest {
         val decoded = json.decodeFromString<Response>(jsonString)
 
         assertEquals(response, decoded)
+    }
+
+    @Test
+    fun `test Response with normal values`() {
+        val response =
+            Response(
+                time = "00:00:00",
+                message = "This is a test message",
+            )
+        assertEquals("00:00:00", response.time)
+        assertEquals("This is a test message", response.message)
     }
 }
