@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { ChatBox } from "./chat-box";
 import { MessageBox } from "./messages-box";
 import  ChatMessage  from "@/hooks/Chat";
-import { ChatScreenProps } from "../types/Types";
+import { ChatScreenProps } from "../../types/Types";
 
 import {toast} from 'sonner'
 
