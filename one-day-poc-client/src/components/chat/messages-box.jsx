@@ -36,10 +36,20 @@ export function MessageBox({ sentMessages }) {
                                 components={{
                                     code({ node, inline, className, children, ...props }) {
                                         return inline ? (
-                                            <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
-                                        ) : (
+                                            <code
+                                                className="inline-block bg-muted px-1 py-0.5 rounded font-mono font-semibold text-sm"
+                                                {...props}
+                                            >
+                                                {children}
+                                            </code>
+                                            ) : (
                                             <pre className="whitespace-pre-wrap pt-2">
-                                                <TypographyInlineCode {...props}>{children}</TypographyInlineCode>
+                                                <code
+                                                className="block bg-muted rounded p-2 font-mono text-sm"
+                                                {...props}
+                                                >
+                                                {children}
+                                                </code>
                                             </pre>
                                         );
                                     }
