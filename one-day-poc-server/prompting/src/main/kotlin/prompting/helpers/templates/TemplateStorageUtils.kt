@@ -1,6 +1,6 @@
 package prompting.helpers.templates
 
-import prompting.exceptions.TemplateRetrievalExcecption
+import prompting.exceptions.TemplateRetrievalException
 import utils.environment.EnvironmentLoader
 import utils.storage.StorageService
 import kotlin.io.path.createTempFile
@@ -17,7 +17,7 @@ object TemplateStorageUtils {
      *
      * @param templateHandle The URI of the template file
      * @return The content of the file as a ByteArray
-     * @throws TemplateRetrievalExcecption if the file cannot be retrieved
+     * @throws TemplateRetrievalException if the file cannot be retrieved
      */
     suspend fun retrieveFileContent(templateHandle: String): ByteArray =
         if (EnvironmentLoader.get("LOCAL_STORAGE").toBoolean()) {
@@ -31,23 +31,23 @@ object TemplateStorageUtils {
      *
      * @param path The path to the file
      * @return The content of the file as a ByteArray
-     * @throws TemplateRetrievalExcecption if the file cannot be retrieved
+     * @throws TemplateRetrievalException if the file cannot be retrieved
      */
     private fun retrieveLocalFileContent(path: String): ByteArray =
         StorageService.getFileLocal(path = path)
-            ?: throw TemplateRetrievalExcecption("File not found")
+            ?: throw TemplateRetrievalException("File not found")
 
     /**
      * Retrieves a file from remote storage.
      *
      * @param url The S3 URL of the file
      * @return The content of the file as a ByteArray
-     * @throws TemplateRetrievalExcecption if the file cannot be retrieved
+     * @throws TemplateRetrievalException if the file cannot be retrieved
      */
     private suspend fun retrieveRemoteFileContent(url: String): ByteArray {
         val (bucket, key) = parseS3Url(url)
         return StorageService.getFileRemote(bucket = bucket, key = key)
-            ?: throw TemplateRetrievalExcecption("File not found")
+            ?: throw TemplateRetrievalException("File not found")
     }
 
     /**
@@ -55,7 +55,7 @@ object TemplateStorageUtils {
      *
      * @param url The S3 URL to parse
      * @return A Pair of bucket and key
-     * @throws TemplateRetrievalExcecption if the URL is invalid
+     * @throws TemplateRetrievalException if the URL is invalid
      */
     private fun parseS3Url(url: String): Pair<String, String> {
         val bucket =
@@ -63,14 +63,14 @@ object TemplateStorageUtils {
                 .find(url)
                 ?.groupValues
                 ?.get(1)
-                ?: throw TemplateRetrievalExcecption("Invalid S3 URL")
+                ?: throw TemplateRetrievalException("Invalid S3 URL")
 
         val key =
             Regex("""^https://[^\.]+\.s3\.amazonaws\.com/(.+)$""")
                 .find(url)
                 ?.groupValues
                 ?.get(1)
-                ?: throw TemplateRetrievalExcecption("Invalid S3 URL")
+                ?: throw TemplateRetrievalException("Invalid S3 URL")
 
         return Pair(bucket, key)
     }
