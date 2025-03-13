@@ -1,3 +1,7 @@
+import authentication.AuthenticatedSession
+import authentication.JWTValidationResponse
+import authentication.cacheSession
+import authentication.setUpCheckEndpoint
 import helpers.AuthenticationTestHelpers
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -5,10 +9,6 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.JWTValidationResponse
-import kcl.seg.rtt.auth.authentication.cacheSession
-import kcl.seg.rtt.auth.authentication.setUpCheckEndpoint
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test

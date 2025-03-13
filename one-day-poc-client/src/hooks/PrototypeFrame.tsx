@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { PrototypeFrameProps } from './Types';
+import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './useWebContainer';
 
 /**
@@ -50,8 +50,19 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
       setStatus('Mounting files...');
 
       try {
-        console.log('Mounting files...');
-        await webcontainerInstance.mount(files);
+        console.log('Files to mount:', JSON.stringify(files, null, 2));
+
+        const mountPromise = webcontainerInstance.mount(files);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(
+            () =>
+              reject(new Error('Mounting files timed out after 10 seconds')),
+            10000
+          )
+        );
+
+        await Promise.race([mountPromise, timeoutPromise]);
+        console.log('Files mounted successfully');
 
         setStatus('Installing dependencies...');
         const installProcess = await webcontainerInstance.spawn('npm', [
@@ -64,7 +75,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
         }
 
         setStatus('Starting development server...');
-        await webcontainerInstance.spawn('npm', ['run', 'dev']);
+        await webcontainerInstance.spawn('npm', ['run', 'start']);
       } catch (error: unknown) {
         console.error('Error:', error);
 
@@ -82,10 +93,19 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
       }
     }
 
-    if (webcontainerInstance) {
+    if (webcontainerInstance && files) {
+      console.log('WebContainer and files are both available, mounting files', {
+        hasFiles: !!files,
+        hasWebContainer: !!webcontainerInstance,
+      });
       loadFiles();
+    } else {
+      console.log('Cannot mount files yet:', {
+        hasFiles: !!files,
+        hasWebContainer: !!webcontainerInstance,
+      });
     }
-  }, [webcontainerInstance]);
+  }, [webcontainerInstance, files]);
 
   if (loading) {
     return <div>Loading WebContainer...</div>;
@@ -96,19 +116,27 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
   }
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="text-sm px-4 py-2 bg-gray-200 text-gray-800">
-        Status: {status}
-      </div>
-      <div className="flex-1 overflow-hidden">
-        <iframe
-          ref={iframeRef}
-          src={url}
-          className="w-full h-full border-none"
-          title="Prototype Preview"
-          sandbox="allow-scripts allow-same-origin"
-        />
-      </div>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div style={{ marginBottom: '10px' }}>Status: {status}</div>
+      <iframe
+        ref={iframeRef}
+        src={url}
+        style={{
+          flexGrow: 1,
+          width: '100%',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+        }}
+        title="Prototype Preview"
+        sandbox="allow-scripts allow-same-origin"
+      />
     </div>
   );
 };

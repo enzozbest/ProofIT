@@ -7,7 +7,14 @@ export interface WebContainerFile {
 export type MessageRole = 'User' | 'LLM';
 
 export interface FileTree {
-    [key: string]: WebContainerFile;
+    [filePath: string]: {
+        file?: {
+            contents: string;
+        };
+        directory?: {
+            [fileName: string]: any;
+        };
+    };
 }
 
 export interface Message {
@@ -17,8 +24,8 @@ export interface Message {
 }
 
 export interface ServerResponse {
-    chat: ChatResponse;
-    prototype: PrototypeResponse;
+    chat?: ChatResponse;
+    prototype?: PrototypeResponse;
 }
 
 export interface ChatResponse {

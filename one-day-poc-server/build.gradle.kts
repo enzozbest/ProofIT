@@ -125,10 +125,16 @@ subprojects {
             classDirectories.setFrom(
                 sourceSets["main"].output.asFileTree.matching {
                     exclude(
-                        """**/*${'$'}DefaultConstructorMarker.class""",
-                        """**/*${'$'}DefaultImpls.class""",
-                        """**/*${'$'}Companion.class""",
-                        """**/*${'$'}${'$'}serializer.class""",
+                        """**/*${'$'}DefaultImpls*.*""",
+                        """**/*${'$'}WhenMappings*.*""",
+                        """**/*${'$'}SuspendImpl*.*""",
+                        """**/*${'$'}delegate*.*""",
+                        """**/*${'$'}Function*.*""",
+                        """**/*${'$'}Metadata*.*""",
+                        """**/*${'$'}Companion*.*""",
+                        """server/*""",
+                        """routes/*""",
+                        """**/*seeding/*""",
                     )
                 },
             )

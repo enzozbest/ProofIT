@@ -2,19 +2,17 @@ package storage
 
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import utils.storage.LocalStorage
+import utils.storage.S3Storage
+import utils.storage.StorageService
 import java.io.File
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class TestStorageService {

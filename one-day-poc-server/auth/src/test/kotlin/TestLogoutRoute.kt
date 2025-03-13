@@ -1,9 +1,9 @@
+import authentication.AuthenticatedSession
+import authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.authModule
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test

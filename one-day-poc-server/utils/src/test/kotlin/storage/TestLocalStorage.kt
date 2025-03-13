@@ -2,6 +2,7 @@ package storage
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import utils.storage.LocalStorage
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.assertContentEquals
