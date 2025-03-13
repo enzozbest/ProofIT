@@ -561,4 +561,93 @@ class UploadRoutesTest : BaseAuthenticationServer() {
 
         assertEquals(HttpStatusCode.OK, response.status)
     }
+
+    @Test
+    fun `Test handleMessagePart with null message skips let block`() = testApplication {
+        setupTestApplication()
+
+        // Create a test description to verify in the response
+        val testDescription = "Test with null message"
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        // Include description and a message with value "null"
+                        append("description", testDescription)
+                        append("message", "null")
+                        append(
+                            "file",
+                            "test content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        // Verify the response contains the default text format (not JSON)
+        val responseText = response.bodyAsText()
+        assertTrue(responseText.contains(testDescription))
+        assertTrue(responseText.contains("is uploaded to"))
+
+        // Try to parse as JSON to verify it's not a JSON response
+        runCatching {
+            Json.decodeFromString<Response>(responseText)
+        }.onSuccess {
+            // If parsing succeeds, the test should fail because we expect a text response, not JSON
+            assertTrue(false, "Response should not be in JSON format when message is null")
+        }
+    }
+
+    @Test
+    fun `Test upload with missing filename parameter`() = testApplication {
+        setupTestApplication()
+
+        // Create a test description to verify in the response
+        val testDescription = "Test with missing filename parameter"
+
+        val response = client.post(UPLOAD) {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            setBody(
+                MultiPartFormDataContent(
+                    formData {
+                        append("description", testDescription)
+                        append(
+                            "file",
+                            "test content".toByteArray(),
+                            Headers.build {
+                                append(HttpHeaders.ContentType, "text/plain")
+                                // Use a ContentDisposition with an empty filename parameter
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"\"")
+                            }
+                        )
+                    }
+                )
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        // Verify the file was uploaded with a generated name
+        val testDir = File("test_uploads")
+        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
+        assertNotNull(uploadedFile, "File with generated name should exist")
+
+        // Verify the file content
+        if (uploadedFile != null) {
+            assertEquals("test content", uploadedFile.readText())
+        }
+
+        // Verify the response contains the expected text
+        val responseText = response.bodyAsText()
+        assertTrue(responseText.contains(testDescription))
+        assertTrue(responseText.contains("is uploaded to"))
+    }
 }
