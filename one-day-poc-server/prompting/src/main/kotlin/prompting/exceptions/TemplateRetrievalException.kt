@@ -1,5 +1,5 @@
 package prompting.exceptions
 
-class TemplateRetrievalExcecption(
+class TemplateRetrievalException(
     message: String,
 ) : RuntimeException(message)

@@ -1,10 +1,12 @@
 package prototype.security
 
-import org.jsoup.Jsoup
-import org.jsoup.parser.Parser
+import org.w3c.tidy.Tidy
 import java.io.BufferedReader
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.InputStreamReader
-import java.nio.file.Path
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.io.path.createTempFile
 import kotlin.io.path.writeText
 
@@ -54,13 +56,16 @@ fun secureCodeCheck(
     return true
 }
 
-// /**
-//  * Enforces a maximum code size in bytes (UTF-8).
-//  */
-// fun checkCodeSizeLimit(code: String, maxBytes: Int): Boolean {
-//     val size = code.toByteArray(Charsets.UTF_8).size
-//     return size <= maxBytes
-// }
+/**
+ * Enforces a maximum code size in bytes (UTF-8).
+ */
+fun checkCodeSizeLimit(
+    code: String,
+    maxBytes: Int,
+): Boolean {
+    val size = code.toByteArray(Charsets.UTF_8).size
+    return size <= maxBytes
+}
 
 // /**
 //  * Example "dangerous patterns" check using a simple blocklist.
@@ -105,26 +110,6 @@ fun secureCodeCheck(
 //     return true
 // }
 
-// /**
-//  * Optionally sanitize the HTML to remove suspicious tags/attributes.
-//  */
-// fun sanitizeHtml(originalHtml: String): String {
-//     // Using Jsoup's "clean" with a relatively permissive safelist
-//     // We can pick from Whitelist.none(), Whitelist.basic(), etc.
-//     return Jsoup.clean(originalHtml, Safelist.relaxed())
-// }
-
-// /**
-//  * Compare sanitized HTML vs original for big differences.
-//  * If you consider big differences suspicious, you can fail.
-//  */
-// fun htmlIsSimilarEnough(original: String, sanitized: String): Boolean {
-//     // Arbitrary approach: if length differs by more than 50%, we suspect something
-//     val origLen = original.length
-//     val sanLen = sanitized.length
-//     return sanLen >= (origLen * 0.5)
-// }
-
 /**
  * Runs a naive compile / syntax check for a few languages (python, js, css, html).
  * If you support more languages, extend this.
@@ -134,46 +119,11 @@ fun runCompilerCheck(
     language: String,
 ): Boolean =
     when (language.lowercase()) {
-        "python" -> checkPythonSyntax(code)
         "javascript" -> checkJavaScriptSyntax(code)
         "css" -> checkCssSyntax(code)
-        "html" -> checkHtmlSyntaxWithJsoup(code)
+        "html" -> checkHtmlSyntaxWithJTidy(code)
         else -> false
     }
-
-/**
- * Attempts to verify the Python syntax of [pythonCode] by writing it to a
- * temporary `.py` file and running `python -m py_compile`.
- *
- * If the compilation is successful (exit code = 0), returns true; otherwise false.
- *
- * @param pythonCode The raw Python code snippet to be checked.
- * @return True if the code passed Python's syntax check, false otherwise.
- */
-fun checkPythonSyntax(pythonCode: String): Boolean {
-    val tempPath: Path = createTempFile(prefix = "pythonSnippet", suffix = ".py")
-    tempPath.writeText(pythonCode)
-
-    val process =
-        ProcessBuilder("python", "-m", "py_compile", tempPath.toString())
-            .redirectErrorStream(true)
-            .start()
-
-    val reader = BufferedReader(InputStreamReader(process.inputStream))
-    val errorOutput = StringBuilder()
-    var line: String?
-    while (reader.readLine().also { line = it } != null) {
-        errorOutput.append(line).append("\n")
-    }
-
-    val exitCode = process.waitFor()
-
-    if (exitCode != 0) {
-        println("Python syntax error: ${errorOutput.toString().trim()}")
-    }
-
-    return exitCode == 0
-}
 
 /**
  * Checks CSS syntax using Stylelint.
@@ -213,23 +163,28 @@ fun checkCssSyntax(cssCode: String): Boolean {
 }
 
 /**
- * Performs a minimal syntax check on [htmlCode] by attempting to parse it with Jsoup.
- *
- * Jsoup is fairly tolerant, so minor errors won't necessarily fail here.
- * For stricter checks or advanced validation (e.g., W3C compliance),
- * consider using Tidy or a dedicated validator.
+ * Performs a syntax check on [htmlCode].
  *
  * @param htmlCode The HTML content to parse.
- * @return True if Jsoup could parse it without throwing an exception, false otherwise.
+ * @return True if the code is valid HTML, otherwise false.
  */
-fun checkHtmlSyntaxWithJsoup(htmlCode: String): Boolean =
-    try {
-        Jsoup.parse(htmlCode, "", Parser.htmlParser())
-        true
-    } catch (e: Exception) {
-        println("HTML parsing error: ${e.message}")
-        false
-    }
+fun checkHtmlSyntaxWithJTidy(htmlCode: String): Boolean {
+    val tidy =
+        Tidy().apply {
+            quiet = true
+            showWarnings = true
+        }
+    val errorWriter = StringWriter()
+    tidy.errout = PrintWriter(errorWriter)
+
+    val inputStream = ByteArrayInputStream(htmlCode.toByteArray(Charsets.UTF_8))
+    val outputStream = ByteArrayOutputStream()
+
+    tidy.parseDOM(inputStream, outputStream)
+
+    val errors = errorWriter.toString()
+    return !errors.contains("Error: ")
+}
 
 /**
  * Checks JavaScript syntax by creating a temporary `.js` file and running `node --check`.
