@@ -29,17 +29,15 @@ const LandingPage: FC = () => {
       <NavBar />
       <div className="flex flex-col items-center justify-center flex-grow w-full px-6">
         <HeroSection />
-        {isAuthenticated && (
-          <div className="flex justify-center w-full max-w-4xl mt-6">
-            <OldPrompts />
-          </div>
-        )}
+        <div className="flex justify-center w-full mt-6">
+          <GeneratedPrompts prompts={prompts} />
+        </div>
         <div className="w-full max-w-5xl mt-6">
           <InputBox />
         </div>
-        {!isAuthenticated && (
-          <div className="flex justify-center w-full mt-6">
-            <GeneratedPrompts prompts={prompts} />
+        {isAuthenticated && (
+          <div className="flex justify-center w-full max-w-4xl mt-6">
+            <OldPrompts />
           </div>
         )}
       </div>
