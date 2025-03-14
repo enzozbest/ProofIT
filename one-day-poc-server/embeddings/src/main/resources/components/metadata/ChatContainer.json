@@ -1,0 +1,16 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "ChatContainer",
+    "description": "A React component that unifies the chat and message input components.",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": ["chatbot", "chat container", "ui component", "memoized"]
+}
