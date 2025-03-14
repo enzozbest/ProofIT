@@ -1,12 +1,21 @@
 package prototype
 
+import io.ktor.client.*
+import io.ktor.client.engine.mock.*
+import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import prototype.helpers.OllamaRequest
 import prototype.helpers.OllamaResponse
+import prototype.helpers.OllamaService
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import io.mockk.coEvery
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import kotlinx.serialization.json.Json
+
 
 /**
  * Tests for the PrototypeMain class.
@@ -23,7 +32,6 @@ class PrototypeMainTest {
     @Test
     fun `prompt returns response when LLM call is successful`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val expectedResponse = OllamaResponse(
                 model = testModel,
@@ -33,23 +41,27 @@ class PrototypeMainTest {
                 done_reason = "stop"
             )
 
-            // Create a test implementation that returns a successful Result
-            val testImpl = PrototypeMainTestImpl(testModel) { request ->
-                // Verify the request parameters
-                assertEquals(testPrompt, request.prompt)
-                assertEquals(testModel, request.model)
-                assertEquals(false, request.stream)
-
-                // Return a successful Result
-                Result.success(expectedResponse)
+            val mockEngine = MockEngine { request ->
+                respond(
+                    content = Json.encodeToString(OllamaResponse.serializer(), expectedResponse),
+                    status = HttpStatusCode.OK,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
             }
 
-            // Act
+            val client = HttpClient(mockEngine)
+            OllamaService.client = client
+
+            mockkObject(OllamaService)
+            coEvery { OllamaService.generateResponse(OllamaRequest(testPrompt, testModel, false)) } returns Result.success(expectedResponse)
+
+            val testImpl = PrototypeMain(testModel)
             val result = testImpl.prompt(testPrompt)
 
-            // Assert
             assertNotNull(result)
             assertEquals(expectedResponse, result)
+
+            unmockkObject(OllamaService)
         }
     }
 
@@ -63,23 +75,22 @@ class PrototypeMainTest {
             val testPrompt = "test prompt"
             val errorMessage = "Test error"
 
-            // Create a test implementation that returns a failure Result
-            val testImpl = PrototypeMainTestImpl(testModel) { request ->
-                // Verify the request parameters
-                assertEquals(testPrompt, request.prompt)
-                assertEquals(testModel, request.model)
-                assertEquals(false, request.stream)
+            // Mock OllamaService to return a failure result
+            mockkObject(OllamaService)
+            coEvery { OllamaService.generateResponse(OllamaRequest(testPrompt, testModel, false)) } returns Result.failure(RuntimeException(errorMessage))
 
-                // Return a failure Result
-                Result.failure(RuntimeException(errorMessage))
-            }
+            val testImpl = PrototypeMain(testModel)
 
             // Act & Assert
             val exception = assertThrows<IllegalStateException> {
-                testImpl.prompt(testPrompt)
+                runBlocking {
+                    testImpl.prompt(testPrompt)
+                }
             }
 
             assertEquals("Failed to receive response from the LLM", exception.message)
         }
     }
+
+
 }

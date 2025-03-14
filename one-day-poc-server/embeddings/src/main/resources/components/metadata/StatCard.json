@@ -1,0 +1,21 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "StatCard",
+    "description": "A card component that displays statistical information with a title, value, and icon",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "statistics",
+        "numerical information",
+        "ui component",
+        "memoized"
+    ]
+}

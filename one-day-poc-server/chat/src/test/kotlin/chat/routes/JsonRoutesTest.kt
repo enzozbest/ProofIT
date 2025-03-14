@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -202,6 +203,370 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     contentType(ContentType.Application.Json)
                     setBody("""{"incorrectField": "value"}""")
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val responseBody = response.bodyAsText()
+            assertTrue(responseBody.contains("Invalid request"))
+        }
+
+    @Test
+    fun `Test resetPromptingMain functionality`() =
+        testApplication {
+            val mockPromptingMain = mock<PromptingMain>()
+            runBlocking {
+                whenever(mockPromptingMain.run(any())).thenReturn(
+                    ChatResponse(
+                        "Mock response",
+                        "2025-01-01T12:00:00",
+                    ),
+                )
+            }
+
+            try {
+                setPromptingMain(mockPromptingMain)
+                setupTestApplication()
+
+                val firstResponse =
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                        )
+                    }
+
+                assertEquals("Mock response", firstResponse.bodyAsText())
+
+                resetPromptingMain()
+
+                val differentMock = mock<PromptingMain>()
+                runBlocking {
+                    whenever(differentMock.run(any())).thenReturn(
+                        ChatResponse(
+                            "Default response after reset",
+                            "2025-01-01T12:00:00",
+                        ),
+                    )
+                }
+
+                setPromptingMain(differentMock)
+                val secondResponse =
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                        )
+                    }
+
+                assertEquals("Default response after reset", secondResponse.bodyAsText())
+            } finally {
+                resetPromptingMain()
+            }
+        }
+
+    @Test
+    fun `Test missing required fields in request JSON`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                    {
+                        "userID": "testUser",
+                        "time": "2025-01-01T12:00:00"
+                        
+                    }
+                    """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val responseBody = response.bodyAsText()
+            assertTrue(responseBody.contains("Invalid request"))
+        }
+
+    @Test
+    fun `Test empty prompt in request`() =
+        testApplication {
+            val mockPromptingMain = mock<PromptingMain>()
+            runBlocking {
+                whenever(mockPromptingMain.run("")).thenReturn(
+                    ChatResponse(
+                        "Response to empty prompt",
+                        "2025-01-01T12:00:00",
+                    ),
+                )
+            }
+
+            try {
+                setPromptingMain(mockPromptingMain)
+                setupTestApplication()
+
+                val response =
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": ""
+                        }
+                        """.trimIndent(),
+                        )
+                    }
+
+                assertEquals(HttpStatusCode.OK, response.status)
+                assertEquals("Response to empty prompt", response.bodyAsText())
+            } finally {
+                resetPromptingMain()
+            }
+        }
+
+    @Test
+    fun `Test exception thrown by PromptingMain`() =
+        testApplication {
+            val mockPromptingMain = mock<PromptingMain>()
+            runBlocking {
+                whenever(mockPromptingMain.run(any())).thenThrow(RuntimeException("Simulation of processing error"))
+            }
+
+            try {
+                setPromptingMain(mockPromptingMain)
+                setupTestApplication()
+
+                val exception = assertThrows<RuntimeException> {
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                        )
+                    }
+                }
+
+                assertEquals("Simulation of processing error", exception.message)
+            } finally {
+                resetPromptingMain()
+            }
+        }
+
+    @Test
+    fun `Test null return value from PromptingMain run method`() =
+        testApplication {
+            val mockPromptingMain = mock<PromptingMain>()
+            runBlocking {
+                whenever(mockPromptingMain.run(any())).thenReturn(null)
+            }
+
+            try {
+                setPromptingMain(mockPromptingMain)
+                setupTestApplication()
+
+                val exception = assertThrows<NullPointerException> {
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                        )
+                    }
+                }
+            } finally {
+                resetPromptingMain()
+            }
+        }
+
+    @Test
+    fun `Test unauthorized access to json route`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                    {
+                        "userID": "testUser",
+                        "time": "2025-01-01T12:00:00",
+                        "prompt": "Test prompt"
+                    }
+                    """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `Test handling null return from PromptingMain run method`() =
+        testApplication {
+            val mockPromptingMain = mock<PromptingMain>()
+            runBlocking {
+                whenever(mockPromptingMain.run(any())).thenReturn(null)
+            }
+
+            try {
+                setPromptingMain(mockPromptingMain)
+                setupTestApplication()
+
+                val exception = assertThrows<NullPointerException> {
+                    client.post("/api/chat/json") {
+                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                        contentType(ContentType.Application.Json)
+                        setBody(
+                            """
+                            {
+                                "userID": "testUser",
+                                "time": "2025-01-01T12:00:00",
+                                "prompt": "Test prompt"
+                            }
+                            """.trimIndent(),
+                        )
+                    }
+                }
+            } finally {
+                resetPromptingMain()
+            }
+        }
+
+    @Test
+    fun `Test invalid token for authorization`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer invalidToken")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `Test malformed authorization header`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "InvalidHeaderFormat")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.Unauthorized, response.status)
+        }
+
+    @Test
+    fun `Test null prompt in request`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": null
+                        }
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val responseBody = response.bodyAsText()
+            assertTrue(responseBody.contains("Invalid request"))
+        }
+
+    @Test
+    fun `Test different exception in receive request`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody("") // Empty body should cause a different exception than malformed JSON
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            val responseBody = response.bodyAsText()
+            assertTrue(responseBody.contains("Invalid request"))
+        }
+
+    @Test
+    fun `Test request with prompt key missing`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00"
+                        }
+                        """.trimIndent(),
+                    )
                 }
 
             assertEquals(HttpStatusCode.BadRequest, response.status)
