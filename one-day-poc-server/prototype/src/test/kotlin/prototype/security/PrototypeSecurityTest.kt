@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test
 
 class PrototypeSecurityTest {
     private val mockRunCompilerCheck = mockk<(String, String) -> Boolean>()
-
     private fun mockCompilerCheck(result: Boolean) {
         every { mockRunCompilerCheck(any(), any()) } returns result
     }
+
 
     @Test
     fun `Test unsupported language fails`() {
@@ -20,18 +20,20 @@ class PrototypeSecurityTest {
 
         assertFalse(result, "Expected code to fail for unsupported language")
     }
-
     @Test
     fun `Test valid HTML code passes`() {
         val htmlCode = "<html><body><p>Hello, World!</p></body></html>"
+
         mockCompilerCheck(true)
         val result = secureCodeCheck(htmlCode, "html")
+
         assertTrue(result, "Expected HTML code to pass security checks")
     }
 
     @Test
     fun `Test invalid HTML code fails`() {
         val htmlCode = "<html><ht><body><p>Hello, World!</p></body><ht></html>"
+
         mockCompilerCheck(false)
         val result = secureCodeCheck(htmlCode, "html")
         assertFalse(result)
@@ -99,4 +101,21 @@ class PrototypeSecurityTest {
 
         assertFalse(result)
     }
+
+    @Test
+    fun `Test size check for small code passes`() {
+        val smallCode = "This is a small code snippet"
+        val result = checkCodeSizeLimit(smallCode, maxBytes = 100_000)
+
+        assertTrue(result, "Expected small code to pass size check")
+    }
+
+    @Test
+    fun `Test size check for large code fails`() {
+        val largeCode = "A".repeat(100_001)
+        val result = checkCodeSizeLimit(largeCode, maxBytes = 100_000)
+
+        assertFalse(result, "Expected large code to fail size check")
+    }
+
 }
