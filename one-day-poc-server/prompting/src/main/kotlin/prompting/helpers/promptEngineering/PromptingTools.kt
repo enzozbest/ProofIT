@@ -121,29 +121,81 @@ object PromptingTools {
         - Backend Frameworks: Express, Django, Spring, Ktor
         - Testing: Jest, Cypress, JUnit, PyTest
 
-        ### JSON Structure Example
+        ### Your response must follow the following JSON Schema:
         {
-            "requirements": [
-                "The system implements user authentication with email/password"
-            ],
-            "mainFile": "html",
-            "files": {
-                "html": {
-                    "code": "<div class='page active'>...</div>",
-                    "frameworks": ["React"],
-                    "dependencies": ["react", "react-dom"]
+          " ${'$'}schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Server Response Schema",
+          "type": "object",
+          "properties": {
+            "chat": {
+              "type": "object",
+              "description": "Chat response from the server",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "The content of the message"
                 },
-                "css": {
-                    "code": ".page { ... }",
-                    "frameworks": ["Tailwind"],
-                    "dependencies": []
+                "role": {
+                  "type": "string",
+                  "enum": ["User", "LLM"],
+                  "description": "The role of the message sender"
                 },
-                "javascript": {
-                    "code": "const App = () => { ... }",
-                    "frameworks": ["React"],
-                    "dependencies": ["axios"]
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "ISO 8601 timestamp of when the message was sent"
                 }
+              },
+              "required": ["message", "role", "timestamp"]
+            },
+            "prototype": {
+              "type": "object",
+              "description": "Prototype files to render in WebContainer",
+              "properties": {
+                "files": {
+                  "type": "object",
+                  "description": "File tree structure compatible with WebContainer",
+                  "patternProperties": {
+                    "^.*${'$'}": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "file": {
+                              "type": "object",
+                              "properties": {
+                                "contents": {
+                                  "type": "string",
+                                  "description": "File contents as a string"
+                                }
+                              },
+                              "required": ["contents"]
+                            }
+                          },
+                          "required": ["file"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "directory": {
+                              "type": "object",
+                              "description": "Directory containing files and subdirectories",
+                              "patternProperties": {
+                                "^.*${'$'}": { "${'$'}ref": "#/properties/prototype/properties/files/patternProperties/^.*${'$'}" }
+                              }
+                            }
+                          },
+                          "required": ["directory"]
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["package.json", "index.html", "server.js"]
+                }
+              },
+              "required": ["files"]
             }
+          }
         }
 
         ### Your Task
