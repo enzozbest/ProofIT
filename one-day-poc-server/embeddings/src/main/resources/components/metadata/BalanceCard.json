@@ -2,7 +2,7 @@
     "@context": "https://schema.org/",
     "@type": "SoftwareSourceCode",
     "name": "BalanceCard",
-    "description": "A card component that displays a user's balance with a chart and a list of recent transactions",
+    "description": "A card component that displays a user's balance and balance trend",
     "programmingLanguage": {
         "@type": "ComputerLanguage",
         "name": "TypeScript"
