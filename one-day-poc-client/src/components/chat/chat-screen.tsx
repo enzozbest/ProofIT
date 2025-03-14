@@ -1,10 +1,9 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { ChatBox } from "../components/chat-box";
-import { MessageBox } from "../components/messages-box";
-import { MutedOverlay } from "@/components/ui/overlay";
+import { ChatBox } from "./chat-box";
+import { MessageBox } from "./messages-box";
 import  ChatMessage  from "@/hooks/Chat";
-import { ChatScreenProps } from "../types/Types";
+import { ChatScreenProps } from "../../types/Types";
 
 import {toast} from 'sonner'
 

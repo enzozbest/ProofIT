@@ -1,17 +1,11 @@
 package chat
 
-import kotlinx.serialization.Serializable
+import chat.routes.Response
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
-
-@Serializable
-data class Response(
-    val message: String,
-    val time: String,
-)
 
 class ResponseTest {
     @Test

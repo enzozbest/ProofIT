@@ -35,8 +35,8 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-white">:D</SidebarGroupLabel>
-      <SidebarMenu className="text-white">
+      <SidebarGroupLabel className="">:D</SidebarGroupLabel>
+      <SidebarMenu className="">
         {items.map((item) => (
           <Collapsible
             key={item.title}
@@ -44,21 +44,21 @@ export function NavMain({
             defaultOpen={item.isActive}
             className="group/collapsible"
           >
-            <SidebarMenuItem className="text-white">
+            <SidebarMenuItem className="">
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title} className="text-white">
-                  {item.icon && <item.icon className="text-white"/>}
+                <SidebarMenuButton tooltip={item.title} className="">
+                  {item.icon && <item.icon className=""/>}
                   <span>{item.title}</span>
-                  <ChevronRightIcon className="ml-auto transition-transform duration-200 text-white group-data-[state=open]/collapsible:rotate-90" />
+                  <ChevronRightIcon className="ml-auto transition-transform duration-200  group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub className="text-white">
+                <SidebarMenuSub className="">
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title} className="text-white">
-                      <SidebarMenuSubButton asChild className="text-white">
-                        <a href={subItem.url} className="text-white">
-                          <span className="text-white">{subItem.title}</span>
+                    <SidebarMenuSubItem key={subItem.title} className="">
+                      <SidebarMenuSubButton asChild className="">
+                        <a href={subItem.url} className="">
+                          <span className="">{subItem.title}</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>

@@ -10,7 +10,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
       {prompts.map((text, index) => (
         <button
           key={index}
-          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent text-white text-center whitespace-nowrap hover:bg-white/20 hover:border-white hover:text-white transition duration-300"
+          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent  text-center whitespace-nowrap hover:bg-white/20 hover:border-white hover: transition duration-300"
         >
           {text} →
         </button>
