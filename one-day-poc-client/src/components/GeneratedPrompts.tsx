@@ -8,19 +8,13 @@ type GeneratedPromptsProps = {
 
 const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
-  const handleSignIn = () => {
-    window.location.href = 'http://localhost:8000/api/auth';
-  };
-
-  const handleSubmit = (promptText: String) => {
-    console.log("clicked btn: " + promptText);
+  const handleSubmit = (promptText: string) => {
     if (!isAuthenticated) {
-      handleSignIn();
+      login(promptText);
       return;
     }
-
     navigate('/generate', { state: { initialMessage: promptText } });
   }
 

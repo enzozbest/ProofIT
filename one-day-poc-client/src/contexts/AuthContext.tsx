@@ -1,10 +1,11 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   checkAuth: () => Promise<void>;
-  login: () => void;
+  login: (promptText?: string) => void;
   logout: () => Promise<void>;
 }
 
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const checkAuth = async () => {
     try {
@@ -31,6 +33,12 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       if (data.userId) {
         setIsAuthenticated(true);
         setIsAdmin(data.isAdmin || false);
+
+        const savedPrompt = sessionStorage.getItem('selectedPrompt');
+        if (savedPrompt) {
+          sessionStorage.removeItem('selectedPrompt');
+          navigate('/generate', { state: { initialMessage: savedPrompt } });
+        }
       } else {
         setIsAuthenticated(false);
         setIsAdmin(false);
@@ -42,7 +50,10 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
-  const login = () => {
+  const login = (promptText?: string) => {
+    if (promptText) {
+      sessionStorage.setItem('selectedPrompt', promptText);
+    }
     window.location.href = 'http://localhost:8000/api/auth';
   };
 
