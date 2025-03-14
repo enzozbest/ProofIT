@@ -1,26 +1,11 @@
-import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "./Types";
+import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "../types/Types";
+
+import hardcoded from './hardcoded.json';
+
+const testFiles = hardcoded;  // keep for now but the system is dynamic now, displays response from server
 
 type ChatCallback = (chatResponse: ChatResponse) => void;
 type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;
-
-export async function getPrototypeFiles(prototypeId: string | number): Promise<FileTree> {
-    const response = await fetch(`/api/prototypes/${prototypeId}/files`);
-    if (!response.ok) {
-        throw new Error('Failed to fetch prototype files');
-    }
-    const files = await response.json();
-    
-    const fileTree: FileTree = {};
-    for (const [fileName, content] of Object.entries(files)) {
-        fileTree[fileName] = {
-            file: {
-                contents: content as string
-            }
-        };
-    }
-    
-    return fileTree;
-}
 
 export async function sendChatMessage(
     message: Message,
@@ -56,6 +41,8 @@ export async function sendChatMessage(
         if (serverResponse.prototype) {
             onPrototypeResponse(serverResponse.prototype);
         }
+
+
     } catch (error) {
         console.error('API Error:', error);
         throw error;

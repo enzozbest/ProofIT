@@ -1,0 +1,78 @@
+import React from 'react';
+import { Coffee, ShoppingCart, HomeIcon, ArrowDownRight, ArrowUpRight, DollarSign, Droplet, Wifi } from 'lucide-react';
+
+interface Transaction {
+  id: string;
+  title: string;
+  date: string;
+  amount: number;
+  type: 'expense' | 'income';
+  category: string;
+}
+
+interface TransactionListProps {
+  transactions: Transaction[];
+}
+
+const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
+  const getCategoryIcon = (category: string) => {
+    switch (category.toLowerCase()) {
+      case 'food':
+        return <Coffee className="w-4 h-4" />;
+      case 'shopping':
+        return <ShoppingCart className="w-4 h-4" />;
+      case 'housing':
+        return <HomeIcon className="w-4 h-4" />;
+      case 'utilities':
+        return <Droplet className="w-4 h-4" />;
+      case 'internet':
+        return <Wifi className="w-4 h-4" />;
+      default:
+        return <DollarSign className="w-4 h-4" />;
+    }
+  };
+
+  return (
+    <div className="financial-card">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold">Recent Transactions</h2>
+        <button className="text-sm text-finance-blue hover:underline">View all</button>
+      </div>
+
+      <div className="space-y-4">
+        {transactions.map((transaction) => (
+          <div key={transaction.id} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+            <div className={`rounded-full p-2 mr-3 ${
+              transaction.type === 'expense' ? 'bg-red-50 text-finance-red' : 'bg-green-50 text-finance-green'
+            }`}>
+              {transaction.type === 'expense' ?
+                <ArrowUpRight className="w-4 h-4" /> :
+                <ArrowDownRight className="w-4 h-4" />
+              }
+            </div>
+
+            <div className="flex-grow">
+              <p className="font-medium">{transaction.title}</p>
+              <div className="flex items-center text-sm text-gray-500">
+                <span>{transaction.date}</span>
+                <div className="flex items-center ml-2 text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                  {getCategoryIcon(transaction.category)}
+                  <span className="ml-1">{transaction.category}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`text-right font-medium ${
+              transaction.type === 'expense' ? 'text-finance-red' : 'text-finance-green'
+            }`}>
+              {transaction.type === 'expense' ? '-' : '+'}
+              ${Math.abs(transaction.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TransactionList;

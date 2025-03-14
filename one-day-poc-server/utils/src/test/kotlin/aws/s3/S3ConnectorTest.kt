@@ -8,14 +8,14 @@ import aws.smithy.kotlin.runtime.time.Instant
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kcl.seg.rtt.utils.aws.S3Manager
-import kcl.seg.rtt.utils.aws.S3Service
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import utils.aws.S3Manager
+import utils.aws.S3Service
+import utils.environment.EnvironmentLoader
 import java.io.File
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals

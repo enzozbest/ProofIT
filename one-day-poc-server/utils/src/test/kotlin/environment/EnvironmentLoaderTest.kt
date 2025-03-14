@@ -1,9 +1,9 @@
 package environment
 
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.environment.EnvironmentLoader
 import java.io.File
 import kotlin.test.assertEquals
 
@@ -22,11 +22,12 @@ class EnvironmentLoaderTest {
     }
 
     private fun generateEnvironmentFile() {
-        val env = """
+        val env =
+            """
             DB_URL=testUrl
             DB_USER=testUser
             DB_PASSWORD=testPassword
-        """.trimIndent()
+            """.trimIndent()
         File(envFile).writeText(env)
     }
 
@@ -53,5 +54,4 @@ class EnvironmentLoaderTest {
         val result = EnvironmentLoader.get("DB_URL")
         assertEquals("", result)
     }
-
 }
