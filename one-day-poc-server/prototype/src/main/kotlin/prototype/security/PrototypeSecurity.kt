@@ -15,7 +15,7 @@ import kotlin.io.path.writeText
  * If any fail, returns false.
  *
  * @param code The code snippet to verify
- * @param language The language (e.g. "python", "javascript", "css", "html")
+ * @param language The language (e.g. "javascript", "css", "html")
  * @return True if all checks pass, false otherwise
  */
 fun secureCodeCheck(
