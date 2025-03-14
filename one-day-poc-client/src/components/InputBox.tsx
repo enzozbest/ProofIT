@@ -8,7 +8,7 @@ const InputBox: FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -17,13 +17,9 @@ const InputBox: FC = () => {
     }
   }, [text]);
 
-  const handleSignIn = () => {
-    window.location.href = 'http://localhost:8000/api/auth';
-  };
-
   const handleSubmit = () => {
     if (!isAuthenticated) {
-      handleSignIn();
+      login(text);
       return;
     }
 
@@ -57,7 +53,6 @@ const InputBox: FC = () => {
           className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
           type="button"
         >
-          <Paperclip size={22} />
         </button>
         <button
           className="p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2"
