@@ -1,29 +1,14 @@
 import React, { FC, useState, useRef, useEffect } from 'react';
 import { Paperclip, SendHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const InputBox: FC = () => {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('http://localhost:8000/api/auth/check', {
-      method: 'GET',
-      credentials: 'include',
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.userId) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      })
-      .catch((error) => console.error('Error:', error));
-  }, []);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (textareaRef.current) {
