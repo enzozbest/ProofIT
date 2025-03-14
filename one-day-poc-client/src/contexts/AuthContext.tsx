@@ -43,7 +43,6 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   };
 
   const login = () => {
-    console.log("Login function called!");
     window.location.href = 'http://localhost:8000/api/auth';
   };
 

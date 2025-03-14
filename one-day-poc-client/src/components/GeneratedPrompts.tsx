@@ -15,6 +15,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
   };
 
   const handleSubmit = (promptText: String) => {
+    console.log("clicked btn: " + promptText);
     if (!isAuthenticated) {
       handleSignIn();
       return;
@@ -28,7 +29,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
       {prompts.map((text, index) => (
         <button
           key={index}
-          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent  text-center whitespace-nowrap hover:bg-white/20 hover:border-white hover: transition duration-300"
+          className="border border-white/50 px-5 py-3 rounded-full bg-transparent text-center whitespace-nowrap hover:bg-white/10 transition duration-300 flex items-center"
           onClick={() => handleSubmit(text)}
         >
           {text} →
