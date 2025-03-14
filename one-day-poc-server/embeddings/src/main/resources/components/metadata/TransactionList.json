@@ -1,0 +1,22 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "TransactionList",
+    "description": "A component that displays a list of recent transactions with different styling and timestamps",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "transactions",
+        "bank statements",
+        "finances",
+        "ui component",
+        "memoized"
+    ]
+}
