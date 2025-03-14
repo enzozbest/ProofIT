@@ -1,0 +1,16 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "use-mobile",
+    "description": "A script that detects if the user is on a mobile device and returns a boolean value",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": ["mobile", "phone", "device", "ui component", "touchscreen"]
+}
