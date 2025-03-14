@@ -5,7 +5,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   checkAuth: () => Promise<void>;
-  login: (promptText?: string) => void;
+  login: (promptTextOrEvent?: string | React.MouseEvent) => void;
   logout: () => Promise<void>;
 }
 
@@ -50,9 +50,9 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
-  const login = (promptText?: string) => {
-    if (promptText) {
-      sessionStorage.setItem('selectedPrompt', promptText);
+  const login = (promptTextOrEvent?: string) => {
+    if (promptTextOrEvent && typeof promptTextOrEvent === 'string') {
+      sessionStorage.setItem('selectedPrompt', promptTextOrEvent);
     }
     window.location.href = 'http://localhost:8000/api/auth';
   };
