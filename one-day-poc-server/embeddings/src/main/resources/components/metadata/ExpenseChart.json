@@ -1,0 +1,23 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "ExpenseChart",
+    "description": "A chart component that displays expenses over time with a pie chart",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "pie chart",
+        "chart",
+        "expense chart",
+        "expenses",
+        "ui component",
+        "memoized"
+    ]
+}
