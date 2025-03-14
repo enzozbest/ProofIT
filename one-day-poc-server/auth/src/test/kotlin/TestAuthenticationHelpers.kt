@@ -1,7 +1,6 @@
+import authentication.*
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import kcl.seg.rtt.auth.*
-import kcl.seg.rtt.auth.authentication.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString

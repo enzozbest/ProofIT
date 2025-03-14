@@ -1,5 +1,7 @@
 package helpers
 
+import authentication.AuthenticatedSession
+import authentication.setUpCallbackRoute
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
@@ -11,11 +13,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
-import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import utils.json.PoCJSON.readJsonFile
 import java.util.*
 
 class MockAuthenticationProvider<T : Any>(
@@ -101,9 +101,9 @@ object AuthenticationTestHelpers {
                         expiresIn = Long.MAX_VALUE,
                         refreshToken = null,
                         extraParameters =
-                        Parameters.build {
-                            append("id_token", generateTestJwtToken())
-                        },
+                            Parameters.build {
+                                append("id_token", generateTestJwtToken())
+                            },
                     )
             }
         }

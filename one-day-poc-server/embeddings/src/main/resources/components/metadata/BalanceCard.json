@@ -1,0 +1,24 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "BalanceCard",
+    "description": "A card component that displays a user's bank account balance, account number and balance trend",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "financial dashboard",
+        "bank account",
+        "money",
+        "ui component",
+        "account balance",
+        "money trend",
+        "memoized"
+    ]
+}
