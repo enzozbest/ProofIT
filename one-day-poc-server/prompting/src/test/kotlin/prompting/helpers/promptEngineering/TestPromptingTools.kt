@@ -1,6 +1,5 @@
 package prompting.helpers.promptEngineering
 
-import kotlinx.serialization.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -99,7 +98,6 @@ class TestPromptingTools {
         val input = """{"key": "value", "nested": {"inner": 42}}"""
         val result = promptingTools.formatResponseJson(input)
         assertNotNull(result)
-        assertTrue(result is JsonObject)
         assertEquals("value", result["key"]?.toString()?.trim('"'))
         assertTrue(result.containsKey("nested"))
         val nested = result["nested"]?.toString() ?: ""
@@ -123,7 +121,6 @@ class TestPromptingTools {
             """.trimIndent()
         val result = promptingTools.formatResponseJson(input)
         assertNotNull(result)
-        assertTrue(result is JsonObject)
         assertEquals("value", result["key"]?.toString()?.trim('"'))
 
         val nested = result["nested"]?.toString() ?: ""
@@ -149,7 +146,6 @@ class TestPromptingTools {
             """.trimIndent()
         val result = promptingTools.formatResponseJson(input)
         assertNotNull(result)
-        assertTrue(result is JsonObject)
     }
 
     @Test
@@ -182,7 +178,6 @@ class TestPromptingTools {
 
         val result = promptingTools.formatResponseJson(input)
         assertNotNull(result)
-        assertTrue(result is JsonObject)
         assertEquals("value", result["key"]?.toString()?.trim('"'))
 
         val nested = result["nested"]?.toString() ?: ""
