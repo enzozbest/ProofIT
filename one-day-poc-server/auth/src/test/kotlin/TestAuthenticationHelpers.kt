@@ -195,7 +195,7 @@ class TestAuthenticationHelpers {
         val json =
             """
             {
-                
+
             }
             """.trimIndent()
         val response = createResponse(json)
@@ -280,12 +280,18 @@ class TestAuthenticationHelpers {
             buildUserInfoRequest(
                 token = "test-token",
                 verifierUrl = "https://example.com",
+                accessKey = "test-access-key",
+                secretKey = "test-secret-key",
+                region = "test-region",
                 contentType = "application/json",
                 amzTarget = true,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
+                amzDate = "20230101T000000Z",
+                dateStamp = "20230101",
             )
         assertEquals("https://example.com/", request.url.toString())
-        assertEquals("Bearer test-token", request.header("Authorization"))
+        assertNotNull(request.header("Authorization"))
+        assertTrue(request.header("Authorization")!!.startsWith("AWS4-HMAC-SHA256"))
         assertEquals("application/json", request.header("Content-Type"))
         assertEquals("AWSCognitoIdentityProviderService.GetUser", request.header("X-Amz-Target"))
     }
@@ -296,12 +302,18 @@ class TestAuthenticationHelpers {
             buildUserInfoRequest(
                 token = "test-token",
                 verifierUrl = "https://example.com",
+                accessKey = "test-access-key",
+                secretKey = "test-secret-key",
+                region = "test-region",
                 contentType = "application/json",
                 amzTarget = false,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
+                amzDate = "20230101T000000Z",
+                dateStamp = "20230101",
             )
         assertEquals("https://example.com/", request.url.toString())
-        assertEquals("Bearer test-token", request.header("Authorization"))
+        assertNotNull(request.header("Authorization"))
+        assertTrue(request.header("Authorization")!!.startsWith("AWS4-HMAC-SHA256"))
         assertEquals("application/json", request.header("Content-Type"))
         assertNull(request.header("X-Amz-Target")) // Header should not exist
     }
@@ -310,12 +322,19 @@ class TestAuthenticationHelpers {
     fun `Test buildUserInfoRequest handles empty token`() {
         val request =
             buildUserInfoRequest(
+                token = "",
                 verifierUrl = "https://example.com",
+                accessKey = "test-access-key",
+                secretKey = "test-secret-key",
+                region = "test-region",
                 contentType = "application/json",
                 amzTarget = true,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
+                amzDate = "20230101T000000Z",
+                dateStamp = "20230101",
             )
-        assertEquals("Bearer", request.header("Authorization"))
+        assertNotNull(request.header("Authorization"))
+        assertTrue(request.header("Authorization")!!.startsWith("AWS4-HMAC-SHA256"))
     }
 
     @Test
@@ -324,11 +343,18 @@ class TestAuthenticationHelpers {
             buildUserInfoRequest(
                 token = "test-token",
                 verifierUrl = "https://example.com",
+                accessKey = "test-access-key",
+                secretKey = "test-secret-key",
+                region = "test-region",
                 contentType = "text/plain",
                 amzTarget = true,
                 amzApi = "AWSCognitoIdentityProviderService.GetUser",
+                amzDate = "20230101T000000Z",
+                dateStamp = "20230101",
             )
         assertEquals("text/plain", request.header("Content-Type"))
+        assertNotNull(request.header("Authorization"))
+        assertTrue(request.header("Authorization")!!.startsWith("AWS4-HMAC-SHA256"))
     }
 
     @Test
