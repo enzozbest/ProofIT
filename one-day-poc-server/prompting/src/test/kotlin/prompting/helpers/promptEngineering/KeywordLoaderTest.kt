@@ -4,8 +4,6 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import prompting.helpers.promptEngineering.KeywordList
-import prompting.helpers.promptEngineering.KeywordLoader
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
