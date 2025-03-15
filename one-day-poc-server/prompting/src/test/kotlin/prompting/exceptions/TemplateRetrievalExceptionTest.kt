@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 
 class TemplateRetrievalExceptionTest {
     @Test
-    fun testTemplateRetrievalException() {
+    fun `Test that TemplateRetrievalException is created correctly`() {
         val exception = TemplateRetrievalException("Test error message")
         assertEquals(exception.message, "Test error message")
     }
