@@ -26,10 +26,13 @@ import io.ktor.server.sessions.clear
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 import io.ktor.util.date.GMTDate
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import redis.Redis
+import utils.aws.AWSUserCredentials
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 object AuthenticationRoutes {
     const val AUTHENTICATION_ROUTE: String = "/api/auth"
@@ -146,7 +149,6 @@ internal fun Route.setUpUserInfoRoute(
     verifierUrl: String = "https://cognito-idp.eu-west-2.amazonaws.com/",
     contentType: String = "application/x-amz-json-1.1",
     amzTarget: Boolean = true,
-    amzApi: String = "AWSCognitoIdentityProviderService.GetUser",
 ) {
     get(route) {
         val sessionJson =
@@ -154,15 +156,27 @@ internal fun Route.setUpUserInfoRoute(
                 HttpStatusCode.Unauthorized,
                 "Missing authentication cookie",
             )
-
         val token =
-            try {
-                Json.decodeFromString<AuthenticatedSession>(sessionJson).token
-            } catch (e: SerializationException) {
-                return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token format")
+            runCatching { Json.decodeFromString<AuthenticatedSession>(sessionJson).token }.getOrElse {
+                return@get call.respond(
+                    HttpStatusCode.Unauthorized,
+                    "Invalid token format",
+                )
             }
 
-        val response = buildUserInfoRequest(token, verifierUrl, contentType, amzTarget, amzApi).sendRequest()
+        val now = Instant.now().atOffset(ZoneOffset.UTC)
+        val response =
+            buildUserInfoRequest(
+                token = token,
+                verifierUrl = verifierUrl,
+                accessKey = AWSUserCredentials.getAccessKeyId(),
+                secretKey = AWSUserCredentials.getSecretAccessKey(),
+                region = AWSUserCredentials.getRegion(),
+                amzTarget = amzTarget,
+                amzDate = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").format(now),
+                dateStamp = DateTimeFormatter.ofPattern("yyyyMMdd").format(now),
+            ).sendRequest()
+
         if (!response.isSuccessful) {
             return@get call.respond(HttpStatusCode.Unauthorized, "Invalid token")
         }
@@ -174,7 +188,6 @@ internal fun Route.setUpUserInfoRoute(
                 status = HttpStatusCode.InternalServerError,
             ) // Issue with the generation of the user info JSON.
         }
-
         call.respondText(
             Json.encodeToString<CognitoUserInfo>(userInfo),
             status = HttpStatusCode.OK,
