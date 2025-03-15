@@ -11,7 +11,10 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('http://localhost:8000/api/auth/me', {
+        method: 'GET',
+	credentials: 'include'
+    })
       .then((response) => response.json())
       .then((response) => {
         setUser(response.data);
