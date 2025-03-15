@@ -1,4 +1,4 @@
-package prompting.promptEngineering
+package prompting.helpers.promptEngineering
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
