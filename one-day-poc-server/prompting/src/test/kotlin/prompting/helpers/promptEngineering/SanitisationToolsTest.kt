@@ -1,4 +1,4 @@
-package prompting.promptEngineering
+package prompting.helpers.promptEngineering
 
 import org.junit.jupiter.api.Test
 import prompting.helpers.promptEngineering.SanitisationTools

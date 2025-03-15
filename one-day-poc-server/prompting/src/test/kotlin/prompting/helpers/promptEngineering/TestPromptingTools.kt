@@ -1,4 +1,4 @@
-package prompting.promptEngineering
+package prompting.helpers.promptEngineering
 
 import kotlinx.serialization.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
