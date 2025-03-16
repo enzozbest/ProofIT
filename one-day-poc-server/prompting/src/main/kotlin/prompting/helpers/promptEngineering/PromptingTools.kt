@@ -227,7 +227,7 @@ object PromptingTools {
             Json.decodeFromString<JsonObject>(noNewLines) // Attempt to return the response as is.
         }.getOrElse {
             val cleaned = cleanLlmResponse(response)
-            println(cleaned) // If it fails, clean the response first and try again.
+            println("Failed formatResponseJson: $cleaned") // If it fails, clean the response first and try again.
             Json.decodeFromString<JsonObject>(cleaned)
         }
 
