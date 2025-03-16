@@ -91,7 +91,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
             <DropdownMenuItem 
-            className="cursor-pointer flex items-center space-x-2" 
+            className="cursor-pointer" 
             onClick={() => navigate("/profile")}>
               <BadgeCheck />
               <span>Account</span>
