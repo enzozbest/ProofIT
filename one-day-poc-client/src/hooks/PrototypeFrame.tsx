@@ -28,6 +28,46 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   /**
+   * Normalises file structure to ensure compatibility with WebContainer API
+   * Properly handles nested paths like "src/index.js" by creating directory structure
+   */
+  const normalizeFiles = (files: Record<string, any>): Record<string, any> => {
+    const result: Record<string, any> = {};
+    
+    Object.keys(files).forEach(path => {
+      const fileData = files[path];
+      
+      if (path.includes('/')) {
+        const segments = path.split('/');
+        const fileName = segments.pop() || '';
+        
+        let current = result;
+        for (const segment of segments) {
+          if (!current[segment]) {
+            current[segment] = { directory: {} };
+          }
+          current = current[segment].directory;
+        }
+        
+        if (fileData.file) {
+          const contents = fileData.file.contents || '';
+          current[fileName] = { file: { contents } };
+        }
+      } else {
+        if (fileData.file && Object.keys(fileData.file).length === 0) {
+          result[path] = { file: { contents: "" } };
+        } else if (fileData.file && fileData.file.contents) {
+          result[path] = { file: { contents: fileData.file.contents } };
+        } else if (fileData.directory) {
+          result[path] = { directory: normalizeFiles(fileData.directory) };
+        }
+      }
+    });
+    
+    return result;
+  };
+
+  /**
    * Effect to set up server-ready listener
    */
   useEffect(() => {
@@ -47,21 +87,14 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
     async function loadFiles() {
       if (!webcontainerInstance || !files) return;
 
+      setStatus('Normalizing files...');
+      const normalizedFiles = normalizeFiles(files);
+      
       setStatus('Mounting files...');
 
       try {
-        console.log('Files to mount:', JSON.stringify(files, null, 2));
-
-        const mountPromise = webcontainerInstance.mount(files);
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(
-            () =>
-              reject(new Error('Mounting files timed out after 10 seconds')),
-            10000
-          )
-        );
-
-        await Promise.race([mountPromise, timeoutPromise]);
+        console.log('Files to mount:', JSON.stringify(normalizedFiles, null, 2));
+        await webcontainerInstance.mount(normalizedFiles);
         console.log('Files mounted successfully');
 
         setStatus('Installing dependencies...');
