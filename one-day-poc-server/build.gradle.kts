@@ -94,7 +94,8 @@ subprojects {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
         implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
         implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-        implementation("ch.qos.logback:logback-classic:1.4.11")
+        implementation("ch.qos.logback:logback-classic:1.4.12")
+        implementation("org.slf4j:slf4j-api:1.7.36")
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
@@ -157,6 +158,8 @@ dependencies {
     implementation(project(":utils"))
     implementation(project(":chat"))
     implementation(project(":prompting"))
+    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("org.jsoup:jsoup:1.15.3")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
