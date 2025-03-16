@@ -42,6 +42,16 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const navigate = useNavigate();
+  const handleSignOut = () => {
+    fetch("http://localhost:8000/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    })
+      .then(() => {
+        window.location.href = "/";
+      })
+      .catch((error) => console.error("Error:", error))
+  }
 
   return (
     <SidebarMenu>
@@ -106,7 +116,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={handleSignOut}>
               <LogOut />
               Log out
             </DropdownMenuItem>
