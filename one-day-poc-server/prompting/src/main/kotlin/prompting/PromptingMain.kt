@@ -51,7 +51,8 @@ data class PrototypeResponse(
  * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = "qwen2.5-coder:14b",
+//    private val model: String = "qwen2.5-coder:14b",
+    private val model: String = "qwen2.5:14b",
 ) {
 
     /**
@@ -59,7 +60,7 @@ class PromptingMain(
      *
      * This method processes the user's prompt through multiple steps:
      * 1. Sanitizes the input prompt to ensure safety
-     * 2. Generates a specialized prompt to extract functional requirements
+     * 2. Generates a specialised prompt to extract functional requirements
      * 3. Makes first LLM call to get requirements analysis
      * 4. Creates a prompt for template retrieval and fetches matching templates
      * 5. Creates a comprehensive prototype prompt with requirements and templates
@@ -68,7 +69,7 @@ class PromptingMain(
      * 8. Formats and returns the final chat response
      *
      * @param userPrompt The raw text prompt from the user
-     * @return A ChatResponse object containing the generated response and timestamp
+     * @return A ServerResponse object containing the generated response and timestamp
      * @throws PromptException If any step in the prompting workflow fails
      */
     suspend fun run(userPrompt: String): ServerResponse {
@@ -82,6 +83,8 @@ class PromptingMain(
             prototypePrompt(userPrompt, freqs) // Same as the prototype prompt, with no templates.
         val templates = TemplateInteractor.fetchTemplates(fetchTemplatesPrompt)
         val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
+
+        println("About to prompt LLM")
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
@@ -145,7 +148,7 @@ class PromptingMain(
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
             val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
-            println(llmResponse.response)
+            println("this is the llm response: $llmResponse.response")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 
