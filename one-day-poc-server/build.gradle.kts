@@ -134,7 +134,7 @@ subprojects {
                         """**/*${'$'}Companion*.*""",
                         """server/*""",
                         """routes/*""",
-                        """**/*seeding/*""",
+                        """**/TemplateLibrarySeeder.kt""",
                     )
                 },
             )
