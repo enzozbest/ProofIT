@@ -28,6 +28,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export function NavUser({
   user,
@@ -39,6 +41,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const navigate = useNavigate();
 
   return (
     <SidebarMenu>
@@ -89,7 +92,12 @@ export function NavUser({
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <BadgeCheck />
-                Account
+                <Button 
+                variant="ghost" 
+                className="bg-transparent p-0 h-auto"
+                onClick={() => navigate("/profile")}>
+                  Account
+                </Button>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <ComponentPlaceholderIcon />
