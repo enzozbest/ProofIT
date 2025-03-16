@@ -126,6 +126,7 @@ class PrototypeRepositoryTest {
                 fullPrompt = "Hello, World!",
                 s3key = "testKey",
                 createdAt = Instant.now(),
+                projectName = "Hello program",
             )
 
             val result = invalidRepository.createPrototype(prototype)
@@ -176,6 +177,7 @@ class PrototypeRepositoryTest {
                 fullPrompt = "Hello, World!",
                 s3key = "testKey",
                 createdAt = Instant.now(),
+                projectName = "Hello program",
             )
         return repository.createPrototype(prototype)
     }
