@@ -1,7 +1,9 @@
 package prompting
 
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import prompting.helpers.PrototypeInteractor
@@ -17,12 +19,26 @@ import kotlin.collections.iterator
 /**
  * Represents a response from the chat processing system.
  *
- * @property response The generated text response from the LLM
- * @property time Timestamp string indicating when the response was created
+ * @property message The generated text response from the LLM
+ * @property role The role of the responder (default: "LLM")
+ * @property timestamp Timestamp string indicating when the response was created
  */
+@Serializable
 data class ChatResponse(
-    val response: String,
-    val time: String,
+    val message: String,
+    val role: String = "LLM",
+    val timestamp: String,
+)
+
+@Serializable
+data class ServerResponse(
+    val chat: ChatResponse,
+    val prototype: PrototypeResponse? = null
+)
+
+@Serializable
+data class PrototypeResponse(
+    val files: Map<String, JsonElement>
 )
 
 /**
@@ -35,7 +51,8 @@ data class ChatResponse(
  * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = "qwen2.5-coder:14b",
+//    private val model: String = "qwen2.5-coder:14b",
+    private val model: String = "qwen2.5:14b",
 ) {
 
     /**
@@ -55,7 +72,7 @@ class PromptingMain(
      * @return A ChatResponse object containing the generated response and timestamp
      * @throws PromptException If any step in the prompting workflow fails
      */
-    suspend fun run(userPrompt: String): ChatResponse {
+    suspend fun run(userPrompt: String): ServerResponse {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
@@ -69,12 +86,13 @@ class PromptingMain(
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
+//        print("RESPONSE IN PROMPTING MAIN: $prototypeResponse")
 
         // Send prototype response to web container for displaying
         // webContainerResponse(prototypeResponse)
 
         // Return chat response to chatbot
-        return chatResponse(prototypeResponse)
+        return serverResponse(prototypeResponse)
     }
 
     /**
@@ -135,12 +153,12 @@ class PromptingMain(
         }
 
     /**
-     * Extracts the functional requirements from the LLM response and returns them as a ChatResponse.
+     * Extracts the functional requirements and prototype files from the LLM response.
      * @param response The LLM response.
-     * @return A ChatResponse containing the functional requirements.
+     * @return A ServerResponse containing both chat response and prototype files.
      * @throws PromptException If the requirements could not be found or were returned in an unrecognised format.
      */
-    private fun chatResponse(response: JsonObject): ChatResponse {
+    private fun serverResponse(response: JsonObject): ServerResponse {
         val reqs =
             when (val jsonReqs = response["requirements"]) {
                 is JsonArray -> {
@@ -154,9 +172,23 @@ class PromptingMain(
                 else -> throw PromptException("Requirements could not be found or were returned in an unrecognised format.")
             }
 
-        return ChatResponse(
-            response = "These are the functional requirements fulfilled by this prototype: $reqs",
-            time = Instant.now().toString(),
+        val chatResponse = ChatResponse(
+            message = "These are the functional requirements fulfilled by this prototype: $reqs",
+            role = "LLM",
+            timestamp = Instant.now().toString(),
+        )
+
+        val prototypeResponse = response["prototype"]?.let { prototype ->
+            if (prototype is JsonObject && prototype.containsKey("files")) {
+                PrototypeResponse(
+                    files = (prototype["files"] as JsonObject).toMap()
+                )
+            } else null
+        }
+
+        return ServerResponse(
+            chat = chatResponse,
+            prototype = prototypeResponse
         )
     }
 
