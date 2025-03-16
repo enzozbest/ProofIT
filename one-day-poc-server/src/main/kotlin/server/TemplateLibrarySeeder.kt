@@ -4,7 +4,10 @@ import kotlinx.coroutines.runBlocking
 import templates.TemplateService
 import utils.environment.EnvironmentLoader
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.nio.file.Paths
+import java.util.Properties
 
 /**
  * Object responsible for seeding the Template Library.
@@ -29,63 +32,115 @@ object TemplateLibrarySeeder {
     private val templateDir = File("$libraryPath/templates")
     private val metadataDir = File("$libraryPath/metadata")
 
+    /**
+     * Updates the TDB_SEEDED environment variable in the .env file.
+     *
+     * @param seeded The new value for the TDB_SEEDED environment variable.
+     */
+    private fun updateSeededStatus(seeded: Boolean) {
+        try {
+            val envFile = File(".env")
+            if (!envFile.exists()) {
+                println("Warning: .env file not found. Cannot update TDB_SEEDED status.")
+                return
+            }
+
+            val properties = Properties()
+            FileInputStream(envFile).use { properties.load(it) }
+
+            properties.setProperty("TDB_SEEDED", seeded.toString())
+
+            FileOutputStream(envFile).use {
+                properties.store(it, "Updated by TemplateLibrarySeeder")
+            }
+
+            println("Updated TDB_SEEDED to $seeded in .env file.")
+        } catch (e: Exception) {
+            println("Error updating TDB_SEEDED status: ${e.message}")
+        }
+    }
+
     suspend fun seed() {
-        if (seeded) {
-            println("Template Library already seeded.")
-            return
-        }
+        try {
+            if (seeded) {
+                println("Template Library already seeded.")
+                return
+            }
 
-        // Ensure the provided library path is absolute and exists.
-        if (!Paths.get(libraryPath).isAbsolute) {
-            println("The path to the Template Library must be absolute.")
-            return
-        }
-        if (!File(libraryPath).exists()) {
-            println("The path to the Template Library does not exist.")
-            return
-        }
+            // Ensure the provided library path is absolute and exists.
+            if (!Paths.get(libraryPath).isAbsolute) {
+                println("The path to the Template Library must be absolute.")
+                return
+            }
+            if (!File(libraryPath).exists()) {
+                println("The path to the Template Library does not exist.")
+                return
+            }
 
-        println("Attempting to read template files...")
-        val templates = templateDir.listFiles()?.toList().orEmpty()
-        println("Attempting to read annotation files...")
-        val annotations = metadataDir.listFiles()?.toList().orEmpty()
+            println("Attempting to read template files...")
+            val templates = templateDir.listFiles { _, name -> name.endsWith(".templ") }?.toList().orEmpty()
+            println("Found ${templates.size} template files.")
 
-        if (templates.isEmpty()) {
-            println("No template files found.")
-            return
-        }
+            println("Attempting to read annotation files...")
+            val annotations = metadataDir.listFiles { _, name -> name.endsWith(".jsonld") }?.toList().orEmpty()
+            println("Found ${annotations.size} annotation files.")
 
-        if (annotations.isEmpty()) {
-            println("No annotation files found.")
-            return
-        }
+            if (templates.isEmpty()) {
+                println("No template files found.")
+                return
+            }
 
-        // Build a lookup map for annotations by base name.
-        val annotationMap = annotations.associateBy { it.name.substringBeforeLast('.') }
+            if (annotations.isEmpty()) {
+                println("No annotation files found.")
+                return
+            }
 
-        println("Seeding Template Library...")
-        templates
-            .mapNotNull { template ->
-                val templateBaseName = template.name.substringBeforeLast('.')
-                val annotationFile =
-                    annotationMap[templateBaseName]
-                        ?: return@mapNotNull run {
-                            println("No annotation found for template '${template.name}'")
+            // Build a lookup map for annotations by base name.
+            val annotationMap = annotations.associateBy { it.name.substringBeforeLast('.') }
+
+            println("Seeding Template Library...")
+            val successCount =
+                templates
+                    .mapNotNull { template ->
+                        val templateBaseName = template.name.substringBeforeLast('.')
+                        val annotationFile =
+                            annotationMap[templateBaseName]
+                                ?: return@mapNotNull run {
+                                    println("No annotation found for template '${template.name}'")
+                                    null
+                                }
+
+                        try {
+                            val annotationText = annotationFile.readText()
+                            val response = TemplateService.storeTemplate(template.toURI().toString(), annotationText)
+                            if (response.status == "success") {
+                                println("Template '${template.name}' processed with annotation ID '${response.id}'.")
+                                template.name to (
+                                    response.id
+                                        ?: error("Annotation ID not found for template '${template.name}'")
+                                )
+                            } else {
+                                println("Failed to store template '${template.name}': ${response.message ?: "Unknown error"}")
+                                null
+                            }
+                        } catch (e: Exception) {
+                            println("Error processing template '${template.name}': ${e.message}")
                             null
                         }
+                    }.toMap()
 
-                val annotationText = annotationFile.readText()
-                val response = TemplateService.storeTemplate(template.toURI().toString(), annotationText)
-                if (response.status == "success") {
-                    println("Template '${template.name}' processed with annotation ID '${response.id}'.")
-                    template.name to (response.id ?: error("Annotation ID not found for template '${template.name}'"))
-                } else {
-                    println("Failed to store template '${template.name}'.")
-                    null
-                }
-            }.toMap()
+            if (successCount.isNotEmpty()) {
+                println("Successfully seeded ${successCount.size} templates.")
+                // Update the TDB_SEEDED environment variable to true
+                updateSeededStatus(true)
+            } else {
+                println("No templates were successfully seeded.")
+            }
 
-        println("Template Library seeded.")
+            println("Template Library seeding process completed.")
+        } catch (e: Exception) {
+            println("Error during seeding process: ${e.message}")
+        }
     }
 }
 
