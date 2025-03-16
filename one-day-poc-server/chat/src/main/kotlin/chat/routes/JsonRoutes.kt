@@ -2,13 +2,15 @@ package chat.routes
 
 import chat.JSON
 import chat.Request
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import kotlinx.serialization.json.Json
 import prompting.PromptingMain
+import prompting.ServerResponse
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
@@ -41,7 +43,11 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
-    call.respondText(getPromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
+    val response = getPromptingMain().run(request.prompt)
+    println("RESPONSE IN JSON ROUTES: $response")
+    val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
+    call.respondText(jsonString, contentType = ContentType.Application.Json)
+//    call.respondText(getPromptingMain().run(request.prompt)?.response!!) // Start the prompting workflow
 }
 
 /**
