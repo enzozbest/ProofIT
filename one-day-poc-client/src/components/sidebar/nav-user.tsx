@@ -90,15 +90,12 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                <Button 
-                variant="ghost" 
-                className="bg-transparent p-0 h-auto"
-                onClick={() => navigate("/profile")}>
-                  Account
-                </Button>
-              </DropdownMenuItem>
+            <DropdownMenuItem 
+            className="cursor-pointer flex items-center space-x-2" 
+            onClick={() => navigate("/profile")}>
+              <BadgeCheck />
+              <span>Account</span>
+            </DropdownMenuItem>
               <DropdownMenuItem>
                 <ComponentPlaceholderIcon />
                 Billing
