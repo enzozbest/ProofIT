@@ -9,7 +9,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -58,34 +60,36 @@ object TemplateService {
      * 1. Sends the template to the embedding service to be embedded and stored for semantic search
      * 2. Creates a local record of the template for file path reference
      *
-     * @param name The identifier of the template.
      * @param fileURI file path for the template.
      * @param data The data to store (JSON-LD annotation of a template).
      */
     suspend fun storeTemplate(
-        name: String,
         fileURI: String,
         data: String,
     ): StoreTemplateResponse {
+        val templateId =
+            TemplateStorageService.createTemplate(fileURI) ?: throw IllegalStateException("Failed to store template!")
+
+        val remoteResponse = storeTemplateEmbedding(templateId, data)
+        val success = remoteResponse.status == HttpStatusCode.OK
+        return if (success) {
+            Json.decodeFromString<StoreTemplateResponse>(remoteResponse.bodyAsText()).copy(id = templateId)
+        } else {
+            throw IllegalStateException("Failed to store template!")
+        }
+    }
+
+    suspend fun storeTemplateEmbedding(
+        name: String,
+        data: String,
+    ): HttpResponse {
         val payload = mapOf("name" to name, "text" to data)
         val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_AND_STORE_URL) {
                     setBody(Json.encodeToString(payload))
                 }
-
-        val responseText = response.bodyAsText()
-
-        val storeResponse =
-            try {
-                Json.decodeFromString<StoreTemplateResponse>(responseText)
-            } catch (e: Exception) {
-                throw IllegalStateException("Failed to parse response!", e)
-            }
-
-        val templateId = TemplateStorageService.createTemplate(fileURI)
-
-        return storeResponse.copy(id = templateId)
+        return if (response.status == HttpStatusCode.OK) response else throw IllegalStateException("Failed to store template!")
     }
 
     /**
