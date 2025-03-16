@@ -78,11 +78,85 @@ object PromptingTools {
         requirements: String,
         templates: List<String>,
     ): String =
-        """
+        $$"""
+        ### Your response must obey the following JSON Schema. Do not copy the schema into your response.
+        {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "title": "Server Response Schema",
+          "type": "object",
+          "properties": {
+            "chat": {
+              "type": "object",
+              "description": "Chat response from the server",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "The content of the message"
+                },
+                "role": {
+                  "type": "string",
+                  "enum": ["User", "LLM"],
+                  "description": "The role of the message sender"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "ISO 8601 timestamp of when the message was sent"
+                }
+              },
+              "required": ["message", "role", "timestamp"]
+            },
+            "prototype": {
+              "type": "object",
+              "description": "Prototype files to render in WebContainer",
+              "properties": {
+                "files": {
+                  "type": "object",
+                  "description": "File tree structure compatible with WebContainer",
+                  "patternProperties": {
+                    "^.*$": {
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "file": {
+                              "type": "object",
+                              "properties": {
+                                "contents": {
+                                  "type": "string",
+                                  "description": "File contents as a string"
+                                }
+                              },
+                              "required": ["contents"]
+                            }
+                          },
+                          "required": ["file"]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "directory": {
+                              "type": "object",
+                              "description": "Directory containing files and subdirectories",
+                              "patternProperties": {
+                                "^.*$": { "$ref": "#/properties/prototype/properties/files/patternProperties/^.*$" }
+                              }
+                            }
+                          },
+                          "required": ["directory"]
+                        }
+                      ]
+                    }
+                  },
+                  "required": ["package.json", "index.html", "server.js"]
+                }
+              },
+              "required": ["files"]
+            }
+          }
+        } 
+           
         You are an expert software architect specializing in creating high-quality, production-ready prototypes for WebContainers.
-
-        ### Response Format
-        Provide a single valid JSON object. No additional text, comments, or explanations.
 
         ### Code Quality Requirements
         1. Architecture:
@@ -119,99 +193,21 @@ object PromptingTools {
         - Styling: Tailwind, Bootstrap, Material-UI
         - Backend: Node.js
         - Backend Frameworks: Express, Spring
-        - Testing: Jest, Cypress
-
-        ### Your response must follow the following JSON Schema:
-        {
-          " ${'$'}schema": "http://json-schema.org/draft-07/schema#",
-          "title": "Server Response Schema",
-          "type": "object",
-          "properties": {
-            "chat": {
-              "type": "object",
-              "description": "Chat response from the server",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "description": "The content of the message"
-                },
-                "role": {
-                  "type": "string",
-                  "enum": ["User", "LLM"],
-                  "description": "The role of the message sender"
-                },
-                "timestamp": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "ISO 8601 timestamp of when the message was sent"
-                }
-              },
-              "required": ["message", "role", "timestamp"]
-            },
-            "prototype": {
-              "type": "object",
-              "description": "Prototype files to render in WebContainer",
-              "properties": {
-                "files": {
-                  "type": "object",
-                  "description": "File tree structure compatible with WebContainer",
-                  "patternProperties": {
-                    "^.*${'$'}": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "file": {
-                              "type": "object",
-                              "properties": {
-                                "contents": {
-                                  "type": "string",
-                                  "description": "File contents as a string"
-                                }
-                              },
-                              "required": ["contents"]
-                            }
-                          },
-                          "required": ["file"]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "directory": {
-                              "type": "object",
-                              "description": "Directory containing files and subdirectories",
-                              "patternProperties": {
-                                "^.*${'$'}": { "${'$'}ref": "#/properties/prototype/properties/files/patternProperties/^.*${'$'}" }
-                              }
-                            }
-                          },
-                          "required": ["directory"]
-                        }
-                      ]
-                    }
-                  },
-                  "required": ["package.json", "index.html", "server.js"]
-                }
-              },
-              "required": ["files"]
-            }
-          }
-        }
 
         ### Your Task
         Generate production-quality code based on:
-        1. User requirements below
+        1. User prompt in natural language below
         2. Provided functional requirements
-        3. Available templates
+        3. Available templates provided below
         4. Modern development best practices
         5. Modern styling practices. You must style the components to make them visually appealing using whatever styling framework you choose.
         6. If templates are provided, your styling must be consistent with the provided templates.
         You must provide a complete answer, with all necessary files and dependencies, including the version of the dependencies. Code must be written in 
         full, not just placeholders or using the phrase "...".
 
-        **User Prompt:** "$userPrompt"   
-        **Functional Requirements:** "$requirements"
-        **Templates:** "$templates"
+        **User Prompt:** "$$userPrompt"   
+        **Functional Requirements:** "$$requirements"
+        **Templates:** "$$templates"
         """.trimIndent()
 
     /**
@@ -227,14 +223,13 @@ object PromptingTools {
             Json.decodeFromString<JsonObject>(noNewLines) // Attempt to return the response as is.
         }.getOrElse {
             val cleaned = cleanLlmResponse(response)
-            println("Failed formatResponseJson: $cleaned") // If it fails, clean the response first and try again.
-            Json.decodeFromString<JsonObject>(cleaned)
+            Json.decodeFromString<JsonObject>(cleaned).also { println("Decoded JSON: $it") }
         }
 
     /**
      * Extracts and cleans a JSON object from an LLM response string.
      *
-     * Identifies the first opening '{' and last closing '}' brace to extract the JSON object,
+     * Identifies the first opening '{' and last closing '}' brace to extract the JSON object,]
      * then removes comments, handles escaped quotations, and normalizes whitespace.
      *
      * @param response The raw string from an LLM that may contain a JSON object
@@ -249,10 +244,12 @@ object PromptingTools {
                     .indexOf('}') // As a "forwards" index pointing to the character just after the last '}'
 
         val jsonString = response.substring(openingBrace, closingBrace)
+        println(jsonString)
         val cleaned =
             jsonString
                 .removeComments()
                 .removeEscapedQuotations()
+                .removeBacktickedBraces()
                 .replace(newLineRegex, "")
                 .trim()
         return cleaned
@@ -285,5 +282,11 @@ object PromptingTools {
         val escapedDoubleQuotationsRegex = Regex("""(\\")""", RegexOption.MULTILINE)
         val escapedSingleQuotationsRegex = Regex("""(\\')""", RegexOption.MULTILINE)
         return this.replace(escapedDoubleQuotationsRegex, "\"").replace(escapedSingleQuotationsRegex, "'")
+    }
+
+    fun String.removeBacktickedBraces(): String {
+        val backtickedOpeningBracesRegex = Regex("""`\{""")
+        val backtickedClosingBracesRegex = Regex("""}`""")
+        return this.replace(backtickedOpeningBracesRegex, "{").replace(backtickedClosingBracesRegex, "}")
     }
 }

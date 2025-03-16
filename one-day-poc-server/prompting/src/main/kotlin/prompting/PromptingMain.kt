@@ -3,7 +3,6 @@ package prompting
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import prompting.helpers.PrototypeInteractor
@@ -33,12 +32,12 @@ data class ChatResponse(
 @Serializable
 data class ServerResponse(
     val chat: ChatResponse,
-    val prototype: PrototypeResponse? = null
+    val prototype: PrototypeResponse? = null,
 )
 
 @Serializable
 data class PrototypeResponse(
-    val files: JsonObject  // Keep as JsonObject, not Map
+    val files: JsonObject, // Keep as JsonObject, not Map
 )
 
 /**
@@ -51,10 +50,9 @@ data class PrototypeResponse(
  * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-//    private val model: String = "qwen2.5-coder:14b",
-    private val model: String = "qwen2.5:14b",
+    private val model: String = "qwen2.5-coder:14b",
+    // private val model: String = "qwen2.5:14b",
 ) {
-
     /**
      * Executes the complete prompting workflow for a user prompt.
      *
@@ -148,7 +146,7 @@ class PromptingMain(
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
             val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
-            println("this is the llm response: $llmResponse.response")
+            println("this is the llm response: ${llmResponse.response}")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 
@@ -160,33 +158,38 @@ class PromptingMain(
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
         println("Inside of serverResponse")
-        val chat = when (val jsonReqs = response["Chat"]) {
-            is JsonPrimitive -> jsonReqs.content
-            // else -> throw PromptException("Message could not be found or were returned in an unrecognised format.")
-            else -> "Here is your code."
-        }
+        val chat =
+            when (val jsonReqs = response["Chat"]) {
+                is JsonPrimitive -> jsonReqs.content
+                // else -> throw PromptException("Message could not be found or were returned in an unrecognised format.")
+                else -> "Here is your code."
+            }
 
-        val chatResponse = ChatResponse(
-            message = chat,
-            role = "LLM",
-            timestamp = Instant.now().toString(),
-        )
+        val chatResponse =
+            ChatResponse(
+                message = chat,
+                role = "LLM",
+                timestamp = Instant.now().toString(),
+            )
 
         println("Chat response created")
 
-        val prototypeResponse = response["prototype"]?.let { prototype ->
-            if (prototype is JsonObject && prototype.containsKey("files")) {
-                PrototypeResponse(
-                    files = prototype["files"] as JsonObject
-                )
-            } else null
-        }
+        val prototypeResponse =
+            response["prototype"]?.let { prototype ->
+                if (prototype is JsonObject && prototype.containsKey("files")) {
+                    PrototypeResponse(
+                        files = prototype["files"] as JsonObject,
+                    )
+                } else {
+                    null
+                }
+            }
 
         println("Response created: $chatResponse and $prototypeResponse")
 
         return ServerResponse(
             chat = chatResponse,
-            prototype = prototypeResponse
+            prototype = prototypeResponse,
         )
     }
 
