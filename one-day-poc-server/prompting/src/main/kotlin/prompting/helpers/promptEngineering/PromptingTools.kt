@@ -117,9 +117,9 @@ object PromptingTools {
         - Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript
         - Frameworks: React, Vue, Angular, Svelte
         - Styling: Tailwind, Bootstrap, Material-UI
-        - Backend: Node.js, Python, Java, Kotlin, C++
-        - Backend Frameworks: Express, Django, Spring, Ktor
-        - Testing: Jest, Cypress, JUnit, PyTest
+        - Backend: Node.js
+        - Backend Frameworks: Express, Spring
+        - Testing: Jest, Cypress
 
         ### Your response must follow the following JSON Schema:
         {

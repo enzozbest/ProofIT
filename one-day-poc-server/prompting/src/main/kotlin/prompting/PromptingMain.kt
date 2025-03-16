@@ -33,12 +33,12 @@ data class ChatResponse(
 @Serializable
 data class ServerResponse(
     val chat: ChatResponse,
-    val prototype: PrototypeResponse? = null,
+    val prototype: PrototypeResponse? = null
 )
 
 @Serializable
 data class PrototypeResponse(
-    val files: Map<String, JsonElement>,
+    val files: JsonObject  // Keep as JsonObject, not Map
 )
 
 /**
@@ -53,21 +53,22 @@ data class PrototypeResponse(
 class PromptingMain(
     private val model: String = "qwen2.5-coder:14b",
 ) {
+
     /**
      * Executes the complete prompting workflow for a user prompt.
      *
      * This method processes the user's prompt through multiple steps:
-     * 1. Sanitizes the input prompt to ensure safety;
-     * 2. Generates a specialised prompt to extract functional requirements;
-     * 3. Makes first LLM call to get requirements analysis;
-     * 4. Creates a prompt for template retrieval and fetches matching templates;
-     * 5. Creates a comprehensive prototype prompt with requirements and templates;
-     * 6. Makes second LLM call to generate the final prototype response;
-     * 7. Validates the response returned by the LLM;
-     * 8. Formats and returns the final chat response.
+     * 1. Sanitizes the input prompt to ensure safety
+     * 2. Generates a specialized prompt to extract functional requirements
+     * 3. Makes first LLM call to get requirements analysis
+     * 4. Creates a prompt for template retrieval and fetches matching templates
+     * 5. Creates a comprehensive prototype prompt with requirements and templates
+     * 6. Makes second LLM call to generate the final prototype response
+     * 7. Validates the response returned by the LLM
+     * 8. Formats and returns the final chat response
      *
      * @param userPrompt The raw text prompt from the user
-     * @return A [ServerResponse] object containing the generated response and timestamp
+     * @return A ChatResponse object containing the generated response and timestamp
      * @throws PromptException If any step in the prompting workflow fails
      */
     suspend fun run(userPrompt: String): ServerResponse {
@@ -84,13 +85,11 @@ class PromptingMain(
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
-//        print("RESPONSE IN PROMPTING MAIN: $prototypeResponse")
 
-        // Send prototype response to web container for displaying
-        // webContainerResponse(prototypeResponse)
+        println("About to create response")
+        val response = serverResponse(prototypeResponse)
 
-        // Return chat response to chatbot
-        return serverResponse(prototypeResponse)
+        return response
     }
 
     /**
@@ -154,43 +153,37 @@ class PromptingMain(
      * Extracts the functional requirements and prototype files from the LLM response.
      * @param response The LLM response.
      * @return A ServerResponse containing both chat response and prototype files.
-     * @throws PromptException If the requirements could not be found or were returned in an unrecognised format.
+     * @throws PromptException If the chat part could not be found or ... i dont even think the llm generates this right now
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
-        val reqs =
-            when (val jsonReqs = response["requirements"]) {
-                is JsonArray -> {
-                    if (jsonReqs.isEmpty()) {
-                        throw PromptException("No requirements found in LLM response")
-                    }
-                    jsonReqs.joinToString(", ") { (it as JsonPrimitive).content }
-                }
+        println("Inside of serverResponse")
+        val chat = when (val jsonReqs = response["Chat"]) {
+            is JsonPrimitive -> jsonReqs.content
+            // else -> throw PromptException("Message could not be found or were returned in an unrecognised format.")
+            else -> "Here is your code."
+        }
 
-                is JsonPrimitive -> jsonReqs.content
-                else -> throw PromptException("Requirements could not be found or were returned in an unrecognised format.")
-            }
+        val chatResponse = ChatResponse(
+            message = chat,
+            role = "LLM",
+            timestamp = Instant.now().toString(),
+        )
 
-        val chatResponse =
-            ChatResponse(
-                message = "These are the functional requirements fulfilled by this prototype: $reqs",
-                role = "LLM",
-                timestamp = Instant.now().toString(),
-            )
+        println("Chat response created")
 
-        val prototypeResponse =
-            response["prototype"]?.let { prototype ->
-                if (prototype is JsonObject && prototype.containsKey("files")) {
-                    PrototypeResponse(
-                        files = (prototype["files"] as JsonObject).toMap(),
-                    )
-                } else {
-                    null
-                }
-            }
+        val prototypeResponse = response["prototype"]?.let { prototype ->
+            if (prototype is JsonObject && prototype.containsKey("files")) {
+                PrototypeResponse(
+                    files = prototype["files"] as JsonObject
+                )
+            } else null
+        }
+
+        println("Response created: $chatResponse and $prototypeResponse")
 
         return ServerResponse(
             chat = chatResponse,
-            prototype = prototypeResponse,
+            prototype = prototypeResponse
         )
     }
 
