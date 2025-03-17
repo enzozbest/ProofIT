@@ -44,7 +44,9 @@ private suspend fun handleJsonRequest(
     call: ApplicationCall,
 ) {
     val response = getPromptingMain().run(request.prompt)
+    println("RECEIVED RESPONSE")
     val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
+    println("ENCODED RESPONSE: $jsonString")
     call.respondText(jsonString, contentType = ContentType.Application.Json)
 }
 

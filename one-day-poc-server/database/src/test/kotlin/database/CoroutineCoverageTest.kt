@@ -87,6 +87,7 @@ class CoroutineCoverageTest {
             fullPrompt = "Hello, World!",
             s3key = "testKey",
             createdAt = Instant.now(),
+            projectName = "Hello program",
         )
 
         val result = prototypeRepository.createPrototype(prototype)
@@ -105,6 +106,7 @@ class CoroutineCoverageTest {
             fullPrompt = "Hello, World!",
             s3key = "testKey",
             createdAt = Instant.now(),
+            projectName = "Hello program",
         )
 
         val createResult = prototypeRepository.createPrototype(prototype)
@@ -132,6 +134,7 @@ class CoroutineCoverageTest {
             fullPrompt = "Hello, World! 1",
             s3key = "testKey1",
             createdAt = Instant.now(),
+            projectName = "Hello program",
         )
 
         val prototype2 = Prototype(
@@ -141,6 +144,7 @@ class CoroutineCoverageTest {
             fullPrompt = "Hello, World! 2",
             s3key = "testKey2",
             createdAt = Instant.now(),
+            projectName = "Hello program",
         )
 
         val createResult1 = prototypeRepository.createPrototype(prototype1)
@@ -202,6 +206,7 @@ class CoroutineCoverageTest {
             fullPrompt = "Hello, World!",
             s3key = "testKey",
             createdAt = Instant.now(),
+            projectName = "Hello program",
         )
 
         val result = invalidRepository.createPrototype(prototype)

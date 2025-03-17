@@ -21,7 +21,15 @@ object PromptingTools {
         You are an expert software requirements engineer tasked with generating precise, actionable functional requirements for a software prototype that will run in WebContainers.
 
         ### Response Format
-        Respond with a single valid JSON object only. No explanations, comments, or additional text.
+        Respond with a single valid JSON object only, according to the example below. No explanations, comments, or additional text.
+        Example: {
+            "requirements": [
+                "The system shall display a login form with email and password fields",
+                "The system shall validate email format before form submission",
+                "The system shall provide error feedback for invalid inputs"
+            ],
+            "keywords": ["authentication", "validation", "user feedback"]
+        }
 
         ### Requirements Guidelines
         1. Requirements must be:
@@ -42,16 +50,6 @@ object PromptingTools {
            - Include data validation rules where applicable
            - Specify error handling and feedback mechanisms
            - Define initial/dummy values for immediate testing
-
-        ### JSON Structure Example
-        {
-            "requirements": [
-                "The system shall display a login form with email and password fields",
-                "The system shall validate email format before form submission",
-                "The system shall provide error feedback for invalid inputs"
-            ],
-            "keywords": ["authentication", "validation", "user feedback"]
-        }
 
         ### Your Task
         Generate comprehensive requirements based on:
@@ -214,7 +212,9 @@ object PromptingTools {
      */
     fun formatResponseJson(response: String): JsonObject {
         val cleaned = cleanLlmResponse(response)
+        println("CLEANED RESPONSE")
         return run {
+            println("DECODING...")
             Json.decodeFromString<JsonObject>(cleaned)
         }
     }

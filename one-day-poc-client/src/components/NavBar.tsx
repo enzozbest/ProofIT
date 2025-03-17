@@ -1,29 +1,9 @@
 import React, { FC } from 'react';
 import { BotMessageSquare } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
-type NavBarProps = {
-  isAuthenticated: boolean;
-  setIsAuthenticated: (value: boolean) => void;
-};
-
-const NavBar: React.FC<NavBarProps> = ({
-  isAuthenticated,
-  setIsAuthenticated,
-}) => {
-  const handleSignIn = () => {
-    window.location.href = 'http://localhost:8000/api/auth';
-  };
-
-  const handleSignOut = () => {
-    fetch('http://localhost:8000/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then(() => {
-        setIsAuthenticated(false);
-      })
-      .catch((error) => console.error('Error:', error));
-  };
+const NavBar: React.FC = () => {
+  const { isAuthenticated, login, logout } = useAuth();
 
   return (
     <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-10 py-6 z-10">
@@ -37,14 +17,14 @@ const NavBar: React.FC<NavBarProps> = ({
       <div className="flex gap-2">
         {isAuthenticated ? (
           <button
-            onClick={handleSignOut}
+            onClick={logout}
             className="border-2 border-white bg-transparent  px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Log Out
           </button>
         ) : (
           <button
-            onClick={handleSignIn}
+            onClick={login}
             className="border-2 border-white  bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Sign In
