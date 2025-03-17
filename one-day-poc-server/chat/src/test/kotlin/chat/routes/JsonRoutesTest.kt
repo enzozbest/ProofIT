@@ -6,6 +6,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
@@ -14,7 +15,6 @@ import org.mockito.kotlin.whenever
 import prompting.ChatResponse
 import prompting.PromptingMain
 import prompting.ServerResponse
-import kotlinx.serialization.json.Json
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -24,46 +24,6 @@ data class PromptResult(
 )
 
 class JsonRoutesTest : BaseAuthenticationServer() {
-    //    private fun Application.successTestModule() {
-//        setTestClient(createSuccessMockClient())
-//        setTestEndpoint("http://test-server/api/prototype/generate")
-//        chatModule()
-//    }
-//
-//    private fun Application.errorTestModule() {
-//        setTestClient(createErrorMockClient())
-//        setTestEndpoint("http://test-server/api/prototype/generate")
-//        chatModule()
-//    }
-//
-//    private fun createSuccessMockClient(): HttpClient {
-//        return HttpClient(MockEngine) {
-//            engine {
-//                addHandler { request ->
-//                    respond(
-//                        content = "Test LLM Response",
-//                        status = HttpStatusCode.OK,
-//                        headers = headersOf(HttpHeaders.ContentType, "text/plain")
-//                    )
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun createErrorMockClient(): HttpClient {
-//        return HttpClient(MockEngine) {
-//            engine {
-//                addHandler { request ->
-//                    respond(
-//                        content = "Service Error",
-//                        status = HttpStatusCode.InternalServerError,
-//                        headers = headersOf(HttpHeaders.ContentType, "text/plain")
-//                    )
-//                }
-//            }
-//        }
-//    }
-
     @Test
     fun `Test successful json route with valid request`() =
         testApplication {
@@ -71,11 +31,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
                     ServerResponse(
-                        chat = ChatResponse(
-                            message = "This is a test response",
-                            timestamp = "2025-01-01T12:00:00",
-                        )
-                    )
+                        chat =
+                            ChatResponse(
+                                message = "This is a test response",
+                                timestamp = "2025-01-01T12:00:00",
+                            ),
+                    ),
                 )
             }
 
@@ -131,11 +92,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
                     ServerResponse(
-                        chat = ChatResponse(
-                            message = "Error processing prompt",
-                            timestamp = "2025-01-01T12:00:00",
-                        )
-                    )
+                        chat =
+                            ChatResponse(
+                                message = "Error processing prompt",
+                                timestamp = "2025-01-01T12:00:00",
+                            ),
+                    ),
                 )
             }
 
@@ -174,11 +136,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
                     ServerResponse(
-                        chat = ChatResponse(
-                            message = "Valid response",
-                            timestamp = "2025-01-01T12:00:00",
-                        )
-                    )
+                        chat =
+                            ChatResponse(
+                                message = "Valid response",
+                                timestamp = "2025-01-01T12:00:00",
+                            ),
+                    ),
                 )
             }
 
@@ -234,11 +197,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
                     ServerResponse(
-                        chat = ChatResponse(
-                            message = "Mock response",
-                            timestamp = "2025-01-01T12:00:00",
-                        )
-                    )
+                        chat =
+                            ChatResponse(
+                                message = "Mock response",
+                                timestamp = "2025-01-01T12:00:00",
+                            ),
+                    ),
                 )
             }
 
@@ -252,12 +216,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         contentType(ContentType.Application.Json)
                         setBody(
                             """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": "Test prompt"
-                        }
-                        """.trimIndent(),
+                            {
+                                "userID": "testUser",
+                                "time": "2025-01-01T12:00:00",
+                                "prompt": "Test prompt"
+                            }
+                            """.trimIndent(),
                         )
                     }
 
@@ -271,11 +235,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 runBlocking {
                     whenever(differentMock.run(any())).thenReturn(
                         ServerResponse(
-                            chat = ChatResponse(
-                                message = "Default response after reset",
-                                timestamp = "2025-01-01T12:00:00",
-                            )
-                        )
+                            chat =
+                                ChatResponse(
+                                    message = "Default response after reset",
+                                    timestamp = "2025-01-01T12:00:00",
+                                ),
+                        ),
                     )
                 }
 
@@ -286,12 +251,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         contentType(ContentType.Application.Json)
                         setBody(
                             """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": "Test prompt"
-                        }
-                        """.trimIndent(),
+                            {
+                                "userID": "testUser",
+                                "time": "2025-01-01T12:00:00",
+                                "prompt": "Test prompt"
+                            }
+                            """.trimIndent(),
                         )
                     }
 
@@ -314,12 +279,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     contentType(ContentType.Application.Json)
                     setBody(
                         """
-                    {
-                        "userID": "testUser",
-                        "time": "2025-01-01T12:00:00"
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00"
 
-                    }
-                    """.trimIndent(),
+                        }
+                        """.trimIndent(),
                     )
                 }
 
@@ -335,11 +300,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             runBlocking {
                 whenever(mockPromptingMain.run("")).thenReturn(
                     ServerResponse(
-                        chat = ChatResponse(
-                            message = "Response to empty prompt",
-                            timestamp = "2025-01-01T12:00:00",
-                        )
-                    )
+                        chat =
+                            ChatResponse(
+                                message = "Response to empty prompt",
+                                timestamp = "2025-01-01T12:00:00",
+                            ),
+                    ),
                 )
             }
 
@@ -353,12 +319,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         contentType(ContentType.Application.Json)
                         setBody(
                             """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": ""
-                        }
-                        """.trimIndent(),
+                            {
+                                "userID": "testUser",
+                                "time": "2025-01-01T12:00:00",
+                                "prompt": ""
+                            }
+                            """.trimIndent(),
                         )
                     }
 
@@ -383,21 +349,22 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                val exception = assertThrows<RuntimeException> {
-                    client.post("/api/chat/json") {
-                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": "Test prompt"
+                val exception =
+                    assertThrows<RuntimeException> {
+                        client.post("/api/chat/json") {
+                            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                            contentType(ContentType.Application.Json)
+                            setBody(
+                                """
+                                {
+                                    "userID": "testUser",
+                                    "time": "2025-01-01T12:00:00",
+                                    "prompt": "Test prompt"
+                                }
+                                """.trimIndent(),
+                            )
                         }
-                        """.trimIndent(),
-                        )
                     }
-                }
 
                 assertEquals("Simulation of processing error", exception.message)
             } finally {
@@ -417,18 +384,18 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                val exception = assertThrows<NullPointerException> {
+                assertThrows<NullPointerException> {
                     client.post("/api/chat/json") {
                         header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                         contentType(ContentType.Application.Json)
                         setBody(
                             """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": "Test prompt"
-                        }
-                        """.trimIndent(),
+                            {
+                                "userID": "testUser",
+                                "time": "2025-01-01T12:00:00",
+                                "prompt": "Test prompt"
+                            }
+                            """.trimIndent(),
                         )
                     }
                 }
@@ -447,12 +414,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     contentType(ContentType.Application.Json)
                     setBody(
                         """
-                    {
-                        "userID": "testUser",
-                        "time": "2025-01-01T12:00:00",
-                        "prompt": "Test prompt"
-                    }
-                    """.trimIndent(),
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt"
+                        }
+                        """.trimIndent(),
                     )
                 }
 
@@ -471,7 +438,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                val exception = assertThrows<NullPointerException> {
+                assertThrows<NullPointerException> {
                     client.post("/api/chat/json") {
                         header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                         contentType(ContentType.Application.Json)
