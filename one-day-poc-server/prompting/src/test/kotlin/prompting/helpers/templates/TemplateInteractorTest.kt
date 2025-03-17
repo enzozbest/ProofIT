@@ -160,7 +160,7 @@ class TemplateInteractorTest {
             } returns templateID
 
             coEvery {
-                TemplateService.storeTemplate(templateID, templateFilePath, jsonLD)
+                TemplateService.storeTemplate(templateID, templateFilePath)
             } returns
                 mockk {
                     every { status } returns "success"
@@ -182,7 +182,7 @@ class TemplateInteractorTest {
                     storageConfig = any(),
                 )
                 TemplateStorageService.createTemplate(templateFilePath)
-                TemplateService.storeTemplate(templateID, templateFilePath, jsonLD)
+                TemplateService.storeTemplate(templateID, templateFilePath)
             }
         }
 
@@ -358,7 +358,7 @@ class TemplateInteractorTest {
                     storageConfig = any(),
                 )
                 TemplateStorageService.createTemplate(any())
-                TemplateService.storeTemplate(any(), any(), any())
+                TemplateService.storeTemplate(any(), any())
             }
         }
 
@@ -414,7 +414,7 @@ class TemplateInteractorTest {
             }
             coVerify(exactly = 0) {
                 TemplateStorageService.createTemplate(any())
-                TemplateService.storeTemplate(any(), any(), any())
+                TemplateService.storeTemplate(any(), any(),)
             }
         }
 
@@ -475,7 +475,7 @@ class TemplateInteractorTest {
                 TemplateStorageService.createTemplate(templateFilePath)
             }
             coVerify(exactly = 0) {
-                TemplateService.storeTemplate(any(), any(), any())
+                TemplateService.storeTemplate(any(), any())
             }
         }
 
@@ -517,7 +517,7 @@ class TemplateInteractorTest {
             } returns templateID
 
             coEvery {
-                TemplateService.storeTemplate(templateID, templateFilePath, jsonLD)
+                TemplateService.storeTemplate(templateID, templateFilePath)
             } returns
                 mockk {
                     every { status } returns "error"
@@ -541,7 +541,7 @@ class TemplateInteractorTest {
                     storageConfig = any(),
                 )
                 TemplateStorageService.createTemplate(templateFilePath)
-                TemplateService.storeTemplate(templateID, templateFilePath, jsonLD)
+                TemplateService.storeTemplate(templateID, templateFilePath)
             }
         }
 
@@ -622,7 +622,7 @@ class TemplateInteractorTest {
             coVerify(exactly = 0) {
                 TemplateStorageUtils.storeFile(any(), any(), any(), any())
                 TemplateStorageService.createTemplate(any())
-                TemplateService.storeTemplate(any(), any(), any())
+                TemplateService.storeTemplate(any(), any())
             }
         }
 }
