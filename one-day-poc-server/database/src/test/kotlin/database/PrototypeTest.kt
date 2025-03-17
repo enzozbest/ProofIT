@@ -17,7 +17,8 @@ class PrototypeTest {
             userPrompt = "Initial user prompt",
             fullPrompt = "Initial full prompt",
             s3key = "testKey",
-            createdAt = Instant.now()
+            createdAt = Instant.now(),
+            projectName = "Hello program",
         )
         
         // Call the setter method that needs coverage
@@ -36,7 +37,8 @@ class PrototypeTest {
             userPrompt = "Initial user prompt",
             fullPrompt = "Initial full prompt",
             s3key = "testKey",
-            createdAt = Instant.now()
+            createdAt = Instant.now(),
+            projectName = "Hello program",
         )
         
         // Call the setter method that needs coverage
@@ -55,7 +57,8 @@ class PrototypeTest {
             userPrompt = "Test user prompt",
             fullPrompt = "Initial full prompt",
             s3key = "testKey",
-            createdAt = Instant.now()
+            createdAt = Instant.now(),
+            projectName = "Hello program",
         )
         
         // Call the setter method that needs coverage

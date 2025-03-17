@@ -26,6 +26,7 @@ class PrototypeRepository(
                     fullPrompt = prototype.fullPrompt
                     s3Key = prototype.s3key
                     createdAt = prototype.createdAt
+                    projectName = prototype.projectName
                 }
             }
         }
