@@ -1,16 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import ChatMessage from "@/hooks/Chat";
 
-export function ChatBox({ message, setMessage, handleSend, setError}) {
+export function ChatBox({ message, setMessage, handleSend}) {
     const location = useLocation();
     const initialMessage = location.state?.initialMessage;
     const shouldSend = useRef(false);
 
-    /*
-        * Set the message to the one from the landing page
-        * Block handleSend() from running until the message has been set
-     */
     useEffect(() => {
         if (initialMessage) {
             setMessage(initialMessage);
@@ -18,17 +13,12 @@ export function ChatBox({ message, setMessage, handleSend, setError}) {
         }
     }, []);
 
-    /*
-        * The initial message has been set, now we can send the message
-     */
     useEffect(() => {
         if (shouldSend.current && message === initialMessage) {
             shouldSend.current = false;
             handleSend();
         }
     }, [message, initialMessage]);
-
-    const recentMessageRef = useRef(null);
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {

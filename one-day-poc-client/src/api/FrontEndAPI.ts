@@ -1,8 +1,4 @@
-import { Message, ChatResponse, PrototypeResponse, FileTree, ServerResponse, MessagePayload } from "../types/Types";
-
-import hardcoded from './hardcoded.json';
-
-const testFiles = hardcoded;  // keep for now but the system is dynamic now, displays response from server
+import { Message, ChatResponse, PrototypeResponse, ServerResponse, MessagePayload } from "../types/Types";
 
 type ChatCallback = (chatResponse: ChatResponse) => void;
 type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;

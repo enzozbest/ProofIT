@@ -28,11 +28,6 @@ import {
   ChevronDownIcon, 
 } from "@radix-ui/react-icons"
 
-import {
-  Share,
-  Rocket
-} from "lucide-react";
-
 export default function SidebarWrapper({children}:{children : React.ReactNode}) {
   const [projectName, setProjectName] = useState<string >("Untitled Project");
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
