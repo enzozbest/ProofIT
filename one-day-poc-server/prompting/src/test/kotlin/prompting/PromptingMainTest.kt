@@ -102,7 +102,7 @@ class PromptingMainTest {
 
         assertEquals(
             "These are the functional requirements fulfilled by this prototype: final req1, final req2",
-            result.response,
+            result.ServerResponse,
         )
     }
 
