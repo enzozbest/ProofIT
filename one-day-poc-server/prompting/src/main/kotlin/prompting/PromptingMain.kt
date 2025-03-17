@@ -13,7 +13,6 @@ import prototype.LlmResponse
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import java.time.Instant
-import kotlin.collections.iterator
 
 /**
  * Represents a response from the chat processing system.
@@ -51,7 +50,6 @@ data class PrototypeResponse(
  */
 class PromptingMain(
     private val model: String = "qwen2.5-coder:14b",
-    // private val model: String = "qwen2.5:14b",
 ) {
     /**
      * Executes the complete prompting workflow for a user prompt.
@@ -154,18 +152,19 @@ class PromptingMain(
      * @throws PromptException If the chat part could not be found or ... i dont even think the llm generates this right now
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
+        val defaultResponse = "Here is your code."
         val chat =
             when (val jsonReqs = response["chat"]) {
                 is JsonObject ->
                     jsonReqs["message"]?.let {
                         when (it) {
                             is JsonPrimitive -> it.content
-                            else -> "Here is your code."
+                            else -> defaultResponse
                         }
-                    } ?: "Here is your code."
+                    } ?: defaultResponse
 
                 is JsonPrimitive -> jsonReqs.content // If Chat itself is a primitive
-                else -> "Here is your code."
+                else -> defaultResponse
             }
 
         val chatResponse =
