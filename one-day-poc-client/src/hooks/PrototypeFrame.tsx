@@ -31,7 +31,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
    * Normalises file structure to ensure compatibility with WebContainer API
    * Properly handles nested paths like "src/index.js" by creating directory structure
    */
-  const normalizeFiles = (files: Record<string, any>): Record<string, any> => {
+  const normaliseFiles = (files: Record<string, any>): Record<string, any> => {
     const result: Record<string, any> = {};
     
     Object.keys(files).forEach(path => {
@@ -59,7 +59,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
         } else if (fileData.file && fileData.file.contents) {
           result[path] = { file: { contents: fileData.file.contents } };
         } else if (fileData.directory) {
-          result[path] = { directory: normalizeFiles(fileData.directory) };
+          result[path] = { directory: normaliseFiles(fileData.directory) };
         }
       }
     });
@@ -87,14 +87,18 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
     async function loadFiles() {
       if (!webcontainerInstance || !files) return;
 
-      setStatus('Normalizing files...');
-      const normalizedFiles = normalizeFiles(files);
-      
+      console.log('Loading files:', files);
+
+      setStatus('Normalising files...');
+      const normalisedFiles = normaliseFiles(files);
+
+      console.log('Normalised files:', normalisedFiles);
+
       setStatus('Mounting files...');
 
       try {
-        console.log('Files to mount:', JSON.stringify(normalizedFiles, null, 2));
-        await webcontainerInstance.mount(normalizedFiles);
+        console.log('Files to mount:', JSON.stringify(normalisedFiles, null, 2));
+        await webcontainerInstance.mount(normalisedFiles);
         console.log('Files mounted successfully');
 
         setStatus('Installing dependencies...');

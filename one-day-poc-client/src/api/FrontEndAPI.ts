@@ -33,6 +33,8 @@ export async function sendChatMessage(
         }
 
         const serverResponse: ServerResponse = await response.json();
+
+        console.log('Server response:', serverResponse);
         
         if (serverResponse.chat) {
             onChatResponse(serverResponse.chat);
