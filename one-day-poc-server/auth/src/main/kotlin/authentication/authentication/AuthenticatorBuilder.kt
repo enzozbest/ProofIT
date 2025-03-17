@@ -1,4 +1,4 @@
-package authentication
+package authentication.authentication
 
 import com.auth0.jwk.JwkProvider
 import com.auth0.jwk.JwkProviderBuilder
@@ -73,10 +73,6 @@ object Authenticators {
 
         generateVerifier(jwkProvider, issuer)
     }
-    /* Line 61 above is marked as partially covered because of the function it calls.
-     * That function uses an inline lambda, which most coverage tools struggle to appropriately
-     * judge in regard to execution status.
-     */
 
     private fun AuthenticationConfig.generateVerifier(
         jwkProvider: JwkProvider,
@@ -91,7 +87,7 @@ object Authenticators {
                 return@authHeader try {
                     val session = Json.decodeFromString<AuthenticatedSession>(sessionCookie)
                     parseAuthorizationHeader("Bearer ${session.token}")
-                } catch (e: SerializationException) {
+                } catch (_: SerializationException) {
                     null
                 }
             }
@@ -107,7 +103,3 @@ object Authenticators {
         }
     }
 }
-/*
-* Line above is marked as partially covered because of a known issue with coverage tools and some cases of Kotlin's
-* inlined lambdas. The line is fully covered by the tests, but most coverages tools will not mark it as such.
-* */

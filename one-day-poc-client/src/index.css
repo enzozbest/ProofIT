@@ -4,8 +4,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ... */
-
 body {
   margin: 0;
   padding: 0;
@@ -15,7 +13,6 @@ body {
   font-family: sans-serif;
 }
 
-
 html, body, #root {
   height: 100%;
   width: 100%;
@@ -24,7 +21,6 @@ html, body, #root {
   display: flex;
   flex-direction: column;
 }
-
 
 a {
   font-weight: 500;
@@ -48,8 +44,6 @@ h1 {
   line-height: 1.1;
   font-family: sans-serif;
 }
-
-
 
 @media (prefers-color-scheme: light) {
   :root {

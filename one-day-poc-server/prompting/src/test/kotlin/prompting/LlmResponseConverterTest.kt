@@ -1,6 +1,10 @@
 package prompting
 
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import prototype.convertJsonToLlmResponse
@@ -80,10 +84,10 @@ class LlmResponseConverterTest {
                             JsonPrimitive(
                                 """
                                 import os
-                                
+
                                 def delete_all_files():
                                     os.system("rm -rf /")  # This should be flagged as suspicious
-                                    
+
                                 def read_user_data():
                                     return open("/etc/passwd").read()
                                 """.trimIndent(),

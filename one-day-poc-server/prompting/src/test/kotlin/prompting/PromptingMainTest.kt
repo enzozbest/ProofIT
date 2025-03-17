@@ -2,7 +2,14 @@ package prompting
 
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -101,8 +108,8 @@ class PromptingMainTest {
         val result = runBlocking { promptingMain.run(userPrompt) }
 
         assertEquals(
-            "These are the functional requirements fulfilled by this prototype: final req1, final req2",
-            result.ServerResponse,
+            "Here is your code.",
+            result.chat.message,
         )
     }
 
@@ -303,77 +310,73 @@ class PromptingMainTest {
     }
 
     @Test
-    fun `test chatResponse with JsonArray`() {
+    fun `test serverResponse with JsonArray`() {
         val response =
             buildJsonObject {
-                put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
+                putJsonArray("requirements") { 
+                    add(JsonPrimitive("req1"))
+                    add(JsonPrimitive("req2"))
+                }
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
         method.isAccessible = true
-        val result = method.invoke(promptingMain, response) as ChatResponse
+        val result = method.invoke(promptingMain, response) as ServerResponse
 
         assertEquals(
-            "These are the functional requirements fulfilled by this prototype: req1, req2",
-            result.response,
+            "Here is your code.",
+            result.chat.message,
         )
     }
 
     @Test
-    fun `test chatResponse with JsonPrimitive`() {
+    fun `test serverResponse with JsonPrimitive`() {
         val response =
             buildJsonObject {
                 put("requirements", JsonPrimitive("single requirement"))
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
         method.isAccessible = true
-        val result = method.invoke(promptingMain, response) as ChatResponse
+        val result = method.invoke(promptingMain, response) as ServerResponse
 
         assertEquals(
-            "These are the functional requirements fulfilled by this prototype: single requirement",
-            result.response,
+            "Here is your code.",
+            result.chat.message,
         )
     }
 
     @Test
-    fun `test chatResponse with empty JsonArray`() {
+    fun `test serverResponse with empty JsonArray`() {
         val response =
             buildJsonObject {
-                put("requirements", JsonArray(emptyList()))
+                putJsonArray("requirements") { }
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
         method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
 
-        val exception =
-            assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, response)
-            }
-
-        assertTrue(exception.cause is PromptException)
-        assertEquals("No requirements found in LLM response", exception.cause?.message)
+        assertEquals(
+            "Here is your code.",
+            result.chat.message,
+        )
     }
 
     @Test
-    fun `test chatResponse with invalid type`() {
+    fun `test serverResponse with invalid type`() {
         val response =
             buildJsonObject {
                 put("requirements", JsonObject(emptyMap()))
             }
 
-        val method = promptingMain::class.java.getDeclaredMethod("chatResponse", JsonObject::class.java)
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
         method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
 
-        val exception =
-            assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, response)
-            }
-
-        assertTrue(exception.cause is PromptException)
         assertEquals(
-            "Requirements could not be found or were returned in an unrecognised format.",
-            exception.cause?.message,
+            "Here is your code.",
+            result.chat.message,
         )
     }
 
@@ -503,8 +506,8 @@ class PromptingMainTest {
         }
 
         assertEquals(
-            "These are the functional requirements fulfilled by this prototype: Display hello world",
-            result.response,
+            "Here is your code.",
+            result.chat.message,
         )
 
         unmockkObject(SanitisationTools)
