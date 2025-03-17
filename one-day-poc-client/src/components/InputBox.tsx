@@ -1,14 +1,42 @@
 import React, { FC, useState, useRef, useEffect } from 'react';
-import { SendHorizontal } from 'lucide-react';
+import { Paperclip, SendHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
+ * 
+ * This component renders an array of text prompts as interactive buttons, typically used
+ * for suggested actions or example queries the user can click on. The buttons are styled
+ * with hover effects and include a right arrow indicator.
+ * 
+ * @component
+ * @param {Object} props - Component properties
+ * @param {string[]} props.prompts - Array of text strings to display as prompt buttons
+ * 
+ * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
+ */
 const InputBox: FC = () => {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, login } = useAuth();
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/auth/check', {
+      method: 'GET',
+      credentials: 'include',
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.userId) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      })
+      .catch((error) => console.error('Error:', error));
+  }, []);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -17,9 +45,18 @@ const InputBox: FC = () => {
     }
   }, [text]);
 
+  const handleSignIn = () => {
+    window.location.href = 'http://localhost:8000/api/auth';
+  };
+
+  /**
+   * Handle form submission
+   * - Redirects to sign-in if not authenticated
+   * - Navigates to generate page with text input if authenticated
+   */
   const handleSubmit = () => {
     if (!isAuthenticated) {
-      login(text);
+      handleSignIn();
       return;
     }
 
@@ -53,6 +90,7 @@ const InputBox: FC = () => {
           className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
           type="button"
         >
+          <Paperclip size={22} />
         </button>
         <button
           className="p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2"

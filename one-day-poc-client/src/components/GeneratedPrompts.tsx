@@ -1,30 +1,26 @@
 import React, { FC } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 type GeneratedPromptsProps = {
   prompts: string[];
 };
 
+
+/**
+ * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
+ * 
+ * This component renders an array of text prompts as interactive buttons, typically used
+ * for suggested actions or example queries the user can click on. The buttons are styled
+ * with hover effects and include a right arrow indicator.
+ * 
+ * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
+ */
 const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
-  const navigate = useNavigate();
-  const { isAuthenticated, login } = useAuth();
-
-  const handleSubmit = (promptText: string) => {
-    if (!isAuthenticated) {
-      login(promptText);
-      return;
-    }
-    navigate('/generate', { state: { initialMessage: promptText } });
-  }
-
   return (
-    <div className="mt-5 flex flex-nowrap gap-4 w-full max-w-6xl overflow-x-auto justify-center pb-9">
+    <div className="mt-5 flex flex-nowrap gap-4 w-full max-w-5xl overflow-x-auto justify-center pb-9">
       {prompts.map((text, index) => (
         <button
           key={index}
-          className="border border-white/50 px-5 py-3 rounded-full bg-transparent text-center whitespace-nowrap hover:bg-white/10 transition duration-300 flex items-center"
-          onClick={() => handleSubmit(text)}
+          className="border-2 border-white px-6 py-4 rounded-lg bg-transparent  text-center whitespace-nowrap hover:bg-white/20 hover:border-white hover: transition duration-300"
         >
           {text} →
         </button>
