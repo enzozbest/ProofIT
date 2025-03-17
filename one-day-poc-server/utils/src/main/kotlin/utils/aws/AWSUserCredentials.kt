@@ -2,7 +2,6 @@ package utils.aws
 
 import aws.sdk.kotlin.runtime.auth.credentials.DefaultChainCredentialsProvider
 import kotlinx.coroutines.runBlocking
-import kotlin.io.resolve
 
 object AWSUserCredentials {
     private val credentialsProvider = DefaultChainCredentialsProvider()
