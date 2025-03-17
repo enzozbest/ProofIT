@@ -44,7 +44,7 @@ export default function Page() {
     <SidebarWrapper>
       <div
         className={`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
-          isVisible ? 'opacity-100 max-w-[450px]' : 'opacity-0 max-w-0'
+          isVisible ? 'max-w-[450px]' : 'opacity-0 max-w-0'
         }`}
       >
         <ChatScreen
