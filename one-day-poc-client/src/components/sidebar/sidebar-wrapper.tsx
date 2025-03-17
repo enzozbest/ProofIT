@@ -34,6 +34,13 @@ import {
 } from "lucide-react";
 
 export default function SidebarWrapper({children}:{children : React.ReactNode}) {
+  const [projectName, setProjectName] = useState<string >("Untitled Project");
+  const [inputProjectName, setInputProjectName] = useState<string>(projectName);
+
+  const updateProjectName = async () => {
+    setProjectName(inputProjectName);
+    //Call the database to update the name
+  };
 
   return (
     <SidebarProvider>
@@ -47,17 +54,25 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
               <Popover>
                 <PopoverTrigger className="flex items-center gap-1 group bg-background ">
                   <TypographySmall>
-                    Project name
+                    {projectName}
                   </TypographySmall>
-                  <ChevronDownIcon
-                    className="transition-transform duration-200 group-data-[state=open]:rotate-180"
-                  />
+                  <ChevronDownIcon className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
                 </PopoverTrigger>
                 <PopoverContent>
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Rename project</Label>
-                  <Input id="name" placeholder="Name of your project" />
-                </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <Label htmlFor="name">Rename project</Label>
+                    <Input
+                      id="name"
+                      placeholder="Name of your project"
+                      value={inputProjectName}
+                      onChange={(e: {
+                        target: { value: React.SetStateAction<string> };
+                      }) => setInputProjectName(e.target.value)}
+                    />
+                    <Button className="gap-2" onClick={updateProjectName}>
+                      Save
+                    </Button>
+                  </div>
                 </PopoverContent>
               </Popover>
             </div>
@@ -71,29 +86,27 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
                       Export
                     </TypographySmall>
                     <ChevronDownIcon
-                      className="transition-transform duration-200 group-data-[state=open]:rotate-180"
+                        className="transition-transform duration-200 group-data-[state=open]:rotate-180"
                     />
                   </PopoverTrigger>
                   <PopoverContent>
-                  <div className="flex flex-col space-y-1.5">
-                    <p> buttons tba</p>
-                  </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <p> buttons tba</p>
+                    </div>
                   </PopoverContent>
                 </Popover>
                 <Button className="gap-2">
-                  <Rocket size={14}/>
+                  <Rocket size={14} />
                   Deploy
-                  </Button>
+                </Button>
               </div>
             </div>
           </div>
         </header>
         <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
-            {children}
+          {children}
         </div>
-         
- 
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
