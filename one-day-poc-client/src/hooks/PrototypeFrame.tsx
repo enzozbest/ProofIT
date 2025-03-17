@@ -158,7 +158,22 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
         }
 
         setStatus('Starting development server...');
-        await webcontainerInstance.spawn('npm', ['run', 'start']);
+        const startProcess = await webcontainerInstance.spawn('npm', ['run', 'start']);
+
+        startProcess.output.pipeTo(
+          new WritableStream({
+            write(data) {
+              console.log('Server output:', data);
+            }
+          })
+        );
+
+        if (iframeRef.current) {
+          iframeRef.current.sandbox.add('allow-scripts');
+          iframeRef.current.sandbox.add('allow-same-origin');
+          iframeRef.current.sandbox.add('allow-forms');
+          iframeRef.current.sandbox.add('allow-modals');
+        }
       } catch (error: unknown) {
         console.error('Error:', error);
 
@@ -218,7 +233,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
           borderRadius: '4px',
         }}
         title="Prototype Preview"
-        sandbox="allow-scripts allow-same-origin"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
       />
     </div>
   );
