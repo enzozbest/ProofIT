@@ -2,9 +2,7 @@
 
 import {
   BadgeCheck,
-  Bell,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -27,10 +25,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from 'react';
+import { CaretSortIcon } from '@radix-ui/react-icons';
 
 export function NavUser() {
   const { isMobile } = useSidebar()
