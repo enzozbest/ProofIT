@@ -85,8 +85,9 @@ class PromptingMain(
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
+        println("FINISHED PROMPTING.")
         val response = serverResponse(prototypeResponse)
-
+        println("FRONTEND RESPONSE CREATED")
         return response
     }
 
