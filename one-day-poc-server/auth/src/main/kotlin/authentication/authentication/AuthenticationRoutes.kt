@@ -1,11 +1,12 @@
-package authentication
+package authentication.authentication
 
-import authentication.AuthenticationRoutes.AUTHENTICATION_CHECK_ROUTE
-import authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import authentication.AuthenticationRoutes.CALL_BACK_ROUTE
-import authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
-import authentication.AuthenticationRoutes.LOG_OUT_ROUTE
-import authentication.AuthenticationRoutes.USER_INFO_ROUTE
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_CHECK_ROUTE
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
+import authentication.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
+import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.authentication.AuthenticationRoutes.USER_INFO_ROUTE
+import authentication.redis.Redis
 import com.auth0.jwt.JWT
 import io.ktor.http.ContentType
 import io.ktor.http.Cookie
@@ -28,7 +29,6 @@ import io.ktor.server.sessions.set
 import io.ktor.util.date.GMTDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import redis.Redis
 import utils.aws.AWSUserCredentials
 import java.time.Instant
 import java.time.ZoneOffset
@@ -77,7 +77,7 @@ private fun Route.setLogOutEndpoint(route: String) {
     post(route) {
         val cookie =
             call.request.cookies["AuthenticatedSession"]?.let {
-                kotlin.runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()
+                runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()
             } ?: return@post call.respond(HttpStatusCode.OK) // User already logged out, nothing to do.
 
         call.sessions.clear<AuthenticatedSession>()
@@ -128,7 +128,7 @@ internal fun Route.setUpCheckEndpoint(checkRoute: String) {
     get(checkRoute) {
         val sessionCookie =
             call.request.cookies["AuthenticatedSession"]?.let { cookie ->
-                kotlin.runCatching { Json.decodeFromString<AuthenticatedSession>(cookie) }.getOrNull()
+                runCatching { Json.decodeFromString<AuthenticatedSession>(cookie) }.getOrNull()
             } ?: return@get call.respond(HttpStatusCode.Unauthorized, "Invalid or missing session cookie")
 
         checkCache(sessionCookie.token)?.let { cachedSession ->

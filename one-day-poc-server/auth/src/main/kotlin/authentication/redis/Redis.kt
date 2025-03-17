@@ -1,4 +1,4 @@
-package redis
+package authentication.redis
 
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool

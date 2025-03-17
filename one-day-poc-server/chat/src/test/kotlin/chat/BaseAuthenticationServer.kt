@@ -1,6 +1,6 @@
 package chat
 
-import authentication.Authenticators.configureJWTValidator
+import authentication.authentication.Authenticators.configureJWTValidator
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.ContentType
