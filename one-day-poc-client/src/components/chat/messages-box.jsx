@@ -27,6 +27,7 @@ export function MessageBox({ sentMessages }) {
                     <MessageBubble
                     key={index}
                     variant={msg.role == "User" ? "user" : "llm"}
+                    className="bg-gray-800/40 text-white rounded-xl border border-gray-700/50"
                     >
                         <MessageBubbleContent>
                         {msg.content && (

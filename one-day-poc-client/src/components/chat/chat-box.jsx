@@ -51,13 +51,13 @@ export function ChatBox({ message, setMessage, handleSend, setError}) {
         className="flex-1 p-2.5 rounded-sm mr-2.5 focus:outline-none focus:ring-2 focus:ring-muted/50"
     />
     <button
-        type = "button"
-      disabled={!message}
-      onClick={handleButton}
-      className="py-2.5 px-5 bg-secondary text-white border-0 rounded-sm cursor-pointer disabled:opacity-50"
-    >
-      Send
+    type="button"
+    disabled={!message}
+    onClick={handleButton}
+    className="py-2.5 px-5 bg-purple-700 hover:bg-purple-800 text-white border-0 rounded-lg cursor-pointer disabled:opacity-50 transition-all">
+    Send
     </button>
+
     </div>
 
     );

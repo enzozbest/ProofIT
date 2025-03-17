@@ -7,10 +7,7 @@ interface ErrorPageProps {
   code?: string;
 }
 
-const ErrorPage: React.FC<ErrorPageProps> = ({
-  code,
-  message,
-}) => {
+const ErrorPage: React.FC<ErrorPageProps> = ({ code, message }) => {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-white bg-gradient-to-br from-blue-900 to-purple-900">
       {code && <h1 className="text-6xl font-bold">{code}</h1>}
