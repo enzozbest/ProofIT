@@ -17,6 +17,7 @@ internal object Prototypes : UUIDTable("prototypes") {
     val fullPrompt = text("fullPrompt")
     val s3key = varchar("s3_key", 255).nullable()
     val createdAt = timestamp("created_at")
+    val projectName = text("name")
 }
 
 /**
@@ -32,6 +33,7 @@ class PrototypeEntity(
     var fullPrompt by Prototypes.fullPrompt
     var s3Key by Prototypes.s3key
     var createdAt by Prototypes.createdAt
+    var projectName by Prototypes.projectName
 
     /**
      * Converts the entity to a Prototype object
@@ -44,6 +46,7 @@ class PrototypeEntity(
             fullPrompt = this.fullPrompt,
             s3key = this.s3Key,
             createdAt = this.createdAt,
+            projectName = this.projectName,
         )
 }
 
@@ -55,6 +58,7 @@ class PrototypeEntity(
  * @property fullPrompt The prompt which was actually sent to the LLM
  * @property s3key The S3 key of the prototype's source
  * @property createdAt The timestamp of when the prototype was created
+ * @property projectName The name of the prototype
  */
 data class Prototype(
     val id: UUID,
@@ -63,4 +67,5 @@ data class Prototype(
     var fullPrompt: String,
     val s3key: String?,
     val createdAt: Instant,
+    val projectName: String,
 )

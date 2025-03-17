@@ -35,7 +35,6 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="">:D</SidebarGroupLabel>
       <SidebarMenu className="">
         {items.map((item) => (
           <Collapsible

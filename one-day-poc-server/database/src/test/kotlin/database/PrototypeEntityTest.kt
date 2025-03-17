@@ -58,6 +58,7 @@ class PrototypeEntityTest {
                         fullPrompt = "Test full prompt"
                         s3Key = "testKey"
                         createdAt = Instant.now()
+                        projectName = "Hello program"
                     }
                 }
 
@@ -84,6 +85,7 @@ class PrototypeEntityTest {
                         fullPrompt = "Test full prompt"
                         s3Key = "testKey"
                         createdAt = Instant.now()
+                        projectName = "Hello program"
                     }
                 }
 
@@ -109,6 +111,7 @@ class PrototypeEntityTest {
                         fullPrompt = testFullPrompt
                         s3Key = "testKey"
                         createdAt = Instant.now()
+                        projectName = "Hello program"
                     }
                 }
 
@@ -136,6 +139,7 @@ class PrototypeEntityTest {
                         fullPrompt = "Test full prompt"
                         s3Key = testS3Key
                         createdAt = Instant.now()
+                        projectName = "Hello program"
                     }
                 }
 
@@ -163,6 +167,7 @@ class PrototypeEntityTest {
                         fullPrompt = "Test full prompt"
                         s3Key = "testKey"
                         createdAt = testCreatedAt
+                        projectName = "Hello program"
                     }
                 }
 
