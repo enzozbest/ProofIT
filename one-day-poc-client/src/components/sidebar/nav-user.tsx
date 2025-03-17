@@ -29,6 +29,17 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { CaretSortIcon } from '@radix-ui/react-icons';
 
+
+/**
+ * NavUser component renders the user profile section in the sidebar.
+ * 
+ * Displays the current user's information and provides a dropdown menu with
+ * various user account options such as profile settings, billing, notifications,
+ * and sign out functionality. The component adapts its layout based on whether
+ * it's being viewed on mobile or desktop.
+ * 
+ * @returns {JSX.Element} A sidebar menu item with user profile and dropdown
+ */
 export function NavUser({
   user,
 }: {
