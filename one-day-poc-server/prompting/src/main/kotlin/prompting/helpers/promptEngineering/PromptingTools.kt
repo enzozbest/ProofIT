@@ -79,7 +79,7 @@ object PromptingTools {
         templates: List<String>,
     ): String =
         $$"""
-        ### Your response must obey the following JSON Schema. Do not copy the schema into your response.
+        ### Your response must obey the following JSON Schema. Do not copy the schema into your response. DO NOT USE BACKTICKED STRINGS, USE ONLY VALID JSON NOTATION. IF YOU NEED A NEW LINE, USE "\n".
         {
           "$schema": "http://json-schema.org/draft-07/schema#",
           "title": "Server Response Schema",
@@ -113,48 +113,43 @@ object PromptingTools {
                 "files": {
                   "type": "object",
                   "description": "File tree structure compatible with WebContainer",
-                  "patternProperties": {
-                    "^.*$": {
-                      "oneOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "file": {
-                              "type": "object",
-                              "properties": {
-                                "contents": {
-                                  "type": "string",
-                                  "description": "File contents as a string"
-                                }
-                              },
-                              "required": ["contents"]
-                            }
-                          },
-                          "required": ["file"]
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "directory": {
-                              "type": "object",
-                              "description": "Directory containing files and subdirectories",
-                              "patternProperties": {
-                                "^.*$": { "$ref": "#/properties/prototype/properties/files/patternProperties/^.*$" }
-                              }
-                            }
-                          },
-                          "required": ["directory"]
-                        }
-                      ]
-                    }
-                  },
+                  "additionalProperties": { "${'$'}ref": "#/definitions/fileEntry" },
                   "required": ["package.json", "index.html", "server.js"]
                 }
               },
               "required": ["files"]
             }
+          },
+          "definitions": {
+            "fileEntry": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "contents": {
+                      "type": "string",
+                      "description": "File contents as a string"
+                    }
+                  },
+                  "required": ["contents"],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "files": {
+                      "type": "object",
+                      "description": "Nested file tree for a directory",
+                      "additionalProperties": { "${'$'}ref": "#/definitions/fileEntry" }
+                    }
+                  },
+                  "required": ["files"],
+                  "additionalProperties": false
+                }
+              ]
+            }
           }
-        } 
+        }
            
         You are an expert software architect specializing in creating high-quality, production-ready prototypes for WebContainers.
 
@@ -217,14 +212,13 @@ object PromptingTools {
      * @param response The raw response from the LLM as a string
      * @return The formatted JSON response as a JsonObject
      */
-    fun formatResponseJson(response: String): JsonObject =
-        runCatching {
-            val noNewLines = response.removeComments().replace(newLineRegex, "")
-            Json.decodeFromString<JsonObject>(noNewLines) // Attempt to return the response as is.
-        }.getOrElse {
-            val cleaned = cleanLlmResponse(response)
+    fun formatResponseJson(response: String): JsonObject {
+        val cleaned = cleanLlmResponse(response)
+        println("Cleaned JSON: $cleaned")
+        return run {
             Json.decodeFromString<JsonObject>(cleaned).also { println("Decoded JSON: $it") }
         }
+    }
 
     /**
      * Extracts and cleans a JSON object from an LLM response string.
@@ -248,15 +242,13 @@ object PromptingTools {
         val cleaned =
             jsonString
                 .removeComments()
-                .removeEscapedQuotations()
-                .removeBacktickedBraces()
                 .replace(newLineRegex, "")
                 .trim()
         return cleaned
     }
 
     /**
-     * Removes C-style and Python-style comments from a string.
+     * Removes C-style comments from a string.
      *
      * Uses regex with careful pattern matching to avoid false positives like URLs.
      *
@@ -267,26 +259,5 @@ object PromptingTools {
         val cStyleCommentRegex = Regex("""(?<!:)//.*?\\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
         val pythonStyleCommentRegex = Regex("""#.*?(?:\\n|$)""", RegexOption.MULTILINE)
         return this.replace(cStyleCommentRegex, "").replace(pythonStyleCommentRegex, "")
-    }
-
-    /**
-     * Normalizes escaped quotation marks in a string for improved JSON parsing.
-     *
-     * Particularly useful when processing JSON from LLMs with inconsistent escaping
-     * that might cause standard parsers to fail.
-     *
-     * @receiver String containing potentially escaped quotation marks
-     * @return String with normalized quotation marks
-     */
-    fun String.removeEscapedQuotations(): String {
-        val escapedDoubleQuotationsRegex = Regex("""(\\")""", RegexOption.MULTILINE)
-        val escapedSingleQuotationsRegex = Regex("""(\\')""", RegexOption.MULTILINE)
-        return this.replace(escapedDoubleQuotationsRegex, "\"").replace(escapedSingleQuotationsRegex, "'")
-    }
-
-    fun String.removeBacktickedBraces(): String {
-        val backtickedOpeningBracesRegex = Regex("""`\{""")
-        val backtickedClosingBracesRegex = Regex("""}`""")
-        return this.replace(backtickedOpeningBracesRegex, "{").replace(backtickedClosingBracesRegex, "}")
     }
 }
