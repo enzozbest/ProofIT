@@ -155,14 +155,16 @@ class PromptingMain(
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
         val chat =
-            when (val jsonReqs = response["Chat"]) {
-                is JsonObject -> jsonReqs["message"]?.let {
-                    when (it) {
-                        is JsonPrimitive -> it.content
-                        else -> "Here is your code."
-                    }
-                } ?: "Here is your code."
-                is JsonPrimitive -> jsonReqs.content  // If Chat itself is a primitive
+            when (val jsonReqs = response["chat"]) {
+                is JsonObject ->
+                    jsonReqs["message"]?.let {
+                        when (it) {
+                            is JsonPrimitive -> it.content
+                            else -> "Here is your code."
+                        }
+                    } ?: "Here is your code."
+
+                is JsonPrimitive -> jsonReqs.content // If Chat itself is a primitive
                 else -> "Here is your code."
             }
 
