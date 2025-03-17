@@ -1,7 +1,8 @@
-import authentication.AuthenticatedSession
-import authentication.JWTValidationResponse
-import authentication.cacheSession
-import authentication.setUpCheckEndpoint
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.JWTValidationResponse
+import authentication.authentication.cacheSession
+import authentication.authentication.setUpCheckEndpoint
+import authentication.redis.Redis
 import helpers.AuthenticationTestHelpers
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -12,7 +13,6 @@ import io.ktor.server.testing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
-import redis.Redis
 import kotlin.test.assertEquals
 
 class TestAuthenticationCheckRoute {

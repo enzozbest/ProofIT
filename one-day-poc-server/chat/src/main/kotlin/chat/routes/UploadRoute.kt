@@ -74,7 +74,6 @@ private data class UploadData(
  */
 private fun createUploadDirectory(dir: String): File {
     val uploadDir = File(dir)
-    // val uploadDir = File(application.environment.config.property("upload.dir").getString())
     if (!uploadDir.exists()) {
         uploadDir.mkdirs()
     }
@@ -101,7 +100,8 @@ private suspend fun handlePart(
     when (part) {
         is PartData.FormItem -> handleFormItem(part, uploadData, call)
         is PartData.FileItem -> handleFileItem(part, uploadDir, uploadData)
-        else -> {}
+        else -> { // Empty because we do nothing here!
+        }
     }
     part.dispose()
 }

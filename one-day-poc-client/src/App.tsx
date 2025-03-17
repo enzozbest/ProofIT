@@ -6,15 +6,18 @@ import ErrorRoutes from './pages/ErrorPages';
 import './App.css';
 import LandingPage from './pages/LandingPage';
 import ProfilePage from './pages/ProfilePage';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const App: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/generate" element={<Generate />} />
-      <Route path="/*" element={<ErrorRoutes />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/generate" element={<Generate />} />
+        <Route path="/*" element={<ErrorRoutes />} />
+      </Routes>
+    </AuthProvider>
   );
 };
 

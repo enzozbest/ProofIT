@@ -1,7 +1,7 @@
 package helpers
 
-import authentication.AuthenticatedSession
-import authentication.setUpCallbackRoute
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpCallbackRoute
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*

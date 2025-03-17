@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import BackgroundSVG from '../assets/background.svg';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import UserService from '../services/UserService';
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<{
@@ -15,20 +16,19 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/auth/me', {
-        method: 'GET',
-	credentials: 'include'
-    })
-      .then((response) => response.json())
-      .then((response) => {
-        console.log(response);
-        setUser(response);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError('Failed to load profile');
-        setLoading(false);
-      });
+    async function loadUserData() {
+      setLoading(true);
+      const userData = await UserService.fetchUserData();
+      if (userData) {
+        setUser(userData);
+        setError(null);
+      } else {
+        setError(UserService.getError() || 'Failed to load profile');
+      }
+      setLoading(false);
+    }
+    
+    loadUserData();
   }, []);
 
   if (loading)

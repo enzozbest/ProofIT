@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { ChatBox } from "./chat-box";
 import { MessageBox } from "./messages-box";
 import  ChatMessage  from "@/hooks/Chat";

@@ -136,7 +136,7 @@ class TestTemplateService {
             } returns Result.success(Unit)
 
             // Call the method that will use the real createTemplate function
-            val response = TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
+            val response = TemplateService.storeTemplate("file:///test/path", "Test text")
 
             // Verify the response
             assertEquals("success", response.status)
@@ -159,7 +159,7 @@ class TestTemplateService {
             TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
+                TemplateService.storeTemplate("file:///test/path", "Test text")
             }
         }
 
@@ -178,7 +178,7 @@ class TestTemplateService {
             TemplateService.httpClient = client
 
             assertFailsWith<IllegalStateException> {
-                TemplateService.storeTemplate("Test name", "file:///test/path", "Test text")
+                TemplateService.storeTemplate("file:///test/path", "Test text")
             }
         }
 

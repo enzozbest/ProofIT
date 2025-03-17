@@ -2,9 +2,7 @@
 
 import {
   BadgeCheck,
-  Bell,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -27,21 +25,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons"
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { CaretSortIcon } from '@radix-ui/react-icons';
 
-
-/**
- * NavUser component renders the user profile section in the sidebar.
- * 
- * Displays the current user's information and provides a dropdown menu with
- * various user account options such as profile settings, billing, notifications,
- * and sign out functionality. The component adapts its layout based on whether
- * it's being viewed on mobile or desktop.
- * 
- * @returns {JSX.Element} A sidebar menu item with user profile and dropdown
- */
 export function NavUser({
   user,
 }: {
@@ -63,6 +50,25 @@ export function NavUser({
       })
       .catch((error) => console.error("Error:", error))
   }
+  const [user, setUser] = useState<{
+    name: string;
+    email: string;
+    avatar: string;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/auth/me', {
+      method: 'GET',
+      credentials: 'include'
+    })
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+        setUser(response);
+      })
+      .catch((err) => {
+      });
+  }, []);
 
   return (
     <SidebarMenu>
@@ -74,12 +80,12 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold ">{user.name}</span>
-                <span className="truncate text-xs ">{user.email}</span>
+                <span className="truncate font-semibold ">{user?.name}</span>
+                <span className="truncate text-xs ">{user?.email}</span>
               </div>
               <CaretSortIcon className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -93,22 +99,15 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user?.avatar} alt={user?.name} />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold ">{user.name}</span>
-                  <span className="truncate text-xs ">{user.email}</span>
+                  <span className="truncate font-semibold ">{user?.name}</span>
+                  <span className="truncate text-xs ">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
             <DropdownMenuItem 
@@ -117,14 +116,6 @@ export function NavUser({
               <BadgeCheck />
               <span>Account</span>
             </DropdownMenuItem>
-              <DropdownMenuItem>
-                <ComponentPlaceholderIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
