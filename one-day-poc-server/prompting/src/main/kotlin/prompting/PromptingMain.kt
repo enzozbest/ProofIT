@@ -82,12 +82,9 @@ class PromptingMain(
         val templates = TemplateInteractor.fetchTemplates(fetchTemplatesPrompt)
         val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
 
-        println("About to prompt LLM")
-
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
-        println("About to create response")
         val response = serverResponse(prototypeResponse)
 
         return response
@@ -146,7 +143,6 @@ class PromptingMain(
     private fun promptLlm(prompt: String): JsonObject =
         runBlocking {
             val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
-            println("this is the llm response: ${llmResponse.response}")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 
@@ -157,7 +153,6 @@ class PromptingMain(
      * @throws PromptException If the chat part could not be found or ... i dont even think the llm generates this right now
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
-        println("Inside of serverResponse")
         val chat =
             when (val jsonReqs = response["Chat"]) {
                 is JsonPrimitive -> jsonReqs.content
@@ -172,8 +167,6 @@ class PromptingMain(
                 timestamp = Instant.now().toString(),
             )
 
-        println("Chat response created")
-
         val prototypeResponse =
             response["prototype"]?.let { prototype ->
                 if (prototype is JsonObject && prototype.containsKey("files")) {
@@ -184,8 +177,6 @@ class PromptingMain(
                     null
                 }
             }
-
-        println("Response created: $chatResponse and $prototypeResponse")
 
         return ServerResponse(
             chat = chatResponse,
