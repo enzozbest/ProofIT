@@ -1,7 +1,7 @@
-package authentication
+package authentication.authentication
 
-import authentication.Authenticators.configureJWTValidator
-import authentication.Authenticators.configureOAuth
+import authentication.authentication.Authenticators.configureJWTValidator
+import authentication.authentication.Authenticators.configureOAuth
 import io.ktor.server.application.Application
 import io.ktor.server.application.DuplicatePluginException
 import io.ktor.server.application.install

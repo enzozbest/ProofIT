@@ -1,7 +1,7 @@
-import authentication.AuthenticatedSession
-import authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import authentication.Authenticators.configureJWTValidator
-import authentication.authModule
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.authentication.Authenticators.configureJWTValidator
+import authentication.authentication.authModule
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import helpers.AuthenticationTestHelpers.configureBasicAuthentication
