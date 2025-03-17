@@ -19,6 +19,15 @@ import {
 } from "@/components/ui/sidebar"
 import { ChevronRightIcon } from "@radix-ui/react-icons"
 
+/**
+ * NavMain component renders a collapsible sidebar navigation menu.
+ * 
+ * The component creates a hierarchical navigation structure with collapsible
+ * main items that can contain nested sub-items. Each main item can have an
+ * optional icon and can be set as active by default.
+ * 
+ * @returns {JSX.Element} A sidebar navigation menu with collapsible sections
+ */
 export function NavMain({
   items,
 }: {

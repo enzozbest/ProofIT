@@ -6,6 +6,22 @@ import remarkGfm from "remark-gfm";
 import { MessageBubble, MessageBubbleContent, MessageBubbleTimestamp } from "./message-bubble";
 
 
+/**
+ * MessageBox component displays the chat conversation history.
+ * 
+ * Renders a scrollable list of messages with support for Markdown formatting,
+ * code highlighting, and automatic scrolling to the most recent message.
+ * Messages are styled differently based on their sender (user vs LLM).
+ * 
+ * @component
+ * @param {Object} props - Component properties
+ * @param {Array<Object>} props.sentMessages - Array of message objects to display
+ * @param {string} props.sentMessages[].role - The sender of the message ('User' or 'LLM')
+ * @param {string} props.sentMessages[].content - The message content, supports Markdown
+ * @param {string} props.sentMessages[].timestamp - ISO timestamp string for the message
+ * 
+ * @returns {JSX.Element} A scrollable container with formatted chat messages
+ */
 export function MessageBox({ sentMessages }) {
     const recentMessageRef = useRef(null);
 
