@@ -13,6 +13,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import prompting.ChatResponse
 import prompting.PromptingMain
+import prompting.ServerResponse
+import kotlinx.serialization.json.Json
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -68,10 +70,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
-                    ChatResponse(
-                        "This is a test response",
-                        "2025-01-01T12:00:00",
-                    ),
+                    ServerResponse(
+                        chat = ChatResponse(
+                            message = "This is a test response",
+                            timestamp = "2025-01-01T12:00:00",
+                        )
+                    )
                 )
             }
 
@@ -96,7 +100,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertEquals("This is a test response", responseBody)
+                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
+                assertEquals("This is a test response", serverResponse.chat.message)
             } finally {
                 resetPromptingMain()
             }
@@ -125,10 +130,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
-                    ChatResponse(
-                        "Error processing prompt",
-                        "2025-01-01T12:00:00",
-                    ),
+                    ServerResponse(
+                        chat = ChatResponse(
+                            message = "Error processing prompt",
+                            timestamp = "2025-01-01T12:00:00",
+                        )
+                    )
                 )
             }
 
@@ -152,7 +159,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     }
 
                 assertEquals(HttpStatusCode.OK, response.status)
-                assertTrue(response.bodyAsText().contains("Error processing prompt"))
+                val responseBody = response.bodyAsText()
+                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
+                assertTrue(serverResponse.chat.message.contains("Error processing prompt"))
             } finally {
                 resetPromptingMain()
             }
@@ -163,7 +172,14 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(ChatResponse("Valid response", "2025-01-01T12:00:00"))
+                whenever(mockPromptingMain.run(any())).thenReturn(
+                    ServerResponse(
+                        chat = ChatResponse(
+                            message = "Valid response",
+                            timestamp = "2025-01-01T12:00:00",
+                        )
+                    )
+                )
             }
 
             try {
@@ -187,7 +203,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertEquals("Valid response", responseBody)
+                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
+                assertEquals("Valid response", serverResponse.chat.message)
             } finally {
                 resetPromptingMain()
             }
@@ -216,10 +233,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
                 whenever(mockPromptingMain.run(any())).thenReturn(
-                    ChatResponse(
-                        "Mock response",
-                        "2025-01-01T12:00:00",
-                    ),
+                    ServerResponse(
+                        chat = ChatResponse(
+                            message = "Mock response",
+                            timestamp = "2025-01-01T12:00:00",
+                        )
+                    )
                 )
             }
 
@@ -242,17 +261,21 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals("Mock response", firstResponse.bodyAsText())
+                val firstResponseBody = firstResponse.bodyAsText()
+                val firstServerResponse = Json.decodeFromString<ServerResponse>(firstResponseBody)
+                assertEquals("Mock response", firstServerResponse.chat.message)
 
                 resetPromptingMain()
 
                 val differentMock = mock<PromptingMain>()
                 runBlocking {
                     whenever(differentMock.run(any())).thenReturn(
-                        ChatResponse(
-                            "Default response after reset",
-                            "2025-01-01T12:00:00",
-                        ),
+                        ServerResponse(
+                            chat = ChatResponse(
+                                message = "Default response after reset",
+                                timestamp = "2025-01-01T12:00:00",
+                            )
+                        )
                     )
                 }
 
@@ -272,7 +295,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals("Default response after reset", secondResponse.bodyAsText())
+                val secondResponseBody = secondResponse.bodyAsText()
+                val secondServerResponse = Json.decodeFromString<ServerResponse>(secondResponseBody)
+                assertEquals("Default response after reset", secondServerResponse.chat.message)
             } finally {
                 resetPromptingMain()
             }
@@ -292,7 +317,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     {
                         "userID": "testUser",
                         "time": "2025-01-01T12:00:00"
-                        
+
                     }
                     """.trimIndent(),
                     )
@@ -309,10 +334,12 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
                 whenever(mockPromptingMain.run("")).thenReturn(
-                    ChatResponse(
-                        "Response to empty prompt",
-                        "2025-01-01T12:00:00",
-                    ),
+                    ServerResponse(
+                        chat = ChatResponse(
+                            message = "Response to empty prompt",
+                            timestamp = "2025-01-01T12:00:00",
+                        )
+                    )
                 )
             }
 
@@ -336,7 +363,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     }
 
                 assertEquals(HttpStatusCode.OK, response.status)
-                assertEquals("Response to empty prompt", response.bodyAsText())
+                val responseBody = response.bodyAsText()
+                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
+                assertEquals("Response to empty prompt", serverResponse.chat.message)
             } finally {
                 resetPromptingMain()
             }
