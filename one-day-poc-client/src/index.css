@@ -15,6 +15,13 @@ body {
   font-family: sans-serif;
 }
 
+.bg-custom {
+  background-image: var(--background-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 
 html, body, #root {
   height: 100%;
