@@ -214,9 +214,8 @@ object PromptingTools {
      */
     fun formatResponseJson(response: String): JsonObject {
         val cleaned = cleanLlmResponse(response)
-        println("Cleaned JSON: $cleaned")
         return run {
-            Json.decodeFromString<JsonObject>(cleaned).also { println("Decoded JSON: $it") }
+            Json.decodeFromString<JsonObject>(cleaned)
         }
     }
 
