@@ -4,18 +4,18 @@ import database.core.DatabaseManager
 import database.tables.chats.ChatRepository
 
 object ChatStorageFactory {
-    private val storage by lazy {
+    private val repository by lazy {
         val db = DatabaseManager.init()
         ChatRepository(db)
     }
     
-    fun getStorage(): ChatStorage = storage
+    fun getRepository(): ChatRepository = repository
 }
 
 suspend fun storeMessage(message: ChatMessage): Boolean {
-    return ChatStorageFactory.getStorage().saveMessage(message)
+    return ChatStorageFactory.getRepository().saveMessage(message)
 }
 
 suspend fun getMessageHistory(conversationId: String, limit: Int = 50): List<ChatMessage> {
-    return ChatStorageFactory.getStorage().getMessagesByConversation(conversationId, limit)
+    return ChatStorageFactory.getRepository().getMessagesByConversation(conversationId, limit)
 }
