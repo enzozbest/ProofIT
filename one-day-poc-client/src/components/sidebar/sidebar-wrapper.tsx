@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useState } from "react"
-
+import { useState, useEffect } from "react"
+import { useConversation } from "@/contexts/ConversationContext"
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
 
@@ -29,12 +29,26 @@ import {
 } from "@radix-ui/react-icons"
 
 export default function SidebarWrapper({children}:{children : React.ReactNode}) {
-  const [projectName, setProjectName] = useState<string >("Untitled Project");
+  const { conversations, activeConversationId, updateConversationName } = useConversation();
+  const [projectName, setProjectName] = useState<string>("Untitled Project");
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
+
+  useEffect(() => {
+    if (activeConversationId && conversations) {
+      const activeConversation = conversations.find(c => c.id === activeConversationId);
+      if (activeConversation) {
+        setProjectName(activeConversation.name);
+        setInputProjectName(activeConversation.name);
+      }
+    }
+  }, [activeConversationId, conversations]);
 
   const updateProjectName = async () => {
     setProjectName(inputProjectName);
-    //Call the database to update the name
+    
+    if (activeConversationId) {
+      updateConversationName(activeConversationId, inputProjectName);
+    }
   };
 
   return (

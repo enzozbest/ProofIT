@@ -35,6 +35,25 @@ export function createNewConversation(): string {
   return uuidv4();
 }
 
+export async function updateConversationName(conversationId: string, name: string): Promise<void> {
+  try {
+    const response = await fetch(`http://localhost:8000/api/chat/conversation/${conversationId}/rename`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name })
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to update conversation name');
+    }
+  } catch (error) {
+    console.error('Error updating conversation name:', error);
+  }
+};
+
 export async function sendChatMessage(
     message: Message,
     onChatResponse: ChatCallback,

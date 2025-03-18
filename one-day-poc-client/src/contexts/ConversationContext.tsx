@@ -8,6 +8,7 @@ interface ConversationContextType {
   setActiveConversationId: (id: string) => void;
   createConversation: () => string;
   refreshConversations: () => Promise<void>;
+  updateConversationName: (id: string, name: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -39,6 +40,29 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return newId;
   };
 
+  const updateConversationName = async (id: string, name: string) => {
+    setConversations(conversations.map(conv => 
+      conv.id === id ? { ...conv, name } : conv
+    ));
+    
+    try {
+      const response = await fetch(`http://localhost:8000/api/chat/conversation/${id}/rename`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name })
+      });
+      
+      if (!response.ok) {
+        console.error('Failed to update conversation name');
+      }
+    } catch (error) {
+      console.error('Error updating conversation name:', error);
+    }
+  };
+
   // Load conversations when user logs in
   useEffect(() => {
     refreshConversations();
@@ -52,6 +76,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setActiveConversationId,
         createConversation,
         refreshConversations,
+        updateConversationName,
         isLoading
       }}
     >
