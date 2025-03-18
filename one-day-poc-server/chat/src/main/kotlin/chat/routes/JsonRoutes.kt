@@ -51,7 +51,7 @@ private suspend fun handleJsonRequest(
         senderId = request.userID,
         content = request.prompt
     )
-    storeMessage(userMessage, useLocal = true)
+    storeMessage(userMessage)
     println("Stored user message: ${userMessage.id}")
 
     val response = getPromptingMain().run(request.prompt)
@@ -64,7 +64,7 @@ private suspend fun handleJsonRequest(
         senderId = "LLM",
         content = jsonString
     )
-    storeMessage(aiMessage, useLocal = true)
+    storeMessage(aiMessage)
     println("Stored AI response: ${aiMessage.id}")
 
     call.respondText(jsonString, contentType = ContentType.Application.Json)
