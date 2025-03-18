@@ -16,9 +16,17 @@ def setup_index():
             print(f"Error removing directory: {e}")
             # If shutil.rmtree fails, try using os.system as a fallback
             os.system(f"rm -rf {LUCENE_INDEX_DIR}")
-
-    # Ensure the directory doesn't exist before creating it
-    assert not os.path.exists(LUCENE_INDEX_DIR), "Failed to remove old index directory"
+            # If the directory still exists, clear its contents
+            if os.path.exists(LUCENE_INDEX_DIR):
+                for item in os.listdir(LUCENE_INDEX_DIR):
+                    item_path = os.path.join(LUCENE_INDEX_DIR, item)
+                    try:
+                        if os.path.isfile(item_path):
+                            os.remove(item_path)
+                        elif os.path.isdir(item_path):
+                            shutil.rmtree(item_path)
+                    except Exception as e:
+                        print(f"Error removing {item_path}: {e}")
 
     # Create a fresh directory
     os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)

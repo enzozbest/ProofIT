@@ -43,7 +43,7 @@ def new_template_route():
     name = data["name"]
     embedding = emb.embed(jsonld)
     vector_success = vs.store_embedding(name, vector = np.array(embedding))
-    keyword_success = pi.store_jsonld(name, json.loads(jsonld))
+    keyword_success = pi.store_jsonld(name, jsonld)
     if not vector_success or not keyword_success:
         return jsonify({"status": "error", "message": f"Failed to store template: Vector DB: {vector_success}, Keyword DB: {keyword_success}"})
 
