@@ -31,10 +31,16 @@ Linux and macOS:
 ./start.sh
 ```
 
-Windows:
+Windows (PowerShell):
 
-```shell
+```powershell
 start.ps1
+```
+
+or Windows (cmd):
+
+```cmd
+powershell.exe -ExecutionPolicy Bypass -File .\start.ps1
 ```
 
 The provided script will automatically install the required dependencies (e.g. Python/Pip packages) and start both
