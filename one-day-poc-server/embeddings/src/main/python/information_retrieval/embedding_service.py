@@ -1,15 +1,15 @@
 import numpy as np
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
+
 from information_retrieval.data_handler import load_data, save_data
-from information_retrieval.vector_search import embedder as emb
-from information_retrieval.vector_search import vector_store as vs
 from information_retrieval.keyword_search import pyserini_indexer as pi
+from information_retrieval.vector_search import embedder as emb, vector_store as vs
+
 app = Flask(__name__)
 CORS(app)
 
 first_request = True
-
 @app.before_request
 def startup_once():
     global first_request
@@ -42,8 +42,12 @@ def new_template_route():
     embedding = emb.embed(jsonld)
     vector_success = vs.store_embedding(name, vector = np.array(embedding))
     keyword_success = pi.store_jsonld(name, jsonld)
-    if not vector_success and keyword_success:
+    if not vector_success or not keyword_success:
         return jsonify({"status": "error", "message": f"Failed to store template: Vector DB: {vector_success}, Keyword DB: {keyword_success}"})
+
+    # Save data to disk after successful storage
+    save_data(vs.index, vs.store)
+
     return jsonify({"status": "success", "message": "New template stored successfully!"})
 
 @app.route('/search', methods=['POST'])
