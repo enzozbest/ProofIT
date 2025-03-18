@@ -72,7 +72,7 @@ export default function Page() {
           </button>
         </div>
         <div className="flex-1 h-full rounded-xl bg-gray-900/60 backdrop-blur-lg">
-          {showPrototype ? <PrototypeFrame files={prototypeFiles} /> : null}
+          {showPrototype ? <PrototypeFrame files={prototypeFiles} data-testid="prototype-frame" /> : null}
         </div>
       </SidebarWrapper>
     </div>
