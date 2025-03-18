@@ -13,6 +13,7 @@ class ConversationEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     
     var name by ConversationTable.name
     var lastModified by ConversationTable.lastModified
+    var userId by ConversationTable.userId
     
     val messages by ChatMessageEntity referrersOn ChatMessageTable.conversationId
     
@@ -21,7 +22,8 @@ class ConversationEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             id = id.value.toString(),
             name = name,
             lastModified = lastModified.toString(),
-            messageCount = messageCount
+            messageCount = messageCount,
+            userId = userId
         )
     }
 }
@@ -30,7 +32,7 @@ class ChatMessageEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<ChatMessageEntity>(ChatMessageTable)
     
     var conversation by ConversationEntity referencedOn ChatMessageTable.conversationId
-    var senderId by ChatMessageTable.senderId
+    var isFromLLM by ChatMessageTable.isFromLLM
     var content by ChatMessageTable.content
     var timestamp by ChatMessageTable.timestamp
     
@@ -38,7 +40,7 @@ class ChatMessageEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         return ChatMessage(
             id = id.value.toString(),
             conversationId = conversation.id.value.toString(),
-            senderId = senderId,
+            senderId = if (isFromLLM) "LLM" else "user",
             content = content,
             timestamp = timestamp
         )

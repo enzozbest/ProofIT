@@ -23,6 +23,7 @@ class ChatRepository(private val db: Database){
                     ConversationEntity.new(conversationId) {
                         name = "New Conversation"
                         lastModified = message.timestamp
+                        userId = if (message.senderId != "LLM") message.senderId else "user"
                     }
                 
                 conversation.lastModified = message.timestamp
@@ -30,7 +31,7 @@ class ChatRepository(private val db: Database){
                 val messageId = UUID.fromString(message.id)
                 ChatMessageEntity.new(messageId) {
                     this.conversation = conversation
-                    this.senderId = message.senderId
+                    this.isFromLLM = message.senderId == "LLM"
                     this.content = message.content
                     this.timestamp = message.timestamp
                 }
@@ -69,20 +70,6 @@ class ChatRepository(private val db: Database){
             }
         } catch (e: Exception) {
             println("Error retrieving conversation messages: ${e.message}")
-            emptyList()
-        }
-    }
-    
-    suspend fun getMessagesByUser(userId: String, limit: Int, offset: Int): List<ChatMessage> {
-        return try {
-            newSuspendedTransaction(IO_DISPATCHER, db) {
-                ChatMessageEntity.find { ChatMessageTable.senderId eq userId }
-                    .orderBy(ChatMessageTable.timestamp to SortOrder.ASC)
-                    .limit(limit, offset.toLong())
-                    .map { it.toChatMessage() }
-            }
-        } catch (e: Exception) {
-            println("Error retrieving user messages: ${e.message}")
             emptyList()
         }
     }
@@ -127,6 +114,25 @@ class ChatRepository(private val db: Database){
         } catch (e: Exception) {
             println("Error counting messages: ${e.message}")
             0
+        }
+    }
+
+    suspend fun getConversationsByUser(userId: String): List<Conversation> {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                ConversationEntity.find {
+                    ConversationTable.userId eq userId
+                }.map { entity ->
+                    val messageCount = ChatMessageEntity.find {
+                        ChatMessageTable.conversationId eq entity.id
+                    }.count().toInt()
+                    
+                    entity.toConversation(messageCount)
+                }.sortedByDescending { it.lastModified }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving user conversations: ${e.message}")
+            emptyList()
         }
     }
 }
