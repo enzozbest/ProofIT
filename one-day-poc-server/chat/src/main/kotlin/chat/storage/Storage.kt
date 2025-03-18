@@ -2,6 +2,7 @@ package chat.storage
 
 import database.core.DatabaseManager
 import database.tables.chats.ChatRepository
+import database.tables.chats.ChatMessage
 
 object ChatStorageFactory {
     private val repository by lazy {

@@ -6,9 +6,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.time.Instant
 import java.util.UUID
-import chat.storage.ChatMessage
-import chat.storage.ChatStorage
-import chat.storage.Conversation
 
 class ChatRepository(private val db: Database){
     companion object {
