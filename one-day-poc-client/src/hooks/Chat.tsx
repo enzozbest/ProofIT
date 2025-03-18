@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { sendChatMessage } from '../api/FrontEndAPI';
 import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
+import { useConversation } from '../contexts/ConversationContext';
 
 const ChatMessage = ({
   setPrototype,
@@ -10,19 +11,30 @@ const ChatMessage = ({
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [llmResponse, setLlmResponse] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
+  const { activeConversationId, createConversation } = useConversation();
+
+  useEffect(() => {
+    setSentMessages([]);
+  }, [activeConversationId]);
 
   const handleSend = async (messageToSend: string = message): Promise<void> => {
     if (!messageToSend.trim()) return;
 
     const currentTime = new Date().toISOString();
+    
+    const conversationId = activeConversationId || createConversation();
 
     const newMessage: Message = {
       role: 'User',
       content: messageToSend,
       timestamp: currentTime,
+      conversationId: conversationId
     };
+    
     setSentMessages((prevMessages) => [...prevMessages, newMessage]);
     setMessage('');
+    
     try {
       await sendChatMessage(
         newMessage,
@@ -48,11 +60,12 @@ const ChatMessage = ({
         role: 'LLM',
         content: llmResponse,
         timestamp: currentTime,
+        conversationId: activeConversationId || ''
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
     }
-  }, [llmResponse]);
+  }, [llmResponse, activeConversationId]);
 
   return {
     message,

@@ -11,6 +11,8 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
+import chat.storage.*
+import java.util.UUID
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
@@ -43,10 +45,28 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
+    val conversationId = request.conversationId
+    val userMessage = ChatMessage(
+        conversationId = request.conversationId,
+        senderId = request.userID,
+        content = request.prompt
+    )
+    storeMessage(userMessage, useLocal = true)
+    println("Stored user message: ${userMessage.id}")
+
     val response = getPromptingMain().run(request.prompt)
     println("RECEIVED RESPONSE")
     val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
     println("ENCODED RESPONSE: $jsonString")
+
+    val aiMessage = ChatMessage(
+        conversationId = conversationId,
+        senderId = "LLM",
+        content = jsonString
+    )
+    storeMessage(aiMessage, useLocal = true)
+    println("Stored AI response: ${aiMessage.id}")
+
     call.respondText(jsonString, contentType = ContentType.Application.Json)
 }
 
