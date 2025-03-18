@@ -6,6 +6,17 @@ type OldPrompt = {
   duration: string;
 };
 
+/**
+ * OldPrompts component displays a horizontal list of previously used prompts.
+ * 
+ * This component shows the user's prompt history as clickable cards, each displaying
+ * a prompt's text content and how long ago it was used. The component features
+ * a consistent design with the rest of the application, including hover effects
+ * and text truncation for longer prompts.
+ * 
+ * @component
+ * @returns {JSX.Element} A horizontally scrollable container with prompt history cards
+ */
 const OldPrompts: FC = () => {
   const oldPrompts: OldPrompt[] = [
     { text: 'Generating Code For An Application', duration: '5 days ago' },
