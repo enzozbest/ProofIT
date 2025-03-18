@@ -4,6 +4,20 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import UserService from '../services/UserService';
 
+/**
+ * ProfilePage Component
+ * 
+ * Displays user profile information including:
+ * - Name
+ * - Email address
+ * - Date of birth
+ * 
+ * The component handles data loading states, error conditions, and provides
+ * a back navigation button. All form fields are displayed as read-only.
+ * 
+ * @component
+ * @returns {JSX.Element} A profile page with user details or appropriate loading/error states
+ */
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<{
     name: string;
