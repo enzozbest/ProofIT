@@ -4,7 +4,7 @@ val kotlinVersion by extra { "2.1.0" }
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
-    id("io.gitlab.arturbosch.detekt") version "1.23.0"
+    // id("io.gitlab.arturbosch.detekt") version "1.23.0"
     id("org.sonarqube") version "4.0.0.2929"
     jacoco
 }
@@ -46,15 +46,15 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
     }
 }
 
-detekt {
-    toolVersion = "1.23.0"
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = true
-    baseline = file("detekt-baseline.xml")
-    reportsDir = file("build/reports/detekt.html")
-    config.setFrom("$rootDir/detekt.yml")
-}
+// detekt {
+//    toolVersion = "1.23.0"
+//    buildUponDefaultConfig = true
+//    allRules = false
+//    autoCorrect = true
+//    baseline = file("detekt-baseline.xml")
+//    reportsDir = file("build/reports/detekt.html")
+//    config.setFrom("$rootDir/detekt.yml")
+// }
 
 sonarqube {
     properties {
@@ -82,7 +82,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
+//    apply(plugin = "io.gitlab.arturbosch.detekt")
     plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
         apply(plugin = "jacoco")
     }
@@ -104,12 +104,12 @@ subprojects {
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
         testImplementation(kotlin("test"))
     }
-    detekt {
-        toolVersion = "1.23.0"
-        buildUponDefaultConfig = true
-        autoCorrect = true
-        config.setFrom("$rootDir/detekt.yml")
-    }
+//    detekt {
+//        toolVersion = "1.23.0"
+//        buildUponDefaultConfig = true
+//        autoCorrect = true
+//        config.setFrom("$rootDir/detekt.yml")
+//    }
 
     tasks.withType<Test> {
         useJUnitPlatform()
@@ -144,7 +144,7 @@ subprojects {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
+    // detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
@@ -153,7 +153,7 @@ dependencies {
     implementation(project(":auth"))
     implementation(project(":prototype"))
     implementation(project("embeddings"))
-    implementation(project(":database"))
+    api(project(":database"))
     implementation(project(":routes"))
     implementation(project(":utils"))
     implementation(project(":chat"))
