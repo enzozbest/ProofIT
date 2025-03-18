@@ -6,8 +6,8 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import java.time.ZoneOffset
 import chat.storage.*
+import io.ktor.server.request.*
 
 @Serializable
 data class Conversation(
@@ -36,13 +36,13 @@ internal fun Route.chatRoutes() {
                     messageCount = it.messageCount
                 )
             }
+            call.respond(ConversationHistory(conversations))
         } catch (e: Exception) {
             return@get call.respondText(
                 "Error: ${e.message}",
                 status = HttpStatusCode.InternalServerError
             )
         }
-        call.respond(ConversationHistory(conversations))
     }
     get("$GET/{conversationId}") {
         try {
