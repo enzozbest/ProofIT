@@ -39,19 +39,17 @@ object TemplateStorageService {
      * @param templateId The ID of the template to retrieve
      * @return Result containing the found template or null if not found
      */
-    suspend fun getTemplateById(templateId: UUID): Template? {
-        val uuidString = templateId.toString()
-
+    suspend fun getTemplateById(templateId: String): Template? {
         val template =
             runCatching {
-                DatabaseManager.templateRepository().getTemplateFromDB(uuidString)
+                DatabaseManager.templateRepository().getTemplateFromDB(templateId)
             }.getOrElse {
-                logger.error("Error retrieving template with ID $uuidString: ${it.message}", it)
+                println("Error retrieving template with ID $templateId: ${it.message}")
                 null
             }
 
         return template ?: run {
-            logger.info("Failed to get template with the following id: $uuidString")
+            println("Failed to get template with the following id: $templateId")
             null
         }
     }

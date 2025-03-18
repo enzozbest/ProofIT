@@ -13,7 +13,6 @@ import prompting.helpers.templates.TemplateStorageUtils
 import templates.TemplateService
 import templates.TemplateStorageService
 import utils.environment.EnvironmentLoader
-import java.util.UUID
 
 class TemplateInteractorTest {
     @BeforeEach
@@ -53,14 +52,14 @@ class TemplateInteractorTest {
             } returns searchResponse
 
             coEvery {
-                TemplateStorageService.getTemplateById(UUID.fromString(templateIds[0]))
+                TemplateStorageService.getTemplateById(templateIds[0])
             } returns
                 mockk {
                     every { fileURI } returns "template1.txt"
                 }
 
             coEvery {
-                TemplateStorageService.getTemplateById(UUID.fromString(templateIds[1]))
+                TemplateStorageService.getTemplateById(templateIds[1])
             } returns
                 mockk {
                     every { fileURI } returns "template2.txt"
@@ -81,8 +80,8 @@ class TemplateInteractorTest {
             coVerify {
                 TemplateService.embed(prompt, "prompt")
                 TemplateService.search(embedding, prompt)
-                TemplateStorageService.getTemplateById(UUID.fromString(templateIds[0]))
-                TemplateStorageService.getTemplateById(UUID.fromString(templateIds[1]))
+                TemplateStorageService.getTemplateById(templateIds[0])
+                TemplateStorageService.getTemplateById(templateIds[1])
                 TemplateStorageUtils.retrieveFileContent("template1.txt")
                 TemplateStorageUtils.retrieveFileContent("template2.txt")
             }
@@ -259,7 +258,7 @@ class TemplateInteractorTest {
             } returns searchResponse
 
             coEvery {
-                TemplateStorageService.getTemplateById(UUID.fromString(templateId))
+                TemplateStorageService.getTemplateById(templateId)
             } returns null
 
             val result = TemplateInteractor.fetchTemplates(prompt)
@@ -269,7 +268,7 @@ class TemplateInteractorTest {
             coVerify {
                 TemplateService.embed(prompt, "prompt")
                 TemplateService.search(embedding, prompt)
-                TemplateStorageService.getTemplateById(UUID.fromString(templateId))
+                TemplateStorageService.getTemplateById(templateId)
             }
             coVerify(exactly = 0) {
                 TemplateStorageUtils.retrieveFileContent(any())
@@ -297,9 +296,8 @@ class TemplateInteractorTest {
                 TemplateService.search(embedding, prompt)
             } returns searchResponse
 
-            // Return null for getTemplateById to simulate template not found
             coEvery {
-                TemplateStorageService.getTemplateById(UUID.fromString(templateId))
+                TemplateStorageService.getTemplateById(templateId)
             } returns null
 
             val result = TemplateInteractor.fetchTemplates(prompt)
@@ -309,7 +307,7 @@ class TemplateInteractorTest {
             coVerify {
                 TemplateService.embed(prompt, "prompt")
                 TemplateService.search(embedding, prompt)
-                TemplateStorageService.getTemplateById(UUID.fromString(templateId))
+                TemplateStorageService.getTemplateById(templateId)
             }
             coVerify(exactly = 0) {
                 TemplateStorageUtils.retrieveFileContent(any())
@@ -414,7 +412,7 @@ class TemplateInteractorTest {
             }
             coVerify(exactly = 0) {
                 TemplateStorageService.createTemplate(any())
-                TemplateService.storeTemplate(any(), any(),)
+                TemplateService.storeTemplate(any(), any())
             }
         }
 
@@ -543,55 +541,6 @@ class TemplateInteractorTest {
                 TemplateStorageService.createTemplate(templateFilePath)
                 TemplateService.storeTemplate(templateID, templateFilePath)
             }
-        }
-
-    @Test
-    fun `test fetchTemplates when UUID parsing fails returns empty list`() =
-        runBlocking {
-            val prompt = "test prompt"
-            val embedding = listOf(0.1f, 0.2f, 0.3f)
-            val invalidUUID = "not-a-valid-uuid"
-
-            val embedResponse = mockk<TemplateEmbedResponse>()
-            every { embedResponse.embedding } returns embedding
-
-            val searchResponse = mockk<TemplateSearchResponse>()
-            every { searchResponse.matches } returns listOf(invalidUUID)
-
-            coEvery {
-                TemplateService.embed(prompt, "prompt")
-            } returns embedResponse
-
-            coEvery {
-                TemplateService.search(embedding, prompt)
-            } returns searchResponse
-
-            // Mock UUID.fromString to return a valid UUID instead of throwing
-            mockkStatic(UUID::class)
-            every {
-                UUID.fromString(invalidUUID)
-            } returns UUID.randomUUID()
-
-            // Mock getTemplateById to return null to simulate template not found
-            coEvery {
-                TemplateStorageService.getTemplateById(any())
-            } returns null
-
-            val result = TemplateInteractor.fetchTemplates(prompt)
-
-            assertTrue(result.isEmpty())
-
-            coVerify {
-                TemplateService.embed(prompt, "prompt")
-                TemplateService.search(embedding, prompt)
-                UUID.fromString(invalidUUID)
-                TemplateStorageService.getTemplateById(any())
-            }
-            coVerify(exactly = 0) {
-                TemplateStorageUtils.retrieveFileContent(any())
-            }
-
-            unmockkStatic(UUID::class)
         }
 
     @Test
