@@ -22,4 +22,19 @@ export PYTHONPATH="./embeddings/src/main/python"
 trap "echo 'Stopping...'; kill 0" SIGINT
 
 # Run the Python module in the background and then run Gradle
-python3.10 ./embeddings/src/main/python/information_retrieval/__main__.py & ./gradlew run
+python3.10 ./embeddings/src/main/python/information_retrieval/__main__.py &
+
+HOST="localhost"
+PORT=7000
+
+echo "Waiting for Python microservice on $HOST:$PORT to become available..."
+
+# Loop until the port is open
+while ! nc -z "$HOST" "$PORT"; do
+  sleep 1
+done
+
+echo "Python microservice is running!"
+
+echo "Running Kotlin server..."
+./gradlew run
