@@ -2,8 +2,8 @@ import json
 import os
 from pyserini.index.lucene import LuceneIndexer
 from pyserini.search.lucene import LuceneSearcher
+from information_retrieval.data_handler import LUCENE_INDEX_DIR
 
-LUCENE_INDEX_DIR = "jsonld_index"
 JSONL_FILE = "jsonld_docs.jsonl"
 
 def store_jsonld(name:str, data: dict) -> bool:
@@ -11,15 +11,37 @@ def store_jsonld(name:str, data: dict) -> bool:
     if not isinstance(data, dict):
         return False
 
+    # Ensure the directory exists
     os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)
 
+    # Check if there are existing documents in the index
+    existing_docs = []
+    if os.path.exists(LUCENE_INDEX_DIR) and os.listdir(LUCENE_INDEX_DIR):
+        try:
+            # Try to search for existing documents to check if the index is valid
+            searcher = LuceneSearcher(LUCENE_INDEX_DIR)
+            searcher.close()
+        except Exception as e:
+            print(f"Error with existing index: {e}. Creating a new one.")
+            # If there's an error, we'll create a new index
+            for item in os.listdir(LUCENE_INDEX_DIR):
+                item_path = os.path.join(LUCENE_INDEX_DIR, item)
+                if os.path.isfile(item_path):
+                    os.remove(item_path)
+                elif os.path.isdir(item_path):
+                    import shutil
+                    shutil.rmtree(item_path)
+
+    # Create or append to the index
     indexer = LuceneIndexer(LUCENE_INDEX_DIR)
     indexer.add_doc_dict({
         "id": name,
         "contents": json.dumps(data),
     })
+
     indexer.close()
 
+    print(f"Saved document '{name}' to Lucene index at {LUCENE_INDEX_DIR}")
     return True
 
 
@@ -28,11 +50,15 @@ def keyword_search(query: str, top_k: int = 5):
     if not os.path.exists(LUCENE_INDEX_DIR) or not os.listdir(LUCENE_INDEX_DIR):
         return []
 
-    searcher = LuceneSearcher(LUCENE_INDEX_DIR)
-    hits = searcher.search(query, k=top_k)
+    try:
+        searcher = LuceneSearcher(LUCENE_INDEX_DIR)
+        hits = searcher.search(query, k=top_k)
 
-    results = []
-    for hit in hits:
-        results.append(hit.docid)
+        results = []
+        for hit in hits:
+            results.append(hit.docid)
 
-    return results
+        return results
+    except Exception as e:
+        print(f"Error during keyword search: {e}")
+        return []

@@ -7,8 +7,21 @@ from pyserini.index.lucene import LuceneIndexReader
 @pytest.fixture(autouse=True)
 def setup_index():
     """Clears old index and sets up new test data before each test."""
+    # Ensure the directory is completely removed before creating a new one
     if os.path.exists(LUCENE_INDEX_DIR):
-        os.system(f"rm -rf {LUCENE_INDEX_DIR}")
+        import shutil
+        try:
+            shutil.rmtree(LUCENE_INDEX_DIR)
+        except Exception as e:
+            print(f"Error removing directory: {e}")
+            # If shutil.rmtree fails, try using os.system as a fallback
+            os.system(f"rm -rf {LUCENE_INDEX_DIR}")
+
+    # Ensure the directory doesn't exist before creating it
+    assert not os.path.exists(LUCENE_INDEX_DIR), "Failed to remove old index directory"
+
+    # Create a fresh directory
+    os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)
 
     test_data = {
         "name": "LoginForm",
