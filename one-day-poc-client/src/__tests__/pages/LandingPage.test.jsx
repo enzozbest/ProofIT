@@ -3,6 +3,7 @@ import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import LandingPage from '../../pages/LandingPage.js';
 import userEvent from "@testing-library/user-event";
+import { AuthProvider } from "@/contexts/AuthContext.tsx";
 
 beforeEach(() => {
     vi.resetAllMocks()
@@ -11,7 +12,9 @@ beforeEach(() => {
 test("Renders landing page",()=>{
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -26,7 +29,9 @@ test("Authenticated users see new prompts",async()=>{
 
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -47,7 +52,9 @@ test("Unauthenticated users can't see new prompts",async()=>{
     });
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -81,7 +88,9 @@ test("Prompts are sent via the enter key",async()=>{
 
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -101,7 +110,9 @@ test("Sign in button activates authentication",async()=>{
 
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -117,7 +128,9 @@ test("Sign out button triggers logging out",async()=>{
 
     render(
         <MemoryRouter>
-            <LandingPage />
+            <AuthProvider>
+                <LandingPage />
+            </AuthProvider>
         </MemoryRouter>
     );
 
