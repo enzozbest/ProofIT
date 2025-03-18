@@ -41,7 +41,6 @@ import { CaretSortIcon } from '@radix-ui/react-icons';
  * @returns {JSX.Element} A sidebar menu item with user profile and dropdown
  */
 export function NavUser({
-  user,
 }: {
   user: {
     name: string

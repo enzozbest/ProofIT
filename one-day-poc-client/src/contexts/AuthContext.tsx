@@ -9,8 +9,21 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
+/**
+ * Authentication context type definition
+ * Defines the shape of the authentication context data and methods
+ */
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Authentication Provider Component
+ * 
+ * Manages authentication state and provides authentication-related
+ * functionality to child components through React Context.
+ * 
+ * @param {Object} props - Component props
+ * @param {ReactNode} props.children - Child components that will have access to auth context
+ */
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -50,7 +63,13 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     }
   };
 
-  const login = (promptTextOrEvent?: string) => {
+  /**
+   * Initiates the login process by redirecting to the auth endpoint
+   * Optionally saves a prompt text to session storage to be restored after login
+   * 
+   * @param {string | React.MouseEvent} promptTextOrEvent - Optional prompt text to save or click event
+   */
+  const login = (promptTextOrEvent?: string | React.MouseEvent) => {
     if (promptTextOrEvent && typeof promptTextOrEvent === 'string') {
       sessionStorage.setItem('selectedPrompt', promptTextOrEvent);
     }
@@ -81,6 +100,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   );
 };
 
+/**
+ * Custom hook to access the authentication context
+ * 
+ * Provides easy access to authentication state and methods from any component
+ * 
+ * @returns {AuthContextType} The authentication context value
+ * @throws {Error} If used outside of an AuthProvider
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
