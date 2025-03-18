@@ -13,6 +13,8 @@ import prompting.PromptingMain
 import prompting.ServerResponse
 import chat.storage.*
 import java.util.UUID
+import database.tables.chats.Conversation
+import database.tables.chats.ChatMessage
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 

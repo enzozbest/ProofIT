@@ -2,12 +2,12 @@ package chat.routes
 
 import chat.GET
 import io.ktor.http.*
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import java.time.ZoneOffset
-import chat.storage.ChatStorageFactory
+import chat.storage.*
 
 @Serializable
 data class Conversation(
@@ -25,10 +25,10 @@ data class ConversationHistory(
 internal fun Route.chatRoutes() {
     get(GET) {
         val conversationIds = mutableSetOf<String>()
-        val storage = ChatStorageFactory.getStorage(true)
+        val storage = ChatStorageFactory.getRepository()
 
         val userId = call.request.queryParameters["userId"] ?: "user"
-        val userMessages = storage.getMessagesByUser(userId, 1000, 0)
+        val userMessages = storage.getMessagesByUser(userId, 100, 0)
 
         userMessages.forEach {
             conversationIds.add(it.conversationId)
@@ -57,7 +57,7 @@ internal fun Route.chatRoutes() {
         val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
         val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
-        val messages = getMessageHistory(conversationId, limit, true)
+        val messages = getMessageHistory(conversationId, limit)
         call.respond(messages)
     }
 }
