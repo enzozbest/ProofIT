@@ -25,7 +25,7 @@ internal data class DatabaseCredentials(
 
 /**
  * DatabaseManager is a singleton object responsible for managing database connections and repositories.
- * 
+ *
  * This manager handles the lifecycle of database connections, including initialization,
  * configuration, and cleanup. It uses HikariCP for connection pooling and Flyway for
  * database migrations. The object follows a lazy initialization pattern for resources
@@ -38,7 +38,7 @@ object DatabaseManager {
 
     /**
      * Resets the database manager state by closing connections and clearing references.
-     * 
+     *
      * This method is primarily used for testing purposes to ensure a clean state
      * between test cases and prevent resource leaks.
      */
@@ -51,7 +51,7 @@ object DatabaseManager {
 
     /**
      * Initializes the database connection and runs all necessary migrations.
-     * 
+     *
      * This method performs the following steps:
      * 1. Retrieves database credentials from environment variables
      * 2. Configures and runs Flyway migrations to ensure schema is up-to-date
@@ -61,7 +61,7 @@ object DatabaseManager {
      * @return The initialized Database connection instance
      * @throws Exception If connection initialization fails for any reason
      */
-    fun init(): Database {
+    internal fun init(): Database {
         val credentials = getDatabaseCredentials()
 
         return try {
@@ -74,9 +74,13 @@ object DatabaseManager {
         }
     }
 
+    fun externalInit() {
+        init()
+    }
+
     /**
      * Provides access to the template repository using lazy initialization.
-     * 
+     *
      * This method ensures the database is initialized before creating the repository
      * and caches the repository instance for future calls.
      *
@@ -90,7 +94,7 @@ object DatabaseManager {
 
     /**
      * Sets up the database connection pool using HikariCP.
-     * 
+     *
      * This method configures the connection pool with appropriate settings for
      * performance and reliability, including transaction isolation levels and
      * connection limits.
@@ -115,7 +119,7 @@ object DatabaseManager {
 
     /**
      * Retrieves the database credentials from environment variables.
-     * 
+     *
      * This method loads database connection settings from the application's
      * environment configuration using the EnvironmentLoader utility.
      *
@@ -132,7 +136,7 @@ object DatabaseManager {
 
     /**
      * Configures and runs Flyway database migrations.
-     * 
+     *
      * This method ensures the database schema is up-to-date by applying
      * any pending migrations from the specified migrations directory.
      *
@@ -142,7 +146,7 @@ object DatabaseManager {
         Flyway
             .configure()
             .dataSource(credentials.url, credentials.username, credentials.password)
-            .locations("database/src/main/resources/db/migrations")
+            .locations("classpath:migrations")
             .load()
             .migrate()
     }

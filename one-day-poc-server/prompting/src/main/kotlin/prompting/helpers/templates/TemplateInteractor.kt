@@ -86,6 +86,9 @@ object TemplateInteractor {
             if (jsonLDFilePath.isEmpty()) return@runCatching false
 
             // Create template in database and store in template service
-            TemplateService.storeTemplate(templateFilePath, jsonLD).status == "success"
+            val createdTemplateId = TemplateStorageService.createTemplate(templateFilePath)
+            if (createdTemplateId == null) return@runCatching false
+
+            TemplateService.storeTemplate(createdTemplateId, templateFilePath).status == "success"
         }.getOrElse { false }
 }

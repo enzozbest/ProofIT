@@ -1,5 +1,5 @@
-import authentication.AuthenticatedSession
-import authentication.setUpUserInfoRoute
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpUserInfoRoute
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*

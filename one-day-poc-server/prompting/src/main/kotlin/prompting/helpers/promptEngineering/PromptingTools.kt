@@ -22,6 +22,8 @@ object PromptingTools {
 
         ### Response Format
         Respond with a single valid JSON object only, according to the example below. No explanations, comments, or additional text.
+
+        ### JSON Structure Example
         Example: {
             "requirements": [
                 "The system shall display a login form with email and password fields",
@@ -77,7 +79,11 @@ object PromptingTools {
         templates: List<String>,
     ): String =
         $$"""
+        ### Response Format
+
         ### Your response must obey the following JSON Schema. Do not copy the schema into your response. DO NOT USE BACKTICKED STRINGS, USE ONLY VALID JSON NOTATION. IF YOU NEED A NEW LINE, USE "\n".
+
+        ### JSON Structure
         {
           "$schema": "http://json-schema.org/draft-07/schema#",
           "title": "Server Response Schema",
@@ -148,7 +154,7 @@ object PromptingTools {
             }
           }
         }
-           
+
         You are an expert software architect specializing in creating high-quality, production-ready prototypes for WebContainers.
 
         ### Code Quality Requirements
@@ -189,9 +195,9 @@ object PromptingTools {
 
         ### Your Task
         Generate production-quality code based on:
-        1. User prompt in natural language below
+        1. User requirements
         2. Provided functional requirements
-        3. Available templates provided below
+        3. Available templates
         4. Modern development best practices
         5. Modern styling practices. You must style the components to make them visually appealing using whatever styling framework you choose.
         6. If templates are provided, your styling must be consistent with the provided templates.

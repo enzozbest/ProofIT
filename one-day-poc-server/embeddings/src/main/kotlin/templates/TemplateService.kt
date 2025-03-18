@@ -7,10 +7,12 @@ import embeddings.TemplateEmbedResponse
 import embeddings.TemplateSearchResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -24,6 +26,7 @@ import kotlinx.serialization.json.Json
  */
 object TemplateService {
     internal var httpClient = HttpClient(CIO)
+    private const val EXCEPTION_COULD_NOT_STORE_TEMPLATE = "Failed to store template!"
 
     /**
      * Embeds the given data and returns the embedding.
@@ -48,7 +51,7 @@ object TemplateService {
         val responseText = response.bodyAsText()
         val embedResponse =
             runCatching { Json.decodeFromString<TemplateEmbedResponse>(responseText) }.getOrElse {
-                throw IllegalStateException("Failed to parse response!")
+                error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
             }
         return embedResponse
     }
@@ -68,14 +71,16 @@ object TemplateService {
         data: String,
     ): StoreTemplateResponse {
         val templateId =
-            TemplateStorageService.createTemplate(fileURI) ?: throw IllegalStateException("Failed to store template!")
+            TemplateStorageService.createTemplate(fileURI)
+                ?: error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
 
         val remoteResponse = storeTemplateEmbedding(templateId, data)
         val success = remoteResponse.status == HttpStatusCode.OK
         return if (success) {
             Json.decodeFromString<StoreTemplateResponse>(remoteResponse.bodyAsText()).copy(id = templateId)
         } else {
-            throw IllegalStateException("Failed to store template!")
+            print("VECTOR DB FAILED")
+            error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
         }
     }
 
@@ -87,9 +92,14 @@ object TemplateService {
         val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_AND_STORE_URL) {
+                    header(HttpHeaders.ContentType, "application/json")
                     setBody(Json.encodeToString(payload))
                 }
-        return if (response.status == HttpStatusCode.OK) response else throw IllegalStateException("Failed to store template!")
+        return if (response.status == HttpStatusCode.OK) {
+            response
+        } else {
+            error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
+        }
     }
 
     /**
@@ -117,7 +127,7 @@ object TemplateService {
         val responseText = response.bodyAsText()
         val searchResponse =
             runCatching { Json.decodeFromString<TemplateSearchResponse>(responseText) }.getOrElse {
-                throw IllegalStateException("Failed to parse response!")
+                error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
             }
         return searchResponse
     }
