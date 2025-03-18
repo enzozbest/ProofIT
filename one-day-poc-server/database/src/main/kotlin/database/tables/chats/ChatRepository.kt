@@ -10,12 +10,12 @@ import chat.storage.ChatMessage
 import chat.storage.ChatStorage
 import chat.storage.Conversation
 
-class ChatRepository(private val db: Database) : ChatStorage {
+class ChatRepository(private val db: Database){
     companion object {
         private val IO_DISPATCHER = Dispatchers.IO
     }
 
-    override suspend fun saveMessage(message: ChatMessage): Boolean {
+    suspend fun saveMessage(message: ChatMessage): Boolean {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val conversationId = UUID.fromString(message.conversationId)
@@ -42,7 +42,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun getMessageById(messageId: String): ChatMessage? {
+    suspend fun getMessageById(messageId: String): ChatMessage? {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val id = UUID.fromString(messageId)
@@ -54,7 +54,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun getMessagesByConversation(
+    suspend fun getMessagesByConversation(
         conversationId: String, 
         limit: Int, 
         offset: Int
@@ -73,7 +73,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun getMessagesByUser(userId: String, limit: Int, offset: Int): List<ChatMessage> {
+    suspend fun getMessagesByUser(userId: String, limit: Int, offset: Int): List<ChatMessage> {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 ChatMessageEntity.find { ChatMessageTable.senderId eq userId }
@@ -87,7 +87,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun deleteMessage(messageId: String): Boolean {
+    suspend fun deleteMessage(messageId: String): Boolean {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val id = UUID.fromString(messageId)
@@ -100,7 +100,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun updateConversationName(conversationId: String, name: String): Boolean {
+    suspend fun updateConversationName(conversationId: String, name: String): Boolean {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val id = UUID.fromString(conversationId)
@@ -118,7 +118,7 @@ class ChatRepository(private val db: Database) : ChatStorage {
         }
     }
     
-    override suspend fun getConversationMessageCount(conversationId: String): Int {
+    suspend fun getConversationMessageCount(conversationId: String): Int {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val id = UUID.fromString(conversationId)
