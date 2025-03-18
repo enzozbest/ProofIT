@@ -11,12 +11,14 @@ export async function fetchChatHistory(): Promise<Conversation[]> {
       return [];
     }
     
+    const userId = UserService.getUserId();
     const response = await fetch("http://localhost:8000/api/chat/history", {
       method: 'GET',
       credentials: "include",
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
+      body: JSON.stringify({ userID: userId })
     });
 
     if (!response.ok) {
@@ -37,7 +39,7 @@ export function createNewConversation(): string {
 
 export async function updateConversationName(conversationId: string, name: string): Promise<void> {
   try {
-    const response = await fetch(`http://localhost:8000/api/chat/conversation/${conversationId}/rename`, {
+    const response = await fetch(`http://localhost:8000/api/chat/json/${conversationId}/rename`, {
       method: 'POST',
       credentials: 'include',
       headers: {

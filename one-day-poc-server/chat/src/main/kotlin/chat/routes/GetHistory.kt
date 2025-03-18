@@ -24,40 +24,43 @@ data class ConversationHistory(
 
 internal fun Route.chatRoutes() {
     get(GET) {
-        val conversationIds = mutableSetOf<String>()
-        val storage = ChatStorageFactory.getRepository()
+        try {
+            val requestBody = call.receive<Map<String, String>>()
+            val userId = requestBody["userId"] ?: throw IllegalArgumentException("Missing name")
 
-        val userId = call.request.queryParameters["userId"] ?: "user"
-        val userMessages = storage.getMessagesByUser(userId, 100, 0)
-
-        userMessages.forEach {
-            conversationIds.add(it.conversationId)
-        }
-
-        val conversations = conversationIds.map { conversationId ->
-            val firstMessage = storage.getMessagesByConversation(conversationId, 1, 0).firstOrNull()
-            val messageCount = storage.getConversationMessageCount(conversationId)
-            val lastMessage = storage.getMessagesByConversation(conversationId, 1, 0, sortDescending = true).firstOrNull()
-            Conversation(
-                id = conversationId,
-                name = firstMessage?.content?.take(30)?.plus("...") ?: "New Conversation",
-                lastModified = lastMessage?.timestamp?.atOffset(ZoneOffset.UTC)?.toString() ?: "",
-                messageCount = messageCount
+            val conversations = getConversationHistory(userId).map {
+                Conversation(
+                    id = it.id,
+                    name = it.name,
+                    lastModified = it.lastModified,
+                    messageCount = it.messageCount
+                )
+            }
+        } catch (e: Exception) {
+            return@get call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.InternalServerError
             )
-        }.sortedByDescending { it.lastModified }
-
+        }
         call.respond(ConversationHistory(conversations))
     }
     get("$GET/{conversationId}") {
-        val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
-            "Missing conversation ID",
-            status = HttpStatusCode.BadRequest
-        )
+        try {
+            val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
+                "Missing conversation ID",
+                status = HttpStatusCode.BadRequest
+            )
 
-        val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
-        val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
+            val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
+            val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
-        val messages = getMessageHistory(conversationId, limit)
-        call.respond(messages)
+            val messages = getMessageHistory(conversationId, limit)
+            call.respond(messages)
+        } catch (e: Exception) {
+            return@get call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.InternalServerError
+            )
+        }
     }
 }
