@@ -16,17 +16,37 @@ object ChatStorageFactory {
 }
 
 suspend fun storeMessage(message: ChatMessage): Boolean {
-    return ChatStorageFactory.getChatRepository().saveMessage(message)
+    return runCatching {
+        ChatStorageFactory.getChatRepository().saveMessage(message)
+    }.getOrElse { e ->
+        println("Error storing message: ${e.message}")
+        false
+    }
 }
 
 suspend fun getMessageHistory(conversationId: String, limit: Int = 50, offset: Int = 0): List<ChatMessage> {
-    return ChatStorageFactory.getChatRepository().getMessagesByConversation(conversationId, limit, offset)
+    return runCatching {
+        ChatStorageFactory.getChatRepository().getMessagesByConversation(conversationId, limit, offset)
+    }.getOrElse { e ->
+        println("Error retrieving message history: ${e.message}")
+        emptyList()
+    }
 }
 
 suspend fun getConversationHistory(userId: String): List<Conversation> {
-    return ChatStorageFactory.getChatRepository().getConversationsByUser(userId)
+    return runCatching {
+        ChatStorageFactory.getChatRepository().getConversationsByUser(userId)
+    }.getOrElse { e ->
+        println("Error retrieving conversation history: ${e.message}")
+        emptyList()
+    }
 }
 
 suspend fun updateConversationName(conversationId: String, name: String): Boolean {
-    return ChatStorageFactory.getChatRepository().updateConversationName(conversationId, name)
+    return runCatching {
+        ChatStorageFactory.getChatRepository().updateConversationName(conversationId, name)
+    }.getOrElse { e ->
+        println("Error updating conversation name: ${e.message}")
+        false
+    }
 }
