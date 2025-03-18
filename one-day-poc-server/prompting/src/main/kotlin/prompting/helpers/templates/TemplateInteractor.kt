@@ -3,7 +3,6 @@ package prompting.helpers.templates
 import templates.TemplateService
 import templates.TemplateStorageService
 import utils.environment.EnvironmentLoader
-import java.util.UUID
 
 /**
  * Interacts with templates by fetching and storing them.
@@ -20,6 +19,8 @@ object TemplateInteractor {
         val embedding = runCatching { TemplateService.embed(prompt, "prompt").embedding }.getOrElse { emptyList() }
         val templateIds = runCatching { TemplateService.search(embedding, prompt).matches }.getOrElse { emptyList() }
 
+        println(templateIds)
+
         return templateIds.mapNotNull { id ->
             getTemplateContent(id)
         }
@@ -32,7 +33,7 @@ object TemplateInteractor {
      * @return The content of the template as a string, or null if not found
      */
     private suspend fun getTemplateContent(id: String): String? =
-        TemplateStorageService.getTemplateById(UUID.fromString(id))?.fileURI?.let { templateHandle ->
+        TemplateStorageService.getTemplateById(id)?.fileURI?.let { templateHandle ->
             val fileContent = TemplateStorageUtils.retrieveFileContent(templateHandle)
             fileContent.decodeToString()
         }
