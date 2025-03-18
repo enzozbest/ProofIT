@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 
+interface ChatBoxProps {
+    message: string;
+    setMessage: (message: string) => void;
+    handleSend: (messageToSend?: string) => Promise<void>;
+    setError: (error: string | null) => void;
+  }
+
 /**
  * ChatBox component provides a text input interface for the chat functionality.
  * 
@@ -14,7 +21,7 @@ import { useLocation } from "react-router-dom";
  * 
  * @returns {JSX.Element} A chat input box with send button
  */
-export function ChatBox({ message, setMessage, handleSend, setError}) {
+export function ChatBox({ message, setMessage, handleSend, setError}: ChatBoxProps) {
     const location = useLocation();
     const initialMessage = location.state?.initialMessage;
     const shouldSend = useRef(false);
@@ -33,7 +40,7 @@ export function ChatBox({ message, setMessage, handleSend, setError}) {
         }
     }, [message, initialMessage]);
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             handleSend();
         }
