@@ -9,4 +9,8 @@ import org.jetbrains.exposed.sql.Database
  */
 internal object PoCDatabase {
     internal val database: Database by lazy { DatabaseManager.init() }
+
+    fun init() {
+        database
+    }
 }

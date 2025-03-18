@@ -80,6 +80,8 @@ class PromptingMain(
         val templates = TemplateInteractor.fetchTemplates(fetchTemplatesPrompt)
         val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
 
+        println(prototypePrompt)
+
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
 
