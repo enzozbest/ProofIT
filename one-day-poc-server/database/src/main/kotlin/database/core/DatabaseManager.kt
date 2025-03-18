@@ -61,7 +61,7 @@ object DatabaseManager {
      * @return The initialized Database connection instance
      * @throws Exception If connection initialization fails for any reason
      */
-    fun init(): Database {
+    internal fun init(): Database {
         val credentials = getDatabaseCredentials()
 
         return try {
@@ -72,6 +72,10 @@ object DatabaseManager {
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    fun externalInit() {
+        init()
     }
 
     /**
