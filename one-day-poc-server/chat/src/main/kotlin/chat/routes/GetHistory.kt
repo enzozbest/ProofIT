@@ -14,7 +14,8 @@ data class Conversation(
     val id: String,
     val name: String,
     val lastModified: String,
-    val messageCount: Int
+    val messageCount: Int,
+    val userId: String
 )
 
 @Serializable
@@ -25,24 +26,24 @@ data class ConversationHistory(
 internal fun Route.chatRoutes() {
     get(GET) {
         try {
-            val requestBody = call.receive<Map<String, String>>()
-            val userId = requestBody["userId"] ?: throw IllegalArgumentException("Missing name")
+            val userId = call.request.queryParameters["userId"] ?: "user" 
 
             val conversations = getConversationHistory(userId).map {
                 Conversation(
                     id = it.id,
                     name = it.name,
                     lastModified = it.lastModified,
-                    messageCount = it.messageCount
+                    messageCount = it.messageCount,
+                    userId = it.userId
                 )
             }
+            call.respond(ConversationHistory(conversations))
         } catch (e: Exception) {
             return@get call.respondText(
                 "Error: ${e.message}",
                 status = HttpStatusCode.InternalServerError
             )
         }
-        call.respond(ConversationHistory(conversations))
     }
     get("$GET/{conversationId}") {
         try {

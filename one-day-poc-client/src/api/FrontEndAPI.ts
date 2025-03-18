@@ -12,13 +12,12 @@ export async function fetchChatHistory(): Promise<Conversation[]> {
     }
     
     const userId = UserService.getUserId();
-    const response = await fetch("http://localhost:8000/api/chat/history", {
+    const response = await fetch("http://localhost:8000/api/chat/history?userId=${encodeURIComponent(userId)}", {
       method: 'GET',
       credentials: "include",
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userID: userId })
     });
 
     if (!response.ok) {
