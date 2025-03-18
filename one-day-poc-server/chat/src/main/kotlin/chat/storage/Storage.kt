@@ -20,3 +20,11 @@ suspend fun storeMessage(message: ChatMessage): Boolean {
 suspend fun getMessageHistory(conversationId: String, limit: Int = 50): List<ChatMessage> {
     return ChatStorageFactory.getRepository().getMessagesByConversation(conversationId, limit)
 }
+
+suspend fun getConversationHistory(userId: String): List<Conversation> {
+    return ChatStorageFactory.getRepository().getConversationsByUser(userId)
+}
+
+suspend fun updateConversationName(conversationId: String, name: String): Boolean {
+    return ChatStorageFactory.getRepository().updateConversationName(conversationId, name)
+}

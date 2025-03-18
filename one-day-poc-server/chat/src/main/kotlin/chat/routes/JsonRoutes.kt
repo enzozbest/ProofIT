@@ -31,6 +31,24 @@ fun Route.jsonRoutes() {
             }
         handleJsonRequest(request, call)
     }
+    post("$JSON/{conversationId}/rename") {
+        try {
+            val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
+            val requestBody = call.receive<Map<String, String>>()
+            val name = requestBody["name"] ?: throw IllegalArgumentException("Missing name")
+            val success = updateConversationName(conversationId, name)
+            if (success) {
+                call.respondText("Conversation renamed successfully", status = HttpStatusCode.OK)
+            } else {
+                call.respondText("Failed to update name", status = HttpStatusCode.InternalServerError)
+            }
+        } catch (e: Exception) {
+            call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.BadRequest
+            )
+        }
+    }
 }
 
 /**
