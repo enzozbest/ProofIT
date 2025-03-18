@@ -126,13 +126,15 @@ object DatabaseManager {
      * @return A DatabaseCredentials object containing connection parameters
      * @throws Exception If required environment variables are missing
      */
-    private fun getDatabaseCredentials(): DatabaseCredentials =
-        DatabaseCredentials(
+    private fun getDatabaseCredentials(): DatabaseCredentials {
+        EnvironmentLoader.loadEnvironmentFile(".env")
+        return DatabaseCredentials(
             url = EnvironmentLoader.get("DB_URL"),
             username = EnvironmentLoader.get("DB_USERNAME"),
             password = EnvironmentLoader.get("DB_PASSWORD"),
             maxPoolSize = EnvironmentLoader.get("DB_MAX_POOL_SIZE").toInt(),
         )
+    }
 
     /**
      * Configures and runs Flyway database migrations.
