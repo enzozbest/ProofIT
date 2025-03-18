@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -41,7 +43,7 @@ def new_template_route():
     name = data["name"]
     embedding = emb.embed(jsonld)
     vector_success = vs.store_embedding(name, vector = np.array(embedding))
-    keyword_success = pi.store_jsonld(name, jsonld)
+    keyword_success = pi.store_jsonld(name, json.loads(jsonld))
     if not vector_success or not keyword_success:
         return jsonify({"status": "error", "message": f"Failed to store template: Vector DB: {vector_success}, Keyword DB: {keyword_success}"})
 
