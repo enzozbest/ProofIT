@@ -1,6 +1,6 @@
-import authentication.AuthenticatedSession
-import authentication.AuthenticationRoutes.LOG_OUT_ROUTE
-import authentication.authModule
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.authentication.authModule
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*

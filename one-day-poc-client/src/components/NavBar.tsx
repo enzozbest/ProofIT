@@ -1,7 +1,17 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { BotMessageSquare } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * NavBar component provides the application's top navigation bar with authentication controls.
+ * 
+ * Displays the application logo/name and provides authentication functionality with
+ * sign-in and sign-out buttons that adapt based on the user's authentication status.
+ * The component makes API calls to handle authentication actions.
+ * 
+ * @component
+ * @returns {JSX.Element} A navigation bar with application branding and authentication buttons
+ */
 const NavBar: React.FC = () => {
   const { isAuthenticated, login, logout } = useAuth();
 

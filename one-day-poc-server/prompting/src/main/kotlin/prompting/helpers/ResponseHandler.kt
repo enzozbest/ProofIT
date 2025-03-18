@@ -15,7 +15,6 @@ import java.time.LocalDateTime
  * services and convert them into standardized application responses.
  */
 object ResponseHandler {
-
     /**
      * Handles an HTTP response from a prompting service and sends an appropriate response to the client.
      *
@@ -73,14 +72,4 @@ object ResponseHandler {
             time = LocalDateTime.now().toString(),
             message = message,
         )
-
-//    private suspend fun handleError(
-//        e: Exception,
-//        call: ApplicationCall,
-//    ) {
-//        call.respondText(
-//            text = "Invalid request: ${e.message}",
-//            status = HttpStatusCode.BadRequest,
-//        )
-//    }
 }

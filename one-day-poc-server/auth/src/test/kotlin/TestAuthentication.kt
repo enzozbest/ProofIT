@@ -1,7 +1,7 @@
-import authentication.AuthenticatedSession
-import authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import authentication.Authenticators.configureJWTValidator
-import authentication.authModule
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.authentication.Authenticators.configureJWTValidator
+import authentication.authentication.authModule
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import helpers.AuthenticationTestHelpers.configureBasicAuthentication
@@ -17,7 +17,12 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Test
 import utils.json.PoCJSON.readJsonFile
 import java.security.KeyPairGenerator
@@ -236,7 +241,7 @@ class TestAuthentication {
     ) {
         fun getJson(): JsonObject =
             buildJsonObject {
-                put("jwtIssuer", jwksUrl)
+                put("jwtIssuer", JsonPrimitive(jwksUrl))
             }
     }
 }

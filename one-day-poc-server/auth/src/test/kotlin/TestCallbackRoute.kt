@@ -1,5 +1,5 @@
-import authentication.AuthenticatedSession
-import authentication.setUpCallbackRoute
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpCallbackRoute
 import helpers.AuthenticationTestHelpers.configureTestCallbackRoute
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenAdminFalse
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoGroups
@@ -195,7 +195,7 @@ class TestCallbackRoute {
                     .substringBefore(";")
 
             val decoded = Json.decodeFromString<AuthenticatedSession>(cookieValueEncoded)
-            assertFalse(decoded.admin ?: false)
+            assertFalse(decoded.admin == true)
         }
 
     @Test
@@ -245,6 +245,6 @@ class TestCallbackRoute {
                     .substringBefore(";")
 
             val decoded = Json.decodeFromString<AuthenticatedSession>(cookieValueEncoded)
-            assertFalse(decoded.admin ?: false)
+            assertFalse(decoded.admin == true)
         }
 }

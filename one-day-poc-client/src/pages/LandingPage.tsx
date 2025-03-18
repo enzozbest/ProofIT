@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC } from 'react';
 import NavBar from '../components/NavBar';
 import HeroSection from '../components/HeroSection';
 import InputBox from '../components/InputBox';

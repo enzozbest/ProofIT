@@ -1,5 +1,5 @@
-import authentication.AuthenticatedSession
-import authentication.setUpJWTValidation
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpJWTValidation
 import helpers.AuthenticationTestHelpers
 import io.ktor.client.request.*
 import io.ktor.client.statement.*

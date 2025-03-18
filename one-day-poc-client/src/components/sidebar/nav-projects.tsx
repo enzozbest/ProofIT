@@ -25,6 +25,16 @@ import {
 } from "@/components/ui/sidebar"
 import { DotsHorizontalIcon } from "@radix-ui/react-icons"
 
+
+/**
+ * NavProjects component renders a projects section in the sidebar navigation.
+ * 
+ * Displays a list of projects with icons and provides a dropdown menu for each project
+ * with actions like view, share, and delete. The component is responsive and adapts
+ * its layout based on whether it's being viewed on mobile or desktop.
+ * 
+ * @returns {JSX.Element} A sidebar navigation group containing project items with dropdown actions
+ */
 export function NavProjects({
   projects,
 }: {
