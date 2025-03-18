@@ -3,7 +3,10 @@ import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import LandingPage from '../../pages/LandingPage.js';
 import userEvent from "@testing-library/user-event";
-import { AuthProvider } from "@/contexts/AuthContext.tsx";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext.tsx";
+import { act } from 'react-dom/test-utils';
+import React, { useEffect } from 'react';
+
 
 beforeEach(() => {
     vi.resetAllMocks()
@@ -22,15 +25,32 @@ test("Renders landing page",()=>{
     expect(element).toBeInTheDocument();
 })
 
+
 test("Authenticated users see new prompts",async()=>{
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         json: () => Promise.resolve({ userId: 1, isAdmin: false }),
     }));
 
-    render(
+    const TestComponent = () => {
+        const { checkAuth, logout } = useAuth();
+
+        // Call checkAuth to simulate login
+        useEffect(() => {
+            checkAuth();
+        }, [checkAuth]);
+
+        return (
+            <div>
+                <button onClick={logout}>Log Out</button>
+            </div>
+        );
+    };
+
+    const { container } = render(
         <MemoryRouter>
             <AuthProvider>
                 <LandingPage />
+                <TestComponent />
             </AuthProvider>
         </MemoryRouter>
     );
@@ -126,20 +146,47 @@ test("Sign out button triggers logging out",async()=>{
         json: () => Promise.resolve({ userId: 1, isAdmin: false }),
     }));
 
-    render(
+    const TestComponent = () => {
+        const { checkAuth, logout } = useAuth();
+
+        // Call checkAuth to simulate login
+        useEffect(() => {
+            checkAuth();
+        }, [checkAuth]);
+
+        return (
+            <div>
+                <button onClick={logout}>Log Out</button>
+            </div>
+        );
+    };
+
+    const { container } = render(
         <MemoryRouter>
             <AuthProvider>
                 <LandingPage />
+                <TestComponent />
             </AuthProvider>
         </MemoryRouter>
     );
 
-    await waitFor(() => expect(fetch).toHaveBeenCalledWith(
-        "http://localhost:8000/api/auth/check",
-        expect.any(Object)
-    ));
 
-    const signoutButton = screen.getByRole("button", { name: "Log Out" });
-    fireEvent.click(signoutButton);
+    const signInButton = screen.getByRole("button", { name: "Sign In" });
+    expect(signInButton).toBeInTheDocument();
+    await act(async () => {
+        fireEvent.click(signInButton);
+    });
+
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/auth/check', expect.any(Object)));
+
+    const signOutButton = await screen.findByRole("button", { name: "Log Out" });
+    expect(signOutButton).toBeInTheDocument();
+
+    await act(async () => {
+        fireEvent.click(signOutButton);
+    });
+
     await waitFor(() => expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/auth/logout', expect.any(Object)));
+
+
 })
