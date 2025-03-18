@@ -27,9 +27,14 @@ export function NavMain({
     url: string
     icon?: LucideIcon
     isActive?: boolean
+    className?: string
     items?: {
       title: string
       url: string
+      id?: string
+      isActive?: boolean
+      subtitle?: string
+      onClick?: () => void
     }[]
   }[]
 }) {
@@ -45,20 +50,31 @@ export function NavMain({
           >
             <SidebarMenuItem className="">
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title} className="">
+                <SidebarMenuButton tooltip={item.title} className={item.className || ""}>
                   {item.icon && <item.icon className=""/>}
                   <span>{item.title}</span>
-                  <ChevronRightIcon className="ml-auto transition-transform duration-200  group-data-[state=open]/collapsible:rotate-90" />
+                  <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub className="">
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title} className="">
-                      <SidebarMenuSubButton asChild className="">
-                        <a href={subItem.url} className="">
-                          <span className="">{subItem.title}</span>
-                        </a>
+                    <SidebarMenuSubItem key={subItem.id || subItem.title} className="">
+                      <SidebarMenuSubButton 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (subItem.onClick) subItem.onClick();
+                        }}
+                        className={`w-full ${subItem.isActive ? "bg-muted text-foreground" : ""}`}
+                      >
+                        <span className="truncate w-full" title={subItem.title}>
+                          {subItem.title}
+                        </span>
+                        {subItem.subtitle && (
+                          <span className="text-xs text-muted-foreground mt-1 truncate w-full">
+                            {subItem.subtitle}
+                          </span>
+                        )}
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
