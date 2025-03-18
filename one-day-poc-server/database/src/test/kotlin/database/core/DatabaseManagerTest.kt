@@ -217,4 +217,44 @@ class DatabaseManagerTest {
             }
         assertTrue(tablesExist, "Flyway migrations should create flyway_schema_history table")
     }
+
+    @Test
+    fun `test tables created by migrations`() {
+        val database = DatabaseManager.init()
+        assertNotNull(database)
+
+        val templatesTableExists =
+            transaction(database) {
+                exec(
+                    """
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            AND table_name = 'templates'
+                        )
+                    """,
+                ) {
+                    it.next()
+                    it.getBoolean(1)
+                } == true
+            }
+        assertTrue(templatesTableExists, "Migrations should create templates table")
+
+        val prototypesTableExists =
+            transaction(database) {
+                exec(
+                    """
+                        SELECT EXISTS (
+                            SELECT FROM information_schema.tables 
+                            WHERE table_schema = 'public' 
+                            AND table_name = 'prototypes'
+                        )
+                    """,
+                ) {
+                    it.next()
+                    it.getBoolean(1)
+                } == true
+            }
+        assertTrue(prototypesTableExists, "Migrations should create prototypes table")
+    }
 }

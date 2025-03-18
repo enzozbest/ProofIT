@@ -61,6 +61,9 @@ object TemplateLibrarySeeder {
     }
 
     suspend fun seed() {
+        // Initialise DB (migrations are applied automatically):
+        // DatabaseManager.init()
+
         try {
             if (seeded) {
                 println("Template Library already seeded.")
@@ -120,7 +123,9 @@ object TemplateLibrarySeeder {
                                         ?: error("Annotation ID not found for template '${template.name}'")
                                 )
                             } else {
-                                println("Failed to store template '${template.name}': ${response.message ?: "Unknown error"}")
+                                println(
+                                    "Failed to store template '${template.name}': ${response.message ?: "Unknown error"}",
+                                )
                                 null
                             }
                         } catch (e: Exception) {
