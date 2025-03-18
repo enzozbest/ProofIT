@@ -15,5 +15,11 @@ else
     source ./embeddings/src/main/python/venv/bin/activate
 fi
 
+# Set the PYTHONPATH to the Python module correctly
+export PYTHONPATH="./embeddings/src/main/python"
+
+# Trap the SIGINT signal to stop both the Kotlin server and the Python microservice when the user presses CTRL+C
+trap "echo 'Stopping...'; kill 0" SIGINT
+
 # Run the Python module in the background and then run Gradle
 python3.10 ./embeddings/src/main/python/information_retrieval/__main__.py & ./gradlew run

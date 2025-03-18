@@ -34,7 +34,7 @@ Linux and macOS:
 Windows:
 
 ```shell
-start.bat
+start.ps1
 ```
 
 The provided script will automatically install the required dependencies (e.g. Python/Pip packages) and start both
