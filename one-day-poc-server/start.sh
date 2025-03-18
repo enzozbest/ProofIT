@@ -4,6 +4,10 @@
 if [ ! -d "./embeddings/src/main/python/venv" ]; then
     echo "Virtual environment for Python microservice not found. Creating venv and installing requirements..."
     python3.10 -m venv ./embeddings/src/main/python/venv
+    if [ ! -d "./embeddings/src/main/python/venv" ]; then
+      echo "Virtual environment could not be created. Aborting!"
+      exit 1
+    fi
     source ./embeddings/src/main/python/venv/bin/activate
     pip install -r ./embeddings/src/main/python/requirements.txt
 else
