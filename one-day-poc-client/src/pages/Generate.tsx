@@ -7,6 +7,21 @@ import BackgroundSVG from '../assets/background.svg';
 
 import SidebarWrapper from '@/components/sidebar/sidebar-wrapper';
 
+/**
+ * Generate Page Component
+ * 
+ * Renders the main prototype generation interface with:
+ * - A collapsible chat panel for interacting with the AI
+ * - A live prototype preview that updates based on the conversation
+ * - Cross-origin isolation detection for WebContainer compatibility
+ * - Support for initial messages passed through session storage
+ * 
+ * The layout consists of a sidebar navigation, a chat panel that can be toggled
+ * visible/hidden, and the main prototype preview area.
+ * 
+ * @component
+ * @returns {JSX.Element} The complete prototype generation interface
+ */
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showPrototype, setPrototype] = useState<boolean>(true);
