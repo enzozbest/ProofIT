@@ -4,8 +4,6 @@ import database.core.DatabaseManager
 import database.tables.chats.ChatRepository
 import database.tables.chats.ChatMessage
 import database.tables.chats.Conversation
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.transaction
 
 object ChatStorageFactory {
     private val repository by lazy {
@@ -19,6 +17,7 @@ object ChatStorageFactory {
 suspend fun storeMessage(message: ChatMessage): Boolean {
     println("Storing message: ${message.content} from ${message.senderId} in ${message.conversationId}")
     return runCatching {
+        println("Storing message: ${message.content} from ${message.senderId} in ${message.conversationId}")
         ChatStorageFactory.getChatRepository().saveMessage(message)
     }.getOrElse { e ->
         println("Error storing message: ${e.message}")
