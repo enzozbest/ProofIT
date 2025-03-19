@@ -8,11 +8,12 @@ type PrototypeCallback = (prototypeResponse: PrototypeResponse) => void;
 export async function fetchChatHistory(): Promise<Conversation[]> {
   try {
     if (!UserService.getUser()) {
+      console.log("Cannot fetch chat history as user is not logged in");
       return [];
     }
-    
+    console.log('Fetching chat history');
     const userId = UserService.getUserId();
-    const response = await fetch("http://localhost:8000/api/chat/history?userId=${encodeURIComponent(userId)}", {
+    const response = await fetch(`http://localhost:8000/api/chat/history?userId=${encodeURIComponent(userId)}`, {
       method: 'GET',
       credentials: "include",
       headers: {
@@ -36,7 +37,7 @@ export function createNewConversation(): string {
   return uuidv4();
 }
 
-export async function updateConversationName(conversationId: string, name: string): Promise<void> {
+export async function apiUpdateConversationName(conversationId: string, name: string): Promise<void> {
   try {
     const response = await fetch(`http://localhost:8000/api/chat/json/${conversationId}/rename`, {
       method: 'POST',

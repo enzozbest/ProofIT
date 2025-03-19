@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Conversation } from '../types/Types';
-import { fetchChatHistory, createNewConversation } from '../api/FrontEndAPI';
+import { fetchChatHistory, createNewConversation, apiUpdateConversationName } from '../api/FrontEndAPI';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationContextType {
   conversations: Conversation[];
@@ -15,6 +16,7 @@ interface ConversationContextType {
 const ConversationContext = createContext<ConversationContextType | undefined>(undefined);
 
 export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,27 +48,23 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     ));
     
     try {
-      const response = await fetch(`http://localhost:8000/api/chat/conversation/${id}/rename`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name })
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to update conversation name');
-      }
+      await apiUpdateConversationName(id, name);
     } catch (error) {
       console.error('Error updating conversation name:', error);
     }
   };
 
-  // Load conversations when user logs in
+  // Refresh when authentication status changes
   useEffect(() => {
-    refreshConversations();
-  }, []);
+    if (isAuthenticated) {
+      console.log("User authenticated, fetching conversations");
+      refreshConversations();
+    } else {
+      // Clear conversations when logged out
+      setConversations([]);
+      setActiveConversationId(null);
+    }
+  }, [isAuthenticated]); // Depend on isAuthenticated instead of user
 
   return (
     <ConversationContext.Provider
