@@ -55,6 +55,33 @@ export async function updateConversationName(conversationId: string, name: strin
   }
 };
 
+/**
+ * Sends a chat message to the server and processes the response.
+ * 
+ * @param message - The user message to send to the server
+ * @param onChatResponse - Callback function that handles chat response data
+ * @param onPrototypeResponse - Callback function that handles prototype response data
+ * 
+ * @returns A promise that resolves when the API call is complete
+ * 
+ * @throws Error if the network request fails or server returns an error status
+ * 
+ * @example
+ * ```typescript
+ * const message = {
+ *   id: '123',
+ *   content: 'Create a login form',
+ *   sender: 'user',
+ *   timestamp: new Date().toISOString()
+ * };
+ * 
+ * sendChatMessage(
+ *   message,
+ *   (chatResponse) => console.log('Chat response:', chatResponse),
+ *   (prototypeResponse) => console.log('Prototype response:', prototypeResponse)
+ * );
+ * ```
+ */
 export async function sendChatMessage(
     message: Message,
     onChatResponse: ChatCallback,

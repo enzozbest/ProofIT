@@ -28,6 +28,27 @@ import {
   ChevronDownIcon, 
 } from "@radix-ui/react-icons"
 
+import {
+  Share,
+  Rocket
+} from "lucide-react";
+
+/**
+ * SidebarWrapper component provides the layout structure with a collapsible sidebar.
+ * 
+ * This component creates a full application layout with:
+ * - A collapsible sidebar (AppSidebar) for navigation
+ * - A header with project management controls including:
+ *   - Project name with rename functionality
+ *   - Export options dropdown
+ *   - Deploy button
+ * - A main content area where children are rendered
+ * 
+ * The component uses SidebarProvider to manage the sidebar state and ensure
+ * all sidebar components have access to the shared context.
+ * 
+ * @returns {JSX.Element} A layout with sidebar, header, and content area
+ */
 export default function SidebarWrapper({children}:{children : React.ReactNode}) {
   const { conversations, activeConversationId, updateConversationName } = useConversation();
   const [projectName, setProjectName] = useState<string>("Untitled Project");

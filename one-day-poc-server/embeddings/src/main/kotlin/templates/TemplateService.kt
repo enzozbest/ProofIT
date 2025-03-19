@@ -7,10 +7,12 @@ import embeddings.TemplateEmbedResponse
 import embeddings.TemplateSearchResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -44,6 +46,7 @@ object TemplateService {
         val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_URL) {
+                    header(HttpHeaders.ContentType, "application/json")
                     setBody(Json.encodeToString(payload))
                 }
         val responseText = response.bodyAsText()
@@ -69,7 +72,8 @@ object TemplateService {
         data: String,
     ): StoreTemplateResponse {
         val templateId =
-            TemplateStorageService.createTemplate(fileURI) ?: error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
+            TemplateStorageService.createTemplate(fileURI)
+                ?: error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
 
         val remoteResponse = storeTemplateEmbedding(templateId, data)
         val success = remoteResponse.status == HttpStatusCode.OK
@@ -88,6 +92,7 @@ object TemplateService {
         val response =
             httpClient
                 .post(EmbeddingConstants.EMBED_AND_STORE_URL) {
+                    header(HttpHeaders.ContentType, "application/json")
                     setBody(Json.encodeToString(payload))
                 }
         return if (response.status == HttpStatusCode.OK) {
@@ -116,10 +121,11 @@ object TemplateService {
         val response =
             httpClient
                 .post(EmbeddingConstants.SEMANTIC_SEARCH_URL) {
+                    header(HttpHeaders.ContentType, "application/json")
                     setBody(Json.encodeToString(payload))
                 }
 
-        val responseText = response.bodyAsText()
+        val responseText = response.bodyAsText().also { println(it) }
         val searchResponse =
             runCatching { Json.decodeFromString<TemplateSearchResponse>(responseText) }.getOrElse {
                 error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)

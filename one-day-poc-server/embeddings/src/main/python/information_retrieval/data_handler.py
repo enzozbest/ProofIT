@@ -1,8 +1,15 @@
 import faiss
 import pickle
+import os
+import pathlib
 
-FAISS_FILE = "faiss.index"
-MAPPINGS_FILE = "mappings.pkl"
+# Get the absolute path of the current directory
+BASE_DIR = str(pathlib.Path(__file__).parent.parent.absolute())
+
+# Define file paths relative to the base directory
+FAISS_FILE = os.path.join(BASE_DIR, "faiss.index")
+MAPPINGS_FILE = os.path.join(BASE_DIR, "mappings.pkl")
+LUCENE_INDEX_DIR = os.path.join(BASE_DIR, "jsonld_index")
 VECTOR_DIMENSION = 384
 
 def load_data():
@@ -28,6 +35,9 @@ def load_data():
         print(f"Could not load mapping from {MAPPINGS_FILE} ({e}). Creating new mapping.")
         vector_store = {}
 
+    # Ensure the Lucene index directory exists
+    os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)
+
     return index, vector_store
 
 def save_data(index, vector_store):
@@ -37,4 +47,4 @@ def save_data(index, vector_store):
     faiss.write_index(index, FAISS_FILE)
     with open(MAPPINGS_FILE, "wb") as f:
         pickle.dump(vector_store, f)
-    print("Saved index and mapping data to disk.")
+    print(f"Saved FAISS index to {FAISS_FILE}, mappings to {MAPPINGS_FILE}, and Lucene index is maintained at {LUCENE_INDEX_DIR}.")

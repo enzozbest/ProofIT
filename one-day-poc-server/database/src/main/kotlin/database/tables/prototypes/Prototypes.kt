@@ -15,7 +15,7 @@ internal object Prototypes : UUIDTable("prototypes") {
     val userId = text("userId")
     val userPrompt = text("prompt")
     val fullPrompt = text("fullPrompt")
-    val s3key = varchar("s3_key", 255).nullable()
+    val path = varchar("path", 255).nullable()
     val createdAt = timestamp("created_at")
     val projectName = text("name")
 }
@@ -31,7 +31,7 @@ class PrototypeEntity(
     var userId by Prototypes.userId
     var userPrompt by Prototypes.userPrompt
     var fullPrompt by Prototypes.fullPrompt
-    var s3Key by Prototypes.s3key
+    var s3Key by Prototypes.path
     var createdAt by Prototypes.createdAt
     var projectName by Prototypes.projectName
 

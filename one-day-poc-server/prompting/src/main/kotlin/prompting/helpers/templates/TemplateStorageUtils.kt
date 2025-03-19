@@ -34,8 +34,8 @@ object TemplateStorageUtils {
      * @throws TemplateRetrievalException if the file cannot be retrieved
      */
     private fun retrieveLocalFileContent(path: String): ByteArray =
-        StorageService.getFileLocal(path = path)
-            ?: throw TemplateRetrievalException("File not found")
+        StorageService.getFileLocal(path = path.removePrefix("file:"))
+            ?: throw TemplateRetrievalException("File not found").also { println("NOT FOUND! $path") }
 
     /**
      * Retrieves a file from remote storage.

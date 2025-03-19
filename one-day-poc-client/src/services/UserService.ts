@@ -1,3 +1,13 @@
+
+/**
+ * User interface representing the structure of user data
+ * 
+ * @property {string} name - The user's full name
+ * @property {string} email - The user's email address
+ * @property {string} dob - The user's date of birth
+ * @property {string} role - The user's role in the system (e.g., "user", "admin")
+ * @property {string} [id] - Optional unique identifier for the user
+ */
 interface User {
   name: string;
   email: string;
@@ -6,6 +16,13 @@ interface User {
   id?: string;
 }
 
+/**
+ * UserService class provides centralized user data management
+ * 
+ * This service follows the singleton pattern to ensure consistent user state
+ * across the application. It handles API communication, data caching, and
+ * error management related to user information.
+ */
 class UserService {
   private static instance: UserService;
   private currentUser: User | null = null;
