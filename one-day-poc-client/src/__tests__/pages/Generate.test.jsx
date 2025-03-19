@@ -2,12 +2,13 @@ import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import { vi, test, expect, beforeEach, beforeAll } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import Page from '../../pages/Generate.js';
-import ChatScreen from "@/pages/ChatScreen.tsx";
-import { NavUser } from '@/components/nav-user.tsx';
-import { useSidebar } from "@/components/ui/sidebar";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import ChatScreen from '../../components/chat/chat-screen.js';
+import { NavUser } from '../../components/sidebar/nav-user.tsx';
+import { useSidebar } from "../../components/ui/sidebar";
+import { SidebarProvider } from "../../components/ui/sidebar";
+import Generate from "../../pages/Generate";
 
 vi.mock("@/components/ui/sidebar", async (importOriginal) => {
     const actual = await importOriginal();
@@ -33,6 +34,36 @@ beforeAll(() => {
     vi.clearAllMocks();
 });
 
+beforeEach(() => {
+    vi.clearAllMocks();
+    sessionStorage.clear();
+});
+
+test("Sets initialMessage when found in sessionStorage", async () => {
+    // Mock sessionStorage before rendering
+    sessionStorage.setItem("initialMessage", "Hello World");
+
+    render(
+        <MemoryRouter>
+            <Page />
+        </MemoryRouter>
+    );
+
+    // Check if "Hello World" appears in the rendered output
+    await expect(screen.findByText("Hello World")).resolves.toBeInTheDocument();
+});
+
+test("Does not render PrototypeFrame when showPrototype is false", () => {
+    render(
+        <MemoryRouter>
+            <Generate showPrototype={false} prototypeFiles={[]} />
+        </MemoryRouter>
+    );
+
+    expect(screen.queryByTestId("prototype-frame")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("prototype-frame")).toBeNull();
+});
+
 test("Renders generate page", ()=>{
     render(
         <MemoryRouter>
@@ -51,10 +82,11 @@ test("Chat screen toggles", ()=>{
     );
     const toggleButton = screen.getByTestId("toggle-button");
     const chatScreenDiv =  document.querySelector(".w-\\[450px\\]");
-    expect(chatScreenDiv).toHaveClass('opacity-100');
+
+    expect(chatScreenDiv).toHaveClass("max-w-[450px]");
 
     fireEvent.click(toggleButton);
-    expect(chatScreenDiv).toHaveClass('opacity-0');
+    expect(chatScreenDiv).toHaveClass("max-w-0");
 })
 
 test("Prototype frame displays", async ()=>{
@@ -77,9 +109,11 @@ test("Mobile sidebar renders correctly", async()=>{
     useSidebar.mockReturnValue({ isMobile: true });
 
     render(
-        <SidebarProvider>
-            <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
-        </SidebarProvider>
+        <MemoryRouter>
+            <SidebarProvider>
+                <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
+            </SidebarProvider>
+        </MemoryRouter>
     );
 
     const button = screen.getByRole("button");
@@ -89,9 +123,11 @@ test("Mobile sidebar renders correctly", async()=>{
 test("Non-mobile sidebar renders correctly", async()=>{
     useSidebar.mockReturnValue({ isMobile: false });
     render(
-        <SidebarProvider>
-            <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
-        </SidebarProvider>
+        <MemoryRouter>
+            <SidebarProvider>
+                <NavUser user={{ name: "Test User", email: "test@example.com", avatar: "" }} />
+            </SidebarProvider>
+        </MemoryRouter>
     );
 
     const button = screen.getByRole("button");
