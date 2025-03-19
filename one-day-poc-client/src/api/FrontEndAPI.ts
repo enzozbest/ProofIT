@@ -70,14 +70,14 @@ export async function getConversationHistory(conversationId: string): Promise<Me
       throw new Error('Failed to fetch conversation history');
     }
 
-    // The server returns the messages array directly, not a Conversation object
     const messages = await response.json();
     
-    // Debugging log to verify the structure
     console.log('Received message data:', messages);
     
-    // Return the array directly since that's what the server sends
-    return Array.isArray(messages) ? messages : [];
+    return Array.isArray(messages) ? messages.map(msg => ({
+      ...msg,
+      role: msg.senderId === 'user' ? 'User' : 'LLM'
+    })) : [];
   } catch (error) {
     console.error('Error fetching conversation history:', error);
     return [];

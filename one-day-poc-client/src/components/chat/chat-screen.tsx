@@ -22,32 +22,26 @@ import {toast} from 'sonner'
  * @returns A complete chat interface with message history and input box
  */
 const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage }) => {
-    // Get messages from context
     const { messages, loadingMessages, activeConversationId } = useConversation();
     
     const {
         message,
         setMessage,
-        sentMessages, // You'll combine this with context messages
+        sentMessages,
         handleSend,
         errorMessage,
         setErrorMessage,
     } = ChatMessage({setPrototype, setPrototypeFiles});
     
-    // Combine loaded message history with any new messages and sort by timestamp
     const combinedMessages = React.useMemo(() => {
-        // Start with all messages from both sources
         const allMessages = [...messages, ...sentMessages];
         
-        // Sort messages by timestamp (oldest first)
         const sortedMessages = allMessages.sort((a, b) => {
             const timeA = new Date(a.timestamp).getTime();
             const timeB = new Date(b.timestamp).getTime();
             return timeA - timeB;
         });
         
-        // Remove potential duplicates by checking content and timestamps
-        // that are very close to each other (within 1 second)
         const deduplicatedMessages = sortedMessages.reduce((acc, current, idx) => {
             if (idx === 0) {
                 return [current];
