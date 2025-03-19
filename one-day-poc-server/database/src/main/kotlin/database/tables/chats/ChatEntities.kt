@@ -5,8 +5,8 @@ import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import java.time.Instant
 import java.util.UUID
-import chat.storage.ChatMessage
-import chat.storage.Conversation
+import database.tables.chats.ChatMessage
+import database.tables.chats.Conversation
 
 class ConversationEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<ConversationEntity>(ConversationTable)
