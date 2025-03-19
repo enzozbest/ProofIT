@@ -3,6 +3,7 @@ package database.core
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import database.tables.templates.TemplateRepository
+import database.tables.chats.ChatRepository
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import utils.environment.EnvironmentLoader
@@ -35,6 +36,7 @@ object DatabaseManager {
     private var database: Database? = null
     private var templateRepository: TemplateRepository? = null
     private var dataSource: HikariDataSource? = null
+    private var chatRepository: ChatRepository? = null
 
     /**
      * Resets the database manager state by closing connections and clearing references.
@@ -47,6 +49,7 @@ object DatabaseManager {
         database = null
         dataSource = null
         templateRepository = null
+        chatRepository = null
     }
 
     /**
@@ -90,6 +93,11 @@ object DatabaseManager {
     fun templateRepository(): TemplateRepository {
         val db = checkNotNull(database) { "Database connection not initialized. Call init() first." }
         return templateRepository ?: TemplateRepository(db).also { templateRepository = it }
+    }
+
+    fun chatRepository(): ChatRepository {
+        val db = checkNotNull(database) { "Database connection not initialized. Call init() first." }
+        return chatRepository ?: ChatRepository(db).also { chatRepository = it }
     }
 
     /**
