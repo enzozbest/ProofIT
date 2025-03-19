@@ -20,6 +20,7 @@ private var promptingMainInstance: PromptingMain = PromptingMain()
 
 fun Route.jsonRoutes() {
     post(JSON) {
+        println("Received JSON request")
         val request: Request =
             runCatching {
                 call.receive<Request>()
@@ -65,6 +66,7 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
+    println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
     val conversationId = request.conversationId
     val userMessage = ChatMessage(
         conversationId = request.conversationId,

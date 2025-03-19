@@ -2,7 +2,6 @@ package chat.routes
 
 import chat.GET
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
@@ -26,6 +25,7 @@ data class ConversationHistory(
 internal fun Route.chatRoutes() {
     get(GET) {
         try {
+            println("Fetching conversations")
             val userId = call.request.queryParameters["userId"] ?: "user" 
 
             val conversations = getConversationHistory(userId).map {
@@ -37,6 +37,7 @@ internal fun Route.chatRoutes() {
                     userId = it.userId
                 )
             }
+            println("Fetched ${conversations.size} conversations")
             call.respond(ConversationHistory(conversations))
         } catch (e: Exception) {
             return@get call.respondText(

@@ -3,10 +3,7 @@ package database.tables.chats
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import java.time.Instant
 import java.util.UUID
-import database.tables.chats.ChatMessage
-import database.tables.chats.Conversation
 
 class ConversationEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     companion object : UUIDEntityClass<ConversationEntity>(ConversationTable)
