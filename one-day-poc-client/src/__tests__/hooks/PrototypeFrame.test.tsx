@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import PrototypeFrame from '../../hooks/PrototypeFrame';
-import { useWebContainer } from '../../hooks/useWebContainer';
+import { useWebContainer } from '../../hooks/UseWebContainer';
 import { FileTree } from '../../types/Types';
 import React from 'react';
 

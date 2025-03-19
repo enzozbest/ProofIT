@@ -1,7 +1,7 @@
 import { render, act } from "@testing-library/react";
 import { describe, it, vi, expect } from "vitest";
 import { toast } from "sonner";
-import ChatScreen from "@/components/chat/chat-screen";
+import ChatScreen from "@/components/chat/ChatScreen";
 import { MemoryRouter } from "react-router-dom";
 
 describe("ChatScreen - Error Message Handling", () => {
