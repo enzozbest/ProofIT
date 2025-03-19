@@ -56,6 +56,34 @@ export async function apiUpdateConversationName(conversationId: string, name: st
   }
 };
 
+export async function getConversationHistory(conversationId: string): Promise<Message[]> {
+  try {
+    const response = await fetch(`http://localhost:8000/api/chat/history/${conversationId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch conversation history');
+    }
+
+    // The server returns the messages array directly, not a Conversation object
+    const messages = await response.json();
+    
+    // Debugging log to verify the structure
+    console.log('Received message data:', messages);
+    
+    // Return the array directly since that's what the server sends
+    return Array.isArray(messages) ? messages : [];
+  } catch (error) {
+    console.error('Error fetching conversation history:', error);
+    return [];
+  }
+}
+
 /**
  * Sends a chat message to the server and processes the response.
  * 

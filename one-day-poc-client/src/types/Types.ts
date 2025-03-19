@@ -184,6 +184,7 @@ export interface Conversation {
     name: string;
     lastModified: string;
     messageCount: number;
+    messages: Message[];
   }
   
   export interface ConversationHistory {
