@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 
 /**
  * Request structure for Ollama API calls
+ *
  */
 @Serializable
 data class OllamaRequest(
@@ -95,7 +96,7 @@ object OllamaService {
             runCatching {
                 client.post(ollamaApiUrl) {
                     header(HttpHeaders.ContentType, "application/json")
-                    setBody(jsonParser.encodeToString(request))
+                    setBody(jsonParser.encodeToString<OllamaRequest>(request))
                 }
             }.getOrElse {
                 println("Failed to call Ollama: ${it.message}")
