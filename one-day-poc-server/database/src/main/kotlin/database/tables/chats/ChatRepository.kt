@@ -14,8 +14,24 @@ class ChatRepository(private val db: Database){
 
     suspend fun saveMessage(message: ChatMessage): Boolean {
         return try {
+            println("DEBUG - ChatMessage type: ${message::class.qualifiedName}")
+            println("DEBUG - conversationId before transaction: '${message.conversationId}'")
+            
             newSuspendedTransaction(IO_DISPATCHER, db) {
-                val conversationId = UUID.fromString(message.conversationId)
+                println("DEBUG - conversationId inside transaction: '${message.conversationId}'")
+                
+                val conversationId = if (message.conversationId.isNullOrBlank()) {
+                    println("DEBUG - Using random UUID since conversationId was empty")
+                    UUID.randomUUID()
+                } else {
+                    try {
+                        UUID.fromString(message.conversationId)
+                    } catch (e: Exception) {
+                        println("DEBUG - UUID parse failed: ${e.message}")
+                        UUID.randomUUID()
+                    }
+                }
+                
                 val conversation = ConversationEntity.findById(conversationId) ?: 
                     ConversationEntity.new(conversationId) {
                         name = "New Conversation"
