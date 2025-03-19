@@ -1,11 +1,11 @@
-import ChatScreen from '../components/chat/chat-screen';
+import ChatScreen from '../components/chat/ChatScreen';
 import PrototypeFrame from '@/hooks/PrototypeFrame';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
 
-import SidebarWrapper from '@/components/sidebar/sidebar-wrapper';
+import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 
 /**
  * Generate Page Component

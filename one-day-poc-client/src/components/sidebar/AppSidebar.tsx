@@ -5,15 +5,15 @@ import {
   History,
 } from "lucide-react"
 
-import { NavMain } from "@/components/sidebar/nav-main"
-import { NavUser } from "@/components/sidebar/nav-user"
+import { NavMain } from "@/components/sidebar/NavMain"
+import { NavUser } from "@/components/sidebar/NavUser"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 
 // This is sample data.
 const data = {

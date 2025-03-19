@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect } from "react";
-import { ChatBox } from "./chat-box";
-import { MessageBox } from "./messages-box";
+import { ChatBox } from "./ChatBox";
+import { MessageBox } from "./MessagesBox";
 import  ChatMessage  from "@/hooks/Chat";
 import { ChatScreenProps } from "../../types/Types";
 
