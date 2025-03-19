@@ -47,6 +47,7 @@ class UserService {
     this.error = null;
     
     try {
+      console.log('Fetching user data');
       const response = await fetch('http://localhost:8000/api/auth/me', {
         method: 'GET',
         credentials: 'include'
@@ -59,6 +60,7 @@ class UserService {
       const userData = await response.json();
       this.currentUser = userData;
       this.loading = false;
+      console.log('Fetched user data');
       return userData;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Unknown error';
