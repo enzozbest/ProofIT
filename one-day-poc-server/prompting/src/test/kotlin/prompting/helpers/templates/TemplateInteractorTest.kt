@@ -201,8 +201,6 @@ class TemplateInteractorTest {
             coVerify {
                 TemplateService.embed(prompt, "prompt")
             }
-            // No need to verify that search is not called, as the exception in embed
-            // is caught and handled in the fetchTemplates method
         }
 
     @Test
@@ -556,18 +554,12 @@ class TemplateInteractorTest {
                     .get("S3_BUCKET_TEMPLATES")
             } throws RuntimeException("Environment variable not found")
 
-            // Call storeNewTemplate
             val result = TemplateInteractor.storeNewTemplate(templateID, templateCode, jsonLD)
-
-            // Verify the result is false
             assertFalse(result)
-
-            // Verify the expected methods were called
             verify {
                 EnvironmentLoader.get("S3_BUCKET_TEMPLATES")
             }
 
-            // Verify no other methods were called
             coVerify(exactly = 0) {
                 TemplateStorageUtils.storeFile(any(), any(), any(), any())
                 TemplateStorageService.createTemplate(any())
