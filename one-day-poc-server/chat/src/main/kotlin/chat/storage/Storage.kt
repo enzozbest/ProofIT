@@ -9,10 +9,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object ChatStorageFactory {
     private val repository by lazy {
-        val db = DatabaseManager.init()
-        
+        val db = DatabaseManager.externalInit()
         checkDatabaseConnection(db)
-        
         ChatRepository(db)
     }
     
@@ -29,7 +27,7 @@ object ChatStorageFactory {
         } catch (e: Exception) {
             println("❌ Database connection failed: ${e.message}")
             e.printStackTrace()
-            throw e  // Re-throw to prevent initialization with bad connection
+            throw e
         }
     }
     
