@@ -3,6 +3,23 @@ import { sendChatMessage } from '../api/FrontEndAPI';
 import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
 import { useConversation } from '../contexts/ConversationContext';
 
+/**
+ * ChatMessage hook manages state and functionality for chat interactions
+ * 
+ * This hook handles:
+ * - Managing input message state
+ * - Storing conversation history
+ * - Sending messages to the chat API
+ * - Processing text responses from the LLM
+ * - Handling prototype file generation
+ * - Error handling for API interactions
+ * 
+ * @param {Object} props - Hook properties
+ * @param {Function} props.setPrototype - Function to update prototype visibility state
+ * @param {Function} props.setPrototypeFiles - Function to update prototype file content
+ * 
+ * @returns {ChatHookReturn} Object containing chat state and functions
+ */
 const ChatMessage = ({
   setPrototype,
   setPrototypeFiles,

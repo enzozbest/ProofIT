@@ -82,11 +82,8 @@ class PromptingMain(
 
         // Second LLM call
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
-
-        println("FINISHED PROMPTING.")
-        val response = serverResponse(prototypeResponse)
-        println("FRONTEND RESPONSE CREATED")
-        return response
+        println("DONE DECODING!")
+        return serverResponse(prototypeResponse)
     }
 
     /**
@@ -166,7 +163,7 @@ class PromptingMain(
                 is JsonPrimitive -> jsonReqs.content // If Chat itself is a primitive
                 else -> defaultResponse
             }
-
+        println("EXTRACTED CHAT RESPONSE")
         val chatResponse =
             ChatResponse(
                 message = chat,
@@ -184,11 +181,11 @@ class PromptingMain(
                     null
                 }
             }
-
+        println("EXTRACTED PROTOTYPE RESPONSE")
         return ServerResponse(
             chat = chatResponse,
             prototype = prototypeResponse,
-        )
+        ).also { println(it) }
     }
 
     /**

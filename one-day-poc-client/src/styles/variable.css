@@ -1,6 +1,7 @@
 @layer base {
     :root {
-        --background: 233 75% 9%;
+        --background: url('../assets/background.svg');
+        --background-image: url('../assets/background.svg'); 
         --foreground: 247 55% 20%;
         --card: 237, 19%, 100%;
         --card-foreground: 0 0% 96%;
