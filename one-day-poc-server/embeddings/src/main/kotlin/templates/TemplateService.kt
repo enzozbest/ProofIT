@@ -125,7 +125,7 @@ object TemplateService {
                     setBody(Json.encodeToString(payload))
                 }
 
-        val responseText = response.bodyAsText().also { println(it) }
+        val responseText = response.bodyAsText()
         val searchResponse =
             runCatching { Json.decodeFromString<TemplateSearchResponse>(responseText) }.getOrElse {
                 error(EXCEPTION_COULD_NOT_STORE_TEMPLATE)
