@@ -22,6 +22,15 @@ data class ConversationHistory(
     val conversations: List<Conversation>
 )
 
+@Serializable
+data class MessageDto(
+    val id: String,
+    val conversationId: String,
+    val senderId: String,
+    val content: String,
+    val timestamp: String
+)
+
 internal fun Route.chatRoutes() {
     get(GET) {
         try {
@@ -56,9 +65,24 @@ internal fun Route.chatRoutes() {
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
+            println("Fetching messages")
             val messages = getMessageHistory(conversationId, limit)
-            call.respond(messages)
+            println("Fetched $messages messages")
+            
+            val messageDtos = messages.map { message ->
+                MessageDto(
+                    id = message.id,
+                    conversationId = message.conversationId,
+                    senderId = message.senderId,
+                    content = message.content,
+                    timestamp = message.timestamp.toString()
+                )
+            }
+            
+            call.respond(messageDtos)
         } catch (e: Exception) {
+            println("Error getting messages: ${e.message}")
+            e.printStackTrace()
             return@get call.respondText(
                 "Error: ${e.message}",
                 status = HttpStatusCode.InternalServerError

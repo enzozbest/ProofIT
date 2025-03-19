@@ -29,7 +29,15 @@ const ChatMessage = ({
   const [llmResponse, setLlmResponse] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const { activeConversationId, createConversation } = useConversation();
+  const { activeConversationId, createConversation, messages, loadingMessages } = useConversation();
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      setSentMessages(messages);
+    } else {
+      setSentMessages([]);
+    }
+  }, [messages]);
 
   useEffect(() => {
     setSentMessages([]);

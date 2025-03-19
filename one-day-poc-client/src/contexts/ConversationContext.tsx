@@ -1,11 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { Conversation } from '../types/Types';
-import { fetchChatHistory, createNewConversation, apiUpdateConversationName } from '../api/FrontEndAPI';
+import { Conversation, Message } from '../types/Types';
+import { fetchChatHistory, createNewConversation, apiUpdateConversationName, getConversationHistory } from '../api/FrontEndAPI';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationContextType {
   conversations: Conversation[];
   activeConversationId: string | null;
+  messages: Message[];
+  loadingMessages: boolean;
   setActiveConversationId: (id: string) => void;
   createConversation: () => string;
   refreshConversations: () => Promise<void>;
@@ -20,6 +22,8 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   const refreshConversations = async () => {
     setIsLoading(true);
@@ -34,7 +38,8 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       id: newId,
       name: `New Chat ${new Date().toLocaleString()}`,
       lastModified: new Date().toISOString(),
-      messageCount: 0
+      messageCount: 0,
+      messages: []
     };
     
     setConversations([...conversations, newConversation]);
@@ -54,6 +59,25 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
+  const loadConversationMessages = async (conversationId: string) => {
+    if (!conversationId) return;
+    
+    setLoadingMessages(true);
+    try {
+      const messagesHistory = await getConversationHistory(conversationId);
+      setMessages(messagesHistory);
+    } catch (error) {
+      console.error("Error loading conversation messages:", error);
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  const handleSetActiveConversation = (id: string) => {
+    setActiveConversationId(id);
+    loadConversationMessages(id);
+  };
+
   // Refresh when authentication status changes
   useEffect(() => {
     if (isAuthenticated) {
@@ -71,7 +95,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       value={{
         conversations,
         activeConversationId,
-        setActiveConversationId,
+        messages,
+        loadingMessages,
+        setActiveConversationId: handleSetActiveConversation,
         createConversation,
         refreshConversations,
         updateConversationName,
