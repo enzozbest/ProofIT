@@ -4,6 +4,7 @@ import { ChatBox } from "./ChatBox";
 import { MessageBox } from "./MessagesBox";
 import  ChatMessage  from "@/hooks/Chat";
 import { ChatScreenProps } from "../../types/Types";
+import { useConversation } from "@/contexts/ConversationContext";
 
 import {toast} from 'sonner'
 
@@ -20,8 +21,9 @@ import {toast} from 'sonner'
  * 
  * @returns A complete chat interface with message history and input box
  */
-const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage }) =>{
-
+const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage }) => {
+    const { messages, loadingMessages, activeConversationId } = useConversation();
+    
     const {
         message,
         setMessage,
@@ -30,6 +32,36 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, se
         errorMessage,
         setErrorMessage,
     } = ChatMessage({setPrototype, setPrototypeFiles});
+    
+    const combinedMessages = React.useMemo(() => {
+        const allMessages = [...messages, ...sentMessages];
+        
+        const sortedMessages = allMessages.sort((a, b) => {
+            const timeA = new Date(a.timestamp).getTime();
+            const timeB = new Date(b.timestamp).getTime();
+            return timeA - timeB;
+        });
+        
+        const deduplicatedMessages = sortedMessages.reduce((acc, current, idx) => {
+            if (idx === 0) {
+                return [current];
+            }
+            
+            const prev = acc[acc.length - 1];
+            const isDuplicate = 
+                prev.content === current.content && 
+                prev.role === current.role &&
+                Math.abs(new Date(prev.timestamp).getTime() - new Date(current.timestamp).getTime()) < 1000;
+            
+            if (!isDuplicate) {
+                acc.push(current);
+            }
+            
+            return acc;
+        }, [] as typeof sortedMessages);
+        
+        return deduplicatedMessages;
+    }, [messages, sentMessages]);
 
     /**
      * Display error messages as toast notifications when they occur
@@ -62,17 +94,18 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, se
 
     return (
         <div className="relative h-full flex flex-col">
-
-            <MessageBox sentMessages={sentMessages}/>
+            {loadingMessages && <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                <p>Loading messages...</p>
+            </div>}
+            
+            <MessageBox sentMessages={combinedMessages} />
             <ChatBox
                 setMessage={setMessage}
                 message={message}
                 handleSend={handleSend}
                 setError={setErrorMessage}
             />
-
         </div>
-
     );
 }
 
