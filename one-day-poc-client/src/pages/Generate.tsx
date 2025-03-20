@@ -1,11 +1,11 @@
-import ChatScreen from '../components/chat/chat-screen';
+import ChatScreen from '../components/chat/ChatScreen';
 import PrototypeFrame from '@/hooks/PrototypeFrame';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
 
-import SidebarWrapper from '@/components/sidebar/sidebar-wrapper';
+import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 
 /**
  * Generate Page Component
@@ -44,12 +44,15 @@ export default function Page() {
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
       }}
+      data-testid="container"
     >
       <SidebarWrapper>
         <div
           className={`w-[450px] h-full rounded-xl bg-white/15 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden ${
             isVisible ? 'opacity-100 max-w-[450px]' : 'opacity-0 max-w-0'
-          }`}
+          }`} 
+          data-testid="chat"
+
         >
           <ChatScreen
             showPrototype={showPrototype}

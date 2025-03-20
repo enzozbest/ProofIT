@@ -152,15 +152,7 @@ class PromptingMain(
         val defaultResponse = "Here is your code."
         val chat =
             when (val jsonReqs = response["chat"]) {
-                is JsonObject ->
-                    jsonReqs["message"]?.let {
-                        when (it) {
-                            is JsonPrimitive -> it.content
-                            else -> defaultResponse
-                        }
-                    } ?: defaultResponse
-
-                is JsonPrimitive -> jsonReqs.content // If Chat itself is a primitive
+                is JsonPrimitive -> jsonReqs.content
                 else -> defaultResponse
             }
         println("EXTRACTED CHAT RESPONSE")
@@ -185,7 +177,7 @@ class PromptingMain(
         return ServerResponse(
             chat = chatResponse,
             prototype = prototypeResponse,
-        ).also { println(it) }
+        )
     }
 
     /**

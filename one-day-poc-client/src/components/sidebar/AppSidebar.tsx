@@ -6,21 +6,21 @@ import {
   PlusCircle
 } from "lucide-react"
 
-import { NavMain } from "@/components/sidebar/nav-main"
-import { NavUser } from "@/components/sidebar/nav-user"
+import { NavMain } from "@/components/sidebar/NavMain"
+import { NavUser } from "@/components/sidebar/NavUser"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 import { useConversation } from "@/contexts/ConversationContext"
 import { Button } from "@/components/ui/button"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { conversations, activeConversationId, setActiveConversationId, createConversation } = useConversation();
-  
+
   const navMainData = [
     {
       title: "History",
@@ -38,13 +38,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
   ];
 
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>, user) {
   return (
     <Sidebar collapsible="icon" className="bg-background/85" {...props}>
       <SidebarHeader>
         <div className="px-4 py-2">
-          <Button 
-            onClick={createConversation} 
-            variant="outline" 
+          <Button
+            onClick={createConversation}
+            variant="outline"
             className="w-full flex items-center"
           >
             <PlusCircle size={16} className="mr-2" />

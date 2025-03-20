@@ -19,8 +19,6 @@ object TemplateInteractor {
         val embedding = runCatching { TemplateService.embed(prompt, "prompt").embedding }.getOrElse { emptyList() }
         val templateIds = runCatching { TemplateService.search(embedding, prompt).matches }.getOrElse { emptyList() }
 
-        println(templateIds)
-
         return templateIds.mapNotNull { id ->
             getTemplateContent(id)
         }
