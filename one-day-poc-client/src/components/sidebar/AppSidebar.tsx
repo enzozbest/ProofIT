@@ -1,46 +1,49 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import {
-  History,
-  PlusCircle
-} from "lucide-react"
+import * as React from 'react';
+import { History, PlusCircle } from 'lucide-react';
 
-import { NavMain } from "@/components/sidebar/NavMain"
-import { NavUser } from "@/components/sidebar/NavUser"
+import { NavMain } from '@/components/sidebar/NavMain';
+import { NavUser } from '@/components/sidebar/NavUser';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/Sidebar"
-import { useConversation } from "@/contexts/ConversationContext"
-import { Button } from "@/components/ui/Button"
+} from '@/components/ui/Sidebar';
+import { useConversation } from '@/contexts/ConversationContext';
+import { Button } from '@/components/ui/Button';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { conversations, activeConversationId, setActiveConversationId, createConversation } = useConversation();
+  const {
+    conversations,
+    activeConversationId,
+    setActiveConversationId,
+    createConversation,
+  } = useConversation();
 
   const navMainData = [
     {
-      title: "History",
-      url: "#",
+      title: 'History',
+      url: '#',
       icon: History,
       isActive: true,
-      className: "bg-transparent",
-      items: conversations.map(conversation => ({
+      className: 'bg-transparent',
+      items: conversations.map((conversation) => ({
         title: conversation.name,
-        url: "#",
+        url: '#',
         id: conversation.id,
         isActive: activeConversationId === conversation.id,
-        onClick: () => setActiveConversationId(conversation.id)
+        onClick: () => setActiveConversationId(conversation.id),
       })),
     },
   ];
 
   return (
     <Sidebar collapsible="icon" className="bg-background/85" {...props}>
-      <SidebarHeader>
+      <SidebarHeader></SidebarHeader>
+      <SidebarContent>
         <div className="px-4 py-2">
           <Button
             onClick={createConversation}
@@ -51,8 +54,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             New Chat
           </Button>
         </div>
-      </SidebarHeader>
-      <SidebarContent>
         <NavMain items={navMainData} />
       </SidebarContent>
       <SidebarFooter>
@@ -60,5 +61,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
