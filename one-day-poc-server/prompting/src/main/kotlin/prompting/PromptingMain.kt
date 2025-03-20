@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import prompting.helpers.PrototypeInteractor
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
@@ -76,12 +77,16 @@ class PromptingMain(
 
         // First LLM call
         val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
-        val freqs: JsonObject = promptLlm(freqsPrompt, freqsOptions).also { println(it) }
+        val freqs: JsonObject = promptLlm(freqsPrompt, freqsOptions)
 
         val functionalRequirements =
             freqs["requirements"]?.jsonArray?.joinToString(",") + ", $userPrompt"
+
+        // Use functional requirements to and user prompt fetch templates
         val templates = TemplateInteractor.fetchTemplates(functionalRequirements)
-        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
+
+        // Prototype prompt with templates.
+        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates)
 
         // Second LLM call
         val prototypeOptions =
@@ -154,17 +159,16 @@ class PromptingMain(
     /**
      * Extracts the functional requirements and prototype files from the LLM response.
      * @param response The LLM response.
-     * @return A ServerResponse containing both chat response and prototype files.
-     * @throws PromptException If the chat part could not be found or ... i dont even think the llm generates this right now
+     * @return A [ServerResponse] containing both chat response and prototype files.
      */
     private fun serverResponse(response: JsonObject): ServerResponse {
         val defaultResponse = "Here is your code."
         val chat =
             when (val jsonReqs = response["chat"]) {
                 is JsonPrimitive -> jsonReqs.content
+                is JsonObject -> jsonReqs["message"]?.jsonPrimitive?.content ?: defaultResponse
                 else -> defaultResponse
             }
-        println("EXTRACTED CHAT RESPONSE")
         val chatResponse =
             ChatResponse(
                 message = chat,
@@ -182,7 +186,6 @@ class PromptingMain(
                     null
                 }
             }
-        println("EXTRACTED PROTOTYPE RESPONSE")
         return ServerResponse(
             chat = chatResponse,
             prototype = prototypeResponse,

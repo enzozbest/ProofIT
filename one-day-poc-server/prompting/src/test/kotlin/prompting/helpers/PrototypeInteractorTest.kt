@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import prompting.helpers.PrototypeInteractor
 import prototype.PrototypeMain
+import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaResponse
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -43,12 +44,12 @@ class PrototypeInteractorTest {
 
             // Use a more explicit mocking approach
             coEvery { 
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
             } returns expectedResponse
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel)
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
             assertEquals(expectedResponse, result)
-            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }
         }
 
     @Test
@@ -59,13 +60,13 @@ class PrototypeInteractorTest {
 
             // Use a more explicit mocking approach
             coEvery { 
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
             } returns null
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel)
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
 
             assertNull(result)
-            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }
         }
 
     @Test
@@ -84,12 +85,12 @@ class PrototypeInteractorTest {
 
             // Use a more explicit mocking approach
             coEvery { 
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt)) 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
             } returns expectedResponse
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel)
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
 
             assertEquals(expectedResponse, result)
-            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt) }
+            coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }
         }
 }
