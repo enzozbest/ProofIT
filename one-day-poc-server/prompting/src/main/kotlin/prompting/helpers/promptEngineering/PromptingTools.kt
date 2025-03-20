@@ -28,7 +28,8 @@ object PromptingTools {
             requirements for a software prototype that will run in WebContainers.
 
             ### Response Format
-            Respond with a single valid JSON object only. No explanations, comments, or additional text.
+            Respond with a single valid JSON object only. The JSON must be parseable. 
+            Do not include any explanations, comments, or additional text.
 
             ### Response Structure
             Your response must strictly follow the example below. It must be a single valid JSON object containing 
@@ -131,15 +132,17 @@ object PromptingTools {
     ): String {
         val systemMessage =
             """
-            You are an expert software architect specializing in creating high-quality,
-            production-ready prototypes for WebContainers.
+            You are an expert software engineer specializing in creating high-quality, production-ready prototypes
+            for WebContainers. You must answer according to the provided functional requirements and templates. Your job
+            is to extend/modify/combine the given templates together to fit the functional requirements and create a
+            full working solution.
 
             ### Response Format
-            Respond with a single valid JSON object only. No explanations, comments, or additional text. DO NOT USE
-            BACKTICKED STRINGS (`) IN YOUR RESPONSE.
+            Respond with a single valid JSON object only. Do not include any explanations, comments, or additional text. 
+            DO NOT USE BACKTICKED STRINGS (`) IN YOUR RESPONSE. YOU MUST USE ONLY VALID JSON NOTATION.
 
             ### Response Structure
-            Your response must strictly obey the schema provided below.
+            Your response must strictly obey the schema provided below. You are not allowed to change it in any way.
             Schema:
             {
               "${'$'}schema": "http://json-schema.org/draft-07/schema#",
@@ -192,53 +195,38 @@ object PromptingTools {
               }
             }
 
-            You must adhere to this strictly, no other format is allowed. You response must include both the 'chat' and
+            You must adhere to this strictly, no other response format is allowed. You response must include both the 'chat' and
             'prototype' keys at the top-level and only those. 
 
             ### Code Generation Rules
-            1. Architecture:
-               1. Follow SOLID principles.
-               2. Use clean architecture patterns.
-               3. Implement proper separation of concerns.
-               4. Ensure modularity and reusability where possible.
-
-            2. User Interface:
-               1. Must implement responsive design.
-               2. Must follow accessibility standards (WCAG 2.1).
-               3. Must ensure consistent styling.
-               4. Pages must use <div class="page"> with only one having class="active" as well.
-
-            3. Code Standards:
-               1. Write clean, self-documenting code (no comments allowed anywhere).
-               2. Use meaningful variable/function names.
-               3. Follow language-specific best practices.
-               4. Implement proper error handling.
-               5. Include input validation
-               6. Use type safety where applicable.
-
-            4. Interactivity:
-               1. Add event listeners for user interactions.
-               2. Implement immediate feedback mechanisms.
-               3. Include loading states.
-               4. Handle edge cases.
-               5. Use dummy data for immediate testing.
-
+            1. Pages you generate must use <div class="page">. Only one of those must have class="active" as well.
+            2. Ensure modularity and reusability where possible.
+            3. Implement responsive user interface design.
+            4. Follow accessibility standards (WCAG 2.1).
+            5. Ensure consistent styling throughout
+            6. Write clean, self-documenting code (no comments allowed anywhere). 
+            7. Implement proper error handling.
+            8. Include input validation.
+            9. Use type safety where applicable.
+            10. Add event listeners for user interactions.
+            11. Implement immediate feedback mechanisms.
+            12. Use dummy data for immediate experimentation.
+            
             ### Technology Stack
-               Choose appropriate technologies from:
-               1. Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript.
-               2. Frameworks: React, Vue, Angular, Svelte.
-               3. Styling: Tailwind, Bootstrap, Material-UI.
-               4. Backend: Node.js.
-               5. Backend Frameworks: Express, Spring.
+            Choose appropriate technologies from:
+            1. Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript.
+            2. Frameworks: React, Vue, Angular, Svelte.
+            3. Styling: Tailwind, Bootstrap, Material-UI.
+            4. Backend: Node.js.
+            5. Backend Frameworks: Express, Spring.
 
             ### Your Task
-               Generate production-quality code based on:
-               1. The user's message.
-               2. Provided functional requirements.
-               3. Available reference templates.
-               4. Modern development best practices.
-               5. Modern styling practices. You must style the components to make them visually appealing using
-                  whatever styling framework you choose.
+            Generate production-quality code based on:
+            1. The user's message.
+            2. The provided functional requirements (to follow).
+            3. Available reference templates (to follow).
+            5. Modern styling practices. You must style the components to make them visually appealing using
+            whatever styling framework you choose.
             """.trimIndent()
 
         val userMessage =
@@ -249,31 +237,32 @@ object PromptingTools {
 
         val functionalRequirementsMessage =
             """
-            These are the functional requirements you should consider in addition to the user's message:
+            You must consider the following functional requirements in addition to the user's message:
             $requirements
             """.trimIndent()
 
         val templatesMessage =
             """
-            These are the templates you should consider (use them to help generate your response. DO NOT simply describe them):
+            These are the templates you must consider (use them to help generate your response. DO NOT simply describe them):
             ${templates.joinToString(separator = "\n\n")}
             """.trimIndent()
 
         val finalPromptMessage =
             """
-            Now produce the final JSON strictly following the schema provided previously.
+            Now produce the final JSON strictly following the schema.
             
             Incorporate each reference template provided into its respective file in the prototype.files object. 
             Do not ignore the reference templates, rather extend/modify/combine them to fit the functional requirements. 
             Adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
             Add dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
-            The final code must run `npm install` and `npm start` without errors in WebContainer.
+            The final code must run `npm install` and `npm start` without errors in a WebContainer.
             
             The final JSON must include:
              1. A 'chat' key, with a simple message indicating how your solution meets the user's original prompt.
-             2.A 'prototype' key, with the file structure of the prototype (described previously). 
+             2.A 'prototype' key, with the file structure of the prototype. 
              
-            Check your response before finalising it. If it is not formatted correct, make the necessary changes.
+            Check your response before finalising it. If it is not formatted correct, make the necessary changes
+            before sending it.
             
             Now produce your response.
             """.trimIndent()

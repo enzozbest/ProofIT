@@ -1,5 +1,6 @@
 package prototype
 
+import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaRequest
 import prototype.helpers.OllamaResponse
 import prototype.helpers.OllamaService
@@ -19,8 +20,12 @@ class PrototypeMain(
      * @return The response from the language model, or null if the request failed
      * @throws IllegalStateException If the request to the language model fails
      */
-    suspend fun prompt(prompt: String): OllamaResponse? {
-        val request = OllamaRequest(prompt = prompt, model = model, stream = false)
+    suspend fun prompt(
+        prompt: String,
+        options: OllamaOptions,
+    ): OllamaResponse? {
+        val request =
+            OllamaRequest(prompt = prompt, model = model, stream = false, options = options).also { println(it) }
         val llmResponse = OllamaService.generateResponse(request)
         check(llmResponse.isSuccess) { "Failed to receive response from the LLM" }
         return llmResponse.getOrNull()
