@@ -10,6 +10,9 @@ import { useSidebar } from "../../components/ui/Sidebar";
 import { SidebarProvider } from "../../components/ui/Sidebar";
 import Generate from "../../pages/Generate";
 
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ConversationProvider } from '@/contexts/ConversationContext';
+
 vi.mock("@/components/ui/Sidebar", async (importOriginal) => {
     const actual = await importOriginal();
     return {
@@ -45,7 +48,11 @@ test("Sets initialMessage when found in sessionStorage", async () => {
 
     render(
         <MemoryRouter>
-            <Page />
+            <AuthProvider>
+                <ConversationProvider>
+                    <Page />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -56,7 +63,11 @@ test("Sets initialMessage when found in sessionStorage", async () => {
 test("Does not render PrototypeFrame when showPrototype is false", () => {
     render(
         <MemoryRouter>
-            <Generate showPrototype={false} prototypeFiles={[]} />
+            <AuthProvider>
+                <ConversationProvider>
+                    <Generate showPrototype={false} prototypeFiles={[]} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -67,7 +78,11 @@ test("Does not render PrototypeFrame when showPrototype is false", () => {
 test("Renders generate page", ()=>{
     render(
         <MemoryRouter>
-            <Page />
+            <AuthProvider>
+                <ConversationProvider>
+                    <Page />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
     const element = screen.getByPlaceholderText(/How can we help you today?/i);
@@ -77,7 +92,11 @@ test("Renders generate page", ()=>{
 test("Chat screen toggles", ()=>{
     render(
         <MemoryRouter>
-            <Page />
+            <AuthProvider>
+                <ConversationProvider>
+                    <Page />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
     const toggleButton = screen.getByTestId("toggle-button");
@@ -94,7 +113,11 @@ test("Prototype frame displays", async ()=>{
     vi.spyOn(React, 'useState').mockImplementationOnce(() => [true, setPrototypeMock]);
     render(
         <MemoryRouter>
-            <Page />
+            <AuthProvider>
+                <ConversationProvider>
+                    <Page />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -137,7 +160,11 @@ test("Non-mobile sidebar renders correctly", async()=>{
 test('Renders background image correctly', () => {
     render(
       <MemoryRouter>
-        <Generate />
+        <AuthProvider>
+            <ConversationProvider>
+                <Generate />
+            </ConversationProvider>
+        </AuthProvider>
       </MemoryRouter>
     );
 

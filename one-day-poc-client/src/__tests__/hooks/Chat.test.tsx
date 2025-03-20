@@ -3,6 +3,9 @@ import { describe, it, expect, vi } from 'vitest';
 import ChatMessage from '../../hooks/Chat';
 import { sendChatMessage } from '../../api/FrontEndAPI';
 
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ConversationProvider } from '@/contexts/ConversationContext';
+
 vi.mock('../../api/FrontEndAPI', () => ({
   sendChatMessage: vi.fn(),
 }));
@@ -41,7 +44,13 @@ const WrapperComponent = ({ mockSetPrototype = () => {}, mockSetPrototypeFiles =
 
 describe('ChatMessage Hook', () => {
   it('renders sent messages', () => {
-    render(<WrapperComponent />);
+    render(
+      <AuthProvider>
+        <ConversationProvider>
+          <WrapperComponent />
+        </ConversationProvider>
+      </AuthProvider>
+    );
 
     const input = screen.getByPlaceholderText('Type a message');
     fireEvent.change(input, { target: { value: 'Hello, world!' } });
@@ -53,7 +62,13 @@ describe('ChatMessage Hook', () => {
   });
 
   it('does not send a message if it is empty or contains only whitespace', () => {
-    render(<WrapperComponent />);
+    render(
+      <AuthProvider>
+        <ConversationProvider>
+          <WrapperComponent />
+        </ConversationProvider>
+      </AuthProvider>
+    );
   
     const input = screen.getByPlaceholderText('Type a message');
     fireEvent.change(input, { target: { value: '   ' } }); // Only whitespace
@@ -67,7 +82,13 @@ describe('ChatMessage Hook', () => {
   it('renders an error message when sending fails', async () => {
     (sendChatMessage as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'));
 
-    render(<WrapperComponent />);
+    render(
+      <AuthProvider>
+        <ConversationProvider>
+          <WrapperComponent />
+        </ConversationProvider>
+      </AuthProvider>
+    );
 
     const input = screen.getByPlaceholderText('Type a message');
     fireEvent.change(input, { target: { value: 'Hello, world!' } });
@@ -85,7 +106,13 @@ describe('ChatMessage Hook', () => {
       onChatResponse({ message: 'LLM response' });
     });
 
-    render(<WrapperComponent />);
+    render(
+      <AuthProvider>
+        <ConversationProvider>
+          <WrapperComponent />
+        </ConversationProvider>
+      </AuthProvider>
+    );
 
     const input = screen.getByPlaceholderText('Type a message');
     fireEvent.change(input, { target: { value: 'Hello, world!' } });
@@ -106,7 +133,13 @@ describe('ChatMessage Hook', () => {
       onPrototypeResponse({ files: ['file1', 'file2'] });
     });
 
-    render(<WrapperComponent mockSetPrototype={mockSetPrototype} mockSetPrototypeFiles={mockSetPrototypeFiles} />);
+    render(
+      <AuthProvider>
+        <ConversationProvider>
+          <WrapperComponent mockSetPrototype={mockSetPrototype} mockSetPrototypeFiles={mockSetPrototypeFiles} />
+        </ConversationProvider>
+      </AuthProvider>
+    );
 
     const input = screen.getByPlaceholderText('Type a message');
     fireEvent.change(input, { target: { value: 'Hello, world!' } });
