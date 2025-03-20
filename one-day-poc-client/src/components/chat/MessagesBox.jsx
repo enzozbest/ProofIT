@@ -34,7 +34,7 @@ export function MessageBox({ sentMessages }) {
 
     return(
         <>
-            <div className="flex flex-col flex-1 overflow-y-auto gap-1 p-1 text-secondary-foreground">
+            <div className="flex flex-col flex-1 overflow-y-auto gap-1 p-1 text-secondary-foreground no-scrollbar">
                 {sentMessages.map((msg, index) => (
                     <MessageBubble
                     key={index}

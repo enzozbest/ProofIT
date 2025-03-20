@@ -29,7 +29,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
   }
 
   return (
-    <div className="mt-5 flex flex-nowrap gap-4 w-full max-w-6xl overflow-x-auto justify-center pb-9">
+    <div className="mt-5 flex md:flex-nowrap flex-wrap gap-4 w-full max-w-6xl overflow-x-auto justify-center pb-9 no-scrollbar text-sm">
       {prompts.map((text, index) => (
         <button
           key={index}
