@@ -9,17 +9,17 @@ import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Landing Page Component
- * 
+ *
  * Renders the application's main landing page with:
  * - Navigation bar for authentication and branding
  * - Hero section with main value proposition
  * - Suggested prompts to help users get started
  * - Input box for users to enter their own prompts
  * - Previous prompt history for authenticated users
- * 
+ *
  * The page features a gradient background and responsive layout that
  * centers content on different screen sizes.
- * 
+ *
  * @component
  * @returns {JSX.Element} The complete landing page with conditional sections based on auth state
  */
@@ -42,7 +42,6 @@ const LandingPage: FC = () => {
         backgroundPosition: 'center',
       }}
     >
-      <NavBar />
       <div className="flex flex-col items-center justify-center flex-grow w-full px-6">
         <HeroSection />
         <div className="flex justify-center w-full mt-6">
