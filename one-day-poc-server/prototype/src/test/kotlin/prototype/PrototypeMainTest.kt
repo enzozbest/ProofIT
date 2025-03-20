@@ -9,6 +9,7 @@ import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
+import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaRequest
 import prototype.helpers.OllamaResponse
 import prototype.helpers.OllamaService
@@ -64,7 +65,7 @@ class PrototypeMainTest {
             } returns Result.success(expectedResponse)
 
             val testImpl = PrototypeMain(testModel)
-            val result = testImpl.prompt(testPrompt)
+            val result = testImpl.prompt(testPrompt, OllamaOptions())
 
             assertNotNull(result)
             assertEquals(expectedResponse, result)

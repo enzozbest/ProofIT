@@ -20,7 +20,7 @@ data class OllamaRequest(
     val model: String,
     val prompt: String,
     val stream: Boolean,
-    val options: OllamaOptions,
+    val options: OllamaOptions = OllamaOptions(),
 )
 
 /**

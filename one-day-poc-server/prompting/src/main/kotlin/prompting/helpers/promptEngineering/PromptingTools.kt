@@ -142,7 +142,7 @@ object PromptingTools {
             DO NOT USE BACKTICKED STRINGS (`) IN YOUR RESPONSE. YOU MUST USE ONLY VALID JSON NOTATION.
 
             ### Response Structure
-            Your response must strictly obey the schema provided below. You are not allowed to change it in any way.
+            Your response must strictly obey the schema and examples provided (to follow). You are not allowed to change this format in any way.
             Schema:
             {
               "${'$'}schema": "http://json-schema.org/draft-07/schema#",
@@ -194,7 +194,17 @@ object PromptingTools {
                 }
               }
             }
-
+            Good Example:
+            {
+                "chat" : "This is a sample message to go in the chat"
+                "prototype": {
+                    "files": {
+                        "package.json": "{
+                        "contents": "{ \"name\": \"prototype\", \"version\": \"1.0.0\" }",
+                    }
+                }
+            }
+            
             You must adhere to this strictly, no other response format is allowed. You response must include both the 'chat' and
             'prototype' keys at the top-level and only those. 
 

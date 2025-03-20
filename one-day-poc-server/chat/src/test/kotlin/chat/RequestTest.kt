@@ -15,11 +15,13 @@ class RequestTest {
                 userID = "testUser",
                 time = "2025-01-01T12:00:00",
                 prompt = "Hello",
+                conversationId = "test-conversation-id",
             )
 
         assertEquals("testUser", request.userID)
         assertEquals("2025-01-01T12:00:00", request.time)
         assertEquals("Hello", request.prompt)
+        assertEquals("test-conversation-id", request.conversationId)
     }
 
     @Test
@@ -29,6 +31,7 @@ class RequestTest {
                 userID = "testUser",
                 time = "2025-01-01T12:00:00",
                 prompt = "Hello",
+                conversationId = "test-conversation-id",
             )
 
         val jsonString = Json.encodeToString(Request.serializer(), request)
@@ -39,7 +42,7 @@ class RequestTest {
 
     @Test
     fun `Test Request deserialization fails with missing required fields`() {
-        val invalidJson = """{"userID":"testUser","time":"2025-01-01T12:00:00"}"""
+        val invalidJson = """{"userID":"testUser","time":"2025-01-01T12:00:00","prompt":"Hello"}"""
 
         assertThrows<SerializationException> {
             Json.decodeFromString<Request>(invalidJson)
@@ -48,7 +51,7 @@ class RequestTest {
 
     @Test
     fun `Test Request deserialization fails with invalid JSON`() {
-        val invalidJson = """{"userID":123,"time":"2025-01-01T12:00:00","prompt":"Hello"}"""
+        val invalidJson = """{"userID":123,"time":"2025-01-01T12:00:00","prompt":"Hello","conversationId":"test-conversation-id"}"""
 
         assertThrows<SerializationException> {
             Json.decodeFromString<Request>(invalidJson)
