@@ -34,10 +34,12 @@ fun Route.jsonRoutes() {
     }
     post("$JSON/{conversationId}/rename") {
         try {
+            println("Received conversation rename request")
             val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
             val requestBody = call.receive<Map<String, String>>()
             val name = requestBody["name"] ?: throw IllegalArgumentException("Missing name")
             val success = updateConversationName(conversationId, name)
+            println("Renamed conversation $conversationId to $name")
             if (success) {
                 call.respondText("Conversation renamed successfully", status = HttpStatusCode.OK)
             } else {
@@ -68,7 +70,6 @@ private suspend fun handleJsonRequest(
 ) {
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
     saveMessage(request.conversationId, request.userID, request.prompt)
-    println("Stored user message: ${userMessage.id}")
 
     val response = getPromptingMain().run(request.prompt)
 
