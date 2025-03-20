@@ -40,6 +40,22 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
       const fileData = files[path];
       console.log('File data:', JSON.stringify(fileData, null, 2));
 
+      if (path === "package.json") {
+        if (typeof fileData === 'string') {
+          console.log('Detected package.json as string, converting to proper format');
+          result[path] = { file: { contents: fileData.trim() } };
+          return;
+        }
+        
+        if (fileData && typeof fileData === 'object' && 
+            !fileData.file && !fileData.contents && 
+            (fileData.dependencies || fileData.name || fileData.version)) {
+          console.log('Detected direct package.json object, converting to proper format');
+          result[path] = { file: { contents: JSON.stringify(fileData, null, 2) } };
+          return;
+        }
+      }
+
       if (fileData.contents) {
         // fileData directly contains file contents
         if (path.includes('/')) {
