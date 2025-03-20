@@ -21,6 +21,7 @@ import prompting.helpers.promptEngineering.SanitisedPromptResult
 import prompting.helpers.templates.TemplateInteractor
 import prototype.FileContent
 import prototype.LlmResponse
+import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaResponse
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
@@ -78,7 +79,7 @@ class PromptingMainTest {
         } returns prototypePrompt
 
         coEvery {
-            PrototypeInteractor.prompt(eq(freqsPrompt), any())
+            PrototypeInteractor.prompt(eq(freqsPrompt), any(), OllamaOptions())
         } returns
             OllamaResponse(
                 model = "test-model",
@@ -89,7 +90,7 @@ class PromptingMainTest {
             )
 
         coEvery {
-            PrototypeInteractor.prompt(any(), any())
+            PrototypeInteractor.prompt(any(), any(), OllamaOptions())
         } returns
             OllamaResponse(
                 model = "test-model",
@@ -120,7 +121,7 @@ class PromptingMainTest {
 
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
         every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns "prompt"
-        coEvery { PrototypeInteractor.prompt(any(), any()) } returns null
+        coEvery { PrototypeInteractor.prompt(any(), any(), OllamaOptions()) } returns null
         coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
 
         assertThrows<PromptException> {
@@ -140,7 +141,7 @@ class PromptingMainTest {
 
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
         every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns "prompt"
-        coEvery { PrototypeInteractor.prompt(any(), any()) } returns
+        coEvery { PrototypeInteractor.prompt(any(), any(), OllamaOptions()) } returns
             OllamaResponse(
                 model = "test-model",
                 created_at = "2024-01-01",
@@ -244,7 +245,7 @@ class PromptingMainTest {
             }
 
         coEvery {
-            PrototypeInteractor.prompt(prompt, any())
+            PrototypeInteractor.prompt(prompt, any(), OllamaOptions())
         } returns
             OllamaResponse(
                 model = "test-model",
@@ -271,7 +272,7 @@ class PromptingMainTest {
     fun `test promptLlm when LLM returns null`() {
         val prompt = "test prompt"
 
-        coEvery { PrototypeInteractor.prompt(prompt, any()) } returns null
+        coEvery { PrototypeInteractor.prompt(prompt, any(), OllamaOptions()) } returns null
 
         val method = promptingMain::class.java.getDeclaredMethod("promptLlm", String::class.java)
         method.isAccessible = true
@@ -292,7 +293,7 @@ class PromptingMainTest {
         val prompt = "test prompt"
 
         coEvery {
-            PrototypeInteractor.prompt(prompt, any())
+            PrototypeInteractor.prompt(prompt, any(), OllamaOptions())
         } returns
             OllamaResponse(
                 model = "test-model",
@@ -482,7 +483,7 @@ class PromptingMainTest {
                 sanitisedPrompt.keywords,
             )
         } returns freqsPrompt
-        every { runBlocking { PrototypeInteractor.prompt(any(), any()) } } returns
+        every { runBlocking { PrototypeInteractor.prompt(any(), any(), OllamaOptions()) } } returns
             OllamaResponse(
                 model = "deepseek-r1:32b",
                 created_at = "2024-03-07T21:53:03Z",
@@ -498,11 +499,11 @@ class PromptingMainTest {
         verifyOrder {
             SanitisationTools.sanitisePrompt(userPrompt)
             PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
-            runBlocking { PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b") }
+            runBlocking { PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b", OllamaOptions()) }
             PromptingTools.formatResponseJson("response")
             PromptingTools.prototypePrompt(userPrompt, any(), any())
             runBlocking { TemplateInteractor.fetchTemplates(any()) }
-            runBlocking { PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b") }
+            runBlocking { PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b", OllamaOptions()) }
             PromptingTools.formatResponseJson("response")
         }
 
