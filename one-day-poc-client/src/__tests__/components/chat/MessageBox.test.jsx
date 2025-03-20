@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, test, expect } from 'vitest';
-import { MessageBox } from '../../../components/chat/messages-box.jsx';
+import { MessageBox } from '../../../components/chat/MessagesBox.jsx';
 import '../../mocks/message-box.mock.jsx';
 
 describe('MessageBox Component', () => {
