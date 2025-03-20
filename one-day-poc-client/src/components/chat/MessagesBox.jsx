@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { MessageBubble, MessageBubbleContent, MessageBubbleTimestamp } from "./message-bubble";
+import { MessageBubble, MessageBubbleContent, MessageBubbleTimestamp } from "./MessageBubble";
 
 
 /**

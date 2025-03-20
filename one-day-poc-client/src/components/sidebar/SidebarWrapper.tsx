@@ -1,28 +1,29 @@
 import * as React from "react";
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-import { AppSidebar } from "@/components/sidebar/app-sidebar"
-import { TypographySmall } from "@/components/ui/typography"
+import { AppSidebar } from "@/components/sidebar/AppSidebar"
+import { TypographySmall } from "@/components/ui/Typography"
 
+import { useConversation } from "@/contexts/ConversationContext";
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/Popover"
 
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 
 import {
   Button
-} from "@/components/ui/button"
+} from "@/components/ui/Button"
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/Input"
+import { Label } from "@/components/ui/Label"
 
 import { 
   ChevronDownIcon, 
@@ -50,12 +51,26 @@ import {
  * @returns {JSX.Element} A layout with sidebar, header, and content area
  */
 export default function SidebarWrapper({children}:{children : React.ReactNode}) {
-  const [projectName, setProjectName] = useState<string >("Untitled Project");
+  const { conversations, activeConversationId, updateConversationName } = useConversation();
+  const [projectName, setProjectName] = useState<string>("Untitled Project");
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
+
+  useEffect(() => {
+    if (activeConversationId && conversations) {
+      const activeConversation = conversations.find(c => c.id === activeConversationId);
+      if (activeConversation) {
+        setProjectName(activeConversation.name);
+        setInputProjectName(activeConversation.name);
+      }
+    }
+  }, [activeConversationId, conversations]);
 
   const updateProjectName = async () => {
     setProjectName(inputProjectName);
-    //Call the database to update the name
+
+    if (activeConversationId) {
+      updateConversationName(activeConversationId, inputProjectName);
+    }
   };
 
   return (
