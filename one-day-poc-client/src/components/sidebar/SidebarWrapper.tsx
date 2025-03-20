@@ -1,42 +1,35 @@
-import * as React from "react";
-import { useState, useEffect } from "react"
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 
-import { AppSidebar } from "@/components/sidebar/AppSidebar"
-import { TypographySmall } from "@/components/ui/Typography"
+import { AppSidebar } from '@/components/sidebar/AppSidebar';
+import { TypographySmall } from '@/components/ui/Typography';
 
-import { useConversation } from "@/contexts/ConversationContext";
+import { useConversation } from '@/contexts/ConversationContext';
 
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/Popover"
+} from '@/components/ui/Popover';
 
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/Sidebar"
+} from '@/components/ui/Sidebar';
 
-import {
-  Button
-} from "@/components/ui/Button"
+import { Button } from '@/components/ui/Button';
 
-import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/Label"
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
 
-import { 
-  ChevronDownIcon, 
-} from "@radix-ui/react-icons"
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 
-import {
-  Share,
-  Rocket
-} from "lucide-react";
+import { Share, Rocket } from 'lucide-react';
 
 /**
  * SidebarWrapper component provides the layout structure with a collapsible sidebar.
- * 
+ *
  * This component creates a full application layout with:
  * - A collapsible sidebar (AppSidebar) for navigation
  * - A header with project management controls including:
@@ -44,20 +37,27 @@ import {
  *   - Export options dropdown
  *   - Deploy button
  * - A main content area where children are rendered
- * 
+ *
  * The component uses SidebarProvider to manage the sidebar state and ensure
  * all sidebar components have access to the shared context.
- * 
+ *
  * @returns {JSX.Element} A layout with sidebar, header, and content area
  */
-export default function SidebarWrapper({children}:{children : React.ReactNode}) {
-  const { conversations, activeConversationId, updateConversationName } = useConversation();
-  const [projectName, setProjectName] = useState<string>("Untitled Project");
+export default function SidebarWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { conversations, activeConversationId, updateConversationName } =
+    useConversation();
+  const [projectName, setProjectName] = useState<string>('Untitled Project');
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
 
   useEffect(() => {
     if (activeConversationId && conversations) {
-      const activeConversation = conversations.find(c => c.id === activeConversationId);
+      const activeConversation = conversations.find(
+        (c) => c.id === activeConversationId
+      );
       if (activeConversation) {
         setProjectName(activeConversation.name);
         setInputProjectName(activeConversation.name);
@@ -76,16 +76,15 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 ">
+      <SidebarInset className="mt-16">
+        {' '}
+        <header className="flex shrink-0 items-center gap-2 px-4 text-white">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
-            <div className="flex-1 flex items-center  justify-center gap-2">
+            <div className="flex-1 flex items-center justify-center gap-2">
               <Popover>
-                <PopoverTrigger className="flex items-center gap-1 group bg-background ">
-                  <TypographySmall>
-                    {projectName}
-                  </TypographySmall>
+                <PopoverTrigger className="flex items-center gap-1 group bg-background">
+                  <TypographySmall>{projectName}</TypographySmall>
                   <ChevronDownIcon className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
                 </PopoverTrigger>
                 <PopoverContent>
@@ -95,11 +94,12 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
                       id="name"
                       placeholder="Name of your project"
                       value={inputProjectName}
-                      onChange={(e: {
-                        target: { value: React.SetStateAction<string> };
-                      }) => setInputProjectName(e.target.value)}
+                      onChange={(e) => setInputProjectName(e.target.value)}
                     />
-                    <Button className="gap-2 hover:bg-gray-50 active:bg-gray-400" onClick={updateProjectName}>
+                    <Button
+                      className="gap-2 hover:bg-gray-50 active:bg-gray-400"
+                      onClick={updateProjectName}
+                    >
                       Save
                     </Button>
                   </div>
@@ -108,7 +108,7 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
             </div>
           </div>
         </header>
-        <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
+        <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)] overflow-auto">
           {children}
         </div>
       </SidebarInset>
