@@ -5,11 +5,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
 import prompting.helpers.PrototypeInteractor
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
 import prototype.LlmResponse
+import prototype.helpers.OllamaOptions
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import java.time.Instant
@@ -73,15 +75,18 @@ class PromptingMain(
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
         // First LLM call
-        val freqs: JsonObject = promptLlm(freqsPrompt)
+        val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
+        val freqs: JsonObject = promptLlm(freqsPrompt, freqsOptions).also { println(it) }
 
-        val fetchTemplatesPrompt =
-            prototypePrompt(userPrompt, freqs) // Same as the prototype prompt, with no templates.
-        val templates = TemplateInteractor.fetchTemplates(fetchTemplatesPrompt)
+        val functionalRequirements =
+            freqs["requirements"]?.jsonArray?.joinToString(",") + ", $userPrompt"
+        val templates = TemplateInteractor.fetchTemplates(functionalRequirements)
         val prototypePrompt = prototypePrompt(userPrompt, freqs, templates) // Prototype prompt with templates.
 
         // Second LLM call
-        val prototypeResponse: JsonObject = promptLlm(prototypePrompt)
+        val prototypeOptions =
+            OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
+        val prototypeResponse: JsonObject = promptLlm(prototypePrompt, prototypeOptions)
         println("DONE DECODING!")
         return serverResponse(prototypeResponse)
     }
@@ -136,9 +141,13 @@ class PromptingMain(
      * @return A JsonObject containing the parsed response from the LLM
      * @throws PromptException If the LLM does not respond or if the response cannot be parsed
      */
-    private fun promptLlm(prompt: String): JsonObject =
+    private fun promptLlm(
+        prompt: String,
+        options: OllamaOptions = OllamaOptions(),
+    ): JsonObject =
         runBlocking {
-            val llmResponse = PrototypeInteractor.prompt(prompt, model) ?: throw PromptException("LLM did not respond!")
+            val llmResponse =
+                PrototypeInteractor.prompt(prompt, model, options) ?: throw PromptException("LLM did not respond!")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 

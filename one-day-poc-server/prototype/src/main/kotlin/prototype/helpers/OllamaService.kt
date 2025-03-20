@@ -20,6 +20,7 @@ data class OllamaRequest(
     val model: String,
     val prompt: String,
     val stream: Boolean,
+    val options: OllamaOptions,
 )
 
 /**
@@ -32,6 +33,15 @@ data class OllamaResponse(
     val response: String,
     val done: Boolean,
     val done_reason: String,
+)
+
+@Serializable
+data class OllamaOptions(
+    val temperature: Double? = null,
+    val top_k: Int? = null,
+    val top_p: Double? = null,
+    val num_predict: Int? = null,
+    val stop: List<String>? = null,
 )
 
 /**
