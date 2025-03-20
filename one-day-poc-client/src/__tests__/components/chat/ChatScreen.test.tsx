@@ -4,6 +4,9 @@ import { toast } from "sonner";
 import ChatScreen from "@/components/chat/ChatScreen";
 import { MemoryRouter } from "react-router-dom";
 
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ConversationProvider } from '@/contexts/ConversationContext';
+
 describe("ChatScreen - Error Message Handling", () => {
     it("should call toast.error and handle setErrorMessage correctly", async () => {
         const toastErrorSpy = vi.spyOn(toast, "error").mockImplementation(() => "mock-toast-id");
@@ -23,12 +26,16 @@ describe("ChatScreen - Error Message Handling", () => {
         await act(async () => {
             render(
                 <MemoryRouter>
-                    <ChatScreen
-                        showPrototype={false}
-                        setPrototype={vi.fn()}
-                        setPrototypeFiles={vi.fn()}
-                        initialMessage={null}
-                    />
+                    <AuthProvider>
+                        <ConversationProvider>
+                            <ChatScreen
+                                showPrototype={false}
+                                setPrototype={vi.fn()}
+                                setPrototypeFiles={vi.fn()}
+                                initialMessage={null}
+                            />
+                        </ConversationProvider>
+                    </AuthProvider>
                 </MemoryRouter>
             );
         });
@@ -85,12 +92,16 @@ describe("ChatScreen - Initial Message Handling", () => {
 
         render(
             <MemoryRouter>
-                <ChatScreen
-                    showPrototype={false}
-                    setPrototype={vi.fn()}
-                    setPrototypeFiles={vi.fn()}
-                    initialMessage={mockInitialMessage}
-                />
+                <AuthProvider>
+                    <ConversationProvider>
+                        <ChatScreen
+                            showPrototype={false}
+                            setPrototype={vi.fn()}
+                            setPrototypeFiles={vi.fn()}
+                            initialMessage={mockInitialMessage}
+                        />
+                    </ConversationProvider>
+                </AuthProvider>
             </MemoryRouter>
         );
 
