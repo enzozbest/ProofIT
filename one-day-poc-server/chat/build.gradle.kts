@@ -32,5 +32,5 @@ dependencies {
 
     implementation(project(":auth"))
     implementation(project(":prompting"))
-    implementation(project(":utils"))
+    implementation(project(":database"))
 }
