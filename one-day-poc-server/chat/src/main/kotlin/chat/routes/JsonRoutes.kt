@@ -11,11 +11,16 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
+import chat.storage.*
+import java.util.UUID
+import database.tables.chats.Conversation
+import database.tables.chats.ChatMessage
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
 fun Route.jsonRoutes() {
     post(JSON) {
+        println("Received JSON request")
         val request: Request =
             runCatching {
                 call.receive<Request>()
@@ -26,6 +31,26 @@ fun Route.jsonRoutes() {
                 )
             }
         handleJsonRequest(request, call)
+    }
+    post("$JSON/{conversationId}/rename") {
+        try {
+            println("Received conversation rename request")
+            val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
+            val requestBody = call.receive<Map<String, String>>()
+            val name = requestBody["name"] ?: throw IllegalArgumentException("Missing name")
+            val success = updateConversationName(conversationId, name)
+            println("Renamed conversation $conversationId to $name")
+            if (success) {
+                call.respondText("Conversation renamed successfully", status = HttpStatusCode.OK)
+            } else {
+                call.respondText("Failed to update name", status = HttpStatusCode.InternalServerError)
+            }
+        } catch (e: Exception) {
+            call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.BadRequest
+            )
+        }
     }
 }
 
@@ -43,11 +68,29 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
+    println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
+    saveMessage(request.conversationId, request.userID, request.prompt)
+
     val response = getPromptingMain().run(request.prompt)
+
+    saveMessage(request.conversationId, "LLM", response.chat.message)
+
     println("RECEIVED RESPONSE")
     val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
     println("ENCODED RESPONSE: $jsonString")
+
     call.respondText(jsonString, contentType = ContentType.Application.Json)
+}
+
+private suspend fun saveMessage(conversationId: String, senderId: String, content: String) {
+    val message = ChatMessage(
+        conversationId = conversationId,
+        senderId = senderId,
+        content = content
+    )
+    println("Saving message: $message")
+    storeMessage(message)
+    println("Stored message: ${message.id}")
 }
 
 /**

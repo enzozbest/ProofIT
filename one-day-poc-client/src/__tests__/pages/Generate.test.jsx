@@ -4,13 +4,13 @@ import { MemoryRouter } from "react-router-dom";
 import Page from '../../pages/Generate.js';
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import ChatScreen from '../../components/chat/chat-screen.js';
-import { NavUser } from '../../components/sidebar/nav-user.tsx';
-import { useSidebar } from "../../components/ui/sidebar";
-import { SidebarProvider } from "../../components/ui/sidebar";
+import ChatScreen from '../../components/chat/ChatScreen.js';
+import { NavUser } from '../../components/sidebar/NavUser.tsx';
+import { useSidebar } from "../../components/ui/Sidebar";
+import { SidebarProvider } from "../../components/ui/Sidebar";
 import Generate from "../../pages/Generate";
 
-vi.mock("@/components/ui/sidebar", async (importOriginal) => {
+vi.mock("@/components/ui/Sidebar", async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...actual,
@@ -132,4 +132,18 @@ test("Non-mobile sidebar renders correctly", async()=>{
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-})
+});
+
+test('Renders background image correctly', () => {
+    render(
+      <MemoryRouter>
+        <Generate />
+      </MemoryRouter>
+    );
+
+    const containerDiv = screen.getByTestId('container').closest('div');
+    expect(containerDiv).toHaveStyle({
+        backgroundImage: "url('/background.svg')",
+      });
+      
+});
