@@ -5,6 +5,9 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import { vi, test, expect, beforeEach } from "vitest";
 import userEvent from '@testing-library/user-event';
 
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ConversationProvider } from '@/contexts/ConversationContext';
+
 globalThis.fetch = vi.fn();
 const mockSetPrototype = vi.fn();
 const mockSetPrototypeId = vi.fn();
@@ -18,7 +21,11 @@ test("Renders chat page", () => {
 
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
     const element = screen.getByPlaceholderText(/How can we help you today?/i);
@@ -28,7 +35,11 @@ test("Renders chat page", () => {
 test("Enter text in chat", async () =>{
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -44,7 +55,11 @@ test("Press enter button", async () =>{
     });
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -63,7 +78,11 @@ test("Valid post request", async () =>{
     });
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -112,7 +131,11 @@ test("Clicking send button sends a message", async () =>{
     });
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
 
@@ -174,7 +197,11 @@ test("Initial message set when page loads", async ()=>{
     const ChatScreen = (await import ("../../components/chat/ChatScreen.tsx")).default;
     render(
         <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+            <AuthProvider>
+                <ConversationProvider>
+                    <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
+                </ConversationProvider>
+            </AuthProvider>
         </MemoryRouter>
     );
     
