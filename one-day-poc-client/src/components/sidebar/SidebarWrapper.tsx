@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useState, useEffect } from "react"
-import { useConversation } from "@/contexts/ConversationContext"
+import { useState } from "react"
+
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { TypographySmall } from "@/components/ui/typography"
 
@@ -9,20 +9,20 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/Popover"
 
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/Sidebar"
 
 import {
   Button
-} from "@/components/ui/button"
+} from "@/components/ui/Button"
 
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/Input"
+import { Label } from "@/components/ui/Label"
 
 import { 
   ChevronDownIcon, 
@@ -66,7 +66,7 @@ export default function SidebarWrapper({children}:{children : React.ReactNode}) 
 
   const updateProjectName = async () => {
     setProjectName(inputProjectName);
-    
+
     if (activeConversationId) {
       updateConversationName(activeConversationId, inputProjectName);
     }

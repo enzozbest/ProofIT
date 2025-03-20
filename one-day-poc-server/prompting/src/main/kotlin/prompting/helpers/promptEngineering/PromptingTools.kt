@@ -36,7 +36,7 @@ object PromptingTools {
             The "requirements" field must be an array of strings, each representing one of your generated functional requirements.
             The "keywords" field must be an array of strings, each representing a relevant keyword you identified
             in your functional requirements.
-
+            
             Example: 
             {
                 "requirements": [
@@ -47,7 +47,7 @@ object PromptingTools {
                 "keywords": ["authentication", "validation", "user feedback"]
             }
 
-            ### Requirements Guidelines  
+            ### Requirements Rules  
             1. Functional Requirements must be:
                1. Specific, measurable, and testable.
                2. Self-contained (one requirement = one functionality).
@@ -61,7 +61,7 @@ object PromptingTools {
                3. Specify user interactions and expected system responses, where applicable.
 
             ### Your Task
-            Generate comprehensive requirements based on:
+            Generate comprehensive functional requirements based on:
             1. The user's request.
             2. The provided keywords.
             3. Industry best practices for similar systems.
@@ -85,31 +85,35 @@ object PromptingTools {
             Now, generate the final JSON response.
             """.trimIndent()
 
-        // For backward compatibility with tests, return a string that includes all the necessary parts
-        val keywordsText = if (keywords.isEmpty()) {
-            "**Keywords:** None provided"
-        } else {
-            "These are the keywords you should consider in addition to the user's message:\n${keywords.joinToString(", ")}"
-        }
-
-        return """
-            $systemMessage
-
-            This is what I want you to generate functional requirements for:
-            "$prompt"
-
-            $keywordsText
-
-            ### JSON Structure Example
-            {
-                "requirements": [
-                    "The system shall display a login form with email and password fields",
-                    "The system shall validate email format before form submission",
-                    "The system shall provide error feedback for invalid inputs"
-                ],
-                "keywords": ["authentication", "validation", "user feedback"]
+        val jsonArary =
+            buildJsonArray {
+                add(
+                    buildJsonObject {
+                        put("role", "system")
+                        put("content", systemMessage)
+                    },
+                )
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", userMessage)
+                    },
+                )
+                add(
+                    buildJsonObject {
+                        put("role", "system")
+                        put("content", keywordsMessage)
+                    },
+                )
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", finaliser)
+                    },
+                )
             }
-        """.trimIndent()
+
+        return Json.encodeToString<JsonArray>(jsonArary)
     }
 
     /**
@@ -131,9 +135,10 @@ object PromptingTools {
             production-ready prototypes for WebContainers.
 
             ### Response Format
-            Respond with a single valid JSON object only. No explanations, comments, or additional text.
+            Respond with a single valid JSON object only. No explanations, comments, or additional text. DO NOT USE
+            BACKTICKED STRINGS (`) IN YOUR RESPONSE.
 
-            ### JSON Structure
+            ### Response Structure
             Your response must strictly obey the schema provided below.
             Schema:
             {
@@ -142,25 +147,8 @@ object PromptingTools {
               "type": "object",
               "properties": {
                 "chat": {
-                  "type": "object",
+                  "type": "string",
                   "description": "Chat response from the server",
-                  "properties": {
-                    "message": {
-                      "type": "string",
-                      "description": "The content of the message"
-                    },
-                    "role": {
-                      "type": "string",
-                      "enum": ["User", "LLM"],
-                      "description": "The role of the message sender"
-                    },
-                    "timestamp": {
-                      "type": "string",
-                      "format": "date-time",
-                      "description": "ISO 8601 timestamp of when the message was sent"
-                    }
-                  },
-                  "required": ["message", "role", "timestamp"]
                 },
                 "prototype": {
                   "type": "object",
@@ -182,14 +170,7 @@ object PromptingTools {
                 "fileEntry": {
                   "oneOf": [
                     {
-                      "type": "object",
-                      "properties": {
-                        "contents": {
-                          "type": "string",
-                          "description": "File contents as a string"
-                        }
-                      },
-                      "required": ["contents"],
+                      "type": "string",
                       "additionalProperties": false
                     },
                     {
@@ -210,6 +191,9 @@ object PromptingTools {
                 }
               }
             }
+
+            You must adhere to this strictly, no other format is allowed. You response must include both the 'chat' and
+            'prototype' keys at the top-level and only those. 
 
             ### Code Generation Rules
             1. Architecture:
@@ -255,9 +239,6 @@ object PromptingTools {
                4. Modern development best practices.
                5. Modern styling practices. You must style the components to make them visually appealing using
                   whatever styling framework you choose.
-               6. If templates are provided, your styling must be consistent with the provided templates.
-               You must provide a complete answer, with all necessary files and dependencies, including the version
-               of the dependencies. Code must be written in full, not just placeholders or using the phrase "...".
             """.trimIndent()
 
         val userMessage =
@@ -280,38 +261,63 @@ object PromptingTools {
 
         val finalPromptMessage =
             """
-            Now produce the final JSON strictly following the schema. 
-
+            Now produce the final JSON strictly following the schema provided previously.
+            
             Incorporate each reference template provided into its respective file in the prototype.files object. 
-            Do not ignore the reference templates, rather extend/modify them to fit the requirements. 
-            Ensure the final file structure must have package.json, index.html, and server.js at minimum,
-            plus any other files needed to run this as a React app in WebContainer. For example: src/components/ChatInput.tsx. 
+            Do not ignore the reference templates, rather extend/modify/combine them to fit the functional requirements. 
             Adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
             Add dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
-            The final code must run npm start without errors in WebContainer.
-
-            Remember that the final JSON must include both a 'chat' key, with a simple, short message indicating what you have done,
-            and the 'prototype' key, with the file structure of the prototype described previously.
+            The final code must run `npm install` and `npm start` without errors in WebContainer.
+            
+            The final JSON must include:
+             1. A 'chat' key, with a simple message indicating how your solution meets the user's original prompt.
+             2.A 'prototype' key, with the file structure of the prototype (described previously). 
+             
+            Check your response before finalising it. If it is not formatted correct, make the necessary changes.
+            
+            Now produce your response.
             """.trimIndent()
 
-        // For backward compatibility with tests, return a string that includes all the necessary parts
-        return """
-            $systemMessage
+        val messagesArray =
+            buildJsonArray {
+                // Main system constraints
+                add(
+                    buildJsonObject {
+                        put("role", "system")
+                        put("content", systemMessage)
+                    },
+                )
+                // The user's initial request
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", userMessage)
+                    },
+                )
+                // Additional system-level functional requirements
+                add(
+                    buildJsonObject {
+                        put("role", "system")
+                        put("content", functionalRequirementsMessage)
+                    },
+                )
+                // Additional system-level templates
+                add(
+                    buildJsonObject {
+                        put("role", "system")
+                        put("content", templatesMessage)
+                    },
+                )
+                // Final "user" request: produce the final JSON response
+                add(
+                    buildJsonObject {
+                        put("role", "user")
+                        put("content", finalPromptMessage)
+                    },
+                )
+            }
 
-            This is what I want you to generate a lightweight proof-of-concept prototype for:
-            "$userPrompt"
-
-            These are the functional requirements you should consider in addition to the user's message:
-            $requirements
-
-            These are the templates you should consider (use them to help generate your response. DO NOT simply describe them):
-            ${templates.joinToString(separator = "\n\n")}
-
-            1. User requirements
-            2. Provided functional requirements
-            3. Available templates
-            4. Modern development best practices
-        """.trimIndent()
+        return Json.encodeToString(JsonArray.serializer(), messagesArray)
     }
 
     /**
@@ -322,11 +328,14 @@ object PromptingTools {
      * @return The formatted JSON response as a JsonObject
      */
     fun formatResponseJson(response: String): JsonObject {
-        val cleaned = cleanLlmResponse(response)
+        val cleaned = cleanLlmResponse(response).also { println(it) }
         println("CLEANED RESPONSE")
         return run {
             println("DECODING...")
-            Json.decodeFromString<JsonObject>(cleaned)
+            runCatching { Json.decodeFromString<JsonObject>(cleaned) }.getOrElse {
+                println(it)
+                error("ERROR: $it")
+            }
         }
     }
 
