@@ -1,9 +1,10 @@
 import * as React from "react";
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
-import { AppSidebar } from "@/components/sidebar/app-sidebar"
-import { TypographySmall } from "@/components/ui/typography"
+import { AppSidebar } from "@/components/sidebar/AppSidebar"
+import { TypographySmall } from "@/components/ui/Typography"
 
+import { useConversation } from "@/contexts/ConversationContext";
 
 import {
   Popover,
