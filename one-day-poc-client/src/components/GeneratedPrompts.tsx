@@ -1,4 +1,6 @@
 import React, { FC } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 type GeneratedPromptsProps = {
   prompts: string[];
@@ -15,12 +17,24 @@ type GeneratedPromptsProps = {
  * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
  */
 const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated, login } = useAuth();
+
+  const handleSubmit = (promptText: string) => {
+    if (!isAuthenticated) {
+      login(promptText);
+      return;
+    }
+    navigate('/generate', { state: { initialMessage: promptText } });
+  }
+
   return (
     <div className="mt-5 flex flex-nowrap gap-4 w-full max-w-6xl overflow-x-auto justify-center pb-9">
       {prompts.map((text, index) => (
         <button
           key={index}
           className="border-2 border-white px-6 py-4 rounded-lg bg-transparent  text-center whitespace-nowrap hover:bg-white/20 hover:border-white hover: transition duration-300"
+          onClick={() => handleSubmit(text)}
         >
           {text} →
         </button>
