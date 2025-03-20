@@ -8,7 +8,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 
 const val CHAT = "/api/chat"
-const val GET = "$CHAT/get"
+const val GET = "$CHAT/history"
 const val JSON = "$CHAT/json"
 const val UPLOAD = "$CHAT/upload"
 

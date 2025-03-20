@@ -30,6 +30,7 @@ export interface Message {
     role: MessageRole;
     content: string;
     timestamp: string;
+    conversationId?: string;
 }
 
 /**
@@ -115,6 +116,7 @@ export interface MessagePayload {
     userID: string;
     time: string;
     prompt: string;
+    conversationId?: string;
 }
 
 /**
@@ -176,3 +178,15 @@ export interface PrototypeFrameProps {
     width?: string;
     height?: string;
 }
+
+export interface Conversation {
+    id: string;
+    name: string;
+    lastModified: string;
+    messageCount: number;
+    messages: Message[];
+  }
+  
+  export interface ConversationHistory {
+    conversations: Conversation[];
+  }
