@@ -350,9 +350,15 @@ object PromptingTools {
         val cleaned =
             jsonString
                 .removeComments()
+                .removeEscapedQuotations()
                 .replace(newLineRegex, "")
                 .trim()
         return cleaned
+    }
+
+    fun String.removeEscapedQuotations(): String {
+        val pattern = Regex("\\\"")
+        return this.replace(pattern, "\"")
     }
 
     /**
