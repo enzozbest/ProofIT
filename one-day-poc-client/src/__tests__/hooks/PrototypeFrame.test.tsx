@@ -6,7 +6,7 @@ import { FileTree } from '../../types/Types';
 import React from 'react';
 
 // Mock the `useWebContainer` hook
-vi.mock('../../hooks/useWebContainer', () => ({
+vi.mock('../../hooks/UseWebContainer', () => ({
   useWebContainer: vi.fn(),
 }));
 
