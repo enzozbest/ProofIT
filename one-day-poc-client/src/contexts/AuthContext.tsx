@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import UserService from '../services/UserService';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -39,11 +40,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       if (!response.ok) {
         setIsAuthenticated(false);
         setIsAdmin(false);
+        UserService.clearUser();
         return;
       }
 
       const data = await response.json();
       if (data.userId) {
+        await UserService.fetchUserData();
+
         setIsAuthenticated(true);
         setIsAdmin(data.isAdmin || false);
 
@@ -55,11 +59,13 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       } else {
         setIsAuthenticated(false);
         setIsAdmin(false);
+        UserService.clearUser();
       }
     } catch (error) {
       console.error('Authentication check error:', error);
       setIsAuthenticated(false);
       setIsAdmin(false);
+      UserService.clearUser();
     }
   };
 
@@ -84,6 +90,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       });
       setIsAuthenticated(false);
       setIsAdmin(false);
+      UserService.clearUser();
     } catch (error) {
       console.error('Logout error:', error);
     }
