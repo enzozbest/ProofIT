@@ -7,7 +7,7 @@ import kotlin.test.assertNull
 class JSONUtilsTest {
     @Test
     fun `Test parses JSON correctly`() {
-        val json = PoCJSON.readJsonFile("src/test/resources/test.json")
+        val json = PoCJSON.readJsonFile("test.json")
         assertEquals("value", json["key"]!!.jsonPrimitive.content)
     }
 

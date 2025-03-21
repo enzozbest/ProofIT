@@ -13,7 +13,7 @@ import kotlin.collections.set
 
 internal object AuthenticationConstants {
     const val DEFAULT_EXPIRATION_SECONDS = 600L
-    const val CONFIGURATION_FILE_PATH = "auth/src/main/resources/cognito.json"
+    const val CONFIGURATION_FILE = "cognito.json"
     const val DEFAULT_AUTHENTICATOR = "Cognito"
 }
 
@@ -24,7 +24,7 @@ internal object AuthenticationConstants {
  * in application.conf).
  */
 fun Application.authModule(
-    configFilePath: String = AuthenticationConstants.CONFIGURATION_FILE_PATH,
+    configFilePath: String = AuthenticationConstants.CONFIGURATION_FILE,
     authName: String = AuthenticationConstants.DEFAULT_AUTHENTICATOR,
 ) {
     configureAuthentication(configFilePath)

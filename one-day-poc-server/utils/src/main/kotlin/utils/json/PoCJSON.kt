@@ -5,7 +5,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import java.io.File
 import java.lang.IllegalArgumentException
 
 /**
@@ -18,9 +17,9 @@ object PoCJSON {
      * @return The JSONObject
      */
 
-    fun readJsonFile(path: String): JsonObject {
-        val file = File(path)
-        val content: String = file.readText()
+    fun readJsonFile(name: String): JsonObject {
+        val file = javaClass.classLoader.getResourceAsStream(name)
+        val content: String = file?.readBytes()?.toString(Charsets.UTF_8) ?: ""
         return Json.parseToJsonElement(content).jsonObject
     }
 

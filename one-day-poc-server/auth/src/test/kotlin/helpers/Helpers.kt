@@ -3,7 +3,6 @@ package helpers
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpCallbackRoute
 import authentication.redis.Redis
-import utils.aws.AWSUserCredentials
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
@@ -17,6 +16,7 @@ import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import utils.aws.AWSUserCredentials
 import utils.json.PoCJSON.readJsonFile
 import java.util.*
 
@@ -46,7 +46,7 @@ fun <T : Any> AuthenticationConfig.mock(
 
 object AuthenticationTestHelpers {
     val jsonConfig: JsonObject =
-        readJsonFile("src/test/resources/cognito-test.json")
+        readJsonFile("cognito-test.json")
 
     val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
 

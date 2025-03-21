@@ -56,10 +56,10 @@ class TestAuthentication {
             application {
                 authentication {
                     configureBasicAuthentication()
-                    configureJWTValidator(readJsonFile("src/test/resources/cognito-test.json"))
+                    configureJWTValidator(readJsonFile("cognito-test.json"))
                 }
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
