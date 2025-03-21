@@ -10,6 +10,6 @@ import utils.json.PoCJSON
 fun Application.configureUtils() {
     val awsRegion = EnvironmentLoader.get("AWS_REGION")
     val s3Manager =
-        S3Manager(PoCJSON.readJsonFile("utils/src/main/resources/s3_config.json"), StsClient { region = awsRegion })
+        S3Manager(PoCJSON.readJsonFile("s3_config.json"), StsClient { region = awsRegion })
     S3Service.init(s3Manager)
 }
