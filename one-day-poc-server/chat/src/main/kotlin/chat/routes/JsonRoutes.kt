@@ -69,12 +69,22 @@ private suspend fun handleJsonRequest(
     call: ApplicationCall,
 ) {
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
+    // Save user message
     saveMessage(request.conversationId, request.userID, request.prompt)
 
     val response = getPromptingMain().run(request.prompt)
-
-    saveMessage(request.conversationId, "LLM", response.chat.message)
-
+    
+    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
+    response.prototype?.let { prototypeResponse ->
+        val prototype = Prototype(
+            messageId = savedMessage.id,
+            filesJson = prototypeResponse.files.toString(),
+            version = 1,
+            isSelected = true
+        )
+        savePrototype(prototype)
+    }
+    
     println("RECEIVED RESPONSE")
     val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
     println("ENCODED RESPONSE: $jsonString")
@@ -82,7 +92,7 @@ private suspend fun handleJsonRequest(
     call.respondText(jsonString, contentType = ContentType.Application.Json)
 }
 
-private suspend fun saveMessage(conversationId: String, senderId: String, content: String) {
+private suspend fun saveMessage(conversationId: String, senderId: String, content: String): ChatMessage {
     val message = ChatMessage(
         conversationId = conversationId,
         senderId = senderId,
@@ -91,6 +101,7 @@ private suspend fun saveMessage(conversationId: String, senderId: String, conten
     println("Saving message: $message")
     storeMessage(message)
     println("Stored message: ${message.id}")
+    return message
 }
 
 /**
