@@ -4,8 +4,14 @@ val kotlinVersion by extra { "2.1.0" }
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.sonarqube") version "4.0.0.2929"
     jacoco
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    mergeServiceFiles()
 }
 
 tasks.register<JacocoReport>("jacocoMergedReport") {
