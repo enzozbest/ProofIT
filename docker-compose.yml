@@ -1,0 +1,27 @@
+services:
+  one-day-poc-client:
+    build: ./one-day-poc-client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - one-day-poc-server
+
+  one-day-poc-server:
+    build: ./one-day-poc-server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+      - redis
+      - ollama
+      - python-embeddings
+
+  python-embeddings:
+    build: ./one-day-poc-server/embeddings/src/main/python
+    ports:
+      - "7000:7000"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"

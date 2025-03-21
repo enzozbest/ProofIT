@@ -1,0 +1,208 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.16, pytest-8.3.4, pluggy-1.5.0 -- /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python
+plugins: anyio-4.8.0
+collected 8 items
+test/test_pyserini_indexer.py::test_index_creation PASSED                [ 12%]
+test/test_pyserini_indexer.py::test_store_json_ld_with_non_dict PASSED   [ 25%]
+test/test_pyserini_indexer.py::test_keyword_search PASSED                [ 37%]
+test/test_pyserini_indexer.py::test_empty_search PASSED                  [ 50%]
+test/test_pyserini_indexer.py::test_search_when_indices_are_not_available PASSED [ 62%]
+test/test_pyserini_indexer.py::test_valid_index_searcher_close FAILED    [ 75%]
+test/test_pyserini_indexer.py::test_invalid_index_with_subdirectory FAILED [ 87%]
+test/test_pyserini_indexer.py::test_empty_index_directory FAILED         [100%]
+=================================== FAILURES ===================================
+_______________________ test_valid_index_searcher_close ________________________
+    def test_valid_index_searcher_close():
+        """Test that searcher.close() is called when checking a valid index."""
+        # First, ensure we have a valid index
+        test_data = {
+            "name": "TestComponent",
+            "description": "A test component for checking searcher.close()",
+            "keywords": ["test", "component"],
+            "library": "Test"
+        }
+        store_jsonld("ValidIndexTest", test_data)
+
+        # Now store another document to trigger the searcher.close() line
+        another_test_data = {
+            "name": "AnotherComponent",
+            "description": "Another test component",
+            "keywords": ["another", "test"],
+            "library": "Test"
+        }
+        success = store_jsonld("AnotherTest", another_test_data)
+        assert success, "Failed to store second JSON-LD data."
+
+        # Verify both documents are in the index
+        results = keyword_search("test component", top_k=5)
+>       assert len(results) == 2, "Both test documents should be found in the index."
+E       AssertionError: Both test documents should be found in the index.
+E       assert 1 == 2
+E        +  where 1 = len(['AnotherTest'])
+test/test_pyserini_indexer.py:97: AssertionError
+---------------------------- Captured stdout setup -----------------------------
+Error removing directory: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+Error with existing index: JVM exception occurred: no segments* file found in MMapDirectory@/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index lockFactory=org.apache.lucene.store.NativeFSLockFactory@54534abf: files: [.fuse_hidden000528190000073b, .fuse_hidden0005281c0000073c, .fuse_hidden0005281e0000073d, .fuse_hidden000528200000073e, .fuse_hidden000528210000073f, .fuse_hidden0005282200000740, .fuse_hidden0005282300000741, .fuse_hidden0005283b00000742, .fuse_hidden0005283e00000743, .fuse_hidden0005284000000744, .fuse_hidden0005284200000745, .fuse_hidden0005284300000746, .fuse_hidden0005284400000747, .fuse_hidden0005284500000748, .fuse_hidden0005284c0000073a, .fuse_hidden0005284f00000749, .fuse_hidden000528510000074a, .fuse_hidden000528530000074b, .fuse_hidden000528540000074c, .fuse_hidden000528550000074d, .fuse_hidden000528560000074e] org.apache.lucene.index.IndexNotFoundException. Creating a new one.
+2025-03-18 14:56:31,536 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:138) - Using DefaultEnglishAnalyzer
+2025-03-18 14:56:31,536 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:139) - Stemmer: porter
+2025-03-18 14:56:31,536 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:140) - Keep stopwords? false
+2025-03-18 14:56:31,536 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:141) - Stopwords file: null
+Saved document 'TestID' to Lucene index at /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index
+---------------------------- Captured stderr setup -----------------------------
+rm: cannot remove '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index': Directory not empty
+----------------------------- Captured stdout call -----------------------------
+2025-03-18 14:56:31,585 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:138) - Using DefaultEnglishAnalyzer
+2025-03-18 14:56:31,585 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:139) - Stemmer: porter
+2025-03-18 14:56:31,585 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:140) - Keep stopwords? false
+2025-03-18 14:56:31,586 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:141) - Stopwords file: null
+Saved document 'ValidIndexTest' to Lucene index at /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index
+2025-03-18 14:56:31,643 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:138) - Using DefaultEnglishAnalyzer
+2025-03-18 14:56:31,643 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:139) - Stemmer: porter
+2025-03-18 14:56:31,643 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:140) - Keep stopwords? false
+2025-03-18 14:56:31,643 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:141) - Stopwords file: null
+Saved document 'AnotherTest' to Lucene index at /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index
+_____________________ test_invalid_index_with_subdirectory _____________________
+    def test_invalid_index_with_subdirectory():
+        """Test handling of invalid index with subdirectories."""
+        # Clear the index
+        if os.path.exists(LUCENE_INDEX_DIR):
+            import shutil
+>           shutil.rmtree(LUCENE_INDEX_DIR)
+test/test_pyserini_indexer.py:104:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/usr/lib/python3.10/shutil.py:731: in rmtree
+    onerror(os.rmdir, path, sys.exc_info())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+path = '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+ignore_errors = False
+onerror = <function rmtree.<locals>.onerror at 0x784d22125e10>
+    def rmtree(path, ignore_errors=False, onerror=None):
+        """Recursively delete a directory tree.
+
+        If ignore_errors is set, errors are ignored; otherwise, if onerror
+        is set, it is called to handle the error with arguments (func,
+        path, exc_info) where func is platform and implementation dependent;
+        path is the argument to that function that caused it to fail; and
+        exc_info is a tuple returned by sys.exc_info().  If ignore_errors
+        is false and onerror is None, an exception is raised.
+
+        """
+        sys.audit("shutil.rmtree", path)
+        if ignore_errors:
+            def onerror(*args):
+                pass
+        elif onerror is None:
+            def onerror(*args):
+                raise
+        if _use_fd_functions:
+            # While the unsafe rmtree works fine on bytes, the fd based does not.
+            if isinstance(path, bytes):
+                path = os.fsdecode(path)
+            # Note: To guard against symlink races, we use the standard
+            # lstat()/open()/fstat() trick.
+            try:
+                orig_st = os.lstat(path)
+            except Exception:
+                onerror(os.lstat, path, sys.exc_info())
+                return
+            try:
+                fd = os.open(path, os.O_RDONLY)
+                fd_closed = False
+            except Exception:
+                onerror(os.open, path, sys.exc_info())
+                return
+            try:
+                if os.path.samestat(orig_st, os.fstat(fd)):
+                    _rmtree_safe_fd(fd, path, onerror)
+                    try:
+                        os.close(fd)
+                        fd_closed = True
+>                       os.rmdir(path)
+E                       OSError: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+/usr/lib/python3.10/shutil.py:729: OSError
+---------------------------- Captured stdout setup -----------------------------
+Error removing directory: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+Error with existing index: JVM exception occurred: no segments* file found in MMapDirectory@/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index lockFactory=org.apache.lucene.store.NativeFSLockFactory@54534abf: files: [.fuse_hidden000528190000079d, .fuse_hidden0005281c0000079e, .fuse_hidden0005281e0000079f, .fuse_hidden00052820000007a0, .fuse_hidden00052821000007a1, .fuse_hidden00052822000007a2, .fuse_hidden00052823000007a3, .fuse_hidden0005283b000007a4, .fuse_hidden0005283e000007a5, .fuse_hidden00052840000007a6, .fuse_hidden00052842000007a7, .fuse_hidden00052843000007a8, .fuse_hidden00052844000007a9, .fuse_hidden00052845000007aa, .fuse_hidden0005284c0000079c, .fuse_hidden0005284f000007ab, .fuse_hidden00052851000007ac, .fuse_hidden00052853000007ad, .fuse_hidden00052854000007ae, .fuse_hidden00052855000007af, .fuse_hidden00052856000007b0, .fuse_hidden0005288e000007b1, .fuse_hidden00052891000007b2, .fuse_hidden00052893000007b3, .fuse_hidden00052895000007b4, .fuse_hidden00052896000007b5, .fuse_hidden00052897000007b6, .fuse_hidden00052898000007b7] org.apache.lucene.index.IndexNotFoundException. Creating a new one.
+2025-03-18 14:56:31,755 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:138) - Using DefaultEnglishAnalyzer
+2025-03-18 14:56:31,755 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:139) - Stemmer: porter
+2025-03-18 14:56:31,755 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:140) - Keep stopwords? false
+2025-03-18 14:56:31,755 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:141) - Stopwords file: null
+Saved document 'TestID' to Lucene index at /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index
+---------------------------- Captured stderr setup -----------------------------
+rm: cannot remove '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index': Directory not empty
+__________________________ test_empty_index_directory __________________________
+    def test_empty_index_directory():
+        """Test search with an empty index directory."""
+        # Clear the index
+        if os.path.exists(LUCENE_INDEX_DIR):
+            import shutil
+>           shutil.rmtree(LUCENE_INDEX_DIR)
+test/test_pyserini_indexer.py:136:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/usr/lib/python3.10/shutil.py:731: in rmtree
+    onerror(os.rmdir, path, sys.exc_info())
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+path = '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+ignore_errors = False
+onerror = <function rmtree.<locals>.onerror at 0x784d221267a0>
+    def rmtree(path, ignore_errors=False, onerror=None):
+        """Recursively delete a directory tree.
+
+        If ignore_errors is set, errors are ignored; otherwise, if onerror
+        is set, it is called to handle the error with arguments (func,
+        path, exc_info) where func is platform and implementation dependent;
+        path is the argument to that function that caused it to fail; and
+        exc_info is a tuple returned by sys.exc_info().  If ignore_errors
+        is false and onerror is None, an exception is raised.
+
+        """
+        sys.audit("shutil.rmtree", path)
+        if ignore_errors:
+            def onerror(*args):
+                pass
+        elif onerror is None:
+            def onerror(*args):
+                raise
+        if _use_fd_functions:
+            # While the unsafe rmtree works fine on bytes, the fd based does not.
+            if isinstance(path, bytes):
+                path = os.fsdecode(path)
+            # Note: To guard against symlink races, we use the standard
+            # lstat()/open()/fstat() trick.
+            try:
+                orig_st = os.lstat(path)
+            except Exception:
+                onerror(os.lstat, path, sys.exc_info())
+                return
+            try:
+                fd = os.open(path, os.O_RDONLY)
+                fd_closed = False
+            except Exception:
+                onerror(os.open, path, sys.exc_info())
+                return
+            try:
+                if os.path.samestat(orig_st, os.fstat(fd)):
+                    _rmtree_safe_fd(fd, path, onerror)
+                    try:
+                        os.close(fd)
+                        fd_closed = True
+>                       os.rmdir(path)
+E                       OSError: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+/usr/lib/python3.10/shutil.py:729: OSError
+---------------------------- Captured stdout setup -----------------------------
+Error removing directory: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index'
+Error with existing index: JVM exception occurred: no segments* file found in MMapDirectory@/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index lockFactory=org.apache.lucene.store.NativeFSLockFactory@54534abf: files: [.fuse_hidden0005281900000829, .fuse_hidden0005281c0000082a, .fuse_hidden0005281e0000082b, .fuse_hidden000528200000082c, .fuse_hidden000528210000082d, .fuse_hidden000528220000082e, .fuse_hidden000528230000082f, .fuse_hidden0005283b00000830, .fuse_hidden0005283e00000831, .fuse_hidden0005284000000832, .fuse_hidden0005284200000833, .fuse_hidden0005284300000834, .fuse_hidden0005284400000835, .fuse_hidden0005284500000836, .fuse_hidden0005284c00000828, .fuse_hidden0005284f00000837, .fuse_hidden0005285100000838, .fuse_hidden0005285300000839, .fuse_hidden000528540000083a, .fuse_hidden000528550000083b, .fuse_hidden000528560000083c, .fuse_hidden0005288e0000083d, .fuse_hidden000528910000083e, .fuse_hidden000528930000083f, .fuse_hidden0005289500000840, .fuse_hidden0005289600000841, .fuse_hidden0005289700000842, .fuse_hidden0005289800000843] org.apache.lucene.index.IndexNotFoundException. Creating a new one.
+2025-03-18 14:56:31,862 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:138) - Using DefaultEnglishAnalyzer
+2025-03-18 14:56:31,862 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:139) - Stemmer: porter
+2025-03-18 14:56:31,862 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:140) - Keep stopwords? false
+2025-03-18 14:56:31,862 INFO  [main] index.SimpleIndexer (SimpleIndexer.java:141) - Stopwords file: null
+Saved document 'TestID' to Lucene index at /mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index
+---------------------------- Captured stderr setup -----------------------------
+rm: cannot remove '/mnt/shared/Unix/Ubuntu/enzozbest/Documents/KingsCollegeLondon/Year2/SEG/MGP/One-Day-POC/one-day-poc-server/embeddings/src/main/python/jsonld_index': Directory not empty
+=========================== short test summary info ============================
+FAILED test/test_pyserini_indexer.py::test_valid_index_searcher_close - AssertionError: Both test documents should be found in the index.
+FAILED test/test_pyserini_indexer.py::test_invalid_index_with_subdirectory - OSError: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest...
+FAILED test/test_pyserini_indexer.py::test_empty_index_directory - OSError: [Errno 39] Directory not empty: '/mnt/shared/Unix/Ubuntu/enzozbest...
+========================= 3 failed, 5 passed in 21.89s =========================
