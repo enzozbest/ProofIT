@@ -2,6 +2,8 @@ package helpers
 
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpCallbackRoute
+import authentication.redis.Redis
+import utils.aws.AWSUserCredentials
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
@@ -47,6 +49,44 @@ object AuthenticationTestHelpers {
         readJsonFile("src/test/resources/cognito-test.json")
 
     val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
+
+    /**
+     * Set up a mock Redis provider for testing.
+     * This should be called before any test that interacts with Redis.
+     * @return The mock Redis provider that was set up.
+     */
+    fun setupMockRedis(): MockRedisProvider {
+        val mockRedisProvider = MockRedisProvider()
+        Redis.setProvider(mockRedisProvider)
+        return mockRedisProvider
+    }
+
+    /**
+     * Reset the Redis provider to the default.
+     * This should be called after any test that uses setupMockRedis.
+     */
+    fun resetMockRedis() {
+        Redis.resetProvider()
+    }
+
+    /**
+     * Set up a mock AWS credentials provider for testing.
+     * This should be called before any test that interacts with AWS services.
+     * @return The mock AWS credentials provider that was set up.
+     */
+    fun setupMockAWSCredentials(): MockAWSCredentialsProvider {
+        val mockAWSCredentialsProvider = MockAWSCredentialsProvider()
+        AWSUserCredentials.setProvider(mockAWSCredentialsProvider)
+        return mockAWSCredentialsProvider
+    }
+
+    /**
+     * Reset the AWS credentials provider to the default.
+     * This should be called after any test that uses setupMockAWSCredentials.
+     */
+    fun resetMockAWSCredentials() {
+        AWSUserCredentials.resetProvider()
+    }
 
     fun TestApplicationBuilder.setupExternalServices() {
         externalServices {

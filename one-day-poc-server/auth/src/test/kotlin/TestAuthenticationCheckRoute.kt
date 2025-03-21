@@ -4,6 +4,8 @@ import authentication.authentication.cacheSession
 import authentication.authentication.setUpCheckEndpoint
 import authentication.redis.Redis
 import helpers.AuthenticationTestHelpers
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setupMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -12,10 +14,21 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class TestAuthenticationCheckRoute {
+    @BeforeEach
+    fun setUp() {
+        setupMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis()
+    }
     @Test
     fun `Test check route without credentials`() =
         testApplication {

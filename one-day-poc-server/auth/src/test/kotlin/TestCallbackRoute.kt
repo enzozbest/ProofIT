@@ -4,6 +4,8 @@ import helpers.AuthenticationTestHelpers.configureTestCallbackRoute
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenAdminFalse
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoGroups
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoSub
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setupMockRedis
 import helpers.mock
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -11,6 +13,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.net.URLDecoder
 import kotlin.test.assertEquals
@@ -18,6 +22,15 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 
 class TestCallbackRoute {
+    @BeforeEach
+    fun setUp() {
+        setupMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis()
+    }
     @Test
     fun `Test Callback route redirects when principal is present`() =
         testApplication {

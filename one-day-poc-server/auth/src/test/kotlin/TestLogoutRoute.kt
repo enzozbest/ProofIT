@@ -1,17 +1,31 @@
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
 import authentication.authentication.authModule
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setupMockRedis
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TestLogoutRoute {
+    @BeforeEach
+    fun setUp() {
+        setupMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis()
+    }
+
     @Test
     fun `Test Log Out Route clears session`() =
         testApplication {
