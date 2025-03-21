@@ -147,5 +147,6 @@ describe('MessageBox Component', () => {
 
       const timestamp = screen.getByText('10:00 am', { exact: false });
       expect(timestamp).toBeInTheDocument();
-  });
-  })})
+    });
+  })
+})
