@@ -84,12 +84,6 @@ assets/source/
 assets/raw/
 
 # Development configs
-*.config.js
-*.config.ts
-!vite.config.ts
-!tsconfig.json
-*.config.json
-!tsconfig.json
 .prettierrc
 .eslintrc.*
 .stylelintrc.*
