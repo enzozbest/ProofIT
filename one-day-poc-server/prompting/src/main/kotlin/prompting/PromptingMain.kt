@@ -2,11 +2,7 @@ package prompting
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import prompting.helpers.PrototypeInteractor
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
@@ -216,8 +212,6 @@ class PromptingMain(
      * Creates a dummy JSON response for testing purposes
      */
     private fun createDummyResponse(): JsonObject {
-        // Import these at the top of the file if needed
-        import kotlinx.serialization.json.*
         
         // Create the chat response part
         val chatObject = buildJsonObject {
