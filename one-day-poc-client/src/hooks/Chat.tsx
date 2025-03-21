@@ -27,6 +27,7 @@ const ChatMessage = ({
   const [message, setMessage] = useState<string>('');
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [llmResponse, setLlmResponse] = useState<string>('');
+  const [serverResponse, setServerResponse] = useState<{message: string, id?: string} | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const { activeConversationId, createConversation, messages, loadingMessages } = useConversation();
@@ -64,7 +65,7 @@ const ChatMessage = ({
       await sendChatMessage(
         newMessage,
         (chatResponse) => {
-          setLlmResponse(chatResponse.message);
+          setServerResponse(chatResponse);
         },
         (prototypeResponse) => {
           setPrototype(true);
@@ -78,26 +79,26 @@ const ChatMessage = ({
   };
 
   useEffect(() => {
-    if (llmResponse) {
+    if (serverResponse) {
       const currentTime = new Date().toISOString();
 
       const newLLMMessage: Message = {
         role: 'LLM',
-        content: llmResponse,
+        content: serverResponse.message,
         timestamp: currentTime,
-        conversationId: activeConversationId || ''
+        conversationId: activeConversationId || '',
+        id: serverResponse.id
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
     }
-  }, [llmResponse, activeConversationId]);
+  }, [serverResponse, activeConversationId]);
 
   return {
     message,
     setMessage,
     sentMessages,
     handleSend,
-    llmResponse,
     errorMessage,
     setErrorMessage,
   };

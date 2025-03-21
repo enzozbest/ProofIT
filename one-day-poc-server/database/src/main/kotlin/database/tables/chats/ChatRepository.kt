@@ -187,12 +187,42 @@ class ChatRepository(private val db: Database){
         }
     }
 
-    suspend fun getSelectedPrototypeForMessage(messageId: String): Prototype? {
+    suspend fun getAllPrototypesInConversation(conversationId: String): List<Prototype> {
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
-                val id = UUID.fromString(messageId)
+                val convId = UUID.fromString(conversationId)
+                
+                val messageIds = ChatMessageEntity.find {
+                    ChatMessageTable.conversationId eq convId
+                }.map { it.id }
+                
+                if (messageIds.isEmpty()) {
+                    emptyList()
+                } else {
+                    PrototypeEntity.find {
+                        PrototypeTable.messageId inList messageIds
+                    }.map { it.toPrototype() }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving conversation prototypes: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getSelectedPrototypeForMessage(conversationId: String, messageId: String): Prototype? {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val msgId = UUID.fromString(messageId)
+                val convId = UUID.fromString(conversationId)
+                
+                val message = ChatMessageEntity.find {
+                    (ChatMessageTable.id eq msgId) and
+                    (ChatMessageTable.conversationId eq convId)
+                }.firstOrNull() ?: return@newSuspendedTransaction null
+                
                 PrototypeEntity.find { 
-                    (PrototypeTable.messageId eq id) and 
+                    (PrototypeTable.messageId eq msgId) and 
                     (PrototypeTable.isSelected eq true)
                 }.firstOrNull()?.toPrototype()
             }
