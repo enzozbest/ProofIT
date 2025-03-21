@@ -31,6 +31,11 @@ data class MessageDto(
     val timestamp: String
 )
 
+@Serializable
+data class PrototypeDto(
+    val files: String
+)
+
 internal fun Route.chatRoutes() {
     get(GET) {
         try {
@@ -80,6 +85,29 @@ internal fun Route.chatRoutes() {
             }
             
             call.respond(messageDtos)
+        } catch (e: Exception) {
+            println("Error getting messages: ${e.message}")
+            e.printStackTrace()
+            return@get call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.InternalServerError
+            )
+        }
+    }
+    get("$GET/{conversationId}/{messageId}") {
+        try {
+            val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
+                "Missing conversation ID",
+                status = HttpStatusCode.BadRequest
+            )
+            val messageId = call.parameters["messageId"] ?: return@get call.respondText(
+                "Missing message ID",
+                status = HttpStatusCode.BadRequest
+            )
+
+            val prototype = getSelectedPrototypeForMessage(conversationId, messageId)
+
+            call.respond(PrototypeDto(files = prototype.filesJson))            
         } catch (e: Exception) {
             println("Error getting messages: ${e.message}")
             e.printStackTrace()
