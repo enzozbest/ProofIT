@@ -152,7 +152,7 @@ class PromptingMain(
     ): JsonObject =
         runBlocking {
             val llmResponse =
-                PrototypeInteractor.prompt(prompt, model, options) ?: throw PromptException("LLM did not respond!")
+                PrototypeInteractor.prompt(prompt, model, options)?.let { it } ?: throw PromptException("LLM did not respond!")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 

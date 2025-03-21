@@ -29,9 +29,11 @@ class GetHistoryTest : BaseAuthenticationServer() {
             val response =
                 client.get(GET) {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    accept(ContentType.Application.Json)
                 }
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("Hello, world!", response.bodyAsText())
+            val responseBody = response.bodyAsText()
+            assertTrue(responseBody.contains("conversations"))
         }
 
     @Test
@@ -71,8 +73,7 @@ class GetHistoryTest : BaseAuthenticationServer() {
             }
 
             val response = client.get(GET)
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("Hello, world!", response.bodyAsText())
+            assertEquals(HttpStatusCode.NotAcceptable, response.status)
         }
 
     @Test
@@ -86,7 +87,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
             }
 
             val response = client.get(GET)
-            assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals("Hello, world!", response.bodyAsText())
+            assertEquals(HttpStatusCode.NotAcceptable, response.status)
         }
 }

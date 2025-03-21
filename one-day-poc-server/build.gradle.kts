@@ -60,6 +60,12 @@ application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes["Main-Class"] = "io.ktor.server.netty.EngineMain"
+    }
+}
+
 group = "kcl.seg.rtt"
 version = "0.0-SNAPSHOT"
 

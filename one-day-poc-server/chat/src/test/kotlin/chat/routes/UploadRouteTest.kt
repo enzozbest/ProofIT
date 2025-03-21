@@ -141,7 +141,8 @@ class UploadRoutesTest : BaseAuthenticationServer() {
                                     {
                                         "userID": "testUser",
                                         "time": "2025-01-01T12:00:00",
-                                        "prompt": "Hello"
+                                        "prompt": "Hello",
+                                        "conversationId": "test-conversation-id"
                                     }
                                     """.trimIndent(),
                                 )
@@ -248,7 +249,8 @@ class UploadRoutesTest : BaseAuthenticationServer() {
                                     {
                                         "userID": "testUser",
                                         "time": "2025-01-01T12:00:00",
-                                        "prompt": "Hello"
+                                        "prompt": "Hello",
+                                        "conversationId": "test-conversation-id"
                                     }
                                     """.trimIndent(),
                                 )
@@ -372,7 +374,8 @@ class UploadRoutesTest : BaseAuthenticationServer() {
                         {
                             "userID": "testUser",
                             "time": "2025-01-01T12:00:00",
-                            "prompt": "Hello"
+                            "prompt": "Hello",
+                            "conversationId": "test-conversation-id"
                         }
                     """.trimIndent())
                     }
