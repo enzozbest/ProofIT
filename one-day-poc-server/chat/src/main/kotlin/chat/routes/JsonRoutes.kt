@@ -12,9 +12,8 @@ import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
 import chat.storage.*
-import java.util.UUID
-import database.tables.chats.Conversation
 import database.tables.chats.ChatMessage
+import database.tables.chats.Prototype
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
@@ -82,7 +81,7 @@ private suspend fun handleJsonRequest(
             version = 1,
             isSelected = true
         )
-        savePrototype(prototype)
+        storePrototype(prototype)
     }
     
     println("RECEIVED RESPONSE")

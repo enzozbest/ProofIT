@@ -96,6 +96,7 @@ internal fun Route.chatRoutes() {
     }
     get("$GET/{conversationId}/{messageId}") {
         try {
+            println("Fetching prototype")
             val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
                 "Missing conversation ID",
                 status = HttpStatusCode.BadRequest
@@ -105,9 +106,11 @@ internal fun Route.chatRoutes() {
                 status = HttpStatusCode.BadRequest
             )
 
-            val prototype = getSelectedPrototypeForMessage(conversationId, messageId)
+            val prototype = retrievePrototype(conversationId, messageId)
 
-            call.respond(PrototypeDto(files = prototype.filesJson))            
+            if (prototype != null) {
+                call.respond(PrototypeDto(files = prototype.filesJson))
+            }
         } catch (e: Exception) {
             println("Error getting messages: ${e.message}")
             e.printStackTrace()

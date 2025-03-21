@@ -52,7 +52,7 @@ data class PrototypeResponse(
  * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = "qwen2.5-coder:14b",
+    private val model: String = "qwen2.5:14b",
 ) {
     /**
      * Executes the complete prompting workflow for a user prompt.
