@@ -4,7 +4,6 @@ val kotlinVersion by extra { "2.1.0" }
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
-    // id("io.gitlab.arturbosch.detekt") version "1.23.0"
     id("org.sonarqube") version "4.0.0.2929"
     jacoco
 }
@@ -46,16 +45,6 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
     }
 }
 
-// detekt {
-//    toolVersion = "1.23.0"
-//    buildUponDefaultConfig = true
-//    allRules = false
-//    autoCorrect = true
-//    baseline = file("detekt-baseline.xml")
-//    reportsDir = file("build/reports/detekt.html")
-//    config.setFrom("$rootDir/detekt.yml")
-// }
-
 sonarqube {
     properties {
         property("sonar.host.url", "http://localhost:9000")
@@ -82,7 +71,6 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-//    apply(plugin = "io.gitlab.arturbosch.detekt")
     plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
         apply(plugin = "jacoco")
     }
@@ -104,12 +92,6 @@ subprojects {
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
         testImplementation(kotlin("test"))
     }
-//    detekt {
-//        toolVersion = "1.23.0"
-//        buildUponDefaultConfig = true
-//        autoCorrect = true
-//        config.setFrom("$rootDir/detekt.yml")
-//    }
 
     tasks.withType<Test> {
         useJUnitPlatform()
@@ -144,7 +126,6 @@ subprojects {
 }
 
 dependencies {
-    // detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
@@ -172,16 +153,6 @@ tasks.test {
 tasks.withType<Test> {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
     forkEvery = 10
-}
-
-tasks.named("run") {
-    dependsOn("startDocker")
-}
-
-tasks.register<Exec>("startDocker") {
-    group = "docker"
-    description = "Starts the PostgreSQL docker container"
-    commandLine("sh", "-c", "docker compose up -d || docker-compose up -d")
 }
 
 allprojects {
