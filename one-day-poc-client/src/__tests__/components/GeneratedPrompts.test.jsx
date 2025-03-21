@@ -87,7 +87,7 @@ test('Handles click when user is authenticated', async () => {
 
   const promptButton = screen.getByText('Test Prompt →');
   await userEvent.click(promptButton);
-  
+
   expect(navigateMock).toHaveBeenCalledWith('/generate', {
     state: { initialMessage: 'Test Prompt' }
   });
