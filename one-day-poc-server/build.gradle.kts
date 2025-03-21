@@ -168,3 +168,13 @@ allprojects {
         }
     }
 }
+
+tasks.named("run") {
+    dependsOn("startDocker")
+}
+
+tasks.register<Exec>("startDocker") {
+    group = "docker"
+    description = "Starts the PostgreSQL docker container"
+    commandLine("sh", "-c", "docker compose up -d || docker-compose up -d")
+}
