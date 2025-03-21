@@ -13,7 +13,6 @@ services:
     depends_on:
       - database
       - redis
-      - ollama
       - python-embeddings
 
   python-embeddings:
