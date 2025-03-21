@@ -181,7 +181,7 @@ describe('UserService', () => {
     };
 
     UserService.setUser(mockUser);
-    
+
     UserService.clearUser();
 
     expect(UserService.getUser()).toBe(null);
