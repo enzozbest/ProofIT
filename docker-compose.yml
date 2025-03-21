@@ -8,12 +8,15 @@ services:
 
   one-day-poc-server:
     build: ./one-day-poc-server
+    env_file: ./one-day-poc-server/.env  
     ports:
       - "8000:8000"
     depends_on:
-      - database
+      - db
       - redis
       - python-embeddings
+    volumes:
+      - ~/.aws:/root/.aws
 
   python-embeddings:
     build: ./one-day-poc-server/embeddings/src/main/python

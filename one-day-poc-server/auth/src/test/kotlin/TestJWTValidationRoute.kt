@@ -1,6 +1,8 @@
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpJWTValidation
 import helpers.AuthenticationTestHelpers
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setupMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -11,10 +13,22 @@ import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class TestJWTValidationRoute {
+    @BeforeEach
+    fun setUp() {
+        setupMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis()
+    }
+
     @Test
     fun `Test JWT validation route returns expected session details with cookie`() =
         testApplication {
