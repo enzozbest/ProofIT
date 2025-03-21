@@ -1,3 +1,5 @@
+ALTER TABLE prototypes RENAME TO prototypes_old;
+
 CREATE TABLE prototypes (
     id UUID PRIMARY KEY,
     message_id UUID NOT NULL REFERENCES chat_messages(id) ON DELETE CASCADE,
