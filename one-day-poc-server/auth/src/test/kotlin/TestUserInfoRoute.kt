@@ -1,5 +1,7 @@
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpUserInfoRoute
+import helpers.AuthenticationTestHelpers.setupMockAWSCredentials
+import helpers.AuthenticationTestHelpers.resetMockAWSCredentials
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -21,11 +23,13 @@ class TestUserInfoRoute {
     fun setUp() {
         mockWebServer = MockWebServer()
         mockWebServer.start(port = 16000)
+        setupMockAWSCredentials()
     }
 
     @AfterEach
     fun tearDown() {
         mockWebServer.shutdown()
+        resetMockAWSCredentials()
     }
 
     @Test
