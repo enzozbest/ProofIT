@@ -148,4 +148,57 @@ class ChatRepository(private val db: Database){
             emptyList()
         }
     }
+
+    suspend fun savePrototype(prototype: Prototype): Boolean {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val messageId = UUID.fromString(prototype.messageId)
+                val message = ChatMessageEntity.findById(messageId) 
+                    ?: throw IllegalArgumentException("Message not found")
+                
+                val prototypeId = UUID.fromString(prototype.id)
+                PrototypeEntity.new(prototypeId) {
+                    this.message = message
+                    this.filesJson = prototype.filesJson
+                    this.version = prototype.version
+                    this.isSelected = prototype.isSelected
+                    this.timestamp = prototype.timestamp
+                }
+            }
+            true
+        } catch (e: Exception) {
+            println("Error saving prototype: ${e.message}")
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun getPrototypesByMessageId(messageId: String): List<Prototype> {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val id = UUID.fromString(messageId)
+                PrototypeEntity.find { 
+                    PrototypeTable.messageId eq id 
+                }.map { it.toPrototype() }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving prototypes: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getSelectedPrototypeForMessage(messageId: String): Prototype? {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val id = UUID.fromString(messageId)
+                PrototypeEntity.find { 
+                    (PrototypeTable.messageId eq id) and 
+                    (PrototypeTable.isSelected eq true)
+                }.firstOrNull()?.toPrototype()
+            }
+        } catch (e: Exception) {
+            println("Error retrieving selected prototype: ${e.message}")
+            null
+        }
+    }
 }
