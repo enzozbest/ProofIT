@@ -218,10 +218,8 @@ class PromptingMain(
             put("message", JsonPrimitive("I've created a simple counter application with React. The app features a counter display, increment/decrement buttons, and a reset button. You can also set a custom step value for the increments. The code is structured in a clean, maintainable way with separate components for the counter display and controls."))
         }
         
-        // Create file contents
         val filesObject = buildJsonObject {
-            // index.html
-            put("index.html", buildJsonObject {
+            put("public/index.html", buildJsonObject {
                 put("file", buildJsonObject {
                     put("contents", JsonPrimitive("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>React Counter App</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n</body>\n</html>"))
                 })
