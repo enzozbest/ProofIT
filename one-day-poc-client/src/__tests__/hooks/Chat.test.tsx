@@ -167,10 +167,12 @@ describe('ChatMessage Hook', () => {
   });
 
   it('should handle chat responses from the API', async () => {
-    (sendChatMessage as any).mockImplementation((message, chatCallback) => {
-      chatCallback({ message: 'AI response to your message' });
-      return Promise.resolve();
-    });
+    (sendChatMessage as any).mockImplementation(
+      (message: any, chatCallback: (arg0: { message: string }) => void) => {
+        chatCallback({ message: 'AI response to your message' });
+        return Promise.resolve();
+      }
+    );
 
     const mockDate = new Date('2023-01-01T00:00:00Z');
     vi.setSystemTime(mockDate);
@@ -214,7 +216,13 @@ describe('ChatMessage Hook', () => {
     ];
 
     (sendChatMessage as any).mockImplementation(
-      (message, chatCallback, prototypeCallback) => {
+      (
+        message: any,
+        chatCallback: any,
+        prototypeCallback: (arg0: {
+          files: { name: string; content: string }[];
+        }) => void
+      ) => {
         prototypeCallback({ files: mockPrototypeFiles });
         return Promise.resolve();
       }
@@ -270,10 +278,12 @@ describe('ChatMessage Hook', () => {
     );
 
     await act(async () => {
-      (sendChatMessage as any).mockImplementation((msg, callback) => {
-        callback({ message: 'LLM response' });
-        return Promise.resolve();
-      });
+      (sendChatMessage as any).mockImplementation(
+        (msg: any, callback: (arg0: { message: string }) => void) => {
+          callback({ message: 'LLM response' });
+          return Promise.resolve();
+        }
+      );
 
       await result.current.handleSend('Test message');
     });
