@@ -1,5 +1,10 @@
+FROM gradle:jdk23 as build
+WORKDIR /app
+COPY . .
+RUN ./gradlew build
+
 FROM amazoncorretto:23-alpine-jdk
 WORKDIR /app
-COPY build/libs/one-day-poc-server.jar one-day-poc-server-0.0-SNAPSHOT.jar
+COPY --from=build /app/build/libs/*.jar app.jar
+CMD ["java, "-jar", "app.jar"] 
 EXPOSE 8000
-CMD ["java", "-jar", "one-day-poc-server-0.0-SNAPSHOT.jar"]
