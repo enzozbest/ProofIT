@@ -10,16 +10,6 @@ object MockEnvironment {
     private val lock = Any()
     private var container: PostgreSQLContainer<*>? = null
 
-    init {
-        // Configure Testcontainers to use the Docker host from the environment
-        System.setProperty("testcontainers.reuse.enable", "true")
-        System.setProperty(
-            "testcontainers.docker.client.strategy",
-            "org.testcontainers.dockerclient.UnixSocketClientProviderStrategy",
-        )
-        System.setProperty("testcontainers.docker.network", "bridge")
-    }
-
     val postgresContainer: PostgreSQLContainer<*>
         get() =
             synchronized(lock) {

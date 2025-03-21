@@ -7,6 +7,7 @@ services:
       - one-day-poc-server
 
   one-day-poc-server:
+    privileged: true
     build: ./one-day-poc-server
     env_file: ./one-day-poc-server/.env  
     ports:
