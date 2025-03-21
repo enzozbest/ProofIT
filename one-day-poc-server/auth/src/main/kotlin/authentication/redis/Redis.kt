@@ -3,6 +3,7 @@ package authentication.redis
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
+import utils.environment.EnvironmentLoader
 
 /**
  * Default implementation of RedisProvider that uses a JedisPool to provide Redis connections.
@@ -13,7 +14,7 @@ internal class DefaultRedisProvider : RedisProvider {
     override fun getRedisConnection(): Jedis = redisPool.resource
 
     companion object {
-        private const val REDIS_HOST = "localhost"
+        private val REDIS_HOST = EnvironmentLoader.get("REDIS_HOST")
         private const val REDIS_PORT = 6379
     }
 }

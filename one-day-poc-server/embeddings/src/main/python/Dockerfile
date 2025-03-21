@@ -37,6 +37,6 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # Command to run the application
-RUN python3.10 -m information_retrieval
-CMD ["python3.10", "information_retrieval/__main__.py"]
+CMD ["python3.10", "-m", "information_retrieval"]
+
 EXPOSE 7000
