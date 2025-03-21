@@ -42,7 +42,7 @@ class RequestTest {
 
     @Test
     fun `Test Request deserialization fails with missing required fields`() {
-        val invalidJson = """{"userID":"testUser","time":"2025-01-01T12:00:00","prompt":"Hello"}"""
+        val invalidJson = """{"time":"2025-01-01T12:00:00","prompt":"Hello"}"""
 
         assertThrows<SerializationException> {
             Json.decodeFromString<Request>(invalidJson)
@@ -51,7 +51,8 @@ class RequestTest {
 
     @Test
     fun `Test Request deserialization fails with invalid JSON`() {
-        val invalidJson = """{"userID":123,"time":"2025-01-01T12:00:00","prompt":"Hello","conversationId":"test-conversation-id"}"""
+        val invalidJson =
+            """{"userID":123,"time":"2025-01-01T12:00:00","prompt":"Hello","conversationId":"test-conversation-id"}"""
 
         assertThrows<SerializationException> {
             Json.decodeFromString<Request>(invalidJson)

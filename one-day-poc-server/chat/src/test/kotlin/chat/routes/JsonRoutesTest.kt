@@ -328,10 +328,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.OK, response.status)
+                assertEquals(HttpStatusCode.BadRequest, response.status)
                 val responseBody = response.bodyAsText()
-                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
-                assertEquals("Response to empty prompt", serverResponse.chat.message)
+                assertTrue(responseBody.contains("Invalid request"))
             } finally {
                 resetPromptingMain()
             }
@@ -349,24 +348,24 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                val exception =
-                    assertThrows<RuntimeException> {
-                        client.post("/api/chat/json") {
-                            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-                            contentType(ContentType.Application.Json)
-                            setBody(
-                                """
-                                {
-                                    "userID": "testUser",
-                                    "time": "2025-01-01T12:00:00",
-                                    "prompt": "Test prompt"
-                                }
-                                """.trimIndent(),
-                            )
+                val response = client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test prompt",
+                            "conversationId": "test-conversation-id"
                         }
-                    }
+                        """.trimIndent(),
+                    )
+                }
 
-                assertEquals("Simulation of processing error", exception.message)
+                assertEquals(HttpStatusCode.InternalServerError, response.status)
+                val responseBody = response.bodyAsText()
+                assertTrue(responseBody.contains("Error") || responseBody.contains("error"))
             } finally {
                 resetPromptingMain()
             }
