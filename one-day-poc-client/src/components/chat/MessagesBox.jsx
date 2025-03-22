@@ -55,7 +55,7 @@ export function MessageBox({ sentMessages, onLoadPrototype }) {
                         }`}
                         onClick={() => msg.role === "LLM" ? handleMessageClick(msg) : null}
                     >
-                        /* Display a code icon for LLM messages */
+
                         {msg.role === "LLM" && (
                             <div className="absolute -top-1 -left-1 bg-blue-500 rounded-full p-1 text-xs text-white">
                                 <span role="img" aria-label="code">💻</span>
