@@ -3,8 +3,9 @@ package database
 import database.core.DatabaseManager
 import database.helpers.MockEnvironment
 import database.tables.prototypes.Prototype
-import database.tables.prototypes.PrototypeRepository
-import database.tables.prototypes.Prototypes
+import database.tables.prototypes.TestPrototype
+import database.tables.prototypes.TestPrototypeRepository
+import database.tables.prototypes.TestPrototypes
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -25,7 +26,7 @@ import kotlin.test.assertFalse
 
 class PrototypeRepositoryTest {
     private lateinit var db: Database
-    private lateinit var repository: PrototypeRepository
+    private lateinit var repository: TestPrototypeRepository
 
     @BeforeEach
     fun setUp() {
@@ -37,15 +38,15 @@ class PrototypeRepositoryTest {
 
         db = DatabaseManager.init()
         transaction(db) {
-            SchemaUtils.create(Prototypes)
+            SchemaUtils.create(TestPrototypes)
         }
-        repository = PrototypeRepository(db)
+        repository = TestPrototypeRepository(db)
     }
 
     @AfterEach
     fun tearDown() {
         transaction(db) {
-            SchemaUtils.drop(Prototypes)
+            SchemaUtils.drop(TestPrototypes)
         }
         File(MockEnvironment.ENV_FILE).delete()
         MockEnvironment.stopContainer()
@@ -63,6 +64,10 @@ class PrototypeRepositoryTest {
     fun `Test creates prototype`() =
         runTest {
             val result = createPrototype()
+            println("[DEBUG_LOG] Create prototype result: $result")
+            if (result.isFailure) {
+                println("[DEBUG_LOG] Create prototype exception: ${result.exceptionOrNull()}")
+            }
             assertTrue(result.isSuccess)
         }
 
@@ -74,7 +79,7 @@ class PrototypeRepositoryTest {
             assertTrue(result.isSuccess)
 
             transaction(db) {
-                val count = Prototypes.selectAll().count()
+                val count = TestPrototypes.selectAll().count()
                 println("PTTS: $count")
             }
 
@@ -117,7 +122,7 @@ class PrototypeRepositoryTest {
                 user = "invalid",
                 password = "invalid"
             )
-            val invalidRepository = PrototypeRepository(invalidDb)
+            val invalidRepository = TestPrototypeRepository(invalidDb)
 
             val prototype = Prototype(
                 id = UUID.randomUUID(),
@@ -144,7 +149,7 @@ class PrototypeRepositoryTest {
                 user = "invalid",
                 password = "invalid"
             )
-            val invalidRepository = PrototypeRepository(invalidDb)
+            val invalidRepository = TestPrototypeRepository(invalidDb)
 
             val result = invalidRepository.getPrototype(UUID.randomUUID())
             assertFalse(result.isSuccess)
@@ -161,7 +166,7 @@ class PrototypeRepositoryTest {
                 user = "invalid",
                 password = "invalid"
             )
-            val invalidRepository = PrototypeRepository(invalidDb)
+            val invalidRepository = TestPrototypeRepository(invalidDb)
 
             val result = invalidRepository.getPrototypesByUserId("testuserId")
             assertFalse(result.isSuccess)
