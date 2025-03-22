@@ -12,6 +12,7 @@ import java.io.File
 import java.time.Instant
 import java.util.UUID
 import kotlin.test.*
+import database.tables.chats.PrototypeTable
 
 class ChatEntitiesTest {
     private lateinit var db: Database
@@ -32,29 +33,30 @@ class ChatEntitiesTest {
     @AfterEach
     fun tearDown() {
         transaction(db) {
-            SchemaUtils.drop(ChatMessageTable, ConversationTable)
+            SchemaUtils.drop(PrototypeTable, ChatMessageTable, ConversationTable)
         }
         File(MockEnvironment.ENV_FILE).delete()
         MockEnvironment.stopContainer()
     }
-    
+
     @Test
     fun `test ConversationEntity creation and conversion to model`() {
         transaction(db) {
             val conversationId = UUID.randomUUID()
             val now = Instant.now()
             val userId = "test-user-123"
-            
-            val conversation = ConversationEntity.new(conversationId) {
-                name = "Test Conversation"
-                lastModified = now
-                this.userId = userId
-            }
-            
+
+            val conversation =
+                ConversationEntity.new(conversationId) {
+                    name = "Test Conversation"
+                    lastModified = now
+                    this.userId = userId
+                }
+
             assertEquals("Test Conversation", conversation.name)
             assertEquals(now, conversation.lastModified)
             assertEquals(userId, conversation.userId)
-            
+
             val model = conversation.toConversation(5)
             assertEquals(conversationId.toString(), model.id)
             assertEquals("Test Conversation", model.name)
@@ -63,33 +65,35 @@ class ChatEntitiesTest {
             assertEquals(userId, model.userId)
         }
     }
-    
+
     @Test
     fun `test ChatMessageEntity creation and conversion to model`() {
         transaction(db) {
             val conversationId = UUID.randomUUID()
-            val conversation = ConversationEntity.new(conversationId) {
-                name = "Test Conversation"
-                lastModified = Instant.now()
-                userId = "test-user"
-            }
-            
+            val conversation =
+                ConversationEntity.new(conversationId) {
+                    name = "Test Conversation"
+                    lastModified = Instant.now()
+                    userId = "test-user"
+                }
+
             val messageId = UUID.randomUUID()
             val now = Instant.now()
             val content = "Hello world"
-            
-            val message = ChatMessageEntity.new(messageId) {
-                this.conversation = conversation
-                isFromLLM = true
-                this.content = content
-                timestamp = now
-            }
-            
+
+            val message =
+                ChatMessageEntity.new(messageId) {
+                    this.conversation = conversation
+                    isFromLLM = true
+                    this.content = content
+                    timestamp = now
+                }
+
             assertEquals(conversation.id, message.conversation.id)
             assertTrue(message.isFromLLM)
             assertEquals(content, message.content)
             assertEquals(now, message.timestamp)
-            
+
             val model = message.toChatMessage()
             assertEquals(messageId.toString(), model.id)
             assertEquals(conversationId.toString(), model.conversationId)
@@ -98,57 +102,60 @@ class ChatEntitiesTest {
             assertEquals(now, model.timestamp)
         }
     }
-    
+
     @Test
     fun `test ChatMessageEntity with user sender`() {
         transaction(db) {
             val conversationId = UUID.randomUUID()
-            val conversation = ConversationEntity.new(conversationId) {
-                name = "Test Conversation"
-                lastModified = Instant.now()
-                userId = "test-user"
-            }
-            
+            val conversation =
+                ConversationEntity.new(conversationId) {
+                    name = "Test Conversation"
+                    lastModified = Instant.now()
+                    userId = "test-user"
+                }
+
             val messageId = UUID.randomUUID()
-            val message = ChatMessageEntity.new(messageId) {
-                this.conversation = conversation
-                isFromLLM = false
-                content = "User message"
-                timestamp = Instant.now()
-            }
-            
+            val message =
+                ChatMessageEntity.new(messageId) {
+                    this.conversation = conversation
+                    isFromLLM = false
+                    content = "User message"
+                    timestamp = Instant.now()
+                }
+
             val model = message.toChatMessage()
             assertEquals("user", model.senderId) // Should be "user" when isFromLLM is false
         }
     }
-    
+
     @Test
     fun `test relationship between ConversationEntity and ChatMessageEntity`() {
         transaction(db) {
             val conversationId = UUID.randomUUID()
-            val conversation = ConversationEntity.new(conversationId) {
-                name = "Test Conversation"
-                lastModified = Instant.now()
-                userId = "test-user"
-            }
-            
-            val message1 = ChatMessageEntity.new(UUID.randomUUID()) {
+            val conversation =
+                ConversationEntity.new(conversationId) {
+                    name = "Test Conversation"
+                    lastModified = Instant.now()
+                    userId = "test-user"
+                }
+
+            ChatMessageEntity.new(UUID.randomUUID()) {
                 this.conversation = conversation
                 isFromLLM = false
                 content = "Message 1"
                 timestamp = Instant.now()
             }
-            
-            val message2 = ChatMessageEntity.new(UUID.randomUUID()) {
+
+            ChatMessageEntity.new(UUID.randomUUID()) {
                 this.conversation = conversation
                 isFromLLM = true
                 content = "Message 2"
                 timestamp = Instant.now()
             }
-            
+
             val messages = conversation.messages.toList()
             assertEquals(2, messages.size)
-            
+
             val contents = messages.map { it.content }.sorted()
             assertEquals(listOf("Message 1", "Message 2"), contents)
         }

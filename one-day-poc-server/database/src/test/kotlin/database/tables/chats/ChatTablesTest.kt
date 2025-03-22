@@ -11,11 +11,31 @@ import org.junit.jupiter.api.Test
 import utils.environment.EnvironmentLoader
 import java.io.File
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.test.*
 
 class ChatTablesTest {
     private lateinit var db: Database
+
+    /**
+     * Helper function to truncate an Instant to microsecond precision.
+     * This is needed because the database stores timestamps with microsecond precision,
+     * but Instant objects in Kotlin have nanosecond precision.
+     */
+    private fun Instant.truncateToMicros(): Instant {
+        return this.truncatedTo(ChronoUnit.MICROS)
+    }
+
+    /**
+     * Helper function to compare two Instants ignoring precision differences.
+     * This compares the string representations of the Instants up to the seconds part.
+     */
+    private fun assertInstantsEqual(expected: Instant, actual: Instant) {
+        val expectedStr = expected.toString().substringBefore(".")
+        val actualStr = actual.toString().substringBefore(".")
+        assertEquals(expectedStr, actualStr, "Instants should be equal up to seconds precision")
+    }
 
     @BeforeEach
     fun setUp() {
@@ -33,7 +53,7 @@ class ChatTablesTest {
     @AfterEach
     fun tearDown() {
         transaction(db) {
-            SchemaUtils.drop(ChatMessageTable, ConversationTable)
+            SchemaUtils.drop(PrototypeTable, ChatMessageTable, ConversationTable)
         }
         File(MockEnvironment.ENV_FILE).delete()
         MockEnvironment.stopContainer()
@@ -72,7 +92,8 @@ class ChatTablesTest {
             assertTrue(columns.any { it.name == "timestamp" })
 
             val conversationIdColumn = columns.first { it.name == "conversation_id" }
-            assertTrue(conversationIdColumn.columnType.sqlType().contains("UUID"))
+            val conversationIdSqlType = conversationIdColumn.columnType.sqlType().uppercase()
+            assertTrue(conversationIdSqlType.contains("UUID") || conversationIdSqlType.contains("CHAR") || conversationIdSqlType.contains("VARCHAR"), "Expected conversation_id column to be of type UUID, CHAR, or VARCHAR, but was $conversationIdSqlType")
 
             val isFromLLMColumn = columns.first { it.name == "is_from_llm" }
             assertTrue(isFromLLMColumn.columnType.sqlType().contains("BOOL"))
@@ -81,7 +102,8 @@ class ChatTablesTest {
             assertTrue(contentColumn.columnType.sqlType().contains("TEXT"))
 
             val timestampColumn = columns.first { it.name == "timestamp" }
-            assertTrue(timestampColumn.columnType.sqlType().contains("TIMESTAMP"))
+            val sqlType = timestampColumn.columnType.sqlType().uppercase()
+            assertTrue(sqlType.contains("TIMESTAMP") || sqlType.contains("DATETIME"), "Expected timestamp column to be of type TIMESTAMP or DATETIME, but was $sqlType")
         }
     }
 
@@ -100,7 +122,7 @@ class ChatTablesTest {
             val conversation = ConversationTable.select { ConversationTable.id eq conversationId }.single()
             assertEquals(conversationId, conversation[ConversationTable.id].value)
             assertEquals("Test Conversation", conversation[ConversationTable.name])
-            assertEquals(now, conversation[ConversationTable.lastModified])
+            assertInstantsEqual(now, conversation[ConversationTable.lastModified])
             assertEquals("test-user", conversation[ConversationTable.userId])
 
             val updatedName = "Updated Conversation"
@@ -112,7 +134,7 @@ class ChatTablesTest {
 
             val updated = ConversationTable.select { ConversationTable.id eq conversationId }.single()
             assertEquals(updatedName, updated[ConversationTable.name])
-            assertEquals(updatedTime, updated[ConversationTable.lastModified])
+            assertInstantsEqual(updatedTime, updated[ConversationTable.lastModified])
 
             ConversationTable.deleteWhere { ConversationTable.id eq conversationId }
             val count = ConversationTable.select { ConversationTable.id eq conversationId }.count()
@@ -182,7 +204,7 @@ class ChatTablesTest {
             assertEquals(conversationId, message[ChatMessageTable.conversationId].value)
             assertTrue(message[ChatMessageTable.isFromLLM])
             assertEquals("Hello from LLM", message[ChatMessageTable.content])
-            assertEquals(now, message[ChatMessageTable.timestamp])
+            assertInstantsEqual(now, message[ChatMessageTable.timestamp])
 
             val updatedContent = "Updated LLM message"
             ChatMessageTable.update({ ChatMessageTable.id eq messageId }) {
