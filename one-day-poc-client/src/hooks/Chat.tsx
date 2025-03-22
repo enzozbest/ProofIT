@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sendChatMessage } from '../api/FrontEndAPI';
-import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
+import { Message, ChatHookReturn, ChatMessageProps, ChatResponse } from '../types/Types';
 import { useConversation } from '../contexts/ConversationContext';
 
 /**
@@ -27,6 +27,7 @@ const ChatMessage = ({
   const [message, setMessage] = useState<string>('');
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [llmResponse, setLlmResponse] = useState<string>('');
+  const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const { activeConversationId, createConversation, messages, loadingMessages } = useConversation();
@@ -64,7 +65,7 @@ const ChatMessage = ({
       await sendChatMessage(
         newMessage,
         (chatResponse) => {
-          setLlmResponse(chatResponse.message);
+          setChatResponse(chatResponse);
         },
         (prototypeResponse) => {
           setPrototype(true);
@@ -78,26 +79,35 @@ const ChatMessage = ({
   };
 
   useEffect(() => {
-    if (llmResponse) {
+    if (chatResponse) {
       const currentTime = new Date().toISOString();
+      console.log('Chat response:', chatResponse);
+      
+      const messageContent = chatResponse.message;
+      const messageId = chatResponse.messageId;
+      
+      console.log('Extracted values:', { 
+        content: messageContent, 
+        id: messageId 
+      });
 
       const newLLMMessage: Message = {
         role: 'LLM',
-        content: llmResponse,
+        content: messageContent,
         timestamp: currentTime,
-        conversationId: activeConversationId || ''
+        conversationId: activeConversationId || '',
+        id: messageId
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
     }
-  }, [llmResponse, activeConversationId]);
+  }, [chatResponse, activeConversationId]);
 
   return {
     message,
     setMessage,
     sentMessages,
     handleSend,
-    llmResponse,
     errorMessage,
     setErrorMessage,
   };
