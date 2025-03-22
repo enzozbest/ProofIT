@@ -2,7 +2,7 @@ import authentication.authentication.AuthenticatedSession
 import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
 import authentication.authentication.authModule
 import helpers.AuthenticationTestHelpers.resetMockRedis
-import helpers.AuthenticationTestHelpers.setupMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 class TestLogoutRoute {
     @BeforeEach
     fun setUp() {
-        setupMockRedis()
+        setUpMockRedis()
     }
 
     @AfterEach
