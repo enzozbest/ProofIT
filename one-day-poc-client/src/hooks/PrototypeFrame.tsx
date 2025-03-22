@@ -2,22 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './UseWebContainer';
 import { normaliseFiles } from './FileHandler';
+import { WebContainerProcess } from '@webcontainer/api';
 
-/**
- * PrototypeFrame Component
- *
- * Renders a prototype in an isolated WebContainer environment within an iframe.
- * This component handles:
- * - Loading prototype files from the server
- * - Setting up a development environment with necessary dependencies
- * - Starting a development server
- * - Displaying the prototype in an iframe
- *
- * @component
- * @param {Object} props
- * @param {string} [props.width='100%']
- * @param {string} [props.height='100%']
- */
 const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
   files,
   width = '100%',
@@ -27,6 +13,59 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
   const [status, setStatus] = useState('Initialising...');
   const { instance: webcontainerInstance, loading, error } = useWebContainer();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  // Use a ref to track active processes
+  const activeProcessesRef = useRef<WebContainerProcess[]>([]);
+
+  /**
+   * Function to reset the WebContainer
+   */
+  const resetWebContainer = async () => {
+    if (!webcontainerInstance) return;
+    
+    setStatus('Resetting environment...');
+    setUrl('');
+    
+    for (const process of activeProcessesRef.current) {
+      try {
+        process.kill();
+      } catch (e) {
+        console.log('Error killing process:', e);
+      }
+    }
+    
+    activeProcessesRef.current = [];
+    
+    try {
+      const entries = await webcontainerInstance.fs.readdir('/');
+      console.log('Current root entries:', entries);
+      
+      if (entries.includes('src')) {
+        await webcontainerInstance.fs.rm('/src', { recursive: true, force: true });
+      }
+      if (entries.includes('public')) {
+        await webcontainerInstance.fs.rm('/public', { recursive: true, force: true });
+      }
+      if (entries.includes('node_modules')) {
+        await webcontainerInstance.fs.rm('/node_modules', { recursive: true, force: true });
+      }
+      
+      for (const entry of entries) {
+        if (!entry.startsWith('.') && !['src', 'public', 'node_modules'].includes(entry)) {
+          try {
+            await webcontainerInstance.fs.rm(`/${entry}`);
+            console.log(`Removed file: ${entry}`);
+          } catch (e) {
+            console.log(`Error removing ${entry}:`, e);
+          }
+        }
+      }
+      
+      console.log('Filesystem selectively reset');
+    } catch (e) {
+      console.log('Error during selective reset:', e);
+    }
+  };
 
   /**
    * Effect to set up server-ready listener
@@ -48,24 +87,25 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
     async function loadFiles() {
       if (!webcontainerInstance || !files) return;
 
-      console.log('Loading files:', files);
+      await resetWebContainer();
 
       setStatus('Normalising files...');
       const normalisedFiles = normaliseFiles(files);
 
-      console.log('Normalised files:', normalisedFiles);
+      // console.log('Normalised files:', normalisedFiles);
 
       setStatus('Mounting files...');
 
       try {
-        console.log('Files to mount:', JSON.stringify(normalisedFiles, null, 2));
+        // console.log('Files to mount:', JSON.stringify(normalisedFiles, null, 2));
         await webcontainerInstance.mount(normalisedFiles);
         console.log('Files mounted successfully');
 
         setStatus('Installing dependencies...');
-        const installProcess = await webcontainerInstance.spawn('npm', [
-          'install',
-        ]);
+        const installProcess = await webcontainerInstance.spawn('npm', ['install']);
+        // Track the active process
+        activeProcessesRef.current.push(installProcess);
+        
         const exitCode = await installProcess.exit;
 
         if (exitCode !== 0) {
@@ -74,7 +114,10 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
 
         setStatus('Starting development server...');
         const startProcess = await webcontainerInstance.spawn('npm', ['run', 'start']);
+        // Track the active process
+        activeProcessesRef.current.push(startProcess);
 
+        setStatus('Running...');
         startProcess.output.pipeTo(
           new WritableStream({
             write(data) {
@@ -119,14 +162,6 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
       });
     }
   }, [webcontainerInstance, files]);
-
-  if (loading) {
-    return <div>Loading WebContainer...</div>;
-  }
-
-  if (error) {
-    return <div>Error initializing WebContainer: {error.message}</div>;
-  }
 
   return (
     <div
