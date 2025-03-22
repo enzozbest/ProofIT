@@ -15,6 +15,7 @@ import prototype.LlmResponse
 import prototype.helpers.OllamaOptions
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
+import utils.environment.EnvironmentLoader
 import java.time.Instant
 
 /**
@@ -52,7 +53,7 @@ data class PrototypeResponse(
  * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = "qwen2.5-coder:14b",
+    private val model: String = EnvironmentLoader.get("OLLAMA_MODEL"),
 ) {
     /**
      * Executes the complete prompting workflow for a user prompt.
@@ -152,7 +153,8 @@ class PromptingMain(
     ): JsonObject =
         runBlocking {
             val llmResponse =
-                PrototypeInteractor.prompt(prompt, model, options)?.let { it } ?: throw PromptException("LLM did not respond!")
+                PrototypeInteractor.prompt(prompt, model, options)?.let { it }
+                    ?: throw PromptException("LLM did not respond!")
             PromptingTools.formatResponseJson(llmResponse.response)
         }
 

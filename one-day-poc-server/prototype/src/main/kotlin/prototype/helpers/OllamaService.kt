@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import utils.environment.EnvironmentLoader
 
 /**
  * Request structure for Ollama API calls
@@ -50,7 +51,7 @@ data class OllamaOptions(
 object OllamaService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
     private const val OLLAMA_PORT = 11434
-    private const val OLLAMA_HOST = "localhost"
+    private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST").also { println(it) }
     private const val REQUEST_TIMEOUT_MILLIS = 600_000_000L
     private const val CONNECT_TIMEOUT_MILLIS = 30_000_000L
     private const val SOCKET_TIMEOUT_MILLIS = 600_000_000L

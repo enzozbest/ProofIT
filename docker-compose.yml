@@ -9,9 +9,11 @@ services:
   one-day-poc-server:
     privileged: true
     build: ./one-day-poc-server
-    env_file: ./one-day-poc-server/.env  
+    env_file: ./one-day-poc-server/docker.env  
     ports:
       - "8000:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
       - redis
