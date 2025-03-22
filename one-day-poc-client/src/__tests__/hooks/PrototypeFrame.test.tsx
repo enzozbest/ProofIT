@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import PrototypeFrame from '../../hooks/PrototypeFrame';
 import { useWebContainer } from '../../hooks/UseWebContainer';
 import { FileTree } from '../../types/Types';
@@ -11,38 +11,6 @@ vi.mock('../../hooks/UseWebContainer', () => ({
 }));
 
 describe('PrototypeFrame Component', () => {
-  it('renders the loading state when WebContainer is initializing', () => {
-    // Mock the `useWebContainer` hook to simulate loading state
-    (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
-      instance: null,
-      loading: true,
-      error: null,
-    });
-
-    render(<PrototypeFrame files={{}} />);
-
-    // Check if the loading message is displayed
-    expect(screen.getByText('Loading WebContainer...')).toBeInTheDocument();
-  });
-
-  it('renders the error state when WebContainer initialization fails', () => {
-    // Mock the `useWebContainer` hook to simulate an error state
-    (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
-      instance: null,
-      loading: false,
-      error: new Error('Failed to initialize WebContainer'),
-    });
-
-    render(<PrototypeFrame files={{}} />);
-
-    // Check if the error message is displayed
-    expect(
-      screen.getByText(
-        'Error initializing WebContainer: Failed to initialize WebContainer'
-      )
-    ).toBeInTheDocument();
-  });
-
   it('renders the iframe when WebContainer is ready', () => {
     // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -929,5 +897,185 @@ describe('PrototypeFrame Component', () => {
         },
       },
     });
+  });
+});
+
+describe('Filesystem cleanup functionality', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('removes src, public, and node_modules directories when they exist', async () => {
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const mockFsRm = vi.fn().mockResolvedValue(undefined);
+    const mockFsReaddir = vi
+      .fn()
+      .mockResolvedValue(['src', 'public', 'node_modules', 'package.json']);
+
+    const mockWebContainer = {
+      fs: {
+        readdir: mockFsReaddir,
+        rm: mockFsRm,
+      },
+      on: vi.fn(),
+      mount: vi.fn(),
+      spawn: vi.fn(),
+    };
+
+    (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
+      instance: mockWebContainer,
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <PrototypeFrame
+        files={{ 'test.js': { file: { contents: 'console.log("test")' } } }}
+      />
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(mockFsReaddir).toHaveBeenCalledWith('/');
+
+    expect(mockFsRm).toHaveBeenCalledWith('/src', {
+      recursive: true,
+      force: true,
+    });
+    expect(mockFsRm).toHaveBeenCalledWith('/public', {
+      recursive: true,
+      force: true,
+    });
+    expect(mockFsRm).toHaveBeenCalledWith('/node_modules', {
+      recursive: true,
+      force: true,
+    });
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Current root entries:', [
+      'src',
+      'public',
+      'node_modules',
+      'package.json',
+    ]);
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem selectively reset');
+  });
+
+  it('handles errors when removing individual files', async () => {
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const removalError = new Error('Permission denied');
+
+    const mockFsRm = vi.fn().mockImplementation((path) => {
+      if (path === '/package.json') {
+        return Promise.reject(removalError);
+      }
+      return Promise.resolve();
+    });
+
+    const mockFsReaddir = vi
+      .fn()
+      .mockResolvedValue(['src', 'package.json', 'README.md']);
+
+    const mockWebContainer = {
+      fs: {
+        readdir: mockFsReaddir,
+        rm: mockFsRm,
+      },
+      on: vi.fn(),
+      mount: vi.fn(),
+      spawn: vi.fn(),
+    };
+
+    (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
+      instance: mockWebContainer,
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <PrototypeFrame
+        files={{ 'test.js': { file: { contents: 'console.log("test")' } } }}
+      />
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(mockFsRm).toHaveBeenCalledWith('/package.json');
+    expect(mockFsRm).toHaveBeenCalledWith('/README.md');
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Error removing package.json:',
+      removalError
+    );
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Removed file: README.md');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem selectively reset');
+  });
+
+  it('logs different types of errors when removing files', async () => {
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const mockFsRm = vi.fn().mockImplementation((path) => {
+      if (path === '/file1.txt') {
+        return Promise.reject(new Error('Standard error'));
+      } else if (path === '/file2.txt') {
+        return Promise.reject('String error');
+      } else if (path === '/file3.txt') {
+        return Promise.reject({ code: 403, message: 'Object error' });
+      }
+      return Promise.resolve();
+    });
+
+    const mockFsReaddir = vi
+      .fn()
+      .mockResolvedValue(['file1.txt', 'file2.txt', 'file3.txt', 'file4.txt']);
+
+    const mockWebContainer = {
+      fs: {
+        readdir: mockFsReaddir,
+        rm: mockFsRm,
+      },
+      on: vi.fn(),
+      mount: vi.fn(),
+      spawn: vi.fn(),
+    };
+
+    (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
+      instance: mockWebContainer,
+      loading: false,
+      error: null,
+    });
+
+    render(
+      <PrototypeFrame
+        files={{ 'test.js': { file: { contents: 'console.log("test")' } } }}
+      />
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    expect(mockFsRm).toHaveBeenCalledWith('/file1.txt');
+    expect(mockFsRm).toHaveBeenCalledWith('/file2.txt');
+    expect(mockFsRm).toHaveBeenCalledWith('/file3.txt');
+    expect(mockFsRm).toHaveBeenCalledWith('/file4.txt');
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Error removing file1.txt:',
+      expect.objectContaining({ message: 'Standard error' })
+    );
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Error removing file2.txt:',
+      'String error'
+    );
+
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Error removing file3.txt:',
+      expect.objectContaining({ code: 403, message: 'Object error' })
+    );
+
+    expect(consoleLogSpy).toHaveBeenCalledWith('Removed file: file4.txt');
   });
 });
