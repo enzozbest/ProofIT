@@ -83,7 +83,7 @@ private suspend fun handleJsonRequest(
         )
         storePrototype(prototype)
     }
-    
+    response.chat.messageId = savedMessage.id
     println("RECEIVED RESPONSE")
     val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
     println("ENCODED RESPONSE: $jsonString")
