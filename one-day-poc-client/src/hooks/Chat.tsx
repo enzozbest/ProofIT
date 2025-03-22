@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { sendChatMessage } from '../api/FrontEndAPI';
-import { Message, ChatHookReturn, ChatMessageProps } from '../types/Types';
+import { Message, ChatHookReturn, ChatMessageProps, ChatResponse } from '../types/Types';
 import { useConversation } from '../contexts/ConversationContext';
 
 /**
@@ -27,7 +27,7 @@ const ChatMessage = ({
   const [message, setMessage] = useState<string>('');
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
   const [llmResponse, setLlmResponse] = useState<string>('');
-  const [serverResponse, setServerResponse] = useState<{message: string, id?: string} | null>(null);
+  const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   const { activeConversationId, createConversation, messages, loadingMessages } = useConversation();
@@ -65,7 +65,7 @@ const ChatMessage = ({
       await sendChatMessage(
         newMessage,
         (chatResponse) => {
-          setServerResponse(chatResponse);
+          setChatResponse(chatResponse);
         },
         (prototypeResponse) => {
           setPrototype(true);
@@ -79,20 +79,29 @@ const ChatMessage = ({
   };
 
   useEffect(() => {
-    if (serverResponse) {
+    if (chatResponse) {
       const currentTime = new Date().toISOString();
+      console.log('Chat response:', chatResponse);
+      
+      const messageContent = chatResponse.message;
+      const messageId = chatResponse.messageId;
+      
+      console.log('Extracted values:', { 
+        content: messageContent, 
+        id: messageId 
+      });
 
       const newLLMMessage: Message = {
         role: 'LLM',
-        content: serverResponse.message,
+        content: messageContent,
         timestamp: currentTime,
         conversationId: activeConversationId || '',
-        id: serverResponse.id
+        id: messageId
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
     }
-  }, [serverResponse, activeConversationId]);
+  }, [chatResponse, activeConversationId]);
 
   return {
     message,
