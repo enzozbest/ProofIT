@@ -52,6 +52,7 @@ export default function SidebarWrapper({
     useConversation();
   const [projectName, setProjectName] = useState<string>('Untitled Project');
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
+  const [open,setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeConversationId && conversations) {
@@ -67,10 +68,11 @@ export default function SidebarWrapper({
 
   const updateProjectName = async () => {
     setProjectName(inputProjectName);
-
+    
     if (activeConversationId) {
       updateConversationName(activeConversationId, inputProjectName);
     }
+    setOpen(false);
   };
 
   return (
@@ -82,7 +84,7 @@ export default function SidebarWrapper({
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <div className="flex-1 flex items-center justify-center gap-2">
-              <Popover>
+              <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger className="flex items-center gap-1 group bg-background">
                   <TypographySmall>{projectName}</TypographySmall>
                   <ChevronDownIcon className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
@@ -95,6 +97,11 @@ export default function SidebarWrapper({
                       placeholder="Name of your project"
                       value={inputProjectName}
                       onChange={(e) => setInputProjectName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          updateProjectName();
+                        }
+                      }}
                     />
                     <Button
                       className="gap-2 hover:bg-gray-50 active:bg-gray-400"
