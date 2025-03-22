@@ -66,7 +66,7 @@ export function NavMain({
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <SidebarMenuSub className="">
+                <SidebarMenuSub className="max-h-[300px] overflow-y-auto pr-1">
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.id || subItem.title} className="">
                       <SidebarMenuSubButton 

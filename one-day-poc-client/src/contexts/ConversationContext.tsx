@@ -42,7 +42,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       messages: []
     };
     
-    setConversations([...conversations, newConversation]);
+    setConversations([newConversation, ...conversations]);
     setActiveConversationId(newId);
     return newId;
   };
