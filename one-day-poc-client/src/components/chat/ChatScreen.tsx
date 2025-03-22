@@ -7,6 +7,7 @@ import { ChatScreenProps } from "../../types/Types";
 import { useConversation } from "@/contexts/ConversationContext";
 
 import {toast} from 'sonner'
+import { FileTree } from "@/types/Types";
 
 /**
  * ChatScreen component serves as the main chat interface container.
@@ -92,13 +93,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, se
         }
     }, [initialMessage]);
 
+    const handleLoadPrototype = (files: FileTree) => {
+        setPrototype(true);
+        setPrototypeFiles(files);
+    };
+
     return (
         <div className="relative h-full flex flex-col">
             {loadingMessages && <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                 <p>Loading messages...</p>
             </div>}
             
-            <MessageBox sentMessages={combinedMessages} />
+            <MessageBox 
+                sentMessages={combinedMessages} 
+                onLoadPrototype={handleLoadPrototype} 
+            />
             <ChatBox
                 setMessage={setMessage}
                 message={message}

@@ -12,9 +12,8 @@ import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
 import chat.storage.*
-import java.util.UUID
-import database.tables.chats.Conversation
 import database.tables.chats.ChatMessage
+import database.tables.chats.Prototype
 
 private var promptingMainInstance: PromptingMain = PromptingMain()
 
@@ -72,17 +71,32 @@ private suspend fun handleJsonRequest(
     saveMessage(request.conversationId, request.userID, request.prompt)
 
     val response = getPromptingMain().run(request.prompt)
+    
+    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
+    response.prototype?.let { prototypeResponse ->
+        val prototype = Prototype(
+            messageId = savedMessage.id,
+            filesJson = prototypeResponse.files.toString(),
+            version = 1,
+            isSelected = true
+        )
+        storePrototype(prototype)
+    }
 
-    saveMessage(request.conversationId, "LLM", response.chat.message)
+    println("MessageId: ${savedMessage.id}")
+
+    val responseWithId = response.copy(
+        chat = response.chat.copy(messageId = savedMessage.id)
+    )
 
     println("RECEIVED RESPONSE")
-    val jsonString = Json.encodeToString(ServerResponse.serializer(), response)
+    val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
     println("ENCODED RESPONSE: $jsonString")
 
     call.respondText(jsonString, contentType = ContentType.Application.Json)
 }
 
-private suspend fun saveMessage(conversationId: String, senderId: String, content: String) {
+private suspend fun saveMessage(conversationId: String, senderId: String, content: String): ChatMessage {
     val message = ChatMessage(
         conversationId = conversationId,
         senderId = senderId,
@@ -91,6 +105,7 @@ private suspend fun saveMessage(conversationId: String, senderId: String, conten
     println("Saving message: $message")
     storeMessage(message)
     println("Stored message: ${message.id}")
+    return message
 }
 
 /**
