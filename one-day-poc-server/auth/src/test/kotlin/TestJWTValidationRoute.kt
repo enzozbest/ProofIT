@@ -2,7 +2,6 @@ import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpJWTValidation
 import helpers.AuthenticationTestHelpers
 import helpers.AuthenticationTestHelpers.resetMockRedis
-import helpers.AuthenticationTestHelpers.setupMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -21,7 +20,7 @@ import kotlin.test.assertEquals
 class TestJWTValidationRoute {
     @BeforeEach
     fun setUp() {
-        setupMockRedis()
+        AuthenticationTestHelpers.setUpMockRedis()
     }
 
     @AfterEach

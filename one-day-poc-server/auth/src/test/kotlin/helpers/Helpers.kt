@@ -14,8 +14,13 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import redis.clients.jedis.Jedis
 import utils.aws.AWSUserCredentials
 import utils.json.PoCJSON.readJsonFile
 import java.util.*
@@ -51,22 +56,66 @@ object AuthenticationTestHelpers {
     val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
 
     /**
-     * Set up a mock Redis provider for testing.
+     * Set up a mock Redis for testing by directly mocking the getRedisConnection function.
      * This should be called before any test that interacts with Redis.
-     * @return The mock Redis provider that was set up.
+     * @return The mock Jedis instance that was set up.
      */
-    fun setupMockRedis(): MockRedisProvider {
-        val mockRedisProvider = MockRedisProvider()
-        Redis.setProvider(mockRedisProvider)
-        return mockRedisProvider
+    fun setupMockJedis(): Jedis {
+        val mockJedis = mockk<Jedis>(relaxed = true)
+        val storage = mutableMapOf<String, String>()
+
+        every { mockJedis.setex(any<String>(), any<Long>(), any<String>()) } answers {
+            val key = arg<String>(0)
+            val value = arg<String>(2)
+            storage[key] = value
+            "OK"
+        }
+
+        every { mockJedis.get(any<String>()) } answers {
+            val key = arg<String>(0)
+            storage[key]
+        }
+
+        every { mockJedis.del(any<String>()) } answers {
+            val key = arg<String>(0)
+            if (storage.containsKey(key)) {
+                storage.remove(key)
+                1L
+            } else {
+                0L
+            }
+        }
+
+        every { mockJedis.get(any<String>()) } answers {
+            val key = arg<String>(0)
+            storage[key]
+        }
+
+        every { mockJedis.close() } returns Unit
+
+        return mockJedis
     }
 
     /**
-     * Reset the Redis provider to the default.
+     * Set up a mock Redis for testing by directly mocking the getRedisConnection function.
+     * This should be called before any test that interacts with [Redis].
+     * @return The mock [Jedis] instance that was set up.
+     */
+    fun setUpMockRedis(): Jedis {
+        val connectionMock = setupMockJedis()
+        unmockkObject(Redis)
+        mockkObject(Redis)
+        every { Redis.getRedisConnection() } returns connectionMock
+
+        return connectionMock
+    }
+
+    /**
+     * Reset the Redis mock.
      * This should be called after any test that uses setupMockRedis.
      */
     fun resetMockRedis() {
-        Redis.resetProvider()
+        unmockkObject(Redis)
     }
 
     /**
