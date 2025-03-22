@@ -5,7 +5,7 @@ import helpers.AuthenticationTestHelpers.generateTestJwtTokenAdminFalse
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoGroups
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoSub
 import helpers.AuthenticationTestHelpers.resetMockRedis
-import helpers.AuthenticationTestHelpers.setupMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import helpers.mock
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -24,13 +24,14 @@ import kotlin.test.assertNotNull
 class TestCallbackRoute {
     @BeforeEach
     fun setUp() {
-        setupMockRedis()
+        setUpMockRedis()
     }
 
     @AfterEach
     fun tearDown() {
         resetMockRedis()
     }
+
     @Test
     fun `Test Callback route redirects when principal is present`() =
         testApplication {

@@ -5,7 +5,7 @@ import authentication.authentication.setUpCheckEndpoint
 import authentication.redis.Redis
 import helpers.AuthenticationTestHelpers
 import helpers.AuthenticationTestHelpers.resetMockRedis
-import helpers.AuthenticationTestHelpers.setupMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -22,13 +22,14 @@ import kotlin.test.assertEquals
 class TestAuthenticationCheckRoute {
     @BeforeEach
     fun setUp() {
-        setupMockRedis()
+        setUpMockRedis()
     }
 
     @AfterEach
     fun tearDown() {
         resetMockRedis()
     }
+
     @Test
     fun `Test check route without credentials`() =
         testApplication {
