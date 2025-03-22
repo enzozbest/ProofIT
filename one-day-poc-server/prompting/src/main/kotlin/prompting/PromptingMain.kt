@@ -24,7 +24,8 @@ import java.time.Instant
 data class ChatResponse(
     val message: String,
     val role: String = "LLM",
-    val timestamp: String,
+    val timestamp: String,,
+    val messageId: String,
 )
 
 @Serializable
@@ -176,6 +177,7 @@ class PromptingMain(
                 message = chat,
                 role = "LLM",
                 timestamp = Instant.now().toString(),
+                messageId = "0",
             )
 
         val prototypeResponse =
