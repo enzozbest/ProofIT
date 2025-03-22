@@ -14,12 +14,7 @@ class ChatRepository(private val db: Database){
 
     suspend fun saveMessage(message: ChatMessage): Boolean {
         return try {
-            println("DEBUG - ChatMessage type: ${message::class.qualifiedName}")
-            println("DEBUG - conversationId before transaction: '${message.conversationId}'")
-            
             newSuspendedTransaction(IO_DISPATCHER, db) {
-                println("DEBUG - conversationId inside transaction: '${message.conversationId}'")
-                
                 val conversationId = if (message.conversationId.isNullOrBlank()) {
                     println("DEBUG - Using random UUID since conversationId was empty")
                     UUID.randomUUID()
@@ -146,6 +141,89 @@ class ChatRepository(private val db: Database){
         } catch (e: Exception) {
             println("Error retrieving user conversations: ${e.message}")
             emptyList()
+        }
+    }
+
+    suspend fun savePrototype(prototype: Prototype): Boolean {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val messageId = UUID.fromString(prototype.messageId)
+                val message = ChatMessageEntity.findById(messageId) 
+                    ?: throw IllegalArgumentException("Message not found")
+                
+                val prototypeId = UUID.fromString(prototype.id)
+                PrototypeEntity.new(prototypeId) {
+                    this.message = message
+                    this.filesJson = prototype.filesJson
+                    this.version = prototype.version
+                    this.isSelected = prototype.isSelected
+                    this.timestamp = prototype.timestamp
+                }
+            }
+            true
+        } catch (e: Exception) {
+            println("Error saving prototype: ${e.message}")
+            e.printStackTrace()
+            false
+        }
+    }
+
+    suspend fun getPrototypesByMessageId(messageId: String): List<Prototype> {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val id = UUID.fromString(messageId)
+                PrototypeEntity.find { 
+                    PrototypeTable.messageId eq id 
+                }.map { it.toPrototype() }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving prototypes: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getAllPrototypesInConversation(conversationId: String): List<Prototype> {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val convId = UUID.fromString(conversationId)
+                
+                val messageIds = ChatMessageEntity.find {
+                    ChatMessageTable.conversationId eq convId
+                }.map { it.id }
+                
+                if (messageIds.isEmpty()) {
+                    emptyList()
+                } else {
+                    PrototypeEntity.find {
+                        PrototypeTable.messageId inList messageIds
+                    }.map { it.toPrototype() }
+                }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving conversation prototypes: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getSelectedPrototypeForMessage(conversationId: String, messageId: String): Prototype? {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val msgId = UUID.fromString(messageId)
+                val convId = UUID.fromString(conversationId)
+                
+                val message = ChatMessageEntity.find {
+                    (ChatMessageTable.id eq msgId) and
+                    (ChatMessageTable.conversationId eq convId)
+                }.firstOrNull() ?: return@newSuspendedTransaction null
+                
+                PrototypeEntity.find { 
+                    (PrototypeTable.messageId eq msgId) and 
+                    (PrototypeTable.isSelected eq true)
+                }.firstOrNull()?.toPrototype()
+            }
+        } catch (e: Exception) {
+            println("Error retrieving selected prototype: ${e.message}")
+            null
         }
     }
 }
