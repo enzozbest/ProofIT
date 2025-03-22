@@ -24,19 +24,19 @@ object PromptingTools {
     ): String {
         val systemMessage =
             """
-            You are an expert software requirements engineer tasked with generating precise, actionable functional 
+            The model is an expert software requirements engineer tasked with generating precise, actionable functional 
             requirements for a software prototype that will run in WebContainers.
 
             ### Response Format
-            Respond with a single valid JSON object only. The JSON must be parseable. 
-            Do not include any explanations, comments, or additional text.
+            The model always responds with a single valid JSON object only. The JSON must be parseable. 
+            The model never includes any explanations, comments, or additional text.
 
             ### Response Structure
-            Your response must strictly follow the example below. It must be a single valid JSON object containing 
+            The model's response must strictly follow the example below. It must be a single valid JSON object containing 
             only the "requirements" and "keywords" fields. 
-            The "requirements" field must be an array of strings, each representing one of your generated functional requirements.
-            The "keywords" field must be an array of strings, each representing a relevant keyword you identified
-            in your functional requirements.
+            The "requirements" field must be an array of strings, each representing one of the model's generated functional requirements.
+            The "keywords" field must be an array of strings, each representing a relevant keyword the model identified
+            in the model's functional requirements.
             
             Example: 
             {
@@ -61,7 +61,7 @@ object PromptingTools {
                2. Describe a single, atomic functionality.
                3. Specify user interactions and expected system responses, where applicable.
 
-            ### Your Task
+            ### What the model must do
             Generate comprehensive functional requirements based on:
             1. The user's request.
             2. The provided keywords.
@@ -77,13 +77,13 @@ object PromptingTools {
 
         val keywordsMessage =
             """
-            These are the keywords you should consider in addition to the user's message:
+            These are the keywords the model should consider in addition to the user's message:
             ${keywords.joinToString(", ")}
             """.trimIndent()
 
         val finaliser =
             """
-            Now, generate the final JSON response.
+            Now, the model will generate the final JSON response.
             """.trimIndent()
 
         val jsonArary =
@@ -233,13 +233,13 @@ object PromptingTools {
             4. Backend: Node.js.
             5. Backend Frameworks: Express, Spring.
 
-            ### Your Task
+            ### What the model must do
             Generate production-quality code based on:
             1. The user's message.
             2. The provided functional requirements (to follow).
             3. Available reference templates (to follow).
-            5. Modern styling practices. You must style the components to make them visually appealing using
-            whatever styling framework you choose.
+            5. Modern styling practices. The model must style the components to make them visually appealing using
+            whatever styling framework it chooses.
             """.trimIndent()
 
         val userMessage =
@@ -250,34 +250,35 @@ object PromptingTools {
 
         val functionalRequirementsMessage =
             """
-            You must consider the following functional requirements in addition to the user's message:
+            The model always considers the following functional requirements in addition to the user's message:
             $requirements
             """.trimIndent()
 
         val templatesMessage =
             """
-            These are the templates you must consider (use them to help generate your response. DO NOT simply describe them):
+             The model also always considers the following templates (the model uses them to help generate a response. IT NEVER simply describes them):
             ${templates.joinToString(separator = "\n\n")}
             """.trimIndent()
 
         val finalPromptMessage =
             """
-            Now produce the final JSON strictly following the schema.
+            Now the model will produce the final JSON strictly following the schema.
             
-            Incorporate each reference template provided into its respective file in the prototype.files object. 
-            Do not ignore the reference templates, rather extend/modify/combine them to fit the functional requirements. 
-            Adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
-            Add dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
+            The model always incorporates each reference template provided into its respective file in the prototype.files object. 
+            The model never ignores the reference templates, rather it extends/modifies/combines them to fit the functional requirements. 
+            The model should adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
+            The model always adds dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
+            
             The final code must run `npm install` and `npm start` without errors in a WebContainer.
             
             The final JSON must include:
-             1. A 'chat' key, with a simple message indicating how your solution meets the user's original prompt.
+             1. A 'chat' key, with a simple message indicating how the model's solution meets the user's original prompt.
              2.A 'prototype' key, with the file structure of the prototype. 
              
-            Check your response before finalising it. If it is not formatted correct, make the necessary changes
+            The model always checks its response before finalising it. If it is not formatted correct, it always makes the necessary changes
             before sending it.
             
-            Now produce your response.
+            Now the model must produce a response.
             """.trimIndent()
 
         val messagesArray =
