@@ -50,13 +50,14 @@ vi.mock('@/components/ui/Button', () => ({
 }));
 
 vi.mock('@/components/ui/Input', () => ({
-  Input: ({ id, placeholder, value, onChange }) => (
+  Input: ({ id, placeholder, value, onChange, onKeyDown }) => (
     <input
       data-testid="input"
       id={id}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
+      onKeyDown={onKeyDown}
     />
   ),
 }));
@@ -132,6 +133,31 @@ test('Updates project name when user renames it', async () => {
   expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name');
 
   // Check if updateConversationName was called with the correct arguments
+  expect(mockUpdateConversationName).toHaveBeenCalledWith('conversation-1', 'New Project Name');
+});
+
+test('Updates project name when enter key is pressed', async () => {
+  const mockUpdateConversationName = vi.fn();
+  useConversation.mockReturnValue({
+    conversations: [],
+    activeConversationId: 'conversation-1',
+    updateConversationName: mockUpdateConversationName,
+  });
+
+  render(
+      <SidebarWrapper>
+        <div>Children Content</div>
+      </SidebarWrapper>
+  );
+
+  fireEvent.click(screen.getByTestId('popover-trigger'));
+
+  const input = screen.getByTestId('input');
+  fireEvent.change(input, { target: { value: 'New Project Name' } });
+
+  fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+  expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name')
   expect(mockUpdateConversationName).toHaveBeenCalledWith('conversation-1', 'New Project Name');
 });
 
