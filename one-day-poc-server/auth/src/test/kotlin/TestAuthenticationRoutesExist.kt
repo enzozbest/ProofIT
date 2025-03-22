@@ -21,7 +21,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -39,7 +39,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -57,7 +57,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -75,7 +75,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -92,7 +92,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -105,7 +105,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
