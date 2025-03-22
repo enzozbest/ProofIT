@@ -4,6 +4,7 @@ import database.core.DatabaseManager
 import database.tables.chats.ChatRepository
 import database.tables.chats.ChatMessage
 import database.tables.chats.Conversation
+import database.tables.chats.Prototype
 
 object ChatStorageFactory {
     private val repository by lazy {
@@ -49,5 +50,24 @@ suspend fun updateConversationName(conversationId: String, name: String): Boolea
     }.getOrElse { e ->
         println("Error updating conversation name: ${e.message}")
         false
+    }
+}
+
+suspend fun storePrototype(prototype: Prototype): Boolean {
+    return runCatching {
+        ChatStorageFactory.getChatRepository().savePrototype(prototype)
+        true
+    }.getOrElse { e ->
+        println("Error storing prototype: ${e.message}")
+        false
+    }
+}
+
+suspend fun retrievePrototype(conversationId: String, messageId: String): Prototype? {
+    return runCatching {
+        ChatStorageFactory.getChatRepository().getSelectedPrototypeForMessage(conversationId, messageId)
+    }.getOrElse { e ->
+        println("Error retrieving prototype: ${e.message}")
+        null
     }
 }
