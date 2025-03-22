@@ -127,24 +127,16 @@ class PromptingMainTest {
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
         every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns "prompt"
 
-        // Instead of returning null, return a valid response but mock the formatResponseJson to throw an exception
-        coEvery { PrototypeInteractor.prompt(any(), any(), OllamaOptions()) } returns
-            OllamaResponse(
-                model = "test-model",
-                created_at = "2024-01-01",
-                response = "{\"key\": \"value\"}",
-                done = true,
-                done_reason = "test",
-            )
-
-        // Mock formatResponseJson to throw PromptException with "LLM did not respond!" message
-        every { PromptingTools.formatResponseJson(any()) } throws PromptException("LLM did not respond!")
+        // Return null from PrototypeInteractor.prompt to trigger the PromptException
+        coEvery { PrototypeInteractor.prompt(any(), any(), any()) } returns null
 
         coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
 
-        assertThrows<PromptException> {
+        val exception = assertThrows<PromptException> {
             runBlocking { promptingMain.run(userPrompt) }
         }
+
+        assertEquals("LLM did not respond!", exception.message)
     }
 
     @Test
@@ -159,20 +151,30 @@ class PromptingMainTest {
 
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
         every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns "prompt"
-        coEvery { PrototypeInteractor.prompt(any(), any(), OllamaOptions()) } returns
-            OllamaResponse(
-                model = "test-model",
-                created_at = "2024-01-01",
-                response = "response",
-                done = true,
-                done_reason = "test",
-            )
-        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
-        every { PromptingTools.formatResponseJson(any()) } returns invalidResponse
 
-        assertThrows<PromptException> {
+        // First call to PrototypeInteractor.prompt returns a valid response
+        coEvery { 
+            PrototypeInteractor.prompt(eq("prompt"), any(), any()) 
+        } returns OllamaResponse(
+            model = "test-model",
+            created_at = "2024-01-01",
+            response = "response",
+            done = true,
+            done_reason = "test",
+        )
+
+        // First call to formatResponseJson returns the invalid response
+        every { 
+            PromptingTools.formatResponseJson("response") 
+        } returns invalidResponse
+
+        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
+
+        val exception = assertThrows<PromptException> {
             runBlocking { promptingMain.run(userPrompt) }
         }
+
+        assertEquals("Failed to extract requirements from LLM response", exception.message)
     }
 
     @Test
@@ -475,6 +477,7 @@ class PromptingMainTest {
         val userPrompt = "Create a hello world app"
         val sanitisedPrompt = SanitisedPromptResult("Create a hello world app", listOf("hello", "world"))
         val freqsPrompt = "Functional requirements prompt"
+        val modelName = "qwen2.5-coder:14b"  // Define the model name explicitly
 
         val freqsResponse =
             buildJsonObject {
@@ -495,6 +498,9 @@ class PromptingMainTest {
         mockkObject(PrototypeInteractor)
         mockkObject(TemplateInteractor)
 
+        // Create a new instance of PromptingMain with the explicit model name
+        val testPromptingMain = PromptingMain(modelName)
+
         every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitisedPrompt
         every {
             PromptingTools.functionalRequirementsPrompt(
@@ -502,19 +508,24 @@ class PromptingMainTest {
                 sanitisedPrompt.keywords,
             )
         } returns freqsPrompt
-        coEvery { PrototypeInteractor.prompt(any(), any(), any()) } returns
-            OllamaResponse(
-                model = "deepseek-r1:32b",
-                created_at = "2024-03-07T21:53:03Z",
-                response = "{\"key\": \"value\"}",
-                done = true,
-                done_reason = "stop",
-            )
+
+        // Mock PrototypeInteractor.prompt to return a valid response for any call
+        coEvery { 
+            PrototypeInteractor.prompt(any(), any(), any()) 
+        } returns OllamaResponse(
+            model = "deepseek-r1:32b",
+            created_at = "2024-03-07T21:53:03Z",
+            response = "{\"key\": \"value\"}",
+            done = true,
+            done_reason = "stop",
+        )
+
         coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
+
         // Mock formatResponseJson to return the expected responses
         every { PromptingTools.formatResponseJson(any()) } returnsMany listOf(freqsResponse, prototypeResponse)
 
-        val result = runBlocking { promptingMain.run(userPrompt) }
+        val result = runBlocking { testPromptingMain.run(userPrompt) }
 
         // Verify only the essential calls without strict ordering
         verify {
@@ -525,9 +536,9 @@ class PromptingMainTest {
         }
 
         coVerify {
-            PrototypeInteractor.prompt(freqsPrompt, "qwen2.5-coder:14b", any())
+            PrototypeInteractor.prompt(freqsPrompt, modelName, any())
             TemplateInteractor.fetchTemplates(any())
-            PrototypeInteractor.prompt(any(), "qwen2.5-coder:14b", any())
+            PrototypeInteractor.prompt(any(), modelName, any())
         }
 
         verify(atLeast = 1) {
@@ -542,5 +553,6 @@ class PromptingMainTest {
         unmockkObject(SanitisationTools)
         unmockkObject(PromptingTools)
         unmockkObject(PrototypeInteractor)
+        unmockkObject(TemplateInteractor)
     }
 }

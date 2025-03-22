@@ -31,7 +31,7 @@ class TestLogoutRoute {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -57,7 +57,7 @@ class TestLogoutRoute {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -70,7 +70,7 @@ class TestLogoutRoute {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
