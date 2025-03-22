@@ -24,7 +24,7 @@ import java.time.Instant
 data class ChatResponse(
     val message: String,
     val role: String = "LLM",
-    val timestamp: String,,
+    val timestamp: String,
     val messageId: String,
 )
 
@@ -69,7 +69,6 @@ class PromptingMain(
      * @throws PromptException If any step in the prompting workflow fails
      */
     suspend fun run(userPrompt: String): ServerResponse {
-        /*
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
@@ -91,12 +90,10 @@ class PromptingMain(
             OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
         val prototypeResponse: JsonObject = promptLlm(prototypePrompt, prototypeOptions)
         println("DONE DECODING!")
-        */
-        
-        // Create dummy response
-        val dummyResponse = createDummyResponse()
-        println("USING DUMMY RESPONSE INSTEAD OF LLM!")
-        return serverResponse(dummyResponse)
+
+//        val dummyResponse = createDummyResponse()
+//        println("USING DUMMY RESPONSE INSTEAD OF LLM!")
+        return serverResponse(prototypeResponse)
     }
 
     /**
