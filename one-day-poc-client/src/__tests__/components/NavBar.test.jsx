@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, test, expect, beforeEach } from 'vitest';
-import NavBar from '@/components/Navbar';
+import NavBar from '@/components/NavBar';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Mock the useAuth hook
@@ -33,7 +33,9 @@ test('Renders navbar with logo', () => {
 
   // Check if the nav element is rendered with correct classes
   const navElement = screen.getByRole('navigation');
-  expect(navElement).toHaveClass('fixed top-2 left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50');
+  expect(navElement).toHaveClass(
+    'fixed top-2 left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50'
+  );
 });
 
 test('Renders sign in button when user is not authenticated', () => {
@@ -51,10 +53,14 @@ test('Renders sign in button when user is not authenticated', () => {
   expect(signInButton).toBeInTheDocument();
 
   // Check button styling
-  expect(signInButton).toHaveClass('border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition');
+  expect(signInButton).toHaveClass(
+    'border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition'
+  );
 
   // Ensure logout button is not present
-  expect(screen.queryByRole('button', { name: /log out/i })).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /log out/i })
+  ).not.toBeInTheDocument();
 });
 
 test('Renders log out button when user is authenticated', () => {
@@ -72,10 +78,14 @@ test('Renders log out button when user is authenticated', () => {
   expect(logoutButton).toBeInTheDocument();
 
   // Check button styling
-  expect(logoutButton).toHaveClass('border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition');
+  expect(logoutButton).toHaveClass(
+    'border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition'
+  );
 
   // Ensure sign in button is not present
-  expect(screen.queryByRole('button', { name: /sign in/i })).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /sign in/i })
+  ).not.toBeInTheDocument();
 });
 
 test('Calls login function when sign in button is clicked', () => {
