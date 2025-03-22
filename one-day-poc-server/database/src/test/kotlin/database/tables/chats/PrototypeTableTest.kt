@@ -40,36 +40,46 @@ class PrototypeTableTest {
         File(MockEnvironment.ENV_FILE).delete()
         MockEnvironment.stopContainer()
     }
-    
+
     @Test
     fun `verify PrototypeTable schema`() {
         transaction(db) {
             val columns = PrototypeTable.columns
-            
+
             assertTrue(columns.any { it.name == "id" })
             assertTrue(columns.any { it.name == "message_id" })
             assertTrue(columns.any { it.name == "files_json" })
             assertTrue(columns.any { it.name == "version" })
             assertTrue(columns.any { it.name == "is_selected" })
             assertTrue(columns.any { it.name == "timestamp" })
-            
+
             val messageIdColumn = columns.first { it.name == "message_id" }
-            assertTrue(messageIdColumn.columnType.sqlType().contains("UUID"))
-            
+            val messageIdSqlType = messageIdColumn.columnType.sqlType()
+            println("[DEBUG_LOG] message_id SQL type: $messageIdSqlType")
+            assertTrue(messageIdSqlType.uppercase().contains("UUID"), "Expected SQL type to contain 'UUID', but was: $messageIdSqlType")
+
             val filesJsonColumn = columns.first { it.name == "files_json" }
-            assertTrue(filesJsonColumn.columnType.sqlType().contains("TEXT"))
-            
+            val filesJsonSqlType = filesJsonColumn.columnType.sqlType()
+            println("[DEBUG_LOG] files_json SQL type: $filesJsonSqlType")
+            assertTrue(filesJsonSqlType.uppercase().contains("TEXT"), "Expected SQL type to contain 'TEXT', but was: $filesJsonSqlType")
+
             val versionColumn = columns.first { it.name == "version" }
-            assertTrue(versionColumn.columnType.sqlType().contains("INT"))
-            
+            val versionSqlType = versionColumn.columnType.sqlType()
+            println("[DEBUG_LOG] version SQL type: $versionSqlType")
+            assertTrue(versionSqlType.uppercase().contains("INT"), "Expected SQL type to contain 'INT', but was: $versionSqlType")
+
             val isSelectedColumn = columns.first { it.name == "is_selected" }
-            assertTrue(isSelectedColumn.columnType.sqlType().contains("BOOL"))
-            
+            val isSelectedSqlType = isSelectedColumn.columnType.sqlType()
+            println("[DEBUG_LOG] is_selected SQL type: $isSelectedSqlType")
+            assertTrue(isSelectedSqlType.uppercase().contains("BOOL"), "Expected SQL type to contain 'BOOL', but was: $isSelectedSqlType")
+
             val timestampColumn = columns.first { it.name == "timestamp" }
-            assertTrue(timestampColumn.columnType.sqlType().contains("TIMESTAMP"))
+            val timestampSqlType = timestampColumn.columnType.sqlType()
+            println("[DEBUG_LOG] timestamp SQL type: $timestampSqlType")
+            assertTrue(timestampSqlType.uppercase().contains("TIMESTAMP"), "Expected SQL type to contain 'TIMESTAMP', but was: $timestampSqlType")
         }
     }
-    
+
     @Test
     fun `verify foreign key constraint`() {
         transaction(db) {
@@ -80,7 +90,7 @@ class PrototypeTableTest {
                 it[lastModified] = Instant.now()
                 it[userId] = "test-user"
             }
-            
+
             val messageId = UUID.randomUUID()
             ChatMessageTable.insert {
                 it[id] = messageId
@@ -89,7 +99,7 @@ class PrototypeTableTest {
                 it[content] = "Test message"
                 it[timestamp] = Instant.now()
             }
-            
+
             val prototypeId = UUID.randomUUID()
             PrototypeTable.insert {
                 it[id] = prototypeId
@@ -99,10 +109,10 @@ class PrototypeTableTest {
                 it[isSelected] = true
                 it[timestamp] = Instant.now()
             }
-            
+
             val count = PrototypeTable.select { PrototypeTable.id eq prototypeId }.count()
             assertEquals(1, count)
-            
+
             val invalidMessageId = UUID.randomUUID()
             assertFails {
                 PrototypeTable.insert {
@@ -116,7 +126,7 @@ class PrototypeTableTest {
             }
         }
     }
-    
+
     @Test
     fun `verify cascade delete`() {
         transaction(db) {
@@ -127,7 +137,7 @@ class PrototypeTableTest {
                 it[lastModified] = Instant.now()
                 it[userId] = "test-user"
             }
-            
+
             val messageId = UUID.randomUUID()
             ChatMessageTable.insert {
                 it[id] = messageId
@@ -136,7 +146,7 @@ class PrototypeTableTest {
                 it[content] = "Test message"
                 it[timestamp] = Instant.now()
             }
-            
+
             val prototypeId = UUID.randomUUID()
             PrototypeTable.insert {
                 it[id] = prototypeId
@@ -146,12 +156,12 @@ class PrototypeTableTest {
                 it[isSelected] = true
                 it[timestamp] = Instant.now()
             }
-            
+
             val countBefore = PrototypeTable.select { PrototypeTable.id eq prototypeId }.count()
             assertEquals(1, countBefore)
-            
+
             ChatMessageTable.deleteWhere { ChatMessageTable.id eq messageId }
-            
+
             val countAfter = PrototypeTable.select { PrototypeTable.id eq prototypeId }.count()
             assertEquals(0, countAfter)
         }
