@@ -12,7 +12,7 @@ import utils.json.PoCJSON
 import kotlin.collections.set
 
 internal object AuthenticationConstants {
-    const val DEFAULT_EXPIRATION_SECONDS = 600L
+    const val DEFAULT_EXPIRATION_SECONDS = 3600L
     const val CONFIGURATION_FILE = "cognito.json"
     const val DEFAULT_AUTHENTICATOR = "Cognito"
 }
