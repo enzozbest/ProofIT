@@ -3,6 +3,7 @@ package database.tables.chats
 import database.core.DatabaseManager
 import database.helpers.MockEnvironment
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
