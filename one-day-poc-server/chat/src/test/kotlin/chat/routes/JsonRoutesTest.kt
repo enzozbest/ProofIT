@@ -389,21 +389,23 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 setPromptingMain(mockPromptingMain)
                 setupTestApplication()
 
-                assertThrows<NullPointerException> {
-                    client.post("/api/chat/json") {
-                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            """
-                            {
-                                "userID": "testUser",
-                                "time": "2025-01-01T12:00:00",
-                                "prompt": "Test prompt"
-                            }
-                            """.trimIndent(),
-                        )
+                val response = client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                    {
+                        "userID": "testUser",
+                        "time": "2025-01-01T12:00:00",
+                        "prompt": "Test prompt"
                     }
+                    """.trimIndent(),
+                    )
                 }
+
+                assertEquals(HttpStatusCode.InternalServerError, response.status)
+                val responseBody = response.bodyAsText()
+                assertTrue(responseBody.contains("Error") || responseBody.contains("error"))
             } finally {
                 resetPromptingMain()
             }
@@ -429,38 +431,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 }
 
             assertEquals(HttpStatusCode.Unauthorized, response.status)
-        }
-
-    @Test
-    fun `Test handling null return from PromptingMain run method`() =
-        testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(null)
-            }
-
-            try {
-                setPromptingMain(mockPromptingMain)
-                setupTestApplication()
-
-                assertThrows<NullPointerException> {
-                    client.post("/api/chat/json") {
-                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            """
-                            {
-                                "userID": "testUser",
-                                "time": "2025-01-01T12:00:00",
-                                "prompt": "Test prompt"
-                            }
-                            """.trimIndent(),
-                        )
-                    }
-                }
-            } finally {
-                resetPromptingMain()
-            }
         }
 
     @Test

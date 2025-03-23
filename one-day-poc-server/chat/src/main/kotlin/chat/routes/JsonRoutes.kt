@@ -67,33 +67,48 @@ private suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
+    if (request.prompt.isBlank()) {
+        return call.respondText(
+            "Invalid request: Empty prompt",
+            status = HttpStatusCode.BadRequest,
+        )
+    }
+
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
     saveMessage(request.conversationId, request.userID, request.prompt)
 
-    val response = getPromptingMain().run(request.prompt)
+    try {
+        val response = getPromptingMain().run(request.prompt)
 
-    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-    response.prototype?.let { prototypeResponse ->
-        val prototype = Prototype(
-            messageId = savedMessage.id,
-            filesJson = prototypeResponse.files.toString(),
-            version = 1,
-            isSelected = true
+        val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
+        response.prototype?.let { prototypeResponse ->
+            val prototype = Prototype(
+                messageId = savedMessage.id,
+                filesJson = prototypeResponse.files.toString(),
+                version = 1,
+                isSelected = true
+            )
+            storePrototype(prototype)
+        }
+
+        println("MessageId: ${savedMessage.id}")
+
+        val responseWithId = response.copy(
+            chat = response.chat.copy(messageId = savedMessage.id)
         )
-        storePrototype(prototype)
+
+        println("RECEIVED RESPONSE")
+        val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
+        println("ENCODED RESPONSE: $jsonString")
+
+        call.respondText(jsonString, contentType = ContentType.Application.Json)
+    } catch (e: Exception) {
+        println("Error in handleJsonRequest: ${e.message}")
+        call.respondText(
+            "Error processing request: ${e.message}",
+            status = HttpStatusCode.InternalServerError
+        )
     }
-
-    println("MessageId: ${savedMessage.id}")
-
-    val responseWithId = response.copy(
-        chat = response.chat.copy(messageId = savedMessage.id)
-    )
-
-    println("RECEIVED RESPONSE")
-    val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
-    println("ENCODED RESPONSE: $jsonString")
-
-    call.respondText(jsonString, contentType = ContentType.Application.Json)
 }
 
 private suspend fun saveMessage(conversationId: String, senderId: String, content: String): ChatMessage {
