@@ -151,9 +151,18 @@ class TestPromptingTools {
     @Test
     fun `test formatResponseJson with completely invalid JSON throws exception`() {
         val input = "This is not JSON at all"
-        assertThrows<Exception> {
+        assertThrows<StringIndexOutOfBoundsException> {
             promptingTools.formatResponseJson(input)
         }
+    }
+
+    @Test
+    fun `test formatResponseJson with malformed JSON throws exception`() {
+        val input = "{ \"key\": \"value\", \"broken\": }"
+        val exception = assertThrows<IllegalStateException> {
+            promptingTools.formatResponseJson(input)
+        }
+        assertTrue(exception.message?.startsWith("ERROR:") ?: false)
     }
 
     @Test
@@ -210,7 +219,7 @@ class TestPromptingTools {
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
         assertTrue(result.contains("Requirements Rules"))
-        assertTrue(result.contains("Your Task"))
+        assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate comprehensive"))
     }
 
@@ -228,7 +237,7 @@ class TestPromptingTools {
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
         assertTrue(result.contains("Requirements Rules"))
-        assertTrue(result.contains("Your Task"))
+        assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate comprehensive"))
 
         // Check that the keywords message is included even with empty keywords
@@ -282,7 +291,7 @@ class TestPromptingTools {
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
         assertTrue(result.contains("Technology Stack"))
-        assertTrue(result.contains("Your Task"))
+        assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate production-quality code"))
 
         // Check that the templates and requirements are included
