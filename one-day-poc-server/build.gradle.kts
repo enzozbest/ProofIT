@@ -128,8 +128,8 @@ subprojects {
                         """**/*${'$'}Metadata*.*""",
                         """**/*${'$'}Companion*.*""",
                         """server/*""",
-                        """routes/*""",
                         """**/TemplateLibrarySeeder.kt""",
+                        """**/utils/**utils/UtilsModuleKt.*""",
                     )
                 },
             )
