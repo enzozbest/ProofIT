@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi, test, expect, beforeEach } from 'vitest';
 import NavBar from '@/components/NavBar';
 import { useAuth } from '@/contexts/AuthContext';
+import { MemoryRouter } from 'react-router-dom';
 
 // Mock the useAuth hook
 vi.mock('@/contexts/AuthContext', () => ({
@@ -26,7 +27,10 @@ test('Renders navbar with logo', () => {
     logout: vi.fn(),
   });
 
-  render(<NavBar />);
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>);
 
   // Check if the logo is rendered
   expect(screen.getByTestId('logo')).toBeInTheDocument();
@@ -46,7 +50,9 @@ test('Renders sign in button when user is not authenticated', () => {
     logout: vi.fn(),
   });
 
-  render(<NavBar />);
+  render(<MemoryRouter>
+    <NavBar />
+  </MemoryRouter>);
 
   // Check if the sign in button is rendered
   const signInButton = screen.getByRole('button', { name: /sign in/i });
@@ -71,7 +77,9 @@ test('Renders log out button when user is authenticated', () => {
     logout: vi.fn(),
   });
 
-  render(<NavBar />);
+  render(<MemoryRouter>
+    <NavBar />
+  </MemoryRouter>);
 
   // Check if the logout button is rendered
   const logoutButton = screen.getByRole('button', { name: /log out/i });
@@ -99,7 +107,10 @@ test('Calls login function when sign in button is clicked', () => {
     logout: vi.fn(),
   });
 
-  render(<NavBar />);
+  render(<MemoryRouter>
+    <NavBar />
+  </MemoryRouter>
+  );
 
   // Find and click the sign in button
   const signInButton = screen.getByRole('button', { name: /sign in/i });
@@ -120,7 +131,9 @@ test('Calls logout function when log out button is clicked', () => {
     logout: mockLogout,
   });
 
-  render(<NavBar />);
+  render(<MemoryRouter>
+    <NavBar />
+  </MemoryRouter>);
 
   // Find and click the logout button
   const logoutButton = screen.getByRole('button', { name: /log out/i });
