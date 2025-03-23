@@ -55,12 +55,7 @@ object AuthenticationTestHelpers {
 
     val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
 
-    /**
-     * Set up a mock Redis for testing by directly mocking the getRedisConnection function.
-     * This should be called before any test that interacts with Redis.
-     * @return The mock Jedis instance that was set up.
-     */
-    fun setupMockJedis(): Jedis {
+    private fun setupMockJedis(): Jedis {
         val mockJedis = mockk<Jedis>(relaxed = true)
         val storage = mutableMapOf<String, String>()
 
@@ -69,11 +64,6 @@ object AuthenticationTestHelpers {
             val value = arg<String>(2)
             storage[key] = value
             "OK"
-        }
-
-        every { mockJedis.get(any<String>()) } answers {
-            val key = arg<String>(0)
-            storage[key]
         }
 
         every { mockJedis.del(any<String>()) } answers {
@@ -103,10 +93,8 @@ object AuthenticationTestHelpers {
      */
     fun setUpMockRedis(): Jedis {
         val connectionMock = setupMockJedis()
-        unmockkObject(Redis)
         mockkObject(Redis)
         every { Redis.getRedisConnection() } returns connectionMock
-
         return connectionMock
     }
 
@@ -114,8 +102,9 @@ object AuthenticationTestHelpers {
      * Reset the Redis mock.
      * This should be called after any test that uses setupMockRedis.
      */
-    fun resetMockRedis() {
+    fun resetMockRedis(jedis: Jedis) {
         unmockkObject(Redis)
+        unmockkObject(jedis)
     }
 
     /**

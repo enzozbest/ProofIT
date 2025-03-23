@@ -11,19 +11,22 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Jedis
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TestLogoutRoute {
+    private lateinit var mockJedis: Jedis
+
     @BeforeEach
     fun setUp() {
-        setUpMockRedis()
+        mockJedis = setUpMockRedis()
     }
 
     @AfterEach
     fun tearDown() {
-        resetMockRedis()
+        resetMockRedis(mockJedis)
     }
 
     @Test

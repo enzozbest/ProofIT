@@ -2,6 +2,7 @@ import authentication.authentication.AuthenticatedSession
 import authentication.authentication.setUpJWTValidation
 import helpers.AuthenticationTestHelpers
 import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -15,17 +16,20 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Jedis
 import kotlin.test.assertEquals
 
 class TestJWTValidationRoute {
+    private lateinit var mockJedis: Jedis
+
     @BeforeEach
     fun setUp() {
-        AuthenticationTestHelpers.setUpMockRedis()
+        mockJedis = setUpMockRedis()
     }
 
     @AfterEach
     fun tearDown() {
-        resetMockRedis()
+        resetMockRedis(mockJedis)
     }
 
     @Test

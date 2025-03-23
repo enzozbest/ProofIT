@@ -251,7 +251,7 @@ internal fun cacheSession(
 internal fun checkCache(token: String): JWTValidationResponse? {
     Redis.getRedisConnection().use { jedis ->
         val cachedData = jedis["auth:$token"] ?: return null
-        return Json.decodeFromString<JWTValidationResponse>(cachedData)
+        return runCatching { Json.decodeFromString<JWTValidationResponse>(cachedData) }.getOrNull()
     }
 }
 
