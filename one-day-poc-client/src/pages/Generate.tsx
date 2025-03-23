@@ -6,7 +6,6 @@ import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
-import NavBar from '@/components/NavBar';
 
 /**
  * Generate Page Component
