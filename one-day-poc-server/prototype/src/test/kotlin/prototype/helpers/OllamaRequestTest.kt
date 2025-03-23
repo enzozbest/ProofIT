@@ -15,6 +15,7 @@ class OllamaRequestTest {
         val request = OllamaRequest("model", "prompt", false)
         assertEquals("model", request.model)
         assertEquals("prompt", request.prompt)
+        assertEquals(OllamaOptions(), request.options)
         assertFalse(request.stream)
     }
 
