@@ -7,8 +7,6 @@ import utils.environment.EnvironmentLoader
 
 /**
  * Object that provides Redis connections.
- * In production, it uses a DefaultRedisProvider.
- * In tests, it can be configured to use a mock provider.
  */
 internal object Redis {
     private val REDIS_HOST = EnvironmentLoader.get("REDIS_HOST")

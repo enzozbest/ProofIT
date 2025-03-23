@@ -23,5 +23,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.14")
     implementation(project(":utils"))
     testImplementation("com.squareup.okhttp3:mockwebserver:5.0.0-alpha.14")
+    testImplementation("org.testcontainers:testcontainers:1.19.5")
+    testImplementation("org.testcontainers:junit-jupiter:1.19.5")
     testImplementation(kotlin("test"))
 }
