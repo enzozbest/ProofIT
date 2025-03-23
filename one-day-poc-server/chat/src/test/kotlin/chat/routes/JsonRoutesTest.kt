@@ -35,6 +35,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             ChatResponse(
                                 message = "This is a test response",
                                 timestamp = "2025-01-01T12:00:00",
+                                messageId = "0",
                             ),
                     ),
                 )
@@ -96,6 +97,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             ChatResponse(
                                 message = "Error processing prompt",
                                 timestamp = "2025-01-01T12:00:00",
+                                messageId = "0",
                             ),
                     ),
                 )
@@ -140,6 +142,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             ChatResponse(
                                 message = "Valid response",
                                 timestamp = "2025-01-01T12:00:00",
+                                messageId = "0",
                             ),
                     ),
                 )
@@ -201,6 +204,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             ChatResponse(
                                 message = "Mock response",
                                 timestamp = "2025-01-01T12:00:00",
+                                messageId = "0",
                             ),
                     ),
                 )
@@ -239,6 +243,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                                 ChatResponse(
                                     message = "Default response after reset",
                                     timestamp = "2025-01-01T12:00:00",
+                                    messageId = "0",
                                 ),
                         ),
                     )
@@ -304,6 +309,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             ChatResponse(
                                 message = "Response to empty prompt",
                                 timestamp = "2025-01-01T12:00:00",
+                                messageId = "0",
                             ),
                     ),
                 )

@@ -2,9 +2,12 @@ package database
 
 import database.core.DatabaseManager
 import database.helpers.MockEnvironment
-import database.tables.prototypes.Prototype
-import database.tables.prototypes.PrototypeRepository
-import database.tables.prototypes.Prototypes
+import database.tables.chats.ChatMessage
+import database.tables.chats.ChatMessageTable
+import database.tables.chats.ChatRepository
+import database.tables.chats.ConversationTable
+import database.tables.chats.Prototype
+import database.tables.chats.PrototypeTable
 import database.tables.templates.Template
 import database.tables.templates.TemplateRepository
 import database.tables.templates.Templates
@@ -34,7 +37,7 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class CoroutineCoverageTest {
     private lateinit var db: Database
-    private lateinit var prototypeRepository: PrototypeRepository
+    private lateinit var chatRepository: ChatRepository
     private lateinit var templateRepository: TemplateRepository
     private val testScheduler = TestCoroutineScheduler()
     private val testDispatcher = StandardTestDispatcher(testScheduler)
@@ -59,17 +62,21 @@ class CoroutineCoverageTest {
 
         db = DatabaseManager.init()
         transaction(db) {
-            SchemaUtils.create(Prototypes)
+            SchemaUtils.create(ConversationTable)
+            SchemaUtils.create(ChatMessageTable)
+            SchemaUtils.create(PrototypeTable)
             SchemaUtils.create(Templates)
         }
-        prototypeRepository = PrototypeRepository(db)
+        chatRepository = ChatRepository(db)
         templateRepository = TemplateRepository(db)
     }
 
     @AfterEach
     fun tearDown() {
         transaction(db) {
-            SchemaUtils.drop(Prototypes)
+            SchemaUtils.drop(PrototypeTable)
+            SchemaUtils.drop(ChatMessageTable)
+            SchemaUtils.drop(ConversationTable)
             SchemaUtils.drop(Templates)
         }
         File(MockEnvironment.ENV_FILE).delete()
@@ -79,88 +86,132 @@ class CoroutineCoverageTest {
     }
 
     @Test
-    fun `Test createPrototype with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val prototype = Prototype(
-            id = UUID.randomUUID(),
-            userId = "testuserId",
-            userPrompt = "Hello",
-            fullPrompt = "Hello, World!",
-            s3key = "testKey",
-            createdAt = Instant.now(),
-            projectName = "Hello program",
+    fun `Test savePrototype with StandardTestDispatcher`() = runTest(testDispatcher) {
+        // First create a message
+        val conversationId = UUID.randomUUID().toString()
+        val messageId = UUID.randomUUID().toString()
+        val message = ChatMessage(
+            id = messageId,
+            conversationId = conversationId,
+            senderId = "user1",
+            content = "Test message",
+            timestamp = Instant.now()
         )
 
-        val result = prototypeRepository.createPrototype(prototype)
-        testScheduler.advanceUntilIdle() // This is key to ensure all coroutines complete
+        val messageSaveResult = chatRepository.saveMessage(message)
+        testScheduler.advanceUntilIdle()
+        assertTrue(messageSaveResult)
 
-        assertTrue(result.isSuccess)
+        // Now create a prototype for this message
+        val prototype = Prototype(
+            id = UUID.randomUUID().toString(),
+            messageId = messageId,
+            filesJson = """{"files":[{"name":"test.js","content":"console.log('hello')"}]}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
+        )
+
+        val result = chatRepository.savePrototype(prototype)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(result)
     }
 
     @Test
     fun `Test getPrototype with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val id = UUID.randomUUID()
-        val prototype = Prototype(
-            id = id,
-            userId = "testuserId",
-            userPrompt = "Hello",
-            fullPrompt = "Hello, World!",
-            s3key = "testKey",
-            createdAt = Instant.now(),
-            projectName = "Hello program",
+        // First create a message
+        val conversationId = UUID.randomUUID().toString()
+        val messageId = UUID.randomUUID().toString()
+        val message = ChatMessage(
+            id = messageId,
+            conversationId = conversationId,
+            senderId = "user1",
+            content = "Test message",
+            timestamp = Instant.now()
         )
 
-        val createResult = prototypeRepository.createPrototype(prototype)
-        testScheduler.advanceUntilIdle()
-        assertTrue(createResult.isSuccess)
-
-        val result = prototypeRepository.getPrototype(id)
+        chatRepository.saveMessage(message)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(result.isSuccess)
-        val retrievedPrototype = result.getOrNull()
-        assertNotNull(retrievedPrototype)
-        assertEquals("Hello", retrievedPrototype.userPrompt)
+        // Create a prototype
+        val prototypeId = UUID.randomUUID().toString()
+        val filesJson = """{"files":[{"name":"test.js","content":"console.log('hello')"}]}"""
+        val prototype = Prototype(
+            id = prototypeId,
+            messageId = messageId,
+            filesJson = filesJson,
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
+        )
+
+        chatRepository.savePrototype(prototype)
+        testScheduler.advanceUntilIdle()
+
+        // Retrieve the prototype by message ID
+        val prototypes = chatRepository.getPrototypesByMessageId(messageId)
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, prototypes.size)
+        assertEquals(filesJson, prototypes[0].filesJson)
+        assertEquals(messageId, prototypes[0].messageId)
     }
 
     @Test
-    fun `Test getPrototypesByUserId with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val id1 = UUID.randomUUID()
-        val id2 = UUID.randomUUID()
+    fun `Test get all prototypes in conversation with StandardTestDispatcher`() = runTest(testDispatcher) {
+        // Create a conversation with two messages
+        val conversationId = UUID.randomUUID().toString()
 
+        val message1Id = UUID.randomUUID().toString()
+        val message1 = ChatMessage(
+            id = message1Id,
+            conversationId = conversationId,
+            senderId = "user1",
+            content = "First message",
+            timestamp = Instant.now()
+        )
+
+        val message2Id = UUID.randomUUID().toString()
+        val message2 = ChatMessage(
+            id = message2Id,
+            conversationId = conversationId,
+            senderId = "user1",
+            content = "Second message",
+            timestamp = Instant.now()
+        )
+
+        chatRepository.saveMessage(message1)
+        chatRepository.saveMessage(message2)
+        testScheduler.advanceUntilIdle()
+
+        // Create prototypes for each message
         val prototype1 = Prototype(
-            id = id1,
-            userId = "testuserId",
-            userPrompt = "Hello 1",
-            fullPrompt = "Hello, World! 1",
-            s3key = "testKey1",
-            createdAt = Instant.now(),
-            projectName = "Hello program",
+            id = UUID.randomUUID().toString(),
+            messageId = message1Id,
+            filesJson = """{"files":[{"name":"first.js"}]}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
         )
 
         val prototype2 = Prototype(
-            id = id2,
-            userId = "testuserId",
-            userPrompt = "Hello 2",
-            fullPrompt = "Hello, World! 2",
-            s3key = "testKey2",
-            createdAt = Instant.now(),
-            projectName = "Hello program",
+            id = UUID.randomUUID().toString(),
+            messageId = message2Id,
+            filesJson = """{"files":[{"name":"second.js"}]}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
         )
 
-        val createResult1 = prototypeRepository.createPrototype(prototype1)
-        testScheduler.advanceUntilIdle()
-        assertTrue(createResult1.isSuccess)
-
-        val createResult2 = prototypeRepository.createPrototype(prototype2)
-        testScheduler.advanceUntilIdle()
-        assertTrue(createResult2.isSuccess)
-
-        val result = prototypeRepository.getPrototypesByUserId("testuserId")
+        chatRepository.savePrototype(prototype1)
+        chatRepository.savePrototype(prototype2)
         testScheduler.advanceUntilIdle()
 
-        assertTrue(result.isSuccess)
-        val prototypes = result.getOrNull()
-        assertNotNull(prototypes)
+        // Get all prototypes in the conversation
+        val prototypes = chatRepository.getAllPrototypesInConversation(conversationId)
+        testScheduler.advanceUntilIdle()
+
         assertEquals(2, prototypes.size)
     }
 
@@ -196,46 +247,32 @@ class CoroutineCoverageTest {
     }
 
     @Test
-    fun `Test createPrototype failure path with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val invalidRepository = PrototypeRepository(invalidDb)
+    fun `Test error handling when saving prototype`() = runTest(testDispatcher) {
+        val invalidRepository = ChatRepository(invalidDb)
 
         val prototype = Prototype(
-            id = UUID.randomUUID(),
-            userId = "testuserId",
-            userPrompt = "Hello",
-            fullPrompt = "Hello, World!",
-            s3key = "testKey",
-            createdAt = Instant.now(),
-            projectName = "Hello program",
+            id = UUID.randomUUID().toString(),
+            messageId = UUID.randomUUID().toString(), // Invalid message ID
+            filesJson = """{"files":[]}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
         )
 
-        val result = invalidRepository.createPrototype(prototype)
+        val result = invalidRepository.savePrototype(prototype)
         testScheduler.advanceUntilIdle()
 
-        assertFalse(result.isSuccess)
-        assertTrue(result.isFailure)
+        assertFalse(result)
     }
 
     @Test
-    fun `Test getPrototype failure path with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val invalidRepository = PrototypeRepository(invalidDb)
+    fun `Test error handling when getting prototype by messageId`() = runTest(testDispatcher) {
+        val invalidRepository = ChatRepository(invalidDb)
 
-        val result = invalidRepository.getPrototype(UUID.randomUUID())
+        val result = invalidRepository.getPrototypesByMessageId("invalid-id")
         testScheduler.advanceUntilIdle()
 
-        assertFalse(result.isSuccess)
-        assertTrue(result.isFailure)
-    }
-
-    @Test
-    fun `Test getPrototypesByUserId failure path with StandardTestDispatcher`() = runTest(testDispatcher) {
-        val invalidRepository = PrototypeRepository(invalidDb)
-
-        val result = invalidRepository.getPrototypesByUserId("testuserId")
-        testScheduler.advanceUntilIdle()
-
-        assertFalse(result.isSuccess)
-        assertTrue(result.isFailure)
+        assertTrue(result.isEmpty())
     }
 
     @Test
