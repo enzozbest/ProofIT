@@ -129,7 +129,7 @@ subprojects {
                         """**/*${'$'}Companion*.*""",
                         """server/*""",
                         """**/TemplateLibrarySeeder.kt""",
-                        """**/utils/**utils/UtilsModuleKt.*""",
+                        """**/UtilsModuleKt.*""",
                     )
                 },
             )
