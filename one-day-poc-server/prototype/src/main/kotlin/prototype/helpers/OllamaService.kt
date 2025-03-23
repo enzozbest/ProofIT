@@ -81,16 +81,15 @@ object OllamaService {
      * @param request Input for the model formatted as an instance of [OllamaRequest].
      * @return Result object containing an instance of [OllamaResponse], or a failure with error message.
      */
-    suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse> {
+    suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse?> {
         if (!isOllamaRunning()) {
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
 
-        return runCatching {
-            val response = callOllama(request)
-            Result.success(response)
-        }.getOrElse {
-            Result.failure(Exception("Failed to call Ollama: ${it.message}"))
+        return try {
+            Result.success(callOllama(request))
+        } catch (e: Exception) {
+            Result.failure(Exception("Failed to call Ollama: ${e.message}"))
         }
     }
 
@@ -98,27 +97,25 @@ object OllamaService {
      * Makes a call to Ollama and parses the response.
      *
      * @param request An instance of [OllamaRequest] containing the prompt and model for evaluation.
-     * @return An instance of [OllamaResponse] containing the LLM's response.
-     * @throws Exception on network errors or invalid JSON responses
+     * @return An instance of [OllamaResponse] containing the LLM's response, or null if parsing fails.
+     * @throws Exception on network errors
      */
-    private suspend fun callOllama(request: OllamaRequest): OllamaResponse {
+    private suspend fun callOllama(request: OllamaRequest): OllamaResponse? {
         val ollamaApiUrl = "http://$OLLAMA_HOST:$OLLAMA_PORT/api/generate"
-        val response: HttpResponse =
-            runCatching {
-                client.post(ollamaApiUrl) {
-                    header(HttpHeaders.ContentType, "application/json")
-                    setBody(jsonParser.encodeToString<OllamaRequest>(request))
-                }
-            }.getOrElse {
-                println("Failed to call Ollama: ${it.message}")
-                throw it
-            }
+        val response: HttpResponse = client.post(ollamaApiUrl) {
+            header(HttpHeaders.ContentType, "application/json")
+            setBody(jsonParser.encodeToString<OllamaRequest>(request))
+        }
+
+        if (response.status != HttpStatusCode.OK) {
+            throw Exception("HTTP error: ${response.status}")
+        }
         val responseText = response.bodyAsText()
         val ollamaResponse = runCatching { jsonParser.decodeFromString<OllamaResponse>(responseText) }.getOrNull()
 
         // Only for debugging
         val jsonPrinter = Json { prettyPrint = true }
         println("Formatted JSON Response:\n" + jsonPrinter.encodeToString(ollamaResponse))
-        return ollamaResponse ?: throw SerializationException("Failed to parse Ollama response")
+        return ollamaResponse
     }
 }
