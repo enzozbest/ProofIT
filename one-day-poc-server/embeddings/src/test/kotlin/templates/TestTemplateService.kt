@@ -5,10 +5,13 @@ import database.tables.templates.TemplateRepository
 import embeddings.EmbeddingConstants
 import io.ktor.client.*
 import io.ktor.client.engine.mock.*
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.*
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.spyk
 import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -261,5 +264,53 @@ class TestTemplateService {
         method.isAccessible = true
         val retrievedClient = method.invoke(TemplateService)
         assertEquals(client, retrievedClient)
+    }
+
+    @Test
+    fun `Test storeTemplate throws exception when HTTP response is not OK`(): Unit = runBlocking {
+        // Mock TemplateStorageService to return a valid template ID
+        mockkObject(TemplateStorageService)
+        coEvery { TemplateStorageService.createTemplate(any<String>()) } returns "test-template-id"
+
+        // Mock storeTemplateEmbedding to return a non-OK response without throwing an exception
+        val mockResponse = mockk<HttpResponse>()
+        every { mockResponse.status } returns HttpStatusCode.BadRequest
+
+        val originalTemplateService = TemplateService
+        val spyTemplateService = spyk(originalTemplateService)
+        coEvery { 
+            spyTemplateService.storeTemplateEmbedding(
+                name = any<String>(), 
+                data = any<String>()
+            ) 
+        } returns mockResponse
+
+        // Test that the function throws an exception when the HTTP response is not OK
+        assertFailsWith<IllegalStateException> {
+            spyTemplateService.storeTemplate("file:///test/path", "Test text")
+        }
+    }
+
+    @Test
+    fun `Test storeTemplateEmbedding throws exception when HTTP response is not OK`(): Unit = runBlocking {
+        // Setup mock HTTP client to return non-OK status
+        val engine = MockEngine { request ->
+            when (request.url.toString()) {
+                EmbeddingConstants.EMBED_AND_STORE_URL ->
+                    respond(
+                        content = "Error response",
+                        status = HttpStatusCode.InternalServerError,
+                        headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString())),
+                    )
+                else -> error("Unhandled ${request.url}")
+            }
+        }
+        val client = HttpClient(engine)
+        TemplateService.httpClient = client
+
+        // Test that the function throws an exception when the HTTP response is not OK
+        assertFailsWith<IllegalStateException> {
+            TemplateService.storeTemplateEmbedding("test-template-id", "Test text")
+        }
     }
 }
