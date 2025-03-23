@@ -11,6 +11,7 @@ export default function Logo() {
     <div
       className="flex items-center gap-2 text-xl cursor-pointer"
       onClick={() => navigate('/')}
+      data-testid="logo"
     >
       <Bolt className="w-6 h-6" />
       <span className="font-normal">
