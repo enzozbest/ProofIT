@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
 import NavBar from '../components/NavBar';
-import HeroSection from '../components/HeroSection';
-import InputBox from '../components/InputBox';
-import OldPrompts from '../components/OldPrompts';
-import GeneratedPrompts from '../components/GeneratedPrompts';
+import HeroSection from '../components/landing/HeroSection';
+import InputBox from '../components/landing/InputBox';
+import OldPrompts from '../components/landing/OldPrompts';
+import GeneratedPrompts from '../components/landing/GeneratedPrompts';
 import BackgroundSVG from '../assets/background.svg';
 import { useAuth } from '../contexts/AuthContext';
 

@@ -21,7 +21,7 @@ beforeEach(() => {
 test('Renders all prompt buttons', async () => {
   await mockAuth({ isAuthenticated: false });
 
-  const { default: GeneratedPrompts } = await import('../../components/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
 
   const prompts = ['Prompt 1', 'Prompt 2', 'Prompt 3'];
 
@@ -50,7 +50,7 @@ test('Handles click when user is not authenticated', async () => {
     AuthProvider: ({ children }) => children
   }));
 
-  const { default: GeneratedPrompts } = await import('../../components/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
 
   const prompts = ['Test Prompt'];
 
@@ -73,7 +73,7 @@ test('Handles click when user is authenticated', async () => {
   const navigateMock = vi.fn();
   useNavigate.mockReturnValue(navigateMock);
 
-  const { default: GeneratedPrompts } = await import('../../components/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
 
   const prompts = ['Test Prompt'];
 
