@@ -57,7 +57,7 @@ object TemplateStorageUtils {
      * @return A Pair of bucket and key
      * @throws TemplateRetrievalException if the URL is invalid
      */
-    private fun parseS3Url(url: String): Pair<String, String> {
+    internal fun parseS3Url(url: String): Pair<String, String> {
         val bucket =
             Regex("""^https://([^\.]+)\.s3\.amazonaws\.com/.*$""")
                 .find(url)

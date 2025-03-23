@@ -17,7 +17,6 @@ import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import utils.environment.EnvironmentLoader
 import java.time.Instant
-import kotlinx.serialization.json.buildJsonObject
 
 /**
  * Represents a response from the chat processing system.
@@ -211,78 +210,6 @@ class PromptingMain(
             if (!secureCodeCheck(codeSnippet, language)) {
                 throw RuntimeException("Code is not safe for language=$language")
             }
-        }
-    }
-
-    /**
-     * Creates a dummy JSON response for testing purposes
-     */
-    private fun createDummyResponse(): JsonObject {
-
-        // Create the chat response part
-        val chatObject = buildJsonObject {
-            put("message", JsonPrimitive("I've created a simple counter application with React. The app features a counter display, increment/decrement buttons, and a reset button. You can also set a custom step value for the increments. The code is structured in a clean, maintainable way with separate components for the counter display and controls."))
-        }
-
-        val filesObject = buildJsonObject {
-            put("public/index.html", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>React Counter App</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n</body>\n</html>"))
-                })
-            })
-
-            // src/index.js
-            put("src/index.js", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './styles.css';\n\nconst root = ReactDOM.createRoot(document.getElementById('root'));\nroot.render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);"))
-                })
-            })
-
-            // src/App.jsx
-            put("src/App.jsx", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("import React, { useState } from 'react';\nimport CounterDisplay from './components/CounterDisplay';\nimport CounterControls from './components/CounterControls';\n\nfunction App() {\n  const [count, setCount] = useState(0);\n  const [step, setStep] = useState(1);\n\n  const increment = () => setCount(count + step);\n  const decrement = () => setCount(count - step);\n  const reset = () => setCount(0);\n  const handleStepChange = (e) => setStep(Number(e.target.value));\n\n  return (\n    <div className=\"app\">\n      <h1>React Counter</h1>\n      <CounterDisplay count={count} />\n      <div className=\"step-control\">\n        <label>\n          Step Size: \n          <input \n            type=\"number\" \n            min=\"1\" \n            value={step} \n            onChange={handleStepChange} \n          />\n        </label>\n      </div>\n      <CounterControls \n        onIncrement={increment} \n        onDecrement={decrement} \n        onReset={reset} \n      />\n    </div>\n  );\n}\n\nexport default App;"))
-                })
-            })
-
-            // src/components/CounterDisplay.jsx
-            put("src/components/CounterDisplay.jsx", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("import React from 'react';\n\nfunction CounterDisplay({ count }) {\n  return (\n    <div className=\"counter-display\">\n      <h2>{count}</h2>\n    </div>\n  );\n}\n\nexport default CounterDisplay;"))
-                })
-            })
-
-            // src/components/CounterControls.jsx
-            put("src/components/CounterControls.jsx", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("import React from 'react';\n\nfunction CounterControls({ onIncrement, onDecrement, onReset }) {\n  return (\n    <div className=\"counter-controls\">\n      <button onClick={onDecrement}>Decrease</button>\n      <button onClick={onReset}>Reset</button>\n      <button onClick={onIncrement}>Increase</button>\n    </div>\n  );\n}\n\nexport default CounterControls;"))
-                })
-            })
-
-            // src/styles.css
-            put("src/styles.css", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("body {\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;\n  background-color: #f5f5f5;\n  margin: 0;\n  padding: 0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}\n\n.app {\n  background-color: white;\n  border-radius: 8px;\n  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);\n  padding: 2rem;\n  max-width: 400px;\n  width: 100%;\n  text-align: center;\n}\n\nh1 {\n  color: #333;\n  margin-bottom: 1rem;\n}\n\n.counter-display {\n  margin: 1.5rem 0;\n}\n\n.counter-display h2 {\n  font-size: 4rem;\n  margin: 0;\n  color: #2c3e50;\n}\n\n.step-control {\n  margin-bottom: 1.5rem;\n}\n\n.step-control input {\n  width: 60px;\n  padding: 0.5rem;\n  margin-left: 0.5rem;\n  border: 1px solid #ddd;\n  border-radius: 4px;\n}\n\n.counter-controls {\n  display: flex;\n  gap: 0.5rem;\n  justify-content: center;\n}\n\nbutton {\n  background-color: #3498db;\n  color: white;\n  border: none;\n  border-radius: 4px;\n  padding: 0.5rem 1rem;\n  cursor: pointer;\n  font-size: 1rem;\n  transition: background-color 0.2s;\n}\n\nbutton:hover {\n  background-color: #2980b9;\n}\n\nbutton:nth-child(2) {\n  background-color: #e74c3c;\n}\n\nbutton:nth-child(2):hover {\n  background-color: #c0392b;\n}"))
-                })
-            })
-
-            // package.json
-            put("package.json", buildJsonObject {
-                put("file", buildJsonObject {
-                    put("contents", JsonPrimitive("{\n  \"name\": \"react-counter-app\",\n  \"version\": \"1.0.0\",\n  \"description\": \"A simple React counter application\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"start\": \"react-scripts start\",\n    \"build\": \"react-scripts build\",\n    \"test\": \"react-scripts test\",\n    \"eject\": \"react-scripts eject\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\",\n    \"react-scripts\": \"5.0.1\"\n  },\n  \"browserslist\": {\n    \"production\": [\n      \">0.2%\",\n      \"not dead\",\n      \"not op_mini all\"\n    ],\n    \"development\": [\n      \"last 1 chrome version\",\n      \"last 1 firefox version\",\n      \"last 1 safari version\"\n    ]\n  }\n}"))
-                })
-            })
-        }
-
-        // Create prototype object
-        val prototypeObject = buildJsonObject {
-            put("files", filesObject)
-        }
-
-        // Build and return final response
-        return buildJsonObject {
-            put("chat", chatObject)
-            put("prototype", prototypeObject)
         }
     }
 }

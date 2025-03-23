@@ -1,7 +1,9 @@
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
 import utils.json.PoCJSON
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 
 class JSONUtilsTest {
@@ -9,6 +11,13 @@ class JSONUtilsTest {
     fun `Test parses JSON correctly`() {
         val json = PoCJSON.readJsonFile("test.json")
         assertEquals("value", json["key"]!!.jsonPrimitive.content)
+    }
+
+    @Test
+    fun `Test readJsonFile with non-existing resource`() {
+        assertFailsWith<SerializationException> {
+            PoCJSON.readJsonFile("invalid-file.json")
+        }
     }
 
     @Test

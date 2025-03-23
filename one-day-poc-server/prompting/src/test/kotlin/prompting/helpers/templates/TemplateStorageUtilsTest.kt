@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import prompting.exceptions.TemplateRetrievalException
+import prompting.helpers.templates.TemplateStorageUtils.parseS3Url
 import utils.environment.EnvironmentLoader
 import utils.storage.StorageService
 import kotlin.io.path.createTempFile
 import kotlin.io.path.deleteIfExists
+import kotlin.test.assertFailsWith
 
 class TemplateStorageUtilsTest {
     @BeforeEach
@@ -108,118 +110,106 @@ class TemplateStorageUtilsTest {
         }
 
     @Test
-    fun `test parseS3Url with valid URL`() =
-        runBlocking {
-            // Arrange
-            val url = "https://test-bucket.s3.amazonaws.com/path/to/file.txt"
+    fun `parseS3Url correctly extracts bucket and key from valid S3 URL`() {
+        val validUrl = "https://mybucket.s3.amazonaws.com/folder/file.txt"
+        val (bucket, key) = parseS3Url(validUrl)
 
-            // Act
-            val (bucket, key) =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
-                    .invoke(TemplateStorageUtils, url) as Pair<String, String>
-
-            // Assert
-            assertEquals("test-bucket", bucket)
-            assertEquals("path/to/file.txt", key)
-        }
+        assertEquals("mybucket", bucket)
+        assertEquals("folder/file.txt", key)
+    }
 
     @Test
-    fun `test parseS3Url with invalid URL format throws exception`() =
-        runBlocking {
-            // Arrange
-            val url = "invalid-url"
-            val parseS3Url =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
+    fun `parseS3Url throws exception when bucket pattern doesn't match`() {
+        val invalidUrl = "https://invalid-url.com/something"
 
-            // Act & Assert
-            val exception =
-                assertThrows(java.lang.reflect.InvocationTargetException::class.java) {
-                    parseS3Url.invoke(TemplateStorageUtils, url)
-                }
-            assertTrue(exception.cause is TemplateRetrievalException)
-            assertEquals("Invalid S3 URL", exception.cause?.message)
-        }
+        val exception =
+            assertFailsWith<TemplateRetrievalException> {
+                parseS3Url(invalidUrl)
+            }
+        assertEquals("Invalid S3 URL", exception.message)
+    }
 
     @Test
-    fun `test parseS3Url with URL missing bucket throws exception`() =
-        runBlocking {
-            // Arrange
-            val url = "https://s3.amazonaws.com/path/to/file.txt" // Missing bucket in URL
-            val parseS3Url =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
+    fun `parseS3Url throws exception when key pattern doesn't match`() {
+        // This URL passes the bucket regex but fails the key regex
+        val invalidUrl = "https://bucket.s3.amazonaws.com"
 
-            // Act & Assert
-            val exception =
-                assertThrows(java.lang.reflect.InvocationTargetException::class.java) {
-                    parseS3Url.invoke(TemplateStorageUtils, url)
-                }
-            assertTrue(exception.cause is TemplateRetrievalException)
-            assertEquals("Invalid S3 URL", exception.cause?.message)
-        }
+        val exception =
+            assertFailsWith<TemplateRetrievalException> {
+                parseS3Url(invalidUrl)
+            }
+        assertEquals("Invalid S3 URL", exception.message)
+    }
 
     @Test
-    fun `test parseS3Url with URL missing key throws exception`() =
-        runBlocking {
-            // Arrange
-            val url = "https://test-bucket.s3.amazonaws.com/" // Missing key in URL
-            val parseS3Url =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
+    fun `parseS3Url correctly handles URLs with complex paths`() {
+        // Test URL with multiple path segments and special characters
+        val complexUrl = "https://test-bucket.s3.amazonaws.com/path/to/my%20file.pdf"
 
-            // Act & Assert
-            val exception =
-                assertThrows(java.lang.reflect.InvocationTargetException::class.java) {
-                    parseS3Url.invoke(TemplateStorageUtils, url)
-                }
-            assertTrue(exception.cause is TemplateRetrievalException)
-            assertEquals("Invalid S3 URL", exception.cause?.message)
-        }
+        val (bucket, key) = parseS3Url(complexUrl)
+
+        assertEquals("test-bucket", bucket)
+        assertEquals("path/to/my%20file.pdf", key)
+    }
 
     @Test
-    fun `test parseS3Url with different valid URL format`() =
-        runBlocking {
-            // Arrange
-            val url = "https://test-bucket.s3.amazonaws.com/nested/path/to/file.txt"
-            val parseS3Url =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
-
-            // Act
-            val (bucket, key) = parseS3Url.invoke(TemplateStorageUtils, url) as Pair<String, String>
-
-            // Assert
-            assertEquals("test-bucket", bucket)
-            assertEquals("nested/path/to/file.txt", key)
+    fun `parseS3Url throws exception when URL starts with https but doesn't match full pattern`() {
+        val malformedUrl = "https://bucket.s3.other-domain.com/file.txt"
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(malformedUrl)
         }
+    }
 
     @Test
-    fun `test parseS3Url with malformed URL throws exception`() =
-        runBlocking {
-            // Arrange
-            // This URL doesn't match the expected pattern for bucket extraction
-            val url = "https://test-bucket.example.com/path/to/file.txt"
-
-            val parseS3Url =
-                TemplateStorageUtils::class.java
-                    .getDeclaredMethod("parseS3Url", String::class.java)
-                    .apply { isAccessible = true }
-
-            // Act & Assert
-            val exception =
-                assertThrows(java.lang.reflect.InvocationTargetException::class.java) {
-                    parseS3Url.invoke(TemplateStorageUtils, url)
-                }
-            assertTrue(exception.cause is TemplateRetrievalException)
-            assertEquals("Invalid S3 URL", exception.cause?.message)
+    fun `parseS3Url throws exception when URL matches bucket pattern but key is empty`() {
+        val malformedUrl = "https://bucket.s3.amazonaws.com/"
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(malformedUrl)
         }
+    }
+
+    @Test
+    fun `parseS3Url throws exception when URL is null`() {
+        val nullUrl: String? = null
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(nullUrl ?: "")
+        }
+    }
+
+    @Test
+    fun `parseS3Url throws exception when URL is empty`() {
+        val emptyUrl = ""
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(emptyUrl)
+        }
+    }
+
+    @Test
+    fun `parseS3Url throws exception when URL has invalid format for bucket`() {
+        // This URL has the correct domain but doesn't match the bucket pattern
+        val invalidUrl = "https://s3.amazonaws.com/bucket/file.txt"
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(invalidUrl)
+        }
+    }
+
+    @Test
+    fun `parseS3Url throws exception when URL has invalid format for key`() {
+        // This URL has a valid bucket but no key after the trailing slash
+        val invalidUrl = "https://bucket.s3.amazonaws.com"
+        assertFailsWith<TemplateRetrievalException> {
+            parseS3Url(invalidUrl)
+        }
+    }
+
+    @Test
+    fun `parseS3Url handles URL with special characters in bucket and key`() {
+        val specialUrl = "https://my-special-bucket.s3.amazonaws.com/path/to/file%20with%20spaces.txt"
+        val (bucket, key) = parseS3Url(specialUrl)
+
+        assertEquals("my-special-bucket", bucket)
+        assertEquals("path/to/file%20with%20spaces.txt", key)
+    }
 
     @Test
     fun `test storeFile to local storage`() =

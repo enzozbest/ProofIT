@@ -258,6 +258,62 @@ class PromptingMainTest {
     }
 
     @Test
+    fun `test prototypePrompt with default templates parameter`() {
+        val userPrompt = "test prompt"
+        val freqsResponse =
+            buildJsonObject {
+                put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
+                put("keywords", JsonArray(listOf(JsonPrimitive("key1"), JsonPrimitive("key2"))))
+            }
+
+        // Create a new instance of PromptingMain for this test
+        val testPromptingMain = PromptingMain("test-model")
+
+        // Create a method to access the private prototypePrompt method
+        val method =
+            testPromptingMain::class.java.getDeclaredMethod(
+                "prototypePrompt",
+                String::class.java,
+                JsonObject::class.java,
+                List::class.java,
+            )
+        method.isAccessible = true
+
+        // Create a test implementation of the method that only passes the first two parameters
+        val testMethod = { userPrompt: String, freqsResponse: JsonObject ->
+            method.invoke(testPromptingMain, userPrompt, freqsResponse, emptyList<String>()) as String
+        }
+
+        // Mock PromptingTools.prototypePrompt to return a known value
+        mockkStatic(PromptingTools::class)
+        every {
+            PromptingTools.prototypePrompt(
+                userPrompt = any(),
+                requirements = any(),
+                templates = emptyList(),
+            )
+        } returns "mocked prototype prompt"
+
+        // Call the test method
+        val result = testMethod(userPrompt, freqsResponse)
+
+        // Verify the result
+        assertEquals("mocked prototype prompt", result)
+
+        // Verify that PromptingTools.prototypePrompt was called with the expected parameters
+        verify(exactly = 1) {
+            PromptingTools.prototypePrompt(
+                userPrompt = userPrompt,
+                requirements = any(), // Use any() matcher for requirements since the exact format may vary
+                templates = emptyList(),
+            )
+        }
+
+        // Unmock the static method
+        unmockkStatic(PromptingTools::class)
+    }
+
+    @Test
     fun `test promptLlm with successful response`() {
         val prompt = "test prompt"
         val expectedJson =
@@ -329,10 +385,57 @@ class PromptingMainTest {
         assertThrows<Exception> {
             runBlocking {
                 promptingMain::class.java
-                    .getDeclaredMethod("promptLlm", String::class.java)
+                    .getDeclaredMethod("promptLlm", String::class.java, OllamaOptions::class.java)
                     .apply { isAccessible = true }
-                    .invoke(promptingMain, prompt)
+                    .invoke(promptingMain, prompt, OllamaOptions())
             }
+        }
+    }
+
+    @Test
+    fun `test promptLlm with default options parameter`() {
+        val prompt = "test prompt"
+        val expectedJson =
+            buildJsonObject {
+                put("test", JsonPrimitive("value"))
+            }
+
+        // Create a slot to capture the options parameter
+        val optionsSlot = slot<OllamaOptions>()
+
+        coEvery {
+            PrototypeInteractor.prompt(eq(prompt), any(), capture(optionsSlot))
+        } returns
+            OllamaResponse(
+                model = "test-model",
+                created_at = "2024-01-01",
+                response = "test response",
+                done = true,
+                done_reason = "test",
+            )
+
+        every { PromptingTools.formatResponseJson("test response") } returns expectedJson
+
+        // Create a new instance of PromptingMain for this test
+        val testPromptingMain = PromptingMain("test-model")
+
+        // Use reflection to access the private method
+        val method = testPromptingMain::class.java.getDeclaredMethod("promptLlm", String::class.java, OllamaOptions::class.java)
+        method.isAccessible = true
+
+        // Call the method with only the first parameter
+        val result = runBlocking {
+            method.invoke(testPromptingMain, prompt, OllamaOptions()) as JsonObject
+        }
+
+        assertEquals(expectedJson, result)
+
+        // Verify that the captured options is an instance of OllamaOptions with default values
+        assertTrue(optionsSlot.captured is OllamaOptions)
+
+        // Verify the method was called
+        coVerify(exactly = 1) { 
+            PrototypeInteractor.prompt(eq(prompt), eq("test-model"), any()) 
         }
     }
 
@@ -554,5 +657,129 @@ class PromptingMainTest {
         unmockkObject(PromptingTools)
         unmockkObject(PrototypeInteractor)
         unmockkObject(TemplateInteractor)
+    }
+
+    @Test
+    fun `test serverResponse with chat as JsonObject with message field`() {
+        val response =
+            buildJsonObject {
+                putJsonObject("chat") {
+                    put("message", JsonPrimitive("Custom message from LLM"))
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
+
+        assertEquals(
+            "Custom message from LLM",
+            result.chat.message,
+        )
+        assertEquals("LLM", result.chat.role)
+        assertEquals("0", result.chat.messageId)
+    }
+
+    @Test
+    fun `test serverResponse with prototype as JsonObject with files field`() {
+        val filesObject = buildJsonObject {
+            putJsonObject("file1.js") {
+                put("content", JsonPrimitive("console.log('Hello');"))
+            }
+        }
+
+        val response =
+            buildJsonObject {
+                put("chat", JsonPrimitive("Chat message"))
+                putJsonObject("prototype") {
+                    put("files", filesObject)
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
+
+        assertEquals("Chat message", result.chat.message)
+        assertEquals(filesObject, result.prototype?.files)
+    }
+
+    @Test
+    fun `test serverResponse with prototype as JsonObject without files field`() {
+        val response =
+            buildJsonObject {
+                put("chat", JsonPrimitive("Chat message"))
+                putJsonObject("prototype") {
+                    put("someOtherField", JsonPrimitive("value"))
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
+
+        assertEquals("Chat message", result.chat.message)
+        assertEquals(null, result.prototype)
+    }
+
+    @Test
+    fun `test serverResponse with prototype not as JsonObject`() {
+        val response =
+            buildJsonObject {
+                put("chat", JsonPrimitive("Chat message"))
+                putJsonArray("prototype") {
+                    add(JsonPrimitive("Not a JsonObject"))
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
+
+        assertEquals("Chat message", result.chat.message)
+        assertEquals(null, result.prototype)
+    }
+
+    @Test
+    fun `test serverResponse with chat as JsonObject without message field`() {
+        val response =
+            buildJsonObject {
+                putJsonObject("chat") {
+                    put("otherField", JsonPrimitive("Some value"))
+                    // No message field
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+        val result = method.invoke(promptingMain, response) as ServerResponse
+
+        assertEquals("Here is your code.", result.chat.message)
+        assertEquals("LLM", result.chat.role)
+        assertEquals("0", result.chat.messageId)
+    }
+
+    @Test
+    fun `test serverResponse with chat as JsonObject with message field not as JsonPrimitive`() {
+        val response =
+            buildJsonObject {
+                putJsonObject("chat") {
+                    putJsonObject("message") {
+                        put("nestedField", JsonPrimitive("Nested value"))
+                    }
+                }
+            }
+
+        val method = promptingMain::class.java.getDeclaredMethod("serverResponse", JsonObject::class.java)
+        method.isAccessible = true
+
+        // This should throw an exception because the message field is not a JsonPrimitive
+        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
+            method.invoke(promptingMain, response)
+        }
+
+        // Verify that the cause of the exception is IllegalArgumentException
+        assertTrue(exception.cause is IllegalArgumentException)
+        assertTrue(exception.cause?.message?.contains("is not a JsonPrimitive") == true)
     }
 }
