@@ -14,7 +14,6 @@ vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(),
 }));
 
-// Mock the SendHorizontal component
 vi.mock('lucide-react', () => ({
   SendHorizontal: () => <div data-testid="send-icon" />,
 }));
@@ -27,7 +26,6 @@ describe('InputBox', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Setup default mocks
     (useNavigate as any).mockReturnValue(mockNavigate);
     (useAuth as any).mockReturnValue({
       isAuthenticated: true,
@@ -45,14 +43,11 @@ describe('InputBox', () => {
       const sendIcon = screen.getByTestId('send-icon');
       const submitButton = sendIcon.closest('button');
 
-      // Enter non-empty text with content
       const testText = 'Test message';
       fireEvent.change(textarea, { target: { value: testText } });
 
-      // Submit the form
       fireEvent.click(submitButton!);
 
-      // Verify navigate was called with correct parameters
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
         state: { initialMessage: testText },
       });
@@ -64,12 +59,9 @@ describe('InputBox', () => {
       const sendIcon = screen.getByTestId('send-icon');
       const submitButton = sendIcon.closest('button');
 
-      // Text is empty by default
 
-      // Submit the form
       fireEvent.click(submitButton!);
 
-      // Verify navigate was not called
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
@@ -82,24 +74,19 @@ describe('InputBox', () => {
       const sendIcon = screen.getByTestId('send-icon');
       const submitButton = sendIcon.closest('button');
 
-      // Enter whitespace-only text
       fireEvent.change(textarea, { target: { value: '   ' } });
 
-      // Submit the form
       fireEvent.click(submitButton!);
 
-      // Verify navigate was not called
       expect(mockNavigate).not.toHaveBeenCalled();
     });
 
     it('should set error to null when submitting valid text', () => {
-      // Create a component with an initial error state to verify it gets cleared
       const InputBoxWithError = () => {
         const [error, setError] = React.useState<string | null>(
           'Initial error'
         );
 
-        // Render just the error message part to verify it changes
         return (
           <div>
             <InputBox />
@@ -114,18 +101,15 @@ describe('InputBox', () => {
 
       const { rerender } = render(<InputBoxWithError />);
 
-      // Set up the component for testing
       const textarea = screen.getByPlaceholderText(
         'Tell us what we can do for you?'
       );
       const sendIcon = screen.getByTestId('send-icon');
       const submitButton = sendIcon.closest('button');
 
-      // Enter valid text
       const testText = 'Valid message';
       fireEvent.change(textarea, { target: { value: testText } });
 
-      // Submit the form
       fireEvent.click(submitButton!);
 
       // The implementation resets error to null before navigating
@@ -139,7 +123,6 @@ describe('InputBox', () => {
       const clearErrorButton = screen.getByTestId('clear-error');
       fireEvent.click(clearErrorButton);
 
-      // After clearing error, the error element should not be visible
       expect(screen.queryByTestId('error-state')).not.toBeInTheDocument();
     });
 
@@ -152,7 +135,6 @@ describe('InputBox', () => {
       const sendIcon = screen.getByTestId('send-icon');
       const submitButton = sendIcon.closest('button');
 
-      // Test with text that has leading/trailing whitespace
       const textWithWhitespace = '  Trimmed message  ';
       fireEvent.change(textarea, { target: { value: textWithWhitespace } });
       fireEvent.click(submitButton!);
@@ -163,14 +145,11 @@ describe('InputBox', () => {
         state: { initialMessage: textWithWhitespace },
       });
 
-      // Reset mocks
       mockNavigate.mockClear();
 
-      // Test with only whitespace
       fireEvent.change(textarea, { target: { value: '   ' } });
       fireEvent.click(submitButton!);
 
-      // Navigate should not be called
       expect(mockNavigate).not.toHaveBeenCalled();
     });
   });
@@ -178,7 +157,6 @@ describe('InputBox', () => {
 
 describe('error message conditional rendering', () => {
   it('should handle conditional rendering with different error messages', () => {
-    // Create a custom component to test different error messages
     const TestDifferentErrors = () => {
       const [error, setError] = React.useState<string | null>(
         'Error message 1'
@@ -199,17 +177,13 @@ describe('error message conditional rendering', () => {
 
     render(<TestDifferentErrors />);
 
-    // Initially, first error message should be visible
     expect(screen.getByText('Error message 1')).toBeInTheDocument();
 
-    // Change the error message
     const changeButton = screen.getByTestId('change-error');
     fireEvent.click(changeButton);
 
-    // After changing, second error message should be visible
     expect(screen.getByText('Error message 2')).toBeInTheDocument();
 
-    // First error message should no longer be visible
     expect(screen.queryByText('Error message 1')).not.toBeInTheDocument();
   });
 });
