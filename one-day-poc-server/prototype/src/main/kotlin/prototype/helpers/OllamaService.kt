@@ -31,7 +31,7 @@ data class OllamaRequest(
 data class OllamaResponse(
     val model: String,
     val created_at: String,
-    val response: String,
+    val response: String?,
     val done: Boolean,
     val done_reason: String,
 )
