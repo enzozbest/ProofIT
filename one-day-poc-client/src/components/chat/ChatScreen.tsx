@@ -11,18 +11,19 @@ import { FileTree } from "@/types/Types";
 
 /**
  * ChatScreen component serves as the main chat interface container.
- * 
+ *
  * Coordinates between the input interface (ChatBox) and the message display (MessageBox)
  * while managing the chat state and prototype generation through the ChatMessage hook.
- * 
+ *
  * @param showPrototype - Boolean flag to control visibility of the prototype panel
  * @param setPrototype - Function to update the prototype state in parent component
  * @param setPrototypeFiles - Function to update the prototype files in parent component
  * @param initialMessage - Optional initial message to be processed automatically
- * 
+ * @param isPredefined - flag to determine if LLM call is needed for prototype generation
+ *
  * @returns A complete chat interface with message history and input box
  */
-const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage }) => {
+const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, setPrototypeFiles, initialMessage, isPredefined = false }) => {
     const { messages, loadingMessages, activeConversationId } = useConversation();
     
     const {
@@ -85,13 +86,13 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ showPrototype, setPrototype, se
         if (initialMessage) {
             setMessage(initialMessage);
             const timer = setTimeout(() => {
-                handleSend(initialMessage);
+                handleSend(initialMessage, isPredefined);
                 sessionStorage.removeItem('initialMessage');
             }, 500);
             
             return () => clearTimeout(timer);
         }
-    }, [initialMessage]);
+    }, [initialMessage, isPredefined]);
 
     const handleLoadPrototype = (files: FileTree) => {
         setPrototype(true);

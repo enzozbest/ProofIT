@@ -118,15 +118,16 @@ export async function getPrototypeForMessage(conversationId: string, messageId: 
 
 /**
  * Sends a chat message to the server and processes the response.
- * 
+ *
  * @param message - The user message to send to the server
  * @param onChatResponse - Callback function that handles chat response data
  * @param onPrototypeResponse - Callback function that handles prototype response data
- * 
+ * @param isPredefined - boolean flag to control whether the prototype is served from hardcoded library or generated with LLM
+ *
  * @returns A promise that resolves when the API call is complete
- * 
+ *
  * @throws Error if the network request fails or server returns an error status
- * 
+ *
  * @example
  * ```typescript
  * const message = {
@@ -135,7 +136,7 @@ export async function getPrototypeForMessage(conversationId: string, messageId: 
  *   sender: 'user',
  *   timestamp: new Date().toISOString()
  * };
- * 
+ *
  * sendChatMessage(
  *   message,
  *   (chatResponse) => console.log('Chat response:', chatResponse),
@@ -146,7 +147,8 @@ export async function getPrototypeForMessage(conversationId: string, messageId: 
 export async function sendChatMessage(
   message: Message,
   onChatResponse: ChatCallback,
-  onPrototypeResponse: PrototypeCallback
+  onPrototypeResponse: PrototypeCallback,
+  isPredefined: boolean = false
 ): Promise<void> {
   try {
     if (!message.conversationId) {
@@ -157,7 +159,8 @@ export async function sendChatMessage(
       userID: UserService.getUserId(),
       time: message.timestamp,
       prompt: message.content,
-      conversationId: message.conversationId
+      conversationId: message.conversationId,
+      predefined: isPredefined,
     };
 
     const response = await fetch("http://localhost:8000/api/chat/json", {

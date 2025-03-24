@@ -44,7 +44,7 @@ const ChatMessage = ({
     setSentMessages([]);
   }, [activeConversationId]);
 
-  const handleSend = async (messageToSend: string = message): Promise<void> => {
+  const handleSend = async (messageToSend: string = message, isPredefined: boolean = false): Promise<void> => {
     if (!messageToSend.trim()) return;
 
     const currentTime = new Date().toISOString();
@@ -70,7 +70,8 @@ const ChatMessage = ({
         (prototypeResponse) => {
           setPrototype(true);
           setPrototypeFiles(prototypeResponse.files);
-        }
+        },
+        isPredefined
       );
     } catch (error) {
       console.error('Error:', error);
