@@ -2,6 +2,7 @@ import React, { FC, useState, useRef, useEffect } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConversation } from '../../contexts/ConversationContext';
 
 /**
  * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
@@ -22,6 +23,7 @@ const InputBox: FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const { createConversation } = useConversation();
 
   /**
    * Handle form submission
@@ -40,6 +42,7 @@ const InputBox: FC = () => {
 
     if (text.trim()) {
       setError(null);
+      createConversation();
       navigate('/generate', { state: { initialMessage: text } });
     }
   };
