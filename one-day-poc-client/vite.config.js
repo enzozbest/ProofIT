@@ -10,7 +10,19 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // Ensures `@` refers to `src/`
+      "@": path.resolve(__dirname, "src"),
+      "@contexts": path.resolve(__dirname, "src/contexts"),
+      "@hooks": path.resolve(__dirname, "src/hooks"),
+      "@components": path.resolve(__dirname, "src/components"),
+      "@lib": path.resolve(__dirname, "src/lib"),
     },
+  },
+  server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+    host: "0.0.0.0",
+    port: "5173"
   },
 })

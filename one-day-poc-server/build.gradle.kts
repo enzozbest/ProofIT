@@ -4,13 +4,14 @@ val kotlinVersion by extra { "2.1.0" }
 plugins {
     kotlin("jvm") version "2.1.0"
     id("application")
-    id("io.gitlab.arturbosch.detekt") version "1.23.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("org.sonarqube") version "4.0.0.2929"
-    id("jacoco")
+    jacoco
 }
 
-jacoco {
-    toolVersion = "0.8.12"
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    mergeServiceFiles()
 }
 
 tasks.register<JacocoReport>("jacocoMergedReport") {
@@ -50,16 +51,6 @@ tasks.register<JacocoReport>("jacocoMergedReport") {
     }
 }
 
-detekt {
-    toolVersion = "1.23.0"
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = true
-    baseline = file("detekt-baseline.xml")
-    reportsDir = file("build/reports/detekt.html")
-    config.setFrom("$rootDir/detekt.yml")
-}
-
 sonarqube {
     properties {
         property("sonar.host.url", "http://localhost:9000")
@@ -75,6 +66,12 @@ application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes["Main-Class"] = "io.ktor.server.netty.EngineMain"
+    }
+}
+
 group = "kcl.seg.rtt"
 version = "0.0-SNAPSHOT"
 
@@ -86,17 +83,19 @@ allprojects {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-    apply(plugin = "jacoco")
+    plugins.withType<org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper> {
+        apply(plugin = "jacoco")
+    }
     dependencies {
-        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
+        implementation("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
         implementation("io.ktor:ktor-server-core:$ktorVersion")
         implementation("io.ktor:ktor-server-netty:$ktorVersion")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
         implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
         implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-        implementation("ch.qos.logback:logback-classic:1.4.11")
+        implementation("ch.qos.logback:logback-classic:1.4.12")
+        implementation("org.slf4j:slf4j-api:1.7.36")
         testImplementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
@@ -105,26 +104,40 @@ subprojects {
         testImplementation("net.bytebuddy:byte-buddy-agent:1.14")
         testImplementation(kotlin("test"))
     }
-    detekt {
-        toolVersion = "1.23.0"
-        buildUponDefaultConfig = true
-        autoCorrect = true
-        config.setFrom("$rootDir/detekt.yml")
-    }
-    jacoco {
-        toolVersion = "0.8.10"
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+        finalizedBy("jacocoTestReport")
     }
 
-    tasks.jacocoTestReport {
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
+    plugins.withType<JacocoPlugin> {
+        tasks.withType<JacocoReport> {
+            dependsOn(tasks.named<Test>("test"))
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+            classDirectories.setFrom(
+                sourceSets["main"].output.asFileTree.matching {
+                    exclude(
+                        """**/*${'$'}DefaultImpls*.*""",
+                        """**/*${'$'}WhenMappings*.*""",
+                        """**/*${'$'}SuspendImpl*.*""",
+                        """**/*${'$'}delegate*.*""",
+                        """**/*${'$'}Function*.*""",
+                        """**/*${'$'}Metadata*.*""",
+                        """**/*${'$'}Companion*.*""",
+                        """server/*""",
+                        """**/TemplateLibrarySeeder.kt""",
+                        """**/UtilsModuleKt.*""",
+                    )
+                },
+            )
         }
     }
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.0")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
@@ -132,21 +145,34 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation(project(":auth"))
     implementation(project(":prototype"))
-    implementation(project(":webcontainer"))
-    implementation(project(":database"))
+    implementation(project("embeddings"))
+    api(project(":database"))
     implementation(project(":routes"))
     implementation(project(":utils"))
-    implementation(project(":chat_history"))
+    implementation(project(":chat"))
+    implementation(project(":prompting"))
+    implementation("org.slf4j:slf4j-api:1.7.36")
+    implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("org.jsoup:jsoup:1.15.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 tasks.withType<Test> {
     maxParallelForks = Runtime.getRuntime().availableProcessors()
     forkEvery = 10
+}
+
+allprojects {
+    plugins.withType<JavaPlugin> {
+        extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(19))
+        }
+    }
 }
 
 tasks.named("run") {
@@ -156,13 +182,5 @@ tasks.named("run") {
 tasks.register<Exec>("startDocker") {
     group = "docker"
     description = "Starts the PostgreSQL docker container"
-    commandLine("docker-compose", "up", "-d")
-}
-
-allprojects {
-    plugins.withType<JavaPlugin> {
-        extensions.configure<JavaPluginExtension> {
-            toolchain.languageVersion.set(JavaLanguageVersion.of(23))
-        }
-    }
+    commandLine("sh", "-c", "docker compose up -d || docker-compose up -d")
 }

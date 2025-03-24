@@ -1,0 +1,24 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "Header",
+    "description": "A header component for a financial dashboard that displays the title and buttons to navigate to different sections of the application",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "financial dashboard",
+        "dashboard",
+        "header",
+        "HUD",
+        "header bar",
+        "ui component",
+        "memoized"
+    ]
+}

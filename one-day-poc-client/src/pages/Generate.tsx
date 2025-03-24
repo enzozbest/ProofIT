@@ -1,124 +1,87 @@
-import ChatScreen from './ChatScreen'
-import PrototypeFrame from "@/hooks/PrototypeFrame";
-import * as React from "react";
-import { useState } from "react"
+import ChatScreen from '../components/chat/ChatScreen';
+import PrototypeFrame from '@/hooks/PrototypeFrame';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
+import { ChevronRightIcon } from 'lucide-react';
+import BackgroundSVG from '../assets/background.svg';
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { TypographySmall } from "@/components/ui/typography"
+import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-
-import {
-  Button
-} from "@/components/ui/button"
-
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-import { 
-  ChevronDownIcon, 
-  ChevronRightIcon,
-} from "@radix-ui/react-icons"
-
-import {
-  Share,
-  Rocket
-} from "lucide-react";
-
+/**
+ * Generate Page Component
+ *
+ * Renders the main prototype generation interface with:
+ * - A collapsible chat panel for interacting with the AI
+ * - A live prototype preview that updates based on the conversation
+ * - Cross-origin isolation detection for WebContainer compatibility
+ * - Support for initial messages passed through session storage
+ *
+ * The layout consists of a navbar, a sidebar navigation, a chat panel that can be toggled
+ * visible/hidden, and the main prototype preview area.
+ *
+ * @component
+ * @returns {JSX.Element} The complete prototype generation interface
+ */
 export default function Page() {
   const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [showPrototype, setPrototype] = useState<boolean>(false);
-  const [prototypeId, setPrototypeId] = useState<number>(0);
+  const [showPrototype, setPrototype] = useState<boolean>(true);
+  const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
+  const [initialMessage, setInitialMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedMessage = sessionStorage.getItem('initialMessage');
+    if (savedMessage) {
+      setInitialMessage(savedMessage);
+    }
+  }, []);
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 ">
-          <div className="flex items-center gap-2 px-4 w-full">
-            <SidebarTrigger className="-ml-1" />
-
-            <div className="flex-1 flex items-center  justify-center gap-2">
-              <Popover>
-                <PopoverTrigger className="flex items-center gap-1 group bg-[#060a28] text-white">
-                  <TypographySmall>
-                    Project name
-                  </TypographySmall>
-                  <ChevronDownIcon
-                    className="transition-transform duration-200 group-data-[state=open]:rotate-180"
-                  />
-                </PopoverTrigger>
-                <PopoverContent>
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Rename project</Label>
-                  <Input id="name" placeholder="Name of your project" />
-                </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="flex items-center gap-2 px-4">
-              <div className="flex-1 flex items-center  justify-center gap-2">
-                <Popover>
-                  <PopoverTrigger className="flex items-center gap-2 group bg-[#060a28] text-white">
-                    <Share size={14} />
-                    <TypographySmall>
-                      Export
-                    </TypographySmall>
-                    <ChevronDownIcon
-                      className="transition-transform duration-200 group-data-[state=open]:rotate-180"
-                    />
-                  </PopoverTrigger>
-                  <PopoverContent>
-                  <div className="flex flex-col space-y-1.5">
-                    <p> buttons tba</p>
-                  </div>
-                  </PopoverContent>
-                </Popover>
-                <Button variant="secondary" className="gap-2" style={{ backgroundColor: "#dfdfe6" }}>
-                  <Rocket size={14}/>
-                  Deploy
-                  </Button>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div className="flex flex-1 gap-1 p-4 h-[calc(100vh-4rem)]">
-    
-          <div className= {`w-[450px] h-full rounded-xl bg-muted/50 transition-all duration-300 ease-inn-out overflow-hidden ${
-                           isVisible ? "opacity-100 max-w-[450px]" : "opacity-0 max-w-0"}`}>
-            <ChatScreen
-                showPrototype={showPrototype}
-                prototypeId={prototypeId}
-                setPrototype={setPrototype}
-                setPrototypeId={setPrototypeId} />
-          </div>
-          <div className="flex h-full items-center justify-center">
-            <button 
-              onClick={() => setIsVisible(!isVisible)}
-              className="bg-[#060a28]">
-            <ChevronRightIcon className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
-                                        isVisible ? "rotate-180": "rotate-0"}`} />
-            </button>
-          </div>
-          <div className="flex-1 h-full rounded-xl" style={{ backgroundColor: "#7e808f" }}>
-            { showPrototype ? <PrototypeFrame prototypeId={prototypeId} /> : null }
-          </div>
+    <div
+      className="min-h-screen bg-gray-900 text-white"
+      style={{
+        backgroundImage: "url('/background.svg')",
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+      }}
+      data-testid="container"
+    >
+      <SidebarWrapper>
+        <div
+          className={`w-[450px] rounded-xl bg-white/15 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden ${
+            isVisible ? 'opacity-100 max-w-[450px]' : 'opacity-0 max-w-0'
+          }`}
+          data-testid="chat"
+        >
+          <ChatScreen
+            showPrototype={showPrototype}
+            setPrototype={setPrototype}
+            setPrototypeFiles={setPrototypeFiles}
+            initialMessage={initialMessage}
+          />
         </div>
-         
- 
-      </SidebarInset>
-    </SidebarProvider>
-  )
+        <div className="flex h-full items-center justify-center">
+          <button
+            data-testid="toggle-button"
+            onClick={() => setIsVisible(!isVisible)}
+            className="bg-transparent"
+          >
+            <ChevronRightIcon
+              className={`h-12 w-9 text-neutral-400 transition-transform duration-200 ${
+                isVisible ? 'rotate-180' : 'rotate-0'
+              }`}
+            />
+          </button>
+        </div>
+        <div className="flex-1 h-full rounded-xl bg-white/15 backdrop-blur-lg">
+          {showPrototype ? (
+            <PrototypeFrame
+              files={prototypeFiles}
+              data-testid="prototype-frame"
+            />
+          ) : null}
+        </div>
+      </SidebarWrapper>
+    </div>
+  );
 }

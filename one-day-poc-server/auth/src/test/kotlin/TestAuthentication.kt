@@ -1,3 +1,7 @@
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.authentication.Authenticators.configureJWTValidator
+import authentication.authentication.authModule
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import helpers.AuthenticationTestHelpers.configureBasicAuthentication
@@ -7,21 +11,20 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.ktor.util.*
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import kcl.seg.rtt.auth.authentication.Authenticators.configureJWTValidator
-import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Test
+import utils.json.PoCJSON.readJsonFile
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -53,10 +56,10 @@ class TestAuthentication {
             application {
                 authentication {
                     configureBasicAuthentication()
-                    configureJWTValidator(readJsonFile("src/test/resources/cognito-test.json"))
+                    configureJWTValidator(readJsonFile("cognito-test.json"))
                 }
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -143,7 +146,10 @@ class TestAuthentication {
             val responseWithValidCookie =
                 client.get("test/protected") {
                     val session = AuthenticatedSession("id", createValidToken(6000), false)
-                    cookie("AuthenticatedSession", Json.encodeToString<AuthenticatedSession>(session))
+                    cookie(
+                        "AuthenticatedSession",
+                        Json.encodeToString(AuthenticatedSession.serializer(), session),
+                    )
                 }
             assertEquals(HttpStatusCode.OK, responseWithValidCookie.status)
             val responseWithInvalidToken =
@@ -235,7 +241,7 @@ class TestAuthentication {
     ) {
         fun getJson(): JsonObject =
             buildJsonObject {
-                put("jwtIssuer", jwksUrl)
+                put("jwtIssuer", JsonPrimitive(jwksUrl))
             }
     }
 }

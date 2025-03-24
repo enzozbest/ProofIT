@@ -8,17 +8,19 @@ import aws.smithy.kotlin.runtime.time.Instant
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kcl.seg.rtt.utils.aws.S3Manager
-import kcl.seg.rtt.utils.aws.S3Service
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import utils.aws.S3Manager
+import utils.aws.S3Service
+import utils.environment.EnvironmentLoader
 import java.io.File
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration
 
@@ -67,10 +69,11 @@ class S3ConnectorTest {
         }
 
     @Test
-    fun `Test exception thrown if upload file fails`() =
+    fun `Test empty string returned if upload file fails`() =
         runBlocking {
             coEvery { mockS3Client.putObject(any<PutObjectRequest>()) } throws RuntimeException("Failed to upload file")
-            assertFailsWith<RuntimeException> { S3Service.uploadFile(bucketName, testFile, testKey) }
+            val response = S3Service.uploadFile(bucketName, testFile, testKey)
+            assertEquals("", response)
             coVerify { mockS3Client.putObject(any<PutObjectRequest>()) }
         }
 
@@ -84,18 +87,19 @@ class S3ConnectorTest {
                 secondArg<suspend (GetObjectResponse) -> String>().invoke(response)
             }
             val content = S3Service.getFile(bucketName, testKey)
-            assertEquals("Test content", content)
+            assertContentEquals("Test content".encodeToByteArray(), content)
             coVerify { mockS3Client.getObject(any<GetObjectRequest>(), any()) }
         }
 
     @Test
-    fun `Test exception thrown if get file fails`(): Unit =
+    fun `Test returns null if get file fails`(): Unit =
         runBlocking {
             coEvery {
                 mockS3Client.getObject(any<GetObjectRequest>(), any<suspend (GetObjectResponse) -> String>())
             } throws RuntimeException("Failed to get file")
 
-            assertFailsWith<RuntimeException> { S3Service.getFile(bucketName, testKey) }
+            val response = S3Service.getFile(bucketName, testKey)
+            assertNull(response)
             coVerify { mockS3Client.getObject(any<GetObjectRequest>(), any()) }
         }
 
@@ -109,7 +113,7 @@ class S3ConnectorTest {
                 secondArg<suspend (GetObjectResponse) -> String>().invoke(response)
             }
             val content = S3Service.getFile(bucketName, testKey)
-            assertEquals("null", content)
+            assertNull(content)
             coVerify { mockS3Client.getObject(any<GetObjectRequest>(), any()) }
         }
 
@@ -125,11 +129,12 @@ class S3ConnectorTest {
         }
 
     @Test
-    fun `Test exception thrown if delete file fails`(): Unit =
+    fun `Test false if delete file fails`(): Unit =
         runBlocking {
             coEvery { mockS3Client.deleteObject(any<DeleteObjectRequest>()) } throws RuntimeException("Failed to delete file")
 
-            assertFailsWith<RuntimeException> { S3Service.deleteObject(bucketName, testKey) }
+            val response = S3Service.deleteObject(bucketName, testKey)
+            assertFalse(response)
             coVerify { mockS3Client.deleteObject(any<DeleteObjectRequest>()) }
         }
 
@@ -151,11 +156,12 @@ class S3ConnectorTest {
         }
 
     @Test
-    fun `Test exception thrown if list bucket fails`(): Unit =
+    fun `Test empty list returned if list bucket fails`(): Unit =
         runBlocking {
             coEvery { mockS3Client.listObjectsV2(any<ListObjectsV2Request>()) } throws RuntimeException("Failed to list bucket")
 
-            assertFailsWith<RuntimeException> { S3Service.listBucket(bucketName) }
+            val response = S3Service.listBucket(bucketName)
+            assertEquals(emptyList(), response)
             coVerify { mockS3Client.listObjectsV2(any<ListObjectsV2Request>()) }
         }
 

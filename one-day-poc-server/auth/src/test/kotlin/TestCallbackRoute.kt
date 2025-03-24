@@ -1,23 +1,40 @@
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpCallbackRoute
 import helpers.AuthenticationTestHelpers.configureTestCallbackRoute
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenAdminFalse
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoGroups
 import helpers.AuthenticationTestHelpers.generateTestJwtTokenNoSub
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import helpers.mock
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Jedis
 import java.net.URLDecoder
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 
 class TestCallbackRoute {
+    private lateinit var mockJedis: Jedis
+
+    @BeforeEach
+    fun setUp() {
+        mockJedis = setUpMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis(mockJedis)
+    }
+
     @Test
     fun `Test Callback route redirects when principal is present`() =
         testApplication {
@@ -195,7 +212,7 @@ class TestCallbackRoute {
                     .substringBefore(";")
 
             val decoded = Json.decodeFromString<AuthenticatedSession>(cookieValueEncoded)
-            assertFalse(decoded.admin ?: false)
+            assertFalse(decoded.admin == true)
         }
 
     @Test
@@ -245,6 +262,6 @@ class TestCallbackRoute {
                     .substringBefore(";")
 
             val decoded = Json.decodeFromString<AuthenticatedSession>(cookieValueEncoded)
-            assertFalse(decoded.admin ?: false)
+            assertFalse(decoded.admin == true)
         }
 }

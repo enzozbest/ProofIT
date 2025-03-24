@@ -1,8 +1,7 @@
-version: '3.8'
 services:
   db:
     image: postgres:15
-    container_name: rtt-postgres
+    container_name: rtt-postgres-dev
     environment:
       POSTGRES_DB: db
       POSTGRES_USER: user
