@@ -4,6 +4,17 @@ import { vi, test, expect, beforeEach } from 'vitest';
 import NavBar from '@/components/NavBar';
 import { useAuth } from '@/contexts/AuthContext';
 import { MemoryRouter } from 'react-router-dom';
+import { _mockNavigate } from 'react-router-dom';
+
+vi.mock('react-router-dom', () => {
+  const mockNavigate = vi.fn();
+  return {
+    useNavigate: () => mockNavigate,
+    MemoryRouter: ({ children }) => <div>{children}</div>,
+    __esModule: true,
+    _mockNavigate: mockNavigate,
+  };
+});
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(),
@@ -15,6 +26,12 @@ vi.mock('@/components/Logo', () => ({
 
 beforeEach(() => {
   vi.resetAllMocks();
+  useAuth.mockReturnValue({
+    isAuthenticaded: false,
+    login: vi.fn(),
+    logout: vi.fn(),
+  });
+  if (_mockNavigate) _mockNavigate.mockClear();
 });
 
 test('Renders navbar with logo', () => {
@@ -27,7 +44,8 @@ test('Renders navbar with logo', () => {
   render(
     <MemoryRouter>
       <NavBar />
-    </MemoryRouter>);
+    </MemoryRouter>
+  );
 
   expect(screen.getByTestId('logo')).toBeInTheDocument();
 
@@ -44,9 +62,11 @@ test('Renders sign in button when user is not authenticated', () => {
     logout: vi.fn(),
   });
 
-  render(<MemoryRouter>
-    <NavBar />
-  </MemoryRouter>);
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
+  );
 
   const signInButton = screen.getByRole('button', { name: /sign in/i });
   expect(signInButton).toBeInTheDocument();
@@ -67,9 +87,11 @@ test('Renders log out button when user is authenticated', () => {
     logout: vi.fn(),
   });
 
-  render(<MemoryRouter>
-    <NavBar />
-  </MemoryRouter>);
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
+  );
 
   const logoutButton = screen.getByRole('button', { name: /log out/i });
   expect(logoutButton).toBeInTheDocument();
@@ -92,9 +114,10 @@ test('Calls login function when sign in button is clicked', () => {
     logout: vi.fn(),
   });
 
-  render(<MemoryRouter>
-    <NavBar />
-  </MemoryRouter>
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
   );
 
   const signInButton = screen.getByRole('button', { name: /sign in/i });
@@ -112,12 +135,34 @@ test('Calls logout function when log out button is clicked', () => {
     logout: mockLogout,
   });
 
-  render(<MemoryRouter>
-    <NavBar />
-  </MemoryRouter>);
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
+  );
 
   const logoutButton = screen.getByRole('button', { name: /log out/i });
   fireEvent.click(logoutButton);
 
   expect(mockLogout).toHaveBeenCalledTimes(1);
+});
+
+test('Navigates to "/profile" when the "Account" button is clicked', () => {
+  useAuth.mockReturnValue({
+    isAuthenticated: true,
+    login: vi.fn(),
+    logout: vi.fn(),
+  });
+
+  render(
+    <MemoryRouter>
+      <NavBar />
+    </MemoryRouter>
+  );
+
+  const accountButton = screen.getByRole('button', { name: /account/i });
+  fireEvent.click(accountButton);
+
+  expect(_mockNavigate).toHaveBeenCalledTimes(1);
+  expect(_mockNavigate).toHaveBeenCalledWith('/profile');
 });
