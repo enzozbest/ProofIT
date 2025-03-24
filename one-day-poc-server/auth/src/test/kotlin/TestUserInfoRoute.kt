@@ -1,9 +1,11 @@
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpUserInfoRoute
+import helpers.AuthenticationTestHelpers.setupMockAWSCredentials
+import helpers.AuthenticationTestHelpers.resetMockAWSCredentials
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpUserInfoRoute
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -21,11 +23,13 @@ class TestUserInfoRoute {
     fun setUp() {
         mockWebServer = MockWebServer()
         mockWebServer.start(port = 16000)
+        setupMockAWSCredentials()
     }
 
     @AfterEach
     fun tearDown() {
         mockWebServer.shutdown()
+        resetMockAWSCredentials()
     }
 
     @Test

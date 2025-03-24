@@ -1,21 +1,38 @@
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.JWTValidationResponse
+import authentication.authentication.cacheSession
+import authentication.authentication.setUpCheckEndpoint
+import authentication.redis.Redis
 import helpers.AuthenticationTestHelpers
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.JWTValidationResponse
-import kcl.seg.rtt.auth.authentication.cacheSession
-import kcl.seg.rtt.auth.authentication.setUpCheckEndpoint
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import redis.Redis
+import redis.clients.jedis.Jedis
 import kotlin.test.assertEquals
 
 class TestAuthenticationCheckRoute {
+    private lateinit var mockJedis: Jedis
+
+    @BeforeEach
+    fun setUp() {
+        mockJedis = setUpMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis(mockJedis)
+    }
+
     @Test
     fun `Test check route without credentials`() =
         testApplication {

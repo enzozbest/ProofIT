@@ -1,0 +1,23 @@
+{
+    "@context": "https://schema.org/",
+    "@type": "SoftwareSourceCode",
+    "name": "ChatMessage",
+    "description": "A React component that displays a 404 error page.",
+    "programmingLanguage": {
+        "@type": "ComputerLanguage",
+        "name": "TypeScript"
+    },
+    "framework": {
+        "@type": "SoftwareApplication",
+        "name": "React"
+    },
+    "applicationCategory": "User Interface Component",
+    "keywords": [
+        "redirect",
+        "error page",
+        "not found",
+        "404 page",
+        "ui component",
+        "memoized"
+    ]
+}

@@ -1,11 +1,17 @@
 package environment
 
-import kcl.seg.rtt.utils.environment.EnvironmentLoader
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.environment.EnvironmentLoader
+import utils.environment.SystemEnvironment
 import java.io.File
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
 class EnvironmentLoaderTest {
     private val envFile = "test.env"
@@ -19,14 +25,16 @@ class EnvironmentLoaderTest {
     @AfterEach
     fun teardown() {
         File(envFile).delete()
+        unmockkAll()
     }
 
     private fun generateEnvironmentFile() {
-        val env = """
+        val env =
+            """
             DB_URL=testUrl
             DB_USER=testUser
             DB_PASSWORD=testPassword
-        """.trimIndent()
+            """.trimIndent()
         File(envFile).writeText(env)
     }
 
@@ -54,4 +62,42 @@ class EnvironmentLoaderTest {
         assertEquals("", result)
     }
 
+    @Test
+    fun `Test reset clears environment`() {
+        // First verify we can get a value from the loaded environment
+        val beforeReset = EnvironmentLoader.get("DB_URL")
+        assertNotEquals("", beforeReset)
+
+        // Reset the environment
+        EnvironmentLoader.reset()
+
+        // Now try to get the same value, but with no system env fallback
+        val afterReset = EnvironmentLoader.get("DB_URL")
+        assertEquals("", afterReset)
+    }
+
+    @Test
+    fun `Test system environment variable fallback with null return`() {
+        // This test verifies that the system environment variable is used as a fallback
+        // when the .env file doesn't have the variable, but the system env also returns null
+
+        EnvironmentLoader.reset()
+        val result = EnvironmentLoader.get("NON_EXISTENT_SYSTEM_VAR")
+        assertEquals("", result)
+    }
+
+    @Test
+    fun `Test system environment variable fallback with non-null return`() {
+        EnvironmentLoader.reset()
+
+        mockkObject(SystemEnvironment)
+        val testKey = "TEST_SYSTEM_VAR"
+        val expectedValue = "system_value"
+        every { SystemEnvironment.readSystemVariable(testKey) } returns expectedValue
+
+        val result = EnvironmentLoader.get(testKey)
+
+        assertEquals(expectedValue, result)
+        verify { SystemEnvironment.readSystemVariable(testKey) }
+    }
 }

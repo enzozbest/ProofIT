@@ -19,7 +19,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0")
     implementation("org.jetbrains.exposed:exposed-json:0.43.0")
     implementation("org.jetbrains.exposed:exposed-java-time:0.43.0")
-    implementation("org.postgresql:postgresql:42.6.0")
+    implementation("org.postgresql:postgresql:42.7.2")
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core:9.16.0")
     testImplementation("org.jetbrains.exposed:exposed-core:0.43.0")
@@ -31,8 +31,4 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
     testImplementation(kotlin("test"))
     implementation(project(":utils"))
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

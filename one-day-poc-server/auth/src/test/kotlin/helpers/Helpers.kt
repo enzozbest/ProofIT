@@ -1,5 +1,8 @@
 package helpers
 
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.setUpCallbackRoute
+import authentication.redis.Redis
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.*
@@ -11,11 +14,15 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.setUpCallbackRoute
-import kcl.seg.rtt.utils.json.PoCJSON.readJsonFile
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
+import redis.clients.jedis.Jedis
+import utils.aws.AWSUserCredentials
+import utils.json.PoCJSON.readJsonFile
 import java.util.*
 
 class MockAuthenticationProvider<T : Any>(
@@ -44,9 +51,80 @@ fun <T : Any> AuthenticationConfig.mock(
 
 object AuthenticationTestHelpers {
     val jsonConfig: JsonObject =
-        readJsonFile("src/test/resources/cognito-test.json")
+        readJsonFile("cognito-test.json")
 
     val urlProvider: JsonObject = jsonConfig["providerLookup"]!!.jsonObject
+
+    private fun setupMockJedis(): Jedis {
+        val mockJedis = mockk<Jedis>(relaxed = true)
+        val storage = mutableMapOf<String, String>()
+
+        every { mockJedis.setex(any<String>(), any<Long>(), any<String>()) } answers {
+            val key = arg<String>(0)
+            val value = arg<String>(2)
+            storage[key] = value
+            "OK"
+        }
+
+        every { mockJedis.del(any<String>()) } answers {
+            val key = arg<String>(0)
+            if (storage.containsKey(key)) {
+                storage.remove(key)
+                1L
+            } else {
+                0L
+            }
+        }
+
+        every { mockJedis.get(any<String>()) } answers {
+            val key = arg<String>(0)
+            storage[key]
+        }
+
+        every { mockJedis.close() } returns Unit
+
+        return mockJedis
+    }
+
+    /**
+     * Set up a mock Redis for testing by directly mocking the getRedisConnection function.
+     * This should be called before any test that interacts with [Redis].
+     * @return The mock [Jedis] instance that was set up.
+     */
+    fun setUpMockRedis(): Jedis {
+        val connectionMock = setupMockJedis()
+        mockkObject(Redis)
+        every { Redis.getRedisConnection() } returns connectionMock
+        return connectionMock
+    }
+
+    /**
+     * Reset the Redis mock.
+     * This should be called after any test that uses setupMockRedis.
+     */
+    fun resetMockRedis(jedis: Jedis) {
+        unmockkObject(Redis)
+        unmockkObject(jedis)
+    }
+
+    /**
+     * Set up a mock AWS credentials provider for testing.
+     * This should be called before any test that interacts with AWS services.
+     * @return The mock AWS credentials provider that was set up.
+     */
+    fun setupMockAWSCredentials(): MockAWSCredentialsProvider {
+        val mockAWSCredentialsProvider = MockAWSCredentialsProvider()
+        AWSUserCredentials.setProvider(mockAWSCredentialsProvider)
+        return mockAWSCredentialsProvider
+    }
+
+    /**
+     * Reset the AWS credentials provider to the default.
+     * This should be called after any test that uses setupMockAWSCredentials.
+     */
+    fun resetMockAWSCredentials() {
+        AWSUserCredentials.resetProvider()
+    }
 
     fun TestApplicationBuilder.setupExternalServices() {
         externalServices {

@@ -25,6 +25,8 @@ dependencies {
     implementation("io.ktor:ktor-client-plugins:$ktorVersion")
     implementation("org.jetbrains.exposed:exposed-core:0.41.1")
     implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
+    implementation("org.jsoup:jsoup:1.16.1")
+    implementation("net.sf.jtidy:jtidy:r938")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
     testImplementation("io.ktor:ktor-client-mock:3.0.3")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
@@ -33,8 +35,5 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     testImplementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-}
-
-tasks.test {
-    useJUnitPlatform()
+    implementation(project(":utils"))
 }

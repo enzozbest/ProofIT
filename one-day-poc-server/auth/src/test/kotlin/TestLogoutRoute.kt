@@ -1,23 +1,40 @@
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.authentication.authModule
+import helpers.AuthenticationTestHelpers.resetMockRedis
+import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.authentication.AuthenticatedSession
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import redis.clients.jedis.Jedis
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class TestLogoutRoute {
+    private lateinit var mockJedis: Jedis
+
+    @BeforeEach
+    fun setUp() {
+        mockJedis = setUpMockRedis()
+    }
+
+    @AfterEach
+    fun tearDown() {
+        resetMockRedis(mockJedis)
+    }
+
     @Test
     fun `Test Log Out Route clears session`() =
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -43,7 +60,7 @@ class TestLogoutRoute {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -56,7 +73,7 @@ class TestLogoutRoute {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }

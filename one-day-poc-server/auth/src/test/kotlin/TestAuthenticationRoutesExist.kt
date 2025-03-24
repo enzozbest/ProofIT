@@ -1,14 +1,14 @@
+import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
+import authentication.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
+import authentication.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
+import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
+import authentication.authentication.AuthenticationRoutes.USER_INFO_ROUTE
+import authentication.authentication.authModule
 import helpers.AuthenticationTestHelpers.setupExternalServices
 import helpers.AuthenticationTestHelpers.urlProvider
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import kcl.seg.rtt.auth.authModule
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.CALL_BACK_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.JWT_VALIDATION_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
-import kcl.seg.rtt.auth.authentication.AuthenticationRoutes.USER_INFO_ROUTE
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -21,7 +21,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -39,7 +39,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -57,7 +57,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -75,7 +75,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -92,7 +92,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }
@@ -105,7 +105,7 @@ class TestAuthenticationRoutesExist {
         testApplication {
             application {
                 authModule(
-                    configFilePath = "src/test/resources/cognito-test.json",
+                    configFilePath = "cognito-test.json",
                     authName = "testAuth",
                 )
             }

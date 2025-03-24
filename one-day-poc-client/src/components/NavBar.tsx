@@ -1,51 +1,35 @@
-import React, { FC } from 'react';
-import { BotMessageSquare } from 'lucide-react';
+import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import Logo from '@/components/Logo';
 
-type NavBarProps = {
-  isAuthenticated: boolean;
-  setIsAuthenticated: (value: boolean) => void;
-};
-
-const NavBar: React.FC<NavBarProps> = ({
-  isAuthenticated,
-  setIsAuthenticated,
-}) => {
-  const handleSignIn = () => {
-    window.location.href = 'http://localhost:8000/api/auth';
-  };
-
-  const handleSignOut = () => {
-    fetch('http://localhost:8000/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    })
-      .then(() => {
-        setIsAuthenticated(false);
-      })
-      .catch((error) => console.error('Error:', error));
-  };
+/**
+ * NavBar component provides the application's top navigation bar with authentication controls.
+ *
+ * Displays the application logo/name and provides authentication functionality with
+ * sign-in and sign-out buttons that adapt based on the user's authentication status.
+ * The component makes API calls to handle authentication actions.
+ *
+ * @component
+ * @returns {JSX.Element} A navigation bar with application branding and authentication buttons
+ */
+const NavBar: React.FC = () => {
+  const { isAuthenticated, login, logout } = useAuth();
 
   return (
-    <nav className="absolute top-0 left-0 w-full flex justify-between items-center px-10 py-6 z-10">
-      <div className="flex items-center gap-2 text-xl text-white">
-        <BotMessageSquare className="w-6 h-6 text-white" />
-        <span className="font-normal">
-          PROOF -<span className="font-bold"> IT!</span>
-        </span>
-      </div>
-
+    <nav className="fixed top-2 left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50">
+      <Logo />
       <div className="flex gap-2">
         {isAuthenticated ? (
           <button
-            onClick={handleSignOut}
-            className="border-2 border-white bg-transparent text-white px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
+            onClick={logout}
+            className="border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Log Out
           </button>
         ) : (
           <button
-            onClick={handleSignIn}
-            className="border-2 border-white text-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
+            onClick={login}
+            className="border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Sign In
           </button>
