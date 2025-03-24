@@ -9,6 +9,13 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertSame
 
+/**
+ * Test class for ChatStorageFactory
+ * 
+ * This class tests the behavior of the ChatStorageFactory object, focusing on:
+ * 1. The lazy initialization of the repository property
+ * 2. The getChatRepository() method returning the expected repository
+ */
 class ChatStorageFactoryTest {
 
     private val mockRepository = mockk<ChatRepository>()
@@ -26,30 +33,36 @@ class ChatStorageFactoryTest {
         unmockkAll()
     }
 
+    /**
+     * Test that verifies the behavior of ChatStorageFactory
+     * 
+     * This test covers both the initialization and caching behavior in a single test
+     * to ensure that the state is consistent throughout the test.
+     */
     @Test
-    fun `test getChatRepository initializes repository on first call`() {
-        // First call should initialize the repository
-        val repository = ChatStorageFactory.getChatRepository()
+    fun `test ChatStorageFactory initialization and caching behavior`() {
+        // Create a clean spy of ChatStorageFactory for this test
+        mockkObject(ChatStorageFactory)
+        
+        // First call to getChatRepository() should trigger the lazy initialization
+        val repository1 = ChatStorageFactory.getChatRepository()
         
         // Verify that externalInit and chatRepository were called
         verify(exactly = 1) { DatabaseManager.externalInit() }
         verify(exactly = 1) { DatabaseManager.chatRepository() }
         
         // Verify that the returned repository is the mock repository
-        assertEquals(mockRepository, repository)
-    }
-
-    @Test
-    fun `test getChatRepository returns cached repository on subsequent calls`() {
-        // First call
-        val repository1 = ChatStorageFactory.getChatRepository()
+        assertEquals(mockRepository, repository1)
         
-        // Second call
+        // Clear the verification marks to start fresh for the second call
+        clearMocks(DatabaseManager, verificationMarks = true)
+        
+        // Second call to getChatRepository() should return the cached repository
         val repository2 = ChatStorageFactory.getChatRepository()
         
-        // Verify that externalInit and chatRepository were called only once
-        verify(exactly = 1) { DatabaseManager.externalInit() }
-        verify(exactly = 1) { DatabaseManager.chatRepository() }
+        // Verify that externalInit and chatRepository were NOT called on the second call
+        verify(exactly = 0) { DatabaseManager.externalInit() }
+        verify(exactly = 0) { DatabaseManager.chatRepository() }
         
         // Verify that both calls return the same instance
         assertSame(repository1, repository2)
