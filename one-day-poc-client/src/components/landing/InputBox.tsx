@@ -29,6 +29,10 @@ const InputBox: FC = () => {
    * - Navigates to generate page with text input if authenticated
    */
   const handleSubmit = () => {
+    if(!text.trim()) {
+      return;
+    }
+
     if (!isAuthenticated) {
       login(text);
       return;
