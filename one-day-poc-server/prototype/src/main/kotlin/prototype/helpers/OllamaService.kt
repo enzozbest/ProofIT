@@ -111,7 +111,11 @@ object OllamaService {
             throw Exception("HTTP error: ${response.status}")
         }
         val responseText = response.bodyAsText()
-        val ollamaResponse = runCatching { jsonParser.decodeFromString<OllamaResponse>(responseText) }.getOrNull()
+        val ollamaResponse = runCatching { 
+            jsonParser.decodeFromString<OllamaResponse>(responseText) 
+        }.getOrElse {
+            throw Exception("Failed to parse Ollama response")
+        }
 
         // Only for debugging
         val jsonPrinter = Json { prettyPrint = true }
