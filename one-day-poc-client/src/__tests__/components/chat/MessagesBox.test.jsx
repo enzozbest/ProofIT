@@ -1,9 +1,22 @@
-import { render, screen } from '@testing-library/react';
-import { describe, test, expect } from 'vitest';
-import { MessageBox } from '../../../components/chat/MessagesBox.jsx';
+import { render, waitFor, screen, fireEvent, within } from '@testing-library/react';
+import { describe, test, expect, beforeEach } from 'vitest';
+import { MessageBox } from '../../../components/chat/MessagesBox.js';
 import '../../mocks/message-box.mock.jsx';
+import { handleMessageClick } from '@/components/chat/MessagesBox';
+import { getPrototypeForMessage } from '@/api/FrontEndAPI';
+
+vi.mock('@/api/frontEndAPI', () => ({
+  getPrototypeForMessage: vi.fn().mockResolvedValue([]),
+}));
 
 describe('MessageBox Component', () => {
+  let onLoadPrototype;
+
+  beforeEach(() => {
+    onLoadPrototype = vi.fn();
+    vi.clearAllMocks();
+  })
+
   const mockMessages = [
     {
       role: 'User',
@@ -15,6 +28,13 @@ describe('MessageBox Component', () => {
       content: 'bot test message',
       timestamp: '2023-10-01T10:01:00',
     },
+    {
+      role: 'LLM',
+      content: 'llm test message',
+      timestamp: '2023-10-01T10:02:00',
+      conversationId: '1234',
+      id: '5678',
+    }
   ];
 
   test('scrolls to the most recent message', () => {
@@ -50,6 +70,100 @@ describe('MessageBox Component', () => {
 
     const botTimestamp = screen.getByText('10:01 am', { exact: false });
     expect(botTimestamp).toBeInTheDocument();
+  });
+
+  test('does not call API if message role is not "LLM"', async () => {
+    const msg = { role: 'User', content: 'user message', conversationId: '123', id: '456' };
+
+    render(<MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />);
+
+    const userMessageElement = screen.getByText((content, element) => {
+      return content.includes('user message');
+    });
+
+    expect(userMessageElement).toBeInTheDocument();
+
+    fireEvent.click(userMessageElement);
+
+    expect(getPrototypeForMessage).not.toHaveBeenCalled();
+    expect(onLoadPrototype).not.toHaveBeenCalled();
+  });
+
+  test('calls API and onLoadPrototype when an LLM message is clicked', async () => {
+    const mockPrototypeFiles = { some: 'data' };
+    getPrototypeForMessage.mockResolvedValue(mockPrototypeFiles);
+
+    render(
+      <MessageBox sentMessages={mockMessages} onLoadPrototype={onLoadPrototype} />
+    );
+
+    const llmMessageElement = screen.getByText((content, element) =>
+      content.includes('llm test message')
+    ).closest('.group');
+
+    expect(llmMessageElement).toBeInTheDocument();
+
+    fireEvent.click(llmMessageElement);
+
+    expect(getPrototypeForMessage).toHaveBeenCalledWith('1234', '5678');
+
+    await waitFor(() => expect(onLoadPrototype).toHaveBeenCalledWith(mockPrototypeFiles));
+  });
+
+  test('does not call API if coversationId is missing', async () => {
+    const msg = { role: 'LLM', content: 'llm message', id: '456' };
+
+    render(<MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />);
+
+    const llmMessageElement = screen.getByText((content, element) => {
+      return content.includes('llm message');
+    });
+
+    fireEvent.click(screen.getByText('llm message'));
+
+    expect(getPrototypeForMessage).not.toHaveBeenCalled();
+    expect(onLoadPrototype).not.toHaveBeenCalled();
+  });
+
+  test('handles API errors gracefully', async () => {
+    getPrototypeForMessage.mockRejectedValue(new Error('API error'));
+
+    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    render(
+      <MessageBox sentMessages={mockMessages} onLoadPrototype={onLoadPrototype} />
+    );
+
+    const llmMessageElement = screen.getByText((content) => content.includes('llm test message')).closest('.group');
+
+    expect(llmMessageElement).toBeInTheDocument();
+
+    fireEvent.click(llmMessageElement);
+
+    await waitFor(() => {
+      expect(consoleErrorMock).toHaveBeenCalledWith('Error loading prototype:', expect.any(Error));
+    });
+
+    expect(onLoadPrototype).not.toHaveBeenCalled();
+
+    consoleErrorMock.mockRestore();
+  });
+
+  test('calls handleMessageClick when an LLM message is clicked', async () => {
+    const handleMessageClick = vi.fn();
+    render(
+      <MessageBox 
+        sentMessages={mockMessages}
+        onLoadPrototype={() => {}} 
+        onMessageClick={handleMessageClick} 
+      />
+    );
+
+    const llmMessageElement = screen.getByText('llm test message').closest(".group");
+    fireEvent.click(llmMessageElement);
+
+    await waitFor(() => expect(handleMessageClick).toHaveBeenCalledTimes(1));
+    expect(handleMessageClick).toHaveBeenCalledWith(mockMessages[2]);
   });
 
   const mockMessagesWithCode = [
@@ -148,5 +262,5 @@ describe('MessageBox Component', () => {
       const timestamp = screen.getByText('10:00 am', { exact: false });
       expect(timestamp).toBeInTheDocument();
     });
-  })
+  });
 })
