@@ -2,11 +2,7 @@ package prototype
 
 import kotlinx.serialization.json.JsonObject
 import java.io.File
-import prompting.ServerResponse
-import prompting.ChatResponse
-import prompting.PrototypeResponse
 import kotlinx.serialization.json.Json
-import java.time.Instant
 
 
 /**
@@ -19,6 +15,15 @@ data class PredefinedPrototype(
     val message: String,
     val keywords: List<String>,
     val files: JsonObject
+)
+
+/**
+ * Simple data class representing the raw content from a predefined prototype template.
+ * This allows JsonRoutes to handle the database persistence and response construction.
+ */
+data class PrototypeTemplate(
+    val chatMessage: String,
+    val files: JsonObject,
 )
 
 /**
@@ -36,13 +41,16 @@ object PredefinedPrototypeService {
      * @param prompt The user's input prompt
      * @return A ServerResponse containing the appropriate prototype
      */
-    fun getPrototypeForPrompt(prompt: String): ServerResponse {
+    fun getPrototypeForPrompt(prompt: String): PrototypeTemplate {
         val normalizedPrompt = prompt.lowercase()
         val prototypeDir = File(PROTOTYPES_DIR)
 
         if (!prototypeDir.exists() || !prototypeDir.isDirectory) {
             println("Warning: Prototypes directory not found at $PROTOTYPES_DIR")
-            return createFailedResponse(prompt)
+            return PrototypeTemplate(
+                chatMessage = "Prototypes directory not found at: $PROTOTYPES_DIR",
+                files = JsonObject(emptyMap())
+            )
         }
 
         val prototypeFiles = prototypeDir.listFiles { file -> file.extension == "json" } ?: emptyArray()
@@ -53,13 +61,15 @@ object PredefinedPrototypeService {
 
             // If the filename is directly contained in the prompt, use this template
             if (normalizedPrompt.contains(filenameWithoutExtension)) {
-                return loadAndCreateResponse(file, prompt)
+                return loadPrototype(file)
             }
         }
 
-
-        // No matching template found, return response indicating failure
-        return createFailedResponse(prompt)
+        // No matching template found, return null to indicate failure
+        return PrototypeTemplate(
+            chatMessage = "I didn't find pre-defined prototype for user prompt: $prompt",
+            files = JsonObject(emptyMap())
+        )
     }
 
     /**
@@ -69,39 +79,21 @@ object PredefinedPrototypeService {
      * @param originalPrompt The original user prompt (for error handling)
      * @return A ServerResponse based on the template file
      */
-    private fun loadAndCreateResponse(file: File, originalPrompt: String): ServerResponse {
+    private fun loadPrototype(file: File): PrototypeTemplate {
         return try {
             val content = file.readText()
-            val template = Json.decodeFromString<PredefinedPrototype>(content)
+            val predefinedPrototype = Json.decodeFromString<PredefinedPrototype>(content)
 
-            ServerResponse(
-                chat = ChatResponse(
-                    message = template.message,
-                    role = "LLM",
-                    timestamp = Instant.now().toString(),
-                    messageId = "0"
-                ),
-                prototype = PrototypeResponse(
-                    files = template.files
-                )
+            PrototypeTemplate(
+                chatMessage = predefinedPrototype.message,
+                files = predefinedPrototype.files
             )
         } catch (e: Exception) {
             println("Error loading template ${file.name}: ${e.message}")
-            createFailedResponse(originalPrompt)
+            PrototypeTemplate(
+                chatMessage = "There was an error loading pre-defined prototype",
+                files = JsonObject(emptyMap())
+            )
         }
     }
-
-    private fun createFailedResponse(originalPrompt: String): ServerResponse {
-        return ServerResponse(
-            chat = ChatResponse(
-                message = "We don't have a pre-defined prototype for the inserted prompt: $originalPrompt",
-                role = "LLM",
-                timestamp = Instant.now().toString(),
-                messageId = "0",
-            ),
-            prototype = null
-        )
-    }
-
-
 }
