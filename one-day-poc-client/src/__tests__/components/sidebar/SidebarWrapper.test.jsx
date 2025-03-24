@@ -194,20 +194,13 @@ test('Handles project rename with no active conversation', async () => {
     </SidebarWrapper>
   );
 
-  // Open the popover
   fireEvent.click(screen.getByTestId('popover-trigger'));
 
-  // Change the input value
   const input = screen.getByTestId('input');
   fireEvent.change(input, { target: { value: 'New Project Name' } });
-
-  // Click save button
   fireEvent.click(screen.getByTestId('button'));
 
-  // Check if the project name is updated
   expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name');
-
-  // Function should not be called when there's no active conversation
   expect(mockUpdateConversationName).not.toHaveBeenCalled();
 });
 

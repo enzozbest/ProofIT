@@ -222,7 +222,6 @@ test('Sub-item without onClick handler does not throw error', () => {
         {
           title: 'Sub Item 1',
           url: '#',
-          // No onClick handler
         },
       ],
     },
@@ -232,10 +231,7 @@ test('Sub-item without onClick handler does not throw error', () => {
 
   const subButton = screen.getByTestId('sidebar-menu-sub-button');
 
-  // This should not throw an error
   fireEvent.click(subButton);
-
-  // If we get here, the test passed
   expect(true).toBe(true);
 });
 
