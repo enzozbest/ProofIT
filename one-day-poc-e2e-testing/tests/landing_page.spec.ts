@@ -1,5 +1,6 @@
-import {test, expect, Locator} from '@playwright/test';
+import {test, expect, Locator, Page} from '@playwright/test';
 
+//Unauthenticated Landing Page
 test('Landing page has the correct title', async ({ page }) => {
     await page.goto('http://localhost:5173');
     await expect(page).toHaveTitle('ProofIT');
@@ -87,16 +88,57 @@ test('Clicking on any of the pre-set prompt buttons unauthenticated navigates to
     const buttonDashboardForFinancialReports = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[2]")
     const buttonIntelligentDocumentProcessingTool = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[3]")
     await page.goto("http://localhost:5173")
-    await Promise.all([buttonChatbotAssistantForCustomer.click(), page.waitForNavigation()]);
+    await clickPreset(buttonChatbotAssistantForCustomer, page)
+    await clickPreset(buttonDashboardForFinancialReports, page)
+    await clickPreset(buttonIntelligentDocumentProcessingTool, page)
+})
+
+async function clickPreset(button: Locator, page: Page): Promise<void> {
+    await Promise.all([
+        page.waitForLoadState("networkidle"),
+        button.click()
+    ]);
     await expect(page).toHaveTitle('Sign-in');
-    await page.goBack();
-    await Promise.all([buttonDashboardForFinancialReports.click(), page.waitForNavigation()]);
+    await page.waitForTimeout(500);
+    await Promise.all([
+        page.waitForLoadState("networkidle"),
+        page.goBack()
+    ]);
+}
+
+test("Clicking on the 'Send' button without any text in the input box does nothing", async ({ page }) => {
+    const sendButton = page.locator("xpath=//button[contains(@class, 'ml-2')]")
+    await page.goto("http://localhost:5173")
+    await sendButton.click()
+    await expect(page).toHaveTitle('ProofIT');
+    await expect(page).toHaveURL("http://localhost:5173")
+})
+
+test("Pressing 'Enter' without any text in the input box does nothing", async ({ page }) => {
+    const textArea = page.locator("xpath=//textarea")
+    await page.goto("http://localhost:5173")
+    await textArea.press("Enter")
+    await expect(page).toHaveTitle('ProofIT');
+    await expect(page).toHaveURL("http://localhost:5173")
+})
+
+test("Clicking on the 'Send' button with text in the input box unauthenticated redirects to the sign in page", async ({ page }) => {
+    const sendButton = page.locator("xpath=//button[contains(@class, 'ml-2')]")
+    await page.goto("http://localhost:5173")
+    const textareaNoneWhite = page.locator("xpath=//textarea")
+    await textareaNoneWhite.fill("Hello")
+    await sendButton.click()
     await expect(page).toHaveTitle('Sign-in');
-    await page.goBack()
-    await Promise.all([buttonIntelligentDocumentProcessingTool.click(), page.waitForNavigation()]);
+})
+test("Pressing 'Enter' with text in the input box unauthenticated redirects to the sign in page", async ({ page }) => {
+    await page.goto("http://localhost:5173")
+    const textareaNoneWhite = page.locator("xpath=//textarea")
+    await textareaNoneWhite.fill("Hello")
+    await textareaNoneWhite.press("Enter")
     await expect(page).toHaveTitle('Sign-in');
 })
 
+//Authenticated Landing Page
 
 
 
