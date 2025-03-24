@@ -2,6 +2,9 @@ package chat.routes
 
 import chat.JSON
 import chat.Request
+import chat.storage.*
+import database.tables.chats.ChatMessage
+import database.tables.chats.Prototype
 import io.ktor.http.*
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -11,11 +14,8 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
-import chat.storage.*
-import database.tables.chats.ChatMessage
-import database.tables.chats.Prototype
 
-private var promptingMainInstance: PromptingMain = PromptingMain()
+private lateinit var promptingMainInstance: PromptingMain
 
 fun Route.jsonRoutes() {
     post(JSON) {
@@ -47,7 +47,7 @@ fun Route.jsonRoutes() {
         } catch (e: Exception) {
             call.respondText(
                 "Error: ${e.message}",
-                status = HttpStatusCode.BadRequest
+                status = HttpStatusCode.BadRequest,
             )
         }
     }
@@ -82,20 +82,22 @@ private suspend fun handleJsonRequest(
 
         val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
         response.prototype?.let { prototypeResponse ->
-            val prototype = Prototype(
-                messageId = savedMessage.id,
-                filesJson = prototypeResponse.files.toString(),
-                version = 1,
-                isSelected = true
-            )
+            val prototype =
+                Prototype(
+                    messageId = savedMessage.id,
+                    filesJson = prototypeResponse.files.toString(),
+                    version = 1,
+                    isSelected = true,
+                )
             storePrototype(prototype)
         }
 
         println("MessageId: ${savedMessage.id}")
 
-        val responseWithId = response.copy(
-            chat = response.chat.copy(messageId = savedMessage.id)
-        )
+        val responseWithId =
+            response.copy(
+                chat = response.chat.copy(messageId = savedMessage.id),
+            )
 
         println("RECEIVED RESPONSE")
         val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
@@ -106,17 +108,22 @@ private suspend fun handleJsonRequest(
         println("Error in handleJsonRequest: ${e.message}")
         call.respondText(
             "Error processing request: ${e.message}",
-            status = HttpStatusCode.InternalServerError
+            status = HttpStatusCode.InternalServerError,
         )
     }
 }
 
-private suspend fun saveMessage(conversationId: String, senderId: String, content: String): ChatMessage {
-    val message = ChatMessage(
-        conversationId = conversationId,
-        senderId = senderId,
-        content = content
-    )
+private suspend fun saveMessage(
+    conversationId: String,
+    senderId: String,
+    content: String,
+): ChatMessage {
+    val message =
+        ChatMessage(
+            conversationId = conversationId,
+            senderId = senderId,
+            content = content,
+        )
     println("Saving message: $message")
     storeMessage(message)
     println("Stored message: ${message.id}")
@@ -129,7 +136,12 @@ private suspend fun saveMessage(conversationId: String, senderId: String, conten
  *
  * @return The current PromptingMain instance
  */
-private fun getPromptingMain(): PromptingMain = promptingMainInstance
+private fun getPromptingMain(): PromptingMain {
+    if (!::promptingMainInstance.isInitialized) {
+        promptingMainInstance = PromptingMain()
+    }
+    return promptingMainInstance
+}
 
 /**
  * Sets a custom PromptingMain instance.
