@@ -31,7 +31,7 @@ jobs:
         version: 2.1.0
 
     - name: Install dependencies
-      working-directory: one-day-poc-client
+      working-directory: one-day-poc-server
       run: npm ci
         
     - name: Setup Gradle
