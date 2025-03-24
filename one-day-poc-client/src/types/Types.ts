@@ -197,4 +197,5 @@ export interface Conversation {
   export interface MessageBoxProps {
     sentMessages: Message[];
     onLoadPrototype: (files: FileTree) => void;
+    onMessageClick?: (msg: Message) => void;
   }
