@@ -1,7 +1,9 @@
-import React, {useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 import Markdown from "react-markdown";
+import { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MessageBubble, MessageBubbleContent, MessageBubbleTimestamp } from "./MessageBubble";
+import { Message, FileTree, MessageBoxProps } from "@/types/Types";
 import { getPrototypeForMessage } from "@/api/FrontEndAPI";
 
 /**
@@ -10,18 +12,9 @@ import { getPrototypeForMessage } from "@/api/FrontEndAPI";
  * Renders a scrollable list of messages with support for Markdown formatting,
  * code highlighting, and automatic scrolling to the most recent message.
  * Messages are styled differently based on their sender (user vs LLM).
- * 
- * @component
- * @param {Object} props - Component properties
- * @param {Array<Object>} props.sentMessages - Array of message objects to display
- * @param {string} props.sentMessages[].role - The sender of the message ('User' or 'LLM')
- * @param {string} props.sentMessages[].content - The message content, supports Markdown
- * @param {string} props.sentMessages[].timestamp - ISO timestamp string for the message
- * 
- * @returns {JSX.Element} A scrollable container with formatted chat messages
  */
-export function MessageBox({ sentMessages, onLoadPrototype }) {
-    const recentMessageRef = useRef(null);
+export function MessageBox({ sentMessages, onLoadPrototype, onMessageClick }: MessageBoxProps): JSX.Element {
+    const recentMessageRef = useRef<HTMLDivElement>(null);
 
     // Scroll to the most recent message
     useEffect(() => {
@@ -30,8 +23,8 @@ export function MessageBox({ sentMessages, onLoadPrototype }) {
         }
     }, [sentMessages]);
     
-    const handleMessageClick = async (msg) => {
-        if (msg.role !== "LLM" || !msg.conversationId) return;
+    const handleMessageClick = async (msg: Message): Promise<void> => {
+        if (msg.role !== "LLM" || !msg.conversationId || !msg.id) return;
         
         try {
             const prototypeFiles = await getPrototypeForMessage(msg.conversationId, msg.id);
@@ -40,6 +33,29 @@ export function MessageBox({ sentMessages, onLoadPrototype }) {
             }
         } catch (error) {
             console.error("Error loading prototype:", error);
+        }
+    };
+
+    // Create the components object outside the render function
+    const markdownComponents: Components = {
+        code({ inline, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) {
+            return inline ? (
+                <code
+                    className="inline-block bg-muted px-1 py-0.5 rounded font-mono font-semibold text-sm"
+                    {...props}
+                >
+                    {children}
+                </code>
+            ) : (
+                <pre className="whitespace-pre-wrap pt-2">
+                    <code
+                        className="block bg-muted rounded p-2 font-mono text-sm"
+                        {...props}
+                    >
+                        {children}
+                    </code>
+                </pre>
+            );
         }
     };
 
@@ -53,42 +69,26 @@ export function MessageBox({ sentMessages, onLoadPrototype }) {
                         className={`bg-gray-800/40 text-white rounded-xl border border-gray-700/50 ${
                             msg.role === "LLM" ? "cursor-pointer hover:border-blue-400 hover:bg-gray-700/40" : ""
                         }`}
-                        onClick={() => msg.role === "LLM" ? handleMessageClick(msg) : null}
+                        onClick={() => {
+                            if (msg.role === "LLM") {
+                                onMessageClick?.(msg); 
+                                handleMessageClick(msg);
+                            }
+                        }}
                     >
-
+                        {/* Display a code icon for LLM messages */}
                         {msg.role === "LLM" && (
                             <div className="absolute -top-1 -left-1 bg-blue-500 rounded-full p-1 text-xs text-white">
                                 <span role="img" aria-label="code">💻</span>
                             </div>
                         )}
                         
-
-                        <MessageBubbleContent>
+                        <MessageBubbleContent data-testid='message-bubble'>
                             {msg.content && (
                                 <Markdown
                                     key={index}
                                     remarkPlugins={[remarkGfm]} 
-                                    components={{
-                                        code({ node, inline, className, children, ...props }) {
-                                            return inline ? (
-                                                <code
-                                                    className="inline-block bg-muted px-1 py-0.5 rounded font-mono font-semibold text-sm"
-                                                    {...props}
-                                                >
-                                                    {children}
-                                                </code>
-                                                ) : (
-                                                <pre className="whitespace-pre-wrap pt-2">
-                                                    <code
-                                                    className="block bg-muted rounded p-2 font-mono text-sm"
-                                                    {...props}
-                                                    >
-                                                    {children}
-                                                    </code>
-                                                </pre>
-                                            );
-                                        }
-                                    }}
+                                    components={markdownComponents}
                                 >
                                     {msg.content}
                                 </Markdown>
