@@ -159,7 +159,7 @@ class PromptingMain(
             val llmResponse =
                 PrototypeInteractor.prompt(prompt, model, options)?.let { it }
                     ?: throw PromptException("LLM did not respond!")
-            PromptingTools.formatResponseJson(llmResponse.response)
+            PromptingTools.formatResponseJson(llmResponse.response ?: throw PromptException("LLM response was null!"))
         }
 
     /**
