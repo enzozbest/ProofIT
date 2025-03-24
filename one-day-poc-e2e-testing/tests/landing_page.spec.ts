@@ -1,4 +1,5 @@
 import {test, expect, Locator, Page} from '@playwright/test';
+import {loginWithCognitoViaFlow} from "./auth-helpers";
 
 //Unauthenticated Landing Page
 test('Landing page has the correct title', async ({ page }) => {
@@ -139,6 +140,11 @@ test("Pressing 'Enter' with text in the input box unauthenticated redirects to t
 })
 
 //Authenticated Landing Page
+test("Authenticated landing page has the correct title", async ({ page }) => {
+    await page.goto("http://localhost:5173")
+    await loginWithCognitoViaFlow(page)
+    await expect(page).toHaveTitle("ProofIT")
+})
 
 
 
