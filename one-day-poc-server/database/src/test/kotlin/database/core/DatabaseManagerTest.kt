@@ -17,6 +17,7 @@ class DatabaseManagerTest {
     @BeforeAll
     fun setup() {
         // Ensure container is started and environment file is created with correct connection details
+        MockEnvironment.postgresContainer.start()
         generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }

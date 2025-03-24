@@ -27,6 +27,7 @@ class TemplateRepositoryTest {
 
     @BeforeEach
     fun setUp() {
+        MockEnvironment.postgresContainer.start()
         EnvironmentLoader.reset()
         MockEnvironment.generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(MockEnvironment.ENV_FILE)
