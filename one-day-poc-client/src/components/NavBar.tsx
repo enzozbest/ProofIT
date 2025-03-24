@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '@/components/Logo';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * NavBar component provides the application's top navigation bar with authentication controls.
@@ -14,6 +15,12 @@ import Logo from '@/components/Logo';
  */
 const NavBar: React.FC = () => {
   const { isAuthenticated, login, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="fixed top-2 left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50">
@@ -21,7 +28,7 @@ const NavBar: React.FC = () => {
       <div className="flex gap-2">
         {isAuthenticated ? (
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="border-2 border-white bg-transparent px-6 py-2 rounded-full hover:bg-white hover:text-[#731ecb] transition"
           >
             Log Out
