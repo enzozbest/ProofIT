@@ -25,7 +25,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
       login(promptText);
       return;
     }
-    navigate('/generate', { state: { initialMessage: promptText } });
+    navigate('/generate', { state: { initialMessage: promptText, isPredefined: true } });
   }
 
   return (

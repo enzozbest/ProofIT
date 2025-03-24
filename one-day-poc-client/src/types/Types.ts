@@ -122,6 +122,7 @@ export interface MessagePayload {
     time: string;
     prompt: string;
     conversationId?: string;
+    predefined: boolean;
 }
 
 /**
@@ -137,6 +138,7 @@ export interface ChatScreenProps {
     setPrototype: Dispatch<SetStateAction<boolean>>;
     setPrototypeFiles: Dispatch<SetStateAction<FileTree>>;
     initialMessage? : string | null;
+    isPredefined?: boolean;
 }
 
 /**
@@ -164,7 +166,7 @@ export interface ChatHookReturn {
     message: string;
     setMessage: (message: string) => void;
     sentMessages: Message[];
-    handleSend: (messageToSend?: string) => Promise<void>;
+    handleSend: (messageToSend?: string, isPredefined?: boolean) => Promise<void>;
     errorMessage: string | null;
     setErrorMessage: (error:string | null) => void;
 }

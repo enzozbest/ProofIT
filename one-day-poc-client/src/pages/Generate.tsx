@@ -27,6 +27,7 @@ export default function Page() {
   const [showPrototype, setPrototype] = useState<boolean>(true);
   const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
+  const [isPredefined, setIsPredefined] = useState<boolean>(false);
 
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
@@ -58,6 +59,7 @@ export default function Page() {
             setPrototype={setPrototype}
             setPrototypeFiles={setPrototypeFiles}
             initialMessage={initialMessage}
+            isPredefined={isPredefined}
           />
         </div>
         <div className="flex h-full items-center justify-center">
