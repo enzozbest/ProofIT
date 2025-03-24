@@ -89,4 +89,82 @@ class GetHistoryTest : BaseAuthenticationServer() {
             val response = client.get(GET)
             assertEquals(HttpStatusCode.NotAcceptable, response.status)
         }
+
+
+    @Test
+    fun `Test ConversationHistory data class`() =
+        testApplication {
+            val conversation1 = Conversation(
+                id = "123",
+                name = "Chat 1",
+                lastModified = "2024-03-24T12:00:00Z",
+                messageCount = 5,
+                userId = "user_123"
+            )
+
+            val conversation2 = Conversation(
+                id = "456",
+                name = "Chat 2",
+                lastModified = "2024-03-25T14:00:00Z",
+                messageCount = 10,
+                userId = "user_456"
+            )
+
+            val conversationHistory = ConversationHistory(listOf(conversation1, conversation2))
+
+            assertEquals(2, conversationHistory.conversations.size)
+            assertEquals("123", conversationHistory.conversations[0].id)
+            assertEquals("Chat 1", conversationHistory.conversations[0].name)
+            assertEquals("user_123", conversationHistory.conversations[0].userId)
+        }
+
+    @Test
+    fun `Test Conversation data class`() =
+        testApplication {
+            val conversation = Conversation(
+                id = "123",
+                name = "Test Conversation",
+                lastModified = "2024-03-24T12:00:00Z",
+                messageCount = 10,
+                userId = "user_123"
+            )
+
+            assertEquals("123", conversation.id)
+            assertEquals("Test Conversation", conversation.name)
+            assertEquals("2024-03-24T12:00:00Z", conversation.lastModified)
+            assertEquals(10, conversation.messageCount)
+            assertEquals("user_123", conversation.userId)
+    }
+
+
+    @Test
+    fun `Test MessageDto data class`() =
+        testApplication {
+            val message = MessageDto(
+                id = "123",
+                conversationId="1",
+                timestamp = "2024-03-24T12:00:00Z",
+                content = "Hello",
+                senderId = "1"
+            )
+
+            assertEquals("123", message.id)
+            assertEquals("1", message.conversationId)
+            assertEquals("2024-03-24T12:00:00Z", message.timestamp)
+            assertEquals("Hello", message.content)
+            assertEquals("1", message.senderId)
+        }
+
+
+    @Test
+    fun `Test PrototypeDto data class`() =
+        testApplication {
+            val prototype = PrototypeDto(
+                files = "New prototype",
+            )
+
+            assertEquals("New prototype", prototype.files)
+        }
+
+
 }
