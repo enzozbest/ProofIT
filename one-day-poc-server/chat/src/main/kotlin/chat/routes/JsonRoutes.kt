@@ -12,9 +12,8 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
-import prompting.PromptingMain
-import prompting.ServerResponse
-import prototype.PredefinedPrototypeService
+import prompting.*
+import java.time.Instant
 
 private lateinit var promptingMainInstance: PromptingMain
 
@@ -80,7 +79,7 @@ private suspend fun handleJsonRequest(
 
     try {
         val response = if (request.predefined) {
-            PredefinedPrototypeService.getPrototypeForPrompt(request.prompt)
+            PredefinedPrototypes.run(request.prompt)
         } else {
             getPromptingMain().run(request.prompt)
         }
@@ -117,6 +116,52 @@ private suspend fun handleJsonRequest(
         )
     }
 }
+
+/*
+/**
+ * Handles predefined prompt requests by loading the appropriate template
+ */
+private suspend fun handlePredefinedPrompt(request: Request): ServerResponse {
+    val response = PredefinedPrototypes.run(request.prompt)
+    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
+
+    response.prototype?.let { prototypeResponse ->
+        val prototype = Prototype(
+            messageId = savedMessage.id,
+            filesJson = prototypeResponse.files.toString(),
+            version = 1,
+            isSelected = true,
+        )
+        storePrototype(prototype)
+    }
+
+    return response.copy(
+        chat = response.chat.copy(messageId = savedMessage.id)
+    )
+}
+
+/**
+ * Handles LLM-based prompt requests
+ */
+private suspend fun handleLLMPrompt(request: Request): ServerResponse {
+    val response = getPromptingMain().run(request.prompt)
+    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
+
+    response.prototype?.let { prototypeResponse ->
+        val prototype = Prototype(
+            messageId = savedMessage.id,
+            filesJson = prototypeResponse.files.toString(),
+            version = 1,
+            isSelected = true,
+        )
+        storePrototype(prototype)
+    }
+
+    return response.copy(
+        chat = response.chat.copy(messageId = savedMessage.id)
+    )
+}
+ */
 
 private suspend fun saveMessage(
     conversationId: String,
