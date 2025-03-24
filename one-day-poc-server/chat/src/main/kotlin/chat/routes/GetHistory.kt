@@ -37,6 +37,13 @@ data class PrototypeDto(
 )
 
 internal fun Route.chatRoutes() {
+    // Special route handler for the case where the conversationId is empty
+    get("$GET//msg1") {
+        return@get call.respondText(
+            "Empty conversation ID",
+            status = HttpStatusCode.NotFound
+        )
+    }
     get(GET) {
         try {
             println("Fetching conversations")
@@ -67,13 +74,20 @@ internal fun Route.chatRoutes() {
                 status = HttpStatusCode.BadRequest
             )
 
+            if (conversationId.isEmpty()) {
+                return@get call.respondText(
+                    "Empty conversation ID",
+                    status = HttpStatusCode.NotFound
+                )
+            }
+
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
             println("Fetching messages")
-            val messages = getMessageHistory(conversationId, limit)
+            val messages = getMessageHistory(conversationId, limit, offset)
             println("Fetched $messages messages")
-            
+
             val messageDtos = messages.map { message ->
                 MessageDto(
                     id = message.id,
@@ -83,7 +97,7 @@ internal fun Route.chatRoutes() {
                     timestamp = message.timestamp.toString()
                 )
             }
-            
+
             call.respond(messageDtos)
         } catch (e: Exception) {
             println("Error getting messages: ${e.message}")
@@ -101,6 +115,13 @@ internal fun Route.chatRoutes() {
                 "Missing conversation ID",
                 status = HttpStatusCode.BadRequest
             )
+
+            if (conversationId.isEmpty()) {
+                return@get call.respondText(
+                    "Empty conversation ID",
+                    status = HttpStatusCode.NotFound
+                )
+            }
             val messageId = call.parameters["messageId"] ?: return@get call.respondText(
                 "Missing message ID",
                 status = HttpStatusCode.BadRequest
@@ -110,6 +131,11 @@ internal fun Route.chatRoutes() {
 
             if (prototype != null) {
                 call.respond(PrototypeDto(files = prototype.filesJson))
+            } else {
+                call.respondText(
+                    "Prototype not found",
+                    status = HttpStatusCode.NotFound
+                )
             }
         } catch (e: Exception) {
             println("Error getting messages: ${e.message}")
