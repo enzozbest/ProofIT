@@ -26,7 +26,7 @@ class PoCDatabaseTest {
 
     @AfterEach
     fun tearDown() {
-        MockEnvironment.postgresContainer.stop()
+        MockEnvironment.stopContainer()
     }
 
     @Test
