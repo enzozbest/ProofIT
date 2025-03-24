@@ -14,6 +14,7 @@ import io.ktor.server.routing.post
 import kotlinx.serialization.json.Json
 import prompting.PromptingMain
 import prompting.ServerResponse
+import prototype.PredefinedPrototypeService
 
 private lateinit var promptingMainInstance: PromptingMain
 
@@ -79,7 +80,7 @@ private suspend fun handleJsonRequest(
 
     try {
         val response = if (request.predefined) {
-            getHardcodedPrototype(request.prompt)
+            PredefinedPrototypeService.getPrototypeForPrompt(request.prompt)
         } else {
             getPromptingMain().run(request.prompt)
         }
