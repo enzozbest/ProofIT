@@ -78,7 +78,11 @@ private suspend fun handleJsonRequest(
     saveMessage(request.conversationId, request.userID, request.prompt)
 
     try {
-        val response = getPromptingMain().run(request.prompt)
+        val response = if (request.predefined) {
+            getHardcodedPrototype(request.prompt)
+        } else {
+            getPromptingMain().run(request.prompt)
+        }
 
         val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
         response.prototype?.let { prototypeResponse ->
