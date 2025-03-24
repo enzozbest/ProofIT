@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import Markdown from "react-markdown";
-import { Components } from "react-markdown/lib/ast-to-react";
+import { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MessageBubble, MessageBubbleContent, MessageBubbleTimestamp } from "./MessageBubble";
 import { Message, FileTree, MessageBoxProps } from "@/types/Types";
@@ -13,7 +13,7 @@ import { getPrototypeForMessage } from "@/api/FrontEndAPI";
  * code highlighting, and automatic scrolling to the most recent message.
  * Messages are styled differently based on their sender (user vs LLM).
  */
-export function MessageBox({ sentMessages, onLoadPrototype }: MessageBoxProps): JSX.Element {
+export function MessageBox({ sentMessages, onLoadPrototype, onMessageClick }: MessageBoxProps): JSX.Element {
     const recentMessageRef = useRef<HTMLDivElement>(null);
 
     // Scroll to the most recent message
@@ -38,7 +38,7 @@ export function MessageBox({ sentMessages, onLoadPrototype }: MessageBoxProps): 
 
     // Create the components object outside the render function
     const markdownComponents: Components = {
-        code({ node, inline, className, children, ...props }) {
+        code({ inline, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) {
             return inline ? (
                 <code
                     className="inline-block bg-muted px-1 py-0.5 rounded font-mono font-semibold text-sm"
@@ -69,7 +69,12 @@ export function MessageBox({ sentMessages, onLoadPrototype }: MessageBoxProps): 
                         className={`bg-gray-800/40 text-white rounded-xl border border-gray-700/50 ${
                             msg.role === "LLM" ? "cursor-pointer hover:border-blue-400 hover:bg-gray-700/40" : ""
                         }`}
-                        onClick={() => msg.role === "LLM" ? handleMessageClick(msg) : null}
+                        onClick={() => {
+                            if (msg.role === "LLM") {
+                                onMessageClick?.(msg); 
+                                handleMessageClick(msg);
+                            }
+                        }}
                     >
                         {/* Display a code icon for LLM messages */}
                         {msg.role === "LLM" && (
@@ -78,7 +83,7 @@ export function MessageBox({ sentMessages, onLoadPrototype }: MessageBoxProps): 
                             </div>
                         )}
                         
-                        <MessageBubbleContent>
+                        <MessageBubbleContent data-testid='message-bubble'>
                             {msg.content && (
                                 <Markdown
                                     key={index}
