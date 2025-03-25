@@ -42,7 +42,5 @@ class TemplateRepository(
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 TemplateEntity.Companion.findById(id)?.toTemplate()
             }
-        }.onFailure { e ->
-            error("Error retrieving template with ID $id: ${e.message}")
         }.getOrNull()
 }
