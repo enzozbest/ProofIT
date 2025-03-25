@@ -36,7 +36,6 @@ export function MessageBox({ sentMessages, onLoadPrototype, onMessageClick }: Me
         }
     };
 
-    // Create the components object outside the render function
     const markdownComponents: Components = {
         code({ inline, className, children, ...props }: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) {
             return inline ? (
@@ -70,14 +69,14 @@ export function MessageBox({ sentMessages, onLoadPrototype, onMessageClick }: Me
                             msg.role === "LLM" ? "cursor-pointer hover:border-blue-400 hover:bg-gray-700/40" : ""
                         }`}
                         onClick={() => {
-                            if (msg.role === "LLM") {
+                            if (!msg.isError && msg.role === "LLM") {
                                 onMessageClick?.(msg); 
                                 handleMessageClick(msg);
                             }
                         }}
                     >
                         {/* Display a code icon for LLM messages */}
-                        {msg.role === "LLM" && (
+                        {!msg.isError && msg.role === "LLM" && (
                             <div className="absolute -top-1 -left-1 bg-blue-500 rounded-full p-1 text-xs text-white">
                                 <span role="img" aria-label="code">💻</span>
                             </div>

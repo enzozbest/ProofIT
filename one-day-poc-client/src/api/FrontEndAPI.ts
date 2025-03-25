@@ -122,6 +122,7 @@ export async function getPrototypeForMessage(conversationId: string, messageId: 
  * @param message - The user message to send to the server
  * @param onChatResponse - Callback function that handles chat response data
  * @param onPrototypeResponse - Callback function that handles prototype response data
+ * @param onError - Optional callback function that handles error messages
  * 
  * @returns A promise that resolves when the API call is complete
  * 
@@ -139,14 +140,16 @@ export async function getPrototypeForMessage(conversationId: string, messageId: 
  * sendChatMessage(
  *   message,
  *   (chatResponse) => console.log('Chat response:', chatResponse),
- *   (prototypeResponse) => console.log('Prototype response:', prototypeResponse)
+ *   (prototypeResponse) => console.log('Prototype response:', prototypeResponse),
+ *   (errorMessage) => console.error('Error:', errorMessage)
  * );
  * ```
  */
 export async function sendChatMessage(
   message: Message,
   onChatResponse: ChatCallback,
-  onPrototypeResponse: PrototypeCallback
+  onPrototypeResponse: PrototypeCallback,
+  onError?: (message: string) => void
 ): Promise<void> {
   try {
     if (!message.conversationId) {
@@ -170,6 +173,11 @@ export async function sendChatMessage(
     });
 
     if (!response.ok) {
+      if (response.status === 500) {
+        const errorData = await response.text();
+        if (onError) onError("There was an error, please try again");
+        throw new Error(errorData);
+      }
       throw new Error('Network response was not ok');
     }
 
@@ -186,6 +194,7 @@ export async function sendChatMessage(
     }
   } catch (error) {
     console.error('API Error:', error);
+    if (onError) onError("There was an error, please try again");
     throw error;
   }
 }
