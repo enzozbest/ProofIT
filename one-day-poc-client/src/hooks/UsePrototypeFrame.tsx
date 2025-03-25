@@ -131,9 +131,12 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   const mountFiles = async () => {
     if (!webcontainerInstance || !files) return;
     
+    console.log('Files to normalise:', files);
+
     setStatus('Normalising files...');
     const normalisedFiles = normaliseFiles(files);
     
+    console.log('Files to mount: ', normalisedFiles);
     setStatus('Mounting files...');
     await webcontainerInstance.mount(normalisedFiles);
     console.log('Files mounted successfully');
