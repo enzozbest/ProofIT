@@ -2,7 +2,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { vi, test, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPage from '../../pages/LandingPage.js';
-import userEvent from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/AuthContext.tsx';
 import * as ConversationContext from '@/contexts/ConversationContext.tsx';
 import React from 'react';
