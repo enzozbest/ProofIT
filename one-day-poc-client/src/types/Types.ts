@@ -175,13 +175,9 @@ export interface ChatHookReturn {
  * Props interface for the PrototypeFrame component
  * 
  * @property {FileTree} files - File definitions to render in the prototype
- * @property {string} [width='100%'] - Optional width for the prototype frame
- * @property {string} [height='100%'] - Optional height for the prototype frame
  */
 export interface PrototypeFrameProps {
     files: FileTree;
-    width?: string;
-    height?: string;
 }
 
 export interface Conversation {

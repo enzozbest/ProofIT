@@ -4,11 +4,8 @@ import { useWebContainer } from './UseWebContainer';
 import { normaliseFiles } from './FileHandler';
 import { WebContainerProcess } from '@webcontainer/api';
 
-const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
-  files,
-  width = '100%',
-  height = '100%',
-}) => {
+const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
+  const { files } = props;
   const [url, setUrl] = useState('');
   const [status, setStatus] = useState('Initialising...');
   const { instance: webcontainerInstance, loading, error } = useWebContainer();
@@ -163,30 +160,11 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({
     }
   }, [webcontainerInstance, files]);
 
-  return (
-    <div
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <div style={{ marginBottom: '10px' }}>Status: {status}</div>
-      <iframe
-        ref={iframeRef}
-        src={url}
-        style={{
-          flexGrow: 1,
-          width: '100%',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-        }}
-        title="Prototype Preview"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
-      />
-    </div>
-  );
+  return {
+    status,
+    iframeRef,
+    url
+  };
 };
 
-export default PrototypeFrame;
+export default usePrototypeFrame;

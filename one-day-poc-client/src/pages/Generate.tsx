@@ -1,5 +1,6 @@
 import ChatScreen from '../components/chat/ChatScreen';
-import PrototypeFrame from '@/hooks/PrototypeFrame';
+import PrototypeFrame from '../components/prototype/PrototypeFrame';
+import PrototypeWindow from '@/components/prototype/PrototypeWindow';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
@@ -73,13 +74,16 @@ export default function Page() {
             />
           </button>
         </div>
-        <div className="flex-1 h-full rounded-xl bg-white/15 backdrop-blur-lg">
+        <div className="flex-1 h-full">
+          <PrototypeWindow
+            >
           {showPrototype ? (
             <PrototypeFrame
               files={prototypeFiles}
               data-testid="prototype-frame"
             />
           ) : null}
+          </PrototypeWindow>
         </div>
       </SidebarWrapper>
     </div>
