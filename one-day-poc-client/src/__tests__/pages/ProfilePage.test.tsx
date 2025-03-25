@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter, useNavigate } from 'react-router-dom';
 import ProfilePage from '../../pages/ProfilePage';
 import UserService from '../../services/UserService';
@@ -109,7 +109,7 @@ describe('ProfilePage', () => {
 
     await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
 
-    const backButton = screen.getByTestId('back-button'); // Assuming ArrowLeft is an SVG
+    const backButton = screen.getByTestId('back-button'); 
     await userEvent.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith(-1);

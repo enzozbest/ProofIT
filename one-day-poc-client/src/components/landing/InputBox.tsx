@@ -17,7 +17,7 @@ import { useConversation } from '../../contexts/ConversationContext';
  * 
  * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
  */
-const InputBox: FC = () => {
+const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
