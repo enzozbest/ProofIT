@@ -243,7 +243,6 @@ class ChatRepository(private val db: Database){
                         (PrototypeTable.messageId inList messageIds) and
                         (PrototypeTable.isSelected eq true)
                     }.sortedByDescending { it.timestamp }
-                    .drop(1)
                     .firstOrNull()
                     ?.toPrototype()
                 }
