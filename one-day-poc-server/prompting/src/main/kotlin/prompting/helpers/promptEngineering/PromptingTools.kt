@@ -129,6 +129,7 @@ object PromptingTools {
         userPrompt: String,
         requirements: String,
         templates: List<String>,
+        previousGeneration: String ?= null,
     ): String {
         val systemMessage =
             """
@@ -281,6 +282,15 @@ object PromptingTools {
             Now the model must produce a response.
             """.trimIndent()
 
+        val prevCodeMessage =
+            """
+            The model must consider the current code when generating new code.
+            If the code is related and useful, the model must base the new code on this and incorporate existing features.
+            This is the current code:
+            $previousGeneration
+            """.trimIndent()
+
+
         val messagesArray =
             buildJsonArray {
                 // Main system constraints
@@ -304,6 +314,16 @@ object PromptingTools {
                         put("content", functionalRequirementsMessage)
                     },
                 )
+                // Previous code message
+                if ( previousGeneration != null ) {
+                    println("PREVIOUS CODE MESSAGE IS NOT NULL IN PROMPTING TOOLS")
+                    add(
+                        buildJsonObject {
+                            put("role", "system")
+                            put("content", prevCodeMessage)
+                        },
+                    )
+                }
                 // Additional system-level templates
                 add(
                     buildJsonObject {
