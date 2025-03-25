@@ -5,7 +5,6 @@ import { NavUser } from '@/components/sidebar/NavUser';
 import { useNavigate } from 'react-router-dom';
 import { useSidebar } from '@/components/ui/Sidebar';
 
-// Mock the hooks and components used by NavUser
 vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(),
 }));
@@ -82,23 +81,19 @@ vi.mock('@radix-ui/react-icons', () => ({
   CaretSortIcon: () => <div data-testid="caret-sort-icon">CaretSortIcon</div>,
 }));
 
-// Store original fetch
 const originalFetch = window.fetch;
 
 beforeEach(() => {
   vi.resetAllMocks();
   window.fetch = vi.fn();
 
-  // Set up window.location mock
   Object.defineProperty(window, 'location', {
     writable: true,
     value: { href: '' },
   });
 
-  // Mock the useSidebar hook
   useSidebar.mockReturnValue({ isMobile: false });
 
-  // Mock the useNavigate hook
   useNavigate.mockReturnValue(vi.fn());
 });
 
@@ -158,7 +153,6 @@ test('Navigates to profile page when Account is clicked', async () => {
     expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
   });
 
-  // Find all dropdown menu items and click on the Account one
   const accountItem = screen.getAllByTestId('dropdown-menu-item')[0];
   fireEvent.click(accountItem);
 
@@ -224,7 +218,6 @@ test('Handles logout error gracefully', async () => {
     expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
   });
 
-  // Find the Log out menu item
   const logoutItems = screen.getAllByTestId('dropdown-menu-item');
   const logoutItem = logoutItems[logoutItems.length - 1];
   fireEvent.click(logoutItem);

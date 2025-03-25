@@ -5,14 +5,12 @@ import { useWebContainer } from '../../hooks/UseWebContainer';
 import { FileTree } from '../../types/Types';
 import React from 'react';
 
-// Mock the `useWebContainer` hook
 vi.mock('../../hooks/UseWebContainer', () => ({
   useWebContainer: vi.fn(),
 }));
 
 describe('PrototypeFrame Component', () => {
   it('renders the iframe when WebContainer is ready', () => {
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: vi.fn(), mount: vi.fn(), spawn: vi.fn() },
       loading: false,
@@ -21,23 +19,19 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={{}} />);
 
-    // Check if the iframe is rendered
     const iframe = screen.getByTitle('Prototype Preview');
     expect(iframe).toBeInTheDocument();
   });
 
   it('displays the status message correctly', () => {
-    // Mock the `useWebContainer` hook to simulate the initial state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: null,
       loading: false,
       error: null,
     });
 
-    // Render the component
     render(<PrototypeFrame files={{}} />);
 
-    // Assert that the initial status message is displayed
     expect(
       screen.getByText((content) => content.includes('Status: Initialising...'))
     ).toBeInTheDocument();
@@ -47,7 +41,6 @@ describe('PrototypeFrame Component', () => {
     const mockMount = vi.fn();
     const mockOn = vi.fn();
 
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: mockOn, mount: mockMount, spawn: vi.fn() },
       loading: false,
@@ -60,10 +53,8 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={files} />);
 
-    // Wait for the component to process the files
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Verify that the `mount` function is called with normalized files
     expect(mockMount).toHaveBeenCalledWith({
       'index.js': { file: { contents: 'console.log("Hello, world!");' } },
     });
@@ -73,7 +64,6 @@ describe('PrototypeFrame Component', () => {
     const mockMount = vi.fn();
     const mockOn = vi.fn();
 
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: mockOn, mount: mockMount, spawn: vi.fn() },
       loading: false,
@@ -87,10 +77,8 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={files} />);
 
-    // Wait for the component to process the files
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Verify that the `mount` function is called with the normalized files
     expect(mockMount).toHaveBeenCalledWith({
       'index.js': { file: { contents: 'console.log("Hello, world!");' } },
       'style.css': { file: { contents: 'body { background: white; }' } },
@@ -101,7 +89,6 @@ describe('PrototypeFrame Component', () => {
     const mockMount = vi.fn();
     const mockOn = vi.fn();
 
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: mockOn, mount: mockMount, spawn: vi.fn() },
       loading: false,
@@ -118,10 +105,8 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={files} />);
 
-    // Wait for the component to process the files
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Verify that the `mount` function is called with the normalized files
     expect(mockMount).toHaveBeenCalledWith({
       src: {
         directory: {
@@ -148,7 +133,6 @@ describe('PrototypeFrame Component', () => {
     const mockOn = vi.fn();
     const mockSpawn = vi.fn();
 
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: mockOn, mount: mockMount, spawn: mockSpawn },
       loading: false,
@@ -161,10 +145,8 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={files} />);
 
-    // Wait for the component to process the files
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Verify that the `mount` function is called with normalized files
     expect(mockMount).toHaveBeenCalledWith({
       'index.js': { file: { contents: 'console.log("Hello, world!");' } },
     });
@@ -174,7 +156,6 @@ describe('PrototypeFrame Component', () => {
     const mockMount = vi.fn();
     const mockOn = vi.fn();
 
-    // Mock the `useWebContainer` hook to simulate a ready state
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: { on: mockOn, mount: mockMount, spawn: vi.fn() },
       loading: false,
@@ -203,10 +184,8 @@ describe('PrototypeFrame Component', () => {
 
     render(<PrototypeFrame files={files} />);
 
-    // Wait for the component to process the files
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Verify that the `mount` function is called with the normalized files
     expect(mockMount).toHaveBeenCalledWith({
       src: {
         directory: {
@@ -229,7 +208,6 @@ describe('PrototypeFrame Component', () => {
   });
 
   it('sets iframe sandbox attributes correctly', async () => {
-    // Create sandbox tokens array for tracking
     const sandboxTokens: string[] = [];
     const addSandboxMock = vi.fn((token: string) => {
       if (!sandboxTokens.includes(token)) {
@@ -237,7 +215,6 @@ describe('PrototypeFrame Component', () => {
       }
     });
 
-    // Create a mock iframe with sandbox property
     const mockIframe = {
       sandbox: {
         add: addSandboxMock,
@@ -245,13 +222,10 @@ describe('PrototypeFrame Component', () => {
       },
     };
 
-    // Mock useRef to return our custom iframe
     vi.spyOn(React, 'useRef').mockReturnValue({ current: mockIframe } as any);
 
-    // Create a mock for spawn that resolves appropriately
     const mockSpawn = vi.fn().mockImplementation(() => {
-      // When spawn is called, simulate the iframe sandbox being modified
-      // This mimics the component behavior
+
       mockIframe.sandbox.add('allow-scripts');
       mockIframe.sandbox.add('allow-same-origin');
       mockIframe.sandbox.add('allow-forms');
@@ -263,7 +237,6 @@ describe('PrototypeFrame Component', () => {
       };
     });
 
-    // Mock the WebContainer instance
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: {
         on: vi.fn(),
@@ -274,21 +247,16 @@ describe('PrototypeFrame Component', () => {
       error: null,
     });
 
-    // Render with some basic files
     render(
       <PrototypeFrame
         files={{ 'index.js': { file: { contents: 'console.log("hello");' } } }}
       />
     );
 
-    // Allow all promises in the component to resolve
     await new Promise(process.nextTick);
 
-    // Verify that sandbox attributes were added
-    // We directly check if mockSpawn was called, which would trigger our sandbox additions
     expect(mockSpawn).toHaveBeenCalled();
 
-    // Check that our sandbox tokens were added
     expect(sandboxTokens).toContain('allow-scripts');
     expect(sandboxTokens).toContain('allow-same-origin');
     expect(sandboxTokens).toContain('allow-forms');
@@ -296,15 +264,13 @@ describe('PrototypeFrame Component', () => {
   });
 
   it('handles Error objects correctly in error handling', async () => {
-    // Mock console.error to avoid cluttering test output
+
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Mock a failed mount operation
     const mockMount = vi
       .fn()
       .mockRejectedValue(new Error('Failed to mount files'));
 
-    // Mock the WebContainer instance
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: {
         on: vi.fn(),
@@ -321,15 +287,12 @@ describe('PrototypeFrame Component', () => {
       />
     );
 
-    // We need to wait for the asynchronous operations to complete
-    // Using findByText which will retry until it finds the element or times out
     const statusElement = await screen.findByText(
       /Status:.*Error:/i,
       {},
       { timeout: 3000 }
     );
 
-    // Verify the error message is displayed correctly
     expect(statusElement.textContent).toContain('Failed to mount files');
   });
 
@@ -423,14 +386,12 @@ describe('PrototypeFrame Component', () => {
   });
 
   it('handles object errors with message property correctly', async () => {
-    // Mock console.error to avoid cluttering test output
+
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    // Mock a failed mount operation with an object that has a message property
     const objectError = { message: 'Invalid file format', code: 422 };
     const mockMount = vi.fn().mockRejectedValue(objectError);
 
-    // Mock the WebContainer instance
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: {
         on: vi.fn(),
@@ -447,14 +408,12 @@ describe('PrototypeFrame Component', () => {
       />
     );
 
-    // Wait for the error message to be displayed
     const statusElement = await screen.findByText(
       /Status:.*Error:/i,
       {},
       { timeout: 3000 }
     );
 
-    // Verify the error message is displayed correctly
     expect(statusElement.textContent).toContain('Invalid file format');
   });
 
@@ -464,7 +423,7 @@ describe('PrototypeFrame Component', () => {
     const mockSpawn = vi.fn().mockImplementation((command, args) => {
       if (command === 'npm' && args[0] === 'install') {
         return {
-          exit: Promise.resolve(1), // Non-zero exit code indicates failure
+          exit: Promise.resolve(1), 
           output: { pipeTo: vi.fn() },
         };
       }
@@ -477,7 +436,7 @@ describe('PrototypeFrame Component', () => {
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: {
         on: vi.fn(),
-        mount: vi.fn().mockResolvedValue(undefined), // Mount succeeds
+        mount: vi.fn().mockResolvedValue(undefined), 
         spawn: mockSpawn,
       },
       loading: false,
@@ -674,7 +633,7 @@ describe('PrototypeFrame Component', () => {
     });
 
     const files: FileTree = {
-      'empty-file.txt': { file: {} }, // Empty file with no contents
+      'empty-file.txt': { file: {} }, 
       'normal-file.js': {
         file: { contents: 'console.log("I have content");' },
       },
