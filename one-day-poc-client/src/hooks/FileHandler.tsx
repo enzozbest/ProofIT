@@ -29,7 +29,17 @@ export const normaliseFiles = (files: Record<string, FileData>): NormalisedFiles
       }
     }
 
-    // Regular file processing
+    if (typeof fileData === 'string') {
+      console.log(`Processing string content for: ${path}`);
+      if (path.includes('/')) {
+        const { directory, fileName } = createDirectoryStructure(path, result);
+        directory[fileName] = { file: { contents: fileData } };
+      } else {
+        result[path] = { file: { contents: fileData } };
+      }
+      return;
+    }
+
     if (isFileWithContents(fileData)) {
       processFileWithContents(path, fileData, result);
     } else if (isFileEntry(fileData)) {
