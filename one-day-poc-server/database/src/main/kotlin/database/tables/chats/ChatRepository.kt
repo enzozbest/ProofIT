@@ -226,4 +226,30 @@ class ChatRepository(private val db: Database){
             null
         }
     }
+
+    suspend fun getPreviousPrototype(conversationId: String) : Prototype? {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val convId = UUID.fromString(conversationId)
+
+                val messageIds = ChatMessageEntity.find {
+                    ChatMessageTable.conversationId eq convId
+                }.map { it.id }
+
+                if (messageIds.isEmpty()) {
+                    null
+                } else {
+                    PrototypeEntity.find {
+                        (PrototypeTable.messageId inList messageIds) and
+                        (PrototypeTable.isSelected eq true)
+                    }.sortedByDescending { it.timestamp }
+                    .firstOrNull()
+                    ?.toPrototype()
+                }
+            }
+        } catch (e: Exception) {
+            println("Error retrieving previous prototype: ${e.message}")
+            null
+        }
+    }
 }

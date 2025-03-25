@@ -6,7 +6,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import chat.storage.*
-import io.ktor.server.request.*
 
 @Serializable
 data class Conversation(

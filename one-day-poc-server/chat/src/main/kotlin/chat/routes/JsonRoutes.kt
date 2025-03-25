@@ -76,27 +76,19 @@ private suspend fun handleJsonRequest(
 
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
     saveMessage(request.conversationId, request.userID, request.prompt)
-
+    val previousGeneration = getPreviousPrototype(request.conversationId)?.filesJson
+    if (previousGeneration != null) {
+        println("Found previous generation: $previousGeneration")
+    } else {
+        println("No previous generation found")
+    }
     try {
-        val response = getPromptingMain().run(request.prompt)
+        val response = getPromptingMain().run(request.prompt, previousGeneration)
 
-        val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-        response.prototype?.let { prototypeResponse ->
-            val prototype =
-                Prototype(
-                    messageId = savedMessage.id,
-                    filesJson = prototypeResponse.files.toString(),
-                    version = 1,
-                    isSelected = true,
-                )
-            storePrototype(prototype)
-        }
-
-        println("MessageId: ${savedMessage.id}")
-
+        val messageId = savePrototype(request.conversationId, response)
         val responseWithId =
             response.copy(
-                chat = response.chat.copy(messageId = savedMessage.id),
+                chat = response.chat.copy(messageId = messageId),
             )
 
         println("RECEIVED RESPONSE")
@@ -124,10 +116,26 @@ private suspend fun saveMessage(
             senderId = senderId,
             content = content,
         )
-    println("Saving message: $message")
     storeMessage(message)
-    println("Stored message: ${message.id}")
     return message
+}
+
+private suspend fun savePrototype(
+    conversationId: String,
+    response: ServerResponse
+): String {
+    val savedMessage = saveMessage(conversationId, "LLM", response.chat.message)
+    response.prototype?.let { prototypeResponse ->
+        val prototype =
+            Prototype(
+                messageId = savedMessage.id,
+                filesJson = prototypeResponse.files.toString(),
+                version = 1,
+                isSelected = true,
+            )
+        storePrototype(prototype)
+    }
+    return savedMessage.id
 }
 
 /**
