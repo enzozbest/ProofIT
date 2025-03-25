@@ -134,9 +134,9 @@ subprojects {
                         """**/*${'$'}Function*.*""",
                         """**/*${'$'}Metadata*.*""",
                         """**/*${'$'}Companion*.*""",
+                        """**/*${"$$"}serializer*.*""",
                         """server/*""",
                         """**/TemplateLibrarySeeder.kt""",
-                        """**/UtilsModuleKt.*""",
                     )
                 },
             )
