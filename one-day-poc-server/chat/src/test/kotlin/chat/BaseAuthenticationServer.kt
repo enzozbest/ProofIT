@@ -114,7 +114,13 @@ abstract class BaseAuthenticationServer {
     }
 
     protected open fun Application.testModule() {
-        chatModule()
+        routing {
+            with(ChatEndpoints) {
+                setChatRoutes()
+                setJsonRoutes()
+                setUploadRoutes()
+            }
+        }
     }
 
     protected fun ApplicationTestBuilder.setupTestApplication(moduleConfig: Application.() -> Unit = { testModule() }) {

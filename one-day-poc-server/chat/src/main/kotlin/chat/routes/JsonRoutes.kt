@@ -17,7 +17,7 @@ import prompting.ServerResponse
 
 private lateinit var promptingMainInstance: PromptingMain
 
-fun Route.jsonRoutes() {
+internal fun Route.setJsonRoute() {
     post(JSON) {
         println("Received JSON request")
         val request: Request =
@@ -31,6 +31,9 @@ fun Route.jsonRoutes() {
             }
         handleJsonRequest(request, call)
     }
+}
+
+internal fun Route.setJsonRouteRetrieval() {
     post("$JSON/{conversationId}/rename") {
         try {
             println("Received conversation rename request")
@@ -122,7 +125,7 @@ private suspend fun saveMessage(
 
 private suspend fun savePrototype(
     conversationId: String,
-    response: ServerResponse
+    response: ServerResponse,
 ): String {
     val savedMessage = saveMessage(conversationId, "LLM", response.chat.message)
     response.prototype?.let { prototypeResponse ->

@@ -252,6 +252,5 @@ test('Renders NavMain with ID for sub-items', () => {
 
   render(<NavMain items={items} />);
 
-  // Testing that it renders properly with IDs
   expect(screen.getByText('Sub Item 1')).toBeInTheDocument();
 });
