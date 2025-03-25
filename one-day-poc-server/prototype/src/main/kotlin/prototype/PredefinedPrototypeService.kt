@@ -10,8 +10,6 @@ import kotlinx.serialization.json.Json
  */
 @kotlinx.serialization.Serializable
 data class PredefinedPrototype(
-    val name: String,
-    val description: String,
     val message: String,
     val keywords: List<String>,
     val files: JsonObject
@@ -33,7 +31,7 @@ data class PrototypeTemplate(
  * them based on prompt content.
  */
 object PredefinedPrototypeService {
-    private const val PROTOTYPES_DIR = "src/main/resources/prototypes"
+    private const val PROTOTYPES_DIR = "prototype/src/main/resources/prototypes"
 
     /**
      * Gets a prototype response for a given prompt.
