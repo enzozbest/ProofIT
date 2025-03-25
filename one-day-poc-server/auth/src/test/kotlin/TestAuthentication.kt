@@ -1,7 +1,6 @@
 import authentication.authentication.AuthenticatedSession
 import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
 import authentication.authentication.Authenticators.configureJWTValidator
-import authentication.authentication.authModule
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import helpers.AuthenticationTestHelpers.configureBasicAuthentication
@@ -30,25 +29,11 @@ import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TestAuthentication {
     private val rsaKeyPair = generateRSAKeyPair()
     private val rsaPrivateKey = rsaKeyPair.first
     private val rsaPublicKey = rsaKeyPair.second
-
-    @Test
-    fun `Test authModule with default params`() =
-        testApplication {
-            application {
-                try {
-                    authModule()
-                } catch (e: Exception) {
-                    print("Entered catch block")
-                }
-                assertTrue(true)
-            }
-        }
 
     @Test
     fun `Test OAuth flow`() =
@@ -58,19 +43,17 @@ class TestAuthentication {
                     configureBasicAuthentication()
                     configureJWTValidator(readJsonFile("cognito-test.json"))
                 }
-                authModule(
-                    configFilePath = "cognito-test.json",
-                    authName = "testAuth",
-                )
             }
             setupExternalServices()
             routing {
-                get("/authenticate") {
-                    call.respondRedirect(urlProvider["authorizeUrl"]!!.jsonPrimitive.content)
+                authenticate("testAuth") {
+                    get("/authenticate") {
+                        call.respondRedirect(urlProvider["authorizeUrl"]!!.jsonPrimitive.content)
+                    }
                 }
             }
             client
-                .get(AUTHENTICATION_ROUTE) {
+                .get("/authenticate") {
                     header(HttpHeaders.Authorization, "Basic ${"test:password".encodeBase64()}")
                 }.apply {
                     assertEquals(HttpStatusCode.OK, status)

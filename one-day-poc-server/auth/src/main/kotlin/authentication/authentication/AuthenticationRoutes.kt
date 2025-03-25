@@ -58,7 +58,7 @@ fun Route.setUnprotectedRoutes() {
 /**
  * Sets up the authentication endpoint for the authentication process.
  */
-private fun Route.setAuthenticationEndpoint(route: String) {
+internal fun Route.setAuthenticationEndpoint(route: String) {
     get(route) {
         call.respondRedirect("/authenticate")
     }
@@ -67,7 +67,7 @@ private fun Route.setAuthenticationEndpoint(route: String) {
 /**
  * Sets up the logout endpoint for the authentication process.
  */
-private fun Route.setLogOutEndpoint(route: String) {
+internal fun Route.setLogOutEndpoint(route: String) {
     post(route) {
         val cookie =
             call.request.cookies["AuthenticatedSession"]?.let {
