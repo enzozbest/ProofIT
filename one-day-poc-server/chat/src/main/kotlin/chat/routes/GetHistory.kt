@@ -74,18 +74,7 @@ internal fun Route.setGetConversationRoute() {
 
     get("$GET/{conversationId}") {
         try {
-            val conversationId =
-                call.parameters["conversationId"] ?: return@get call.respondText(
-                    "Missing conversation ID",
-                    status = HttpStatusCode.BadRequest,
-                )
-
-            if (conversationId.isEmpty()) {
-                return@get call.respondText(
-                    "Empty conversation ID",
-                    status = HttpStatusCode.NotFound,
-                )
-            }
+            val conversationId = call.parameters["conversationId"]!!
 
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
@@ -121,24 +110,9 @@ internal fun Route.setGetPrototypeRoute() {
     get("$GET/{conversationId}/{messageId}") {
         try {
             println("Fetching prototype")
-            val conversationId =
-                call.parameters["conversationId"] ?: return@get call.respondText(
-                    "Missing conversation ID",
-                    status = HttpStatusCode.BadRequest,
-                )
+            val conversationId = call.parameters["conversationId"]!!
 
-            if (conversationId.isEmpty()) {
-                return@get call.respondText(
-                    "Empty conversation ID",
-                    status = HttpStatusCode.NotFound,
-                )
-            }
-            val messageId =
-                call.parameters["messageId"] ?: return@get call.respondText(
-                    "Missing message ID",
-                    status = HttpStatusCode.BadRequest,
-                )
-
+            val messageId = call.parameters["messageId"]!!
             val prototype = retrievePrototype(conversationId, messageId)
 
             if (prototype != null) {
