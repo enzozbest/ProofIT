@@ -14,6 +14,13 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
 }
 
+tasks.register<JavaExec>("seed") {
+    group = "Seeding"
+    description = "Seeds the Template Library."
+    mainClass.set("server.TemplateLibrarySeederKt")
+    classpath = sourceSets["main"].runtimeClasspath
+}
+
 tasks.register<JacocoReport>("jacocoMergedReport") {
     dependsOn(subprojects.map { it.tasks.named("test") })
     dependsOn(subprojects.map { it.tasks.named("jacocoTestReport") })
