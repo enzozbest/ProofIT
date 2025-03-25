@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation(project(":auth"))
+    implementation(project(":chat"))
     implementation("io.ktor:ktor-server-auth:$ktorVersion")
     testImplementation(kotlin("test"))
 }
