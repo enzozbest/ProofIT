@@ -155,13 +155,12 @@ describe('ChatMessage Hook', () => {
     );
 
     await act(async () => {
-      // Set a message that should be ignored in favor of the explicit parameter
       result.current.setMessage('This should be ignored');
       await result.current.handleSend('Explicit message');
     });
 
     expect(result.current.sentMessages[0].content).toBe('Explicit message');
-    expect(result.current.message).toBe(''); // Should still clear the message input
+    expect(result.current.message).toBe(''); 
 
     vi.useRealTimers();
   });
@@ -243,7 +242,6 @@ describe('ChatMessage Hook', () => {
     expect(mockSetPrototypeFiles).toHaveBeenCalledWith(mockPrototypeFiles);
   });
   it('should set error message when API call fails', async () => {
-    // Mock the sendChatMessage to throw an error
     (sendChatMessage as any).mockRejectedValue(new Error('API Error'));
 
     const { result } = renderHook(() =>

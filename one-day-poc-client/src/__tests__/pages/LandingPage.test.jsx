@@ -1,11 +1,11 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { vi, test, expect, beforeEach, beforeAll } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { vi, test, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPage from '../../pages/LandingPage.js';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext.tsx';
+import { AuthProvider } from '@/contexts/AuthContext.tsx';
 import { act } from 'react-dom/test-utils';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { mockAuth } from '../mocks/authContext.mock.jsx';
 
 beforeEach(() => {
