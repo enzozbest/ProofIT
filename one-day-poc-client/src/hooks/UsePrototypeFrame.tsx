@@ -10,7 +10,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   const [status, setStatus] = useState('Initialising...');
   const { instance: webcontainerInstance, loading, error } = useWebContainer();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
+
   // Use a ref to track active processes
   const activeProcessesRef = useRef<WebContainerProcess[]>([]);
 
@@ -19,10 +19,10 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
    */
   const resetWebContainer = async () => {
     if (!webcontainerInstance) return;
-    
+
     setStatus('Resetting environment...');
     setUrl('');
-    
+
     for (const process of activeProcessesRef.current) {
       try {
         process.kill();
@@ -30,25 +30,37 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         console.log('Error killing process:', e);
       }
     }
-    
+
     activeProcessesRef.current = [];
-    
+
     try {
       const entries = await webcontainerInstance.fs.readdir('/');
       console.log('Current root entries:', entries);
-      
+
       if (entries.includes('src')) {
-        await webcontainerInstance.fs.rm('/src', { recursive: true, force: true });
+        await webcontainerInstance.fs.rm('/src', {
+          recursive: true,
+          force: true,
+        });
       }
       if (entries.includes('public')) {
-        await webcontainerInstance.fs.rm('/public', { recursive: true, force: true });
+        await webcontainerInstance.fs.rm('/public', {
+          recursive: true,
+          force: true,
+        });
       }
       if (entries.includes('node_modules')) {
-        await webcontainerInstance.fs.rm('/node_modules', { recursive: true, force: true });
+        await webcontainerInstance.fs.rm('/node_modules', {
+          recursive: true,
+          force: true,
+        });
       }
-      
+
       for (const entry of entries) {
-        if (!entry.startsWith('.') && !['src', 'public', 'node_modules'].includes(entry)) {
+        if (
+          !entry.startsWith('.') &&
+          !['src', 'public', 'node_modules'].includes(entry)
+        ) {
           try {
             await webcontainerInstance.fs.rm(`/${entry}`);
             console.log(`Removed file: ${entry}`);
@@ -57,7 +69,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
           }
         }
       }
-      
+
       console.log('Filesystem selectively reset');
     } catch (e) {
       console.log('Error during selective reset:', e);
@@ -99,10 +111,12 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         console.log('Files mounted successfully');
 
         setStatus('Installing dependencies...');
-        const installProcess = await webcontainerInstance.spawn('npm', ['install']);
+        const installProcess = await webcontainerInstance.spawn('npm', [
+          'install',
+        ]);
         // Track the active process
         activeProcessesRef.current.push(installProcess);
-        
+
         const exitCode = await installProcess.exit;
 
         if (exitCode !== 0) {
@@ -110,7 +124,10 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         }
 
         setStatus('Starting development server...');
-        const startProcess = await webcontainerInstance.spawn('npm', ['run', 'start']);
+        const startProcess = await webcontainerInstance.spawn('npm', [
+          'run',
+          'start',
+        ]);
         // Track the active process
         activeProcessesRef.current.push(startProcess);
 
@@ -119,7 +136,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
           new WritableStream({
             write(data) {
               console.log('Server output:', data);
-            }
+            },
           })
         );
 
@@ -163,7 +180,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   return {
     status,
     iframeRef,
-    url
+    url,
   };
 };
 

@@ -23,10 +23,10 @@ vi.mock('../../components/landing/InputBox', () => ({
 vi.mock('@/contexts/AuthContext.tsx', () => {
   const mockUseAuth = vi.fn();
   mockUseAuth.mockReturnValue({ isAuthenticated: false, login: vi.fn() });
-  
+
   return {
     useAuth: mockUseAuth,
-    AuthProvider: ({ children }) => children
+    AuthProvider: ({ children }) => children,
   };
 });
 
@@ -61,7 +61,9 @@ test('Renders landing page', async () => {
   const heroText = screen.getByText('Enabling you from');
   expect(heroText).toBeInTheDocument();
 
-  const promptElement = screen.getByText(/AI chatbot assistant for customer self-service/i);
+  const promptElement = screen.getByText(
+    /AI chatbot assistant for customer self-service/i
+  );
   expect(promptElement).toBeInTheDocument();
 });
 
@@ -76,17 +78,22 @@ test('Authenticated users see new prompts', async () => {
     </MemoryRouter>
   );
 
-  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
-  expect(screen.getByText(/Dashboard for financial reports/i)).toBeInTheDocument();
-  expect(screen.getByText(/Intelligent document processing tool/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/AI chatbot assistant for customer self-service/i)
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Dashboard for financial reports/i)
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText(/Intelligent document processing tool/i)
+  ).toBeInTheDocument();
   expect(screen.getByTestId('input-box')).toBeInTheDocument();
 
   const promptButtons = screen.getAllByRole('button');
   expect(promptButtons.length).toBe(3);
-
 });
 
-test('Unauthenticated users dont\'t see OldPrompts component', async () => {
+test("Unauthenticated users dont't see OldPrompts component", async () => {
   await mockAuth({ isAuthenticated: false });
 
   render(
@@ -97,17 +104,18 @@ test('Unauthenticated users dont\'t see OldPrompts component', async () => {
     </MemoryRouter>
   );
 
-  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/AI chatbot assistant for customer self-service/i)
+  ).toBeInTheDocument();
   expect(screen.getByTestId('input-box')).toBeInTheDocument();
 
   const oldPromptsElement = screen.queryByTestId('old-prompts');
   expect(oldPromptsElement).not.toBeInTheDocument();
-
 });
 
 test('Authenticated users see OldPrompts component', async () => {
   useAuth.mockReturnValue({ isAuthenticated: true, login: vi.fn() });
-  
+
   render(
     <MemoryRouter>
       <AuthProvider>
@@ -117,7 +125,9 @@ test('Authenticated users see OldPrompts component', async () => {
   );
 
   expect(screen.getByTestId('input-box')).toBeInTheDocument();
-  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(/AI chatbot assistant for customer self-service/i)
+  ).toBeInTheDocument();
 
   const oldPromptsElement = screen.getByTestId('old-prompts');
   expect(oldPromptsElement).toBeInTheDocument();

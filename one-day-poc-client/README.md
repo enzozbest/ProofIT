@@ -1,6 +1,7 @@
 #one-day-poc-client: Vite + React
 
 ## Requirements
+
 - Node.js 22.9 or higher
 
 This is the client application for the one-day-poc project. It is built with Vite and React.

@@ -14,7 +14,7 @@ describe('MessageBox Component', () => {
   beforeEach(() => {
     onLoadPrototype = vi.fn();
     vi.clearAllMocks();
-  })
+  });
 
   const mockMessages = [
     {
@@ -33,7 +33,7 @@ describe('MessageBox Component', () => {
       timestamp: '2023-10-01T10:02:00',
       conversationId: '1234',
       id: '5678',
-    }
+    },
   ];
 
   test('scrolls to the most recent message', () => {
@@ -72,9 +72,16 @@ describe('MessageBox Component', () => {
   });
 
   test('does not call API if message role is not "LLM"', async () => {
-    const msg = { role: 'User', content: 'user message', conversationId: '123', id: '456' };
+    const msg = {
+      role: 'User',
+      content: 'user message',
+      conversationId: '123',
+      id: '456',
+    };
 
-    render(<MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />);
+    render(
+      <MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />
+    );
 
     const userMessageElement = screen.getByText((content, element) => {
       return content.includes('user message');
@@ -93,12 +100,15 @@ describe('MessageBox Component', () => {
     getPrototypeForMessage.mockResolvedValue(mockPrototypeFiles);
 
     render(
-      <MessageBox sentMessages={mockMessages} onLoadPrototype={onLoadPrototype} />
+      <MessageBox
+        sentMessages={mockMessages}
+        onLoadPrototype={onLoadPrototype}
+      />
     );
 
-    const llmMessageElement = screen.getByText((content, element) =>
-      content.includes('llm test message')
-    ).closest('.group');
+    const llmMessageElement = screen
+      .getByText((content, element) => content.includes('llm test message'))
+      .closest('.group');
 
     expect(llmMessageElement).toBeInTheDocument();
 
@@ -106,13 +116,17 @@ describe('MessageBox Component', () => {
 
     expect(getPrototypeForMessage).toHaveBeenCalledWith('1234', '5678');
 
-    await waitFor(() => expect(onLoadPrototype).toHaveBeenCalledWith(mockPrototypeFiles));
+    await waitFor(() =>
+      expect(onLoadPrototype).toHaveBeenCalledWith(mockPrototypeFiles)
+    );
   });
 
   test('does not call API if coversationId is missing', async () => {
     const msg = { role: 'LLM', content: 'llm message', id: '456' };
 
-    render(<MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />);
+    render(
+      <MessageBox sentMessages={[msg]} onLoadPrototype={onLoadPrototype} />
+    );
 
     const llmMessageElement = screen.getByText((content, element) => {
       return content.includes('llm message');
@@ -127,20 +141,30 @@ describe('MessageBox Component', () => {
   test('handles API errors gracefully', async () => {
     getPrototypeForMessage.mockRejectedValue(new Error('API error'));
 
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     render(
-      <MessageBox sentMessages={mockMessages} onLoadPrototype={onLoadPrototype} />
+      <MessageBox
+        sentMessages={mockMessages}
+        onLoadPrototype={onLoadPrototype}
+      />
     );
 
-    const llmMessageElement = screen.getByText((content) => content.includes('llm test message')).closest('.group');
+    const llmMessageElement = screen
+      .getByText((content) => content.includes('llm test message'))
+      .closest('.group');
 
     expect(llmMessageElement).toBeInTheDocument();
 
     fireEvent.click(llmMessageElement);
 
     await waitFor(() => {
-      expect(consoleErrorMock).toHaveBeenCalledWith('Error loading prototype:', expect.any(Error));
+      expect(consoleErrorMock).toHaveBeenCalledWith(
+        'Error loading prototype:',
+        expect.any(Error)
+      );
     });
 
     expect(onLoadPrototype).not.toHaveBeenCalled();
@@ -151,14 +175,16 @@ describe('MessageBox Component', () => {
   test('calls handleMessageClick when an LLM message is clicked', async () => {
     const handleMessageClick = vi.fn();
     render(
-      <MessageBox 
+      <MessageBox
         sentMessages={mockMessages}
-        onLoadPrototype={() => {}} 
-        onMessageClick={handleMessageClick} 
+        onLoadPrototype={() => {}}
+        onMessageClick={handleMessageClick}
       />
     );
 
-    const llmMessageElement = screen.getByText('llm test message').closest(".group");
+    const llmMessageElement = screen
+      .getByText('llm test message')
+      .closest('.group');
     fireEvent.click(llmMessageElement);
 
     await waitFor(() => expect(handleMessageClick).toHaveBeenCalledTimes(1));
@@ -181,15 +207,16 @@ describe('MessageBox Component', () => {
   });
 
   test('renders code block within pre tag', () => {
-    render(<MessageBox
-      sentMessages={[
-        {
-          role: 'Bot',
-          content: '```\nblock code\n```',
-          timestamp: '2023-10-01T10:01:00',
-        },
-      ]}
-      />,
+    render(
+      <MessageBox
+        sentMessages={[
+          {
+            role: 'Bot',
+            content: '```\nblock code\n```',
+            timestamp: '2023-10-01T10:01:00',
+          },
+        ]}
+      />
     );
 
     const codeBlockElement = screen.getByText((content, element) => {
@@ -203,7 +230,9 @@ describe('MessageBox Component', () => {
   test('renders message with correct structure', () => {
     render(<MessageBox sentMessages={mockMessagesWithCode} />);
 
-    const botMessageContainer = screen.getByText(/Here is some/).closest('.self-start');
+    const botMessageContainer = screen
+      .getByText(/Here is some/)
+      .closest('.self-start');
     expect(botMessageContainer).toBeInTheDocument();
   });
 
@@ -262,4 +291,4 @@ describe('MessageBox Component', () => {
       expect(timestamp).toBeInTheDocument();
     });
   });
-})
+});

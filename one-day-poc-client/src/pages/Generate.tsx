@@ -75,14 +75,13 @@ export default function Page() {
           </button>
         </div>
         <div className="flex-1 h-full">
-          <PrototypeWindow
-            >
-          {showPrototype ? (
-            <PrototypeFrame
-              files={prototypeFiles}
-              data-testid="prototype-frame"
-            />
-          ) : null}
+          <PrototypeWindow>
+            {showPrototype ? (
+              <PrototypeFrame
+                files={prototypeFiles}
+                data-testid="prototype-frame"
+              />
+            ) : null}
           </PrototypeWindow>
         </div>
       </SidebarWrapper>
