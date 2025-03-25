@@ -11,6 +11,9 @@ import io.ktor.server.sessions.cookie
 import utils.json.PoCJSON
 import kotlin.collections.set
 
+/**
+ * Constants used for authentication.
+ */
 internal object AuthenticationConstants {
     const val DEFAULT_EXPIRATION_SECONDS = 3600L
     const val CONFIGURATION_FILE = "cognito.json"
@@ -42,7 +45,7 @@ private fun Application.configureAuthentication(configFilePath: String) {
             configureOAuth(config)
             configureJWTValidator(config)
         }
-    } catch (e: DuplicatePluginException) {
+    } catch (_: DuplicatePluginException) {
         print("Authentication plugin already installed!")
     }
 }
