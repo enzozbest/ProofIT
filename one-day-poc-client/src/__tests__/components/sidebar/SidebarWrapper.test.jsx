@@ -20,7 +20,9 @@ vi.mock('@/components/ui/Typography', () => ({
 
 vi.mock('@/components/ui/Popover', () => ({
   Popover: ({ children }) => <div data-testid="popover">{children}</div>,
-  PopoverContent: ({ children }) => <div data-testid="popover-content">{children}</div>,
+  PopoverContent: ({ children }) => (
+    <div data-testid="popover-content">{children}</div>
+  ),
   PopoverTrigger: ({ children, className }) => (
     <button data-testid="popover-trigger" className={className}>
       {children}
@@ -34,7 +36,9 @@ vi.mock('@/components/ui/Sidebar', () => ({
       {children}
     </div>
   ),
-  SidebarProvider: ({ children }) => <div data-testid="sidebar-provider">{children}</div>,
+  SidebarProvider: ({ children }) => (
+    <div data-testid="sidebar-provider">{children}</div>
+  ),
   SidebarTrigger: ({ className }) => (
     <button data-testid="sidebar-trigger" className={className}></button>
   ),
@@ -70,7 +74,9 @@ vi.mock('@/components/ui/Label', () => ({
 }));
 
 vi.mock('@radix-ui/react-icons', () => ({
-  ChevronDownIcon: () => <div data-testid="chevron-down-icon">ChevronDownIcon</div>,
+  ChevronDownIcon: () => (
+    <div data-testid="chevron-down-icon">ChevronDownIcon</div>
+  ),
 }));
 
 vi.mock('lucide-react', () => ({
@@ -100,7 +106,9 @@ test('Renders sidebar wrapper with default project name', () => {
   expect(screen.getByTestId('sidebar-inset')).toBeInTheDocument();
   expect(screen.getByTestId('sidebar-trigger')).toBeInTheDocument();
   expect(screen.getByTestId('typography-small')).toBeInTheDocument();
-  expect(screen.getByTestId('typography-small')).toHaveTextContent('Untitled Project');
+  expect(screen.getByTestId('typography-small')).toHaveTextContent(
+    'Untitled Project'
+  );
   expect(screen.getByTestId('children-content')).toBeInTheDocument();
 });
 
@@ -125,9 +133,14 @@ test('Updates project name when user renames it', async () => {
 
   fireEvent.click(screen.getByTestId('button'));
 
-  expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name');
+  expect(screen.getByTestId('typography-small')).toHaveTextContent(
+    'New Project Name'
+  );
 
-  expect(mockUpdateConversationName).toHaveBeenCalledWith('conversation-1', 'New Project Name');
+  expect(mockUpdateConversationName).toHaveBeenCalledWith(
+    'conversation-1',
+    'New Project Name'
+  );
 });
 
 test('Updates project name when enter key is pressed', async () => {
@@ -139,9 +152,9 @@ test('Updates project name when enter key is pressed', async () => {
   });
 
   render(
-      <SidebarWrapper>
-        <div>Children Content</div>
-      </SidebarWrapper>
+    <SidebarWrapper>
+      <div>Children Content</div>
+    </SidebarWrapper>
   );
 
   fireEvent.click(screen.getByTestId('popover-trigger'));
@@ -151,15 +164,18 @@ test('Updates project name when enter key is pressed', async () => {
 
   fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-  expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name')
-  expect(mockUpdateConversationName).toHaveBeenCalledWith('conversation-1', 'New Project Name');
+  expect(screen.getByTestId('typography-small')).toHaveTextContent(
+    'New Project Name'
+  );
+  expect(mockUpdateConversationName).toHaveBeenCalledWith(
+    'conversation-1',
+    'New Project Name'
+  );
 });
 
 test('Loads active conversation name when available', async () => {
   useConversation.mockReturnValue({
-    conversations: [
-      { id: 'conversation-1', name: 'Existing Project' }
-    ],
+    conversations: [{ id: 'conversation-1', name: 'Existing Project' }],
     activeConversationId: 'conversation-1',
     updateConversationName: vi.fn(),
   });
@@ -170,7 +186,9 @@ test('Loads active conversation name when available', async () => {
     </SidebarWrapper>
   );
 
-  expect(screen.getByTestId('typography-small')).toHaveTextContent('Existing Project');
+  expect(screen.getByTestId('typography-small')).toHaveTextContent(
+    'Existing Project'
+  );
 });
 
 test('Handles project rename with no active conversation', async () => {
@@ -193,7 +211,9 @@ test('Handles project rename with no active conversation', async () => {
   fireEvent.change(input, { target: { value: 'New Project Name' } });
   fireEvent.click(screen.getByTestId('button'));
 
-  expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name');
+  expect(screen.getByTestId('typography-small')).toHaveTextContent(
+    'New Project Name'
+  );
   expect(mockUpdateConversationName).not.toHaveBeenCalled();
 });
 

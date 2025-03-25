@@ -6,15 +6,15 @@ import { useConversation } from '../../contexts/ConversationContext';
 
 /**
  * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
- * 
+ *
  * This component renders an array of text prompts as interactive buttons, typically used
  * for suggested actions or example queries the user can click on. The buttons are styled
  * with hover effects and include a right arrow indicator.
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {string[]} props.prompts - Array of text strings to display as prompt buttons
- * 
+ *
  * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
  */
 const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
@@ -31,7 +31,7 @@ const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
    * - Navigates to generate page with text input if authenticated
    */
   const handleSubmit = () => {
-    if(!text.trim()) {
+    if (!text.trim()) {
       return;
     }
 
@@ -70,8 +70,7 @@ const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
         <button
           className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
           type="button"
-        >
-        </button>
+        ></button>
         <button
           className="p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2"
           type="button"

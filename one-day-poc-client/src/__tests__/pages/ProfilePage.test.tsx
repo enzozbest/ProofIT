@@ -13,7 +13,10 @@ vi.mock('../../services/UserService', () => ({
 }));
 
 vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  const actual =
+    await vi.importActual<typeof import('react-router-dom')>(
+      'react-router-dom'
+    );
   return {
     ...actual,
     useNavigate: vi.fn(),
@@ -31,7 +34,7 @@ describe('ProfilePage', () => {
         <ProfilePage />
       </BrowserRouter>
     );
-  
+
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
@@ -54,37 +57,40 @@ describe('ProfilePage', () => {
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('john.doe@example.com')).toBeInTheDocument();
+      expect(
+        screen.getByDisplayValue('john.doe@example.com')
+      ).toBeInTheDocument();
       expect(screen.getByDisplayValue('1990-01-01')).toBeInTheDocument();
     });
   });
 
   it('displays an error message when fetch fails', async () => {
-
     vi.spyOn(UserService, 'fetchUserData').mockResolvedValueOnce(null);
-    vi.spyOn(UserService, 'getError').mockReturnValue('Failed to load user data');
-  
+    vi.spyOn(UserService, 'getError').mockReturnValue(
+      'Failed to load user data'
+    );
+
     render(
       <BrowserRouter>
         <ProfilePage />
       </BrowserRouter>
     );
-  
+
     await waitFor(() => {
       expect(screen.getByText('Failed to load user data')).toBeInTheDocument();
     });
   });
-  
+
   it('displays default error message when no error is returned', async () => {
     vi.spyOn(UserService, 'fetchUserData').mockResolvedValueOnce(null);
     vi.spyOn(UserService, 'getError').mockReturnValue(null);
-  
+
     render(
       <BrowserRouter>
         <ProfilePage />
       </BrowserRouter>
     );
-  
+
     await waitFor(() => {
       expect(screen.getByText('Failed to load profile')).toBeInTheDocument();
     });
@@ -107,12 +113,13 @@ describe('ProfilePage', () => {
       </BrowserRouter>
     );
 
-    await waitFor(() => expect(screen.queryByText('Loading...')).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+    );
 
-    const backButton = screen.getByTestId('back-button'); 
+    const backButton = screen.getByTestId('back-button');
     await userEvent.click(backButton);
 
     expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
-  
 });

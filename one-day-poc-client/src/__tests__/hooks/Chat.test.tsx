@@ -160,7 +160,7 @@ describe('ChatMessage Hook', () => {
     });
 
     expect(result.current.sentMessages[0].content).toBe('Explicit message');
-    expect(result.current.message).toBe(''); 
+    expect(result.current.message).toBe('');
 
     vi.useRealTimers();
   });
@@ -310,13 +310,12 @@ describe('ChatMessage Hook', () => {
         return Promise.resolve();
       }
     );
-  
 
     const { result } = renderHook(() =>
       ChatMessage({
         setPrototype: mockSetPrototype,
         setPrototypeFiles: mockSetPrototypeFiles,
-      }) 
+      })
     );
 
     await act(async () => {
@@ -339,9 +338,9 @@ describe('ChatMessage Hook', () => {
     });
 
     expect(result.current.errorMessage).toBe(
-        'Error. Please check your connection and try again.'
+      'Error. Please check your connection and try again.'
     );
 
-      vi.useRealTimers();
+    vi.useRealTimers();
   });
 });
