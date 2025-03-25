@@ -20,12 +20,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkStatic
 import io.mockk.unmockkAll
-import java.time.Instant
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Instant
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import database.tables.chats.ChatMessage as DbChatMessage
 import database.tables.chats.Conversation as DbConversation
 import database.tables.chats.Prototype as DbPrototype
@@ -340,7 +340,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     accept(ContentType.Application.Json)
                 }
-
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
@@ -539,6 +538,71 @@ class GetHistoryTest : BaseAuthenticationServer() {
 
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
+
+    @Test
+    fun `Test get conversation with empty conversationId parameter`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.get("$GET/") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    accept(ContentType.Application.Json)
+                }
+            assertEquals(HttpStatusCode.NotFound, response.status)
+        }
+
+    @Test
+    fun `Test get prototype with empty conversationId parameter`() =
+        testApplication {
+            setupTestApplication()
+
+            val response =
+                client.get("$GET//msg1") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    accept(ContentType.Application.Json)
+                }
+
+            assertEquals(HttpStatusCode.NotFound, response.status)
+            val responseBody = response.bodyAsText()
+            assertEquals("Empty conversation ID", responseBody)
+        }
+
+    @Test
+    fun `Test serializable annotations`() {
+        // This test is to cover the @Serializable annotations
+        val conversation = Conversation("1", "Test", "2023-01-01", 5, "user1")
+        val history = ConversationHistory(listOf(conversation))
+        val message = MessageDto("1", "conv1", "user1", "Hello", "2023-01-01")
+        val prototype = PrototypeDto("files")
+
+        assertEquals("1", conversation.id)
+        assertEquals(listOf(conversation), history.conversations)
+        assertEquals("1", message.id)
+        assertEquals("files", prototype.files)
+
+        // Test JSON serialization to ensure @Serializable is used
+        val json =
+            kotlinx.serialization.json.Json
+                .encodeToString(Conversation.serializer(), conversation)
+        assertTrue(json.contains("\"id\":\"1\""))
+        assertTrue(json.contains("\"name\":\"Test\""))
+
+        val jsonHistory =
+            kotlinx.serialization.json.Json
+                .encodeToString(ConversationHistory.serializer(), history)
+        assertTrue(jsonHistory.contains("\"conversations\""))
+
+        val jsonMessage =
+            kotlinx.serialization.json.Json
+                .encodeToString(MessageDto.serializer(), message)
+        assertTrue(jsonMessage.contains("\"id\":\"1\""))
+
+        val jsonPrototype =
+            kotlinx.serialization.json.Json
+                .encodeToString(PrototypeDto.serializer(), prototype)
+        assertTrue(jsonPrototype.contains("\"files\":\"files\""))
+    }
 
     @Test
     fun `Test get messages for conversation with custom limit and offset`() =
