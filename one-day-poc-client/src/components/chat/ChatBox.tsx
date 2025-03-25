@@ -37,7 +37,7 @@ export function ChatBox({ message, setMessage, handleSend, setError}: ChatBoxPro
     useEffect(() => {
         if (sendInitialMessage.current && message === initialMessage) {
             sendInitialMessage.current = false;
-            handleSend();
+            handleMessageSend();
         }
     }, [message, initialMessage]);
 
