@@ -7,11 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "vite start",
-    "test": "vitest --coverage",
+    "test": "vitest run --coverage",
+    "watch": "vitest --coverage",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "eject": "vite eject"
+    "serve": "vite build && vite preview"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.2",
