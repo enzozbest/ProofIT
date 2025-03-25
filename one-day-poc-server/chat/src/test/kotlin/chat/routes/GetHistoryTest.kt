@@ -51,7 +51,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getConversationHistory function to return a list of conversations
             val userId = "user"
             val mockConversations = listOf(
                 DbConversation(
@@ -81,14 +80,12 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("conversations"))
             assertTrue(responseBody.contains("conv1"))
             assertTrue(responseBody.contains("Conversation 1"))
             assertTrue(responseBody.contains("conv2"))
             assertTrue(responseBody.contains("Conversation 2"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getConversationHistory(userId) }
         }
 
@@ -97,7 +94,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getConversationHistory function to return a list of conversations
             val userId = "custom-user"
             val mockConversations = listOf(
                 DbConversation(
@@ -120,10 +116,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("Custom Conversation"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getConversationHistory(userId) }
         }
 
@@ -132,7 +126,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getConversationHistory function to throw an exception
             val userId = "user"
             val errorMessage = "Database connection error"
 
@@ -147,10 +140,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the error message
             assertTrue(responseBody.contains("Error: $errorMessage"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getConversationHistory(userId) }
         }
 
@@ -208,7 +199,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.NotAcceptable, response.status)
         }
 
-
     @Test
     fun `Test ConversationHistory data class`() =
         testApplication {
@@ -254,7 +244,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals("user_123", conversation.userId)
     }
 
-
     @Test
     fun `Test MessageDto data class`() =
         testApplication {
@@ -278,7 +267,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
             val limit = 50
             val mockMessages = listOf(
@@ -309,13 +297,11 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Hello"))
             assertTrue(responseBody.contains("msg2"))
             assertTrue(responseBody.contains("Hi there"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, 0) }
         }
 
@@ -324,7 +310,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
             val limit = 10
             val mockMessages = listOf(
@@ -337,7 +322,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 )
             )
 
-            // Note: The offset parameter is not used in the actual implementation
             coEvery { getMessageHistory(conversationId, limit) } returns mockMessages
 
             val response =
@@ -349,11 +333,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg6"))
             assertTrue(responseBody.contains("Message 6"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit) }
         }
 
@@ -376,7 +358,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to throw an exception
             val conversationId = "conv1"
             val limit = 50
             val errorMessage = "Database connection error"
@@ -392,13 +373,10 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the error message
             assertTrue(responseBody.contains("Error: $errorMessage"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, 0) }
         }
-
 
     @Test
     fun `Test PrototypeDto data class`() =
@@ -415,7 +393,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the retrievePrototype function to return a prototype
             val conversationId = "conv1"
             val messageId = "msg1"
             val mockPrototype = DbPrototype(
@@ -436,13 +413,11 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("file1"))
             assertTrue(responseBody.contains("content1"))
             assertTrue(responseBody.contains("file2"))
             assertTrue(responseBody.contains("content2"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { retrievePrototype(conversationId, messageId) }
         }
 
@@ -451,7 +426,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the retrievePrototype function to return null
             val conversationId = "conv1"
             val messageId = "msg1"
 
@@ -463,10 +437,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
                     accept(ContentType.Application.Json)
                 }
 
-            // When the prototype is null, the endpoint doesn't respond, resulting in a 404 Not Found
             assertEquals(HttpStatusCode.NotFound, response.status)
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { retrievePrototype(conversationId, messageId) }
         }
 
@@ -475,25 +447,20 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getConversationHistory function to return an empty list
             val userId = "user"
             coEvery { getConversationHistory(userId) } returns emptyList()
 
-            // This actually hits the GET / endpoint, which returns the conversation history
             val response =
                 client.get("$GET") {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     accept(ContentType.Application.Json)
                 }
 
-            // The route should return 200 OK with an empty conversation list
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("conversations"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getConversationHistory(userId) }
         }
 
@@ -502,7 +469,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Test the case where the messageId parameter is null
             val conversationId = "conv1"
 
             val response =
@@ -511,8 +477,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                     accept(ContentType.Application.Json)
                 }
 
-            // The route should return 200 OK for a valid conversationId without a messageId
-            // This actually hits the GET /{conversationId} endpoint, not the GET /{conversationId}/{messageId} endpoint
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
@@ -521,7 +485,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the retrievePrototype function to throw an exception
             val conversationId = "conv1"
             val messageId = "msg1"
             val errorMessage = "Database connection error"
@@ -537,28 +500,22 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.InternalServerError, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the error message
             assertTrue(responseBody.contains("Error: $errorMessage"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { retrievePrototype(conversationId, messageId) }
         }
-
 
     @Test
     fun `Test get messages for conversation with missing conversationId parameter`() =
         testApplication {
             setupTestApplication()
 
-            // This test will call the endpoint without a conversationId parameter
-            // The server should respond with BadRequest
             val response =
                 client.get("$GET/") {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     accept(ContentType.Application.Json)
                 }
 
-            // The route should return 404 Not Found because the path doesn't match any route
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
@@ -567,15 +524,12 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // This test will call the endpoint without a conversationId parameter
-            // The server should respond with BadRequest
             val response =
                 client.get("$GET//msg1") {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     accept(ContentType.Application.Json)
                 }
 
-            // The route should return 404 Not Found because the path doesn't match any route
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
@@ -584,15 +538,12 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // This test will call the endpoint without a messageId parameter
-            // The server should respond with BadRequest
             val response =
                 client.get("$GET/conv1/") {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     accept(ContentType.Application.Json)
                 }
 
-            // The route should return 404 Not Found because the path doesn't match any route
             assertEquals(HttpStatusCode.NotFound, response.status)
         }
 
@@ -601,7 +552,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
             val limit = 25
             val offset = 10
@@ -626,11 +576,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg11"))
             assertTrue(responseBody.contains("Message 11"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
 
@@ -639,9 +587,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is invalid
+            val limit = 50
             val mockMessages = listOf(
                 DbChatMessage(
                     id = "msg1",
@@ -663,11 +610,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Message 1"))
 
-            // Verify the function was called with the expected parameters (default limit)
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, 0) }
         }
 
@@ -676,10 +621,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
             val limit = 50
-            val offset = 0 // Default value when offset is invalid
+            val offset = 0
             val mockMessages = listOf(
                 DbChatMessage(
                     id = "msg1",
@@ -701,19 +645,17 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Message 1"))
 
-            // Verify the function was called with the expected parameters (default offset)
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
+
     @Test
     fun `Test get messages for conversation with all query parameters`() =
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
             val limit = 25
             val offset = 10
@@ -727,7 +669,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 )
             )
 
-            // Mock the getMessageHistory function with all parameters
             coEvery { getMessageHistory(conversationId, limit, offset) } returns mockMessages
 
             val response =
@@ -739,11 +680,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg11"))
             assertTrue(responseBody.contains("Message 11"))
 
-            // Verify the function was called with the expected parameters
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
 
@@ -752,10 +691,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is null
-            val offset = 0 // Default offset
+            val limit = 50
+            val offset = 0
             val mockMessages = listOf(
                 DbChatMessage(
                     id = "msg1",
@@ -766,7 +704,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 )
             )
 
-            // Mock the getMessageHistory function with default limit
             coEvery { getMessageHistory(conversationId, limit, offset) } returns mockMessages
 
             val response =
@@ -778,11 +715,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Message 1"))
 
-            // Verify the function was called with the expected parameters (default limit)
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
 
@@ -791,10 +726,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
-            val limit = 30 // Custom limit
-            val offset = 0 // Default value when offset is null
+            val limit = 30
+            val offset = 0
             val mockMessages = listOf(
                 DbChatMessage(
                     id = "msg1",
@@ -805,7 +739,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 )
             )
 
-            // Mock the getMessageHistory function with default offset
             coEvery { getMessageHistory(conversationId, limit, offset) } returns mockMessages
 
             val response =
@@ -817,22 +750,20 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Message 1"))
 
-            // Verify the function was called with the expected parameters (default offset)
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
+
     @Test
     fun `Test get messages for conversation with null limit and offset parameters`() =
         testApplication {
             setupTestApplication()
 
-            // Mock the getMessageHistory function to return a list of messages
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is null
-            val offset = 0 // Default value when offset is null
+            val limit = 50
+            val offset = 0
             val mockMessages = listOf(
                 DbChatMessage(
                     id = "msg1",
@@ -843,7 +774,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
                 )
             )
 
-            // Mock the getMessageHistory function with default limit and offset
             coEvery { getMessageHistory(conversationId, limit, offset) } returns mockMessages
 
             val response =
@@ -855,11 +785,9 @@ class GetHistoryTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
 
-            // Verify the response contains the expected data
             assertTrue(responseBody.contains("msg1"))
             assertTrue(responseBody.contains("Message 1"))
 
-            // Verify the function was called with the expected parameters (default limit and offset)
             coVerify(exactly = 1) { getMessageHistory(conversationId, limit, offset) }
         }
 }
