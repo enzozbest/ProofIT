@@ -3,6 +3,7 @@ package chat.routes
 import chat.GET
 import chat.storage.*
 import io.ktor.http.*
+import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.routing.get
