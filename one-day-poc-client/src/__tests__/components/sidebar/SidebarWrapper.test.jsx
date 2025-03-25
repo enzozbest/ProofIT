@@ -4,7 +4,6 @@ import { vi, test, expect, beforeEach } from 'vitest';
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 import { useConversation } from '@/contexts/ConversationContext';
 
-// Mock the hooks and components used by SidebarWrapper
 vi.mock('@/contexts/ConversationContext', () => ({
   useConversation: vi.fn(),
 }));
@@ -119,20 +118,15 @@ test('Updates project name when user renames it', async () => {
     </SidebarWrapper>
   );
 
-  // Open the popover
   fireEvent.click(screen.getByTestId('popover-trigger'));
 
-  // Change the input value
   const input = screen.getByTestId('input');
   fireEvent.change(input, { target: { value: 'New Project Name' } });
 
-  // Click save button
   fireEvent.click(screen.getByTestId('button'));
 
-  // Check if the project name is updated
   expect(screen.getByTestId('typography-small')).toHaveTextContent('New Project Name');
 
-  // Check if updateConversationName was called with the correct arguments
   expect(mockUpdateConversationName).toHaveBeenCalledWith('conversation-1', 'New Project Name');
 });
 
@@ -176,7 +170,6 @@ test('Loads active conversation name when available', async () => {
     </SidebarWrapper>
   );
 
-  // Check if the project name is loaded from the active conversation
   expect(screen.getByTestId('typography-small')).toHaveTextContent('Existing Project');
 });
 
@@ -221,7 +214,6 @@ test('Children are rendered correctly in the content area', () => {
   expect(screen.getByTestId('test-child-1')).toBeInTheDocument();
   expect(screen.getByTestId('test-child-2')).toBeInTheDocument();
 
-  // Ensure they're inside the content area (within SidebarInset)
   const sidebarInset = screen.getByTestId('sidebar-inset');
   expect(sidebarInset).toContainElement(screen.getByTestId('test-child-1'));
   expect(sidebarInset).toContainElement(screen.getByTestId('test-child-2'));

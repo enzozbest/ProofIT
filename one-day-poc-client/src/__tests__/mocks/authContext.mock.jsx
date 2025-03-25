@@ -1,5 +1,4 @@
 import { vi } from "vitest";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const mockAuth = async ({ isAuthenticated, isAdmin = false }) => {
     await vi.doMock('@/contexts/AuthContext.tsx', async () => {

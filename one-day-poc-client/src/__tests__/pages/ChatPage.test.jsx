@@ -1,7 +1,7 @@
 import { render, screen, waitFor,fireEvent } from '@testing-library/react'
 import ChatScreen from '../../components/chat/ChatScreen.tsx';
 import '@testing-library/jest-dom';
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { MemoryRouter } from "react-router-dom";
 import { vi, test, expect, beforeEach } from "vitest";
 import userEvent from '@testing-library/user-event';
 
@@ -102,28 +102,6 @@ test("Valid post request", async () =>{
     });
 })
 
-/*
-test("Invalid post request", async () =>{
-    fetch.mockResolvedValueOnce({
-        ok: false,
-        text: vi.fn().mockResolvedValue("Mock LLM response"),
-    });
-    render(
-        <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId}/>
-        </MemoryRouter>
-    );
-
-    const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
-    await userEvent.type(userchat, 'Hello!')
-    await userEvent.keyboard('{Enter}')
-    await waitFor(() => {
-        expect(userchat).toHaveValue('Hello!')
-    },{timeout: 3000})
-
-    await waitFor(() => expect(consoleErrorSpy).toHaveBeenCalledTimes(2));
-})*/
-
 test("Clicking send button sends a message", async () =>{
     fetch.mockResolvedValueOnce({
         ok: true,
@@ -167,19 +145,6 @@ test("Clicking send button sends a message", async () =>{
     await userEvent.type(userchat, "```\nThis is a block code example\n```");
     await userEvent.keyboard("{Enter}");
 
-    /*
-    await waitFor(() => {
-        const inlineMessage = screen.getByText(/This is an inline/i);
-        expect(inlineMessage).toBeInTheDocument();
-        expect(getComputedStyle(inlineMessage).display).toBe("inline");
-    });
-
-    await waitFor(() => {
-        const blockMessage = screen.getByText(/This is a block/i);
-        expect(blockMessage).toBeInTheDocument();
-        expect(getComputedStyle(blockMessage).display).toBe("block");
-    });
-    */
 })
 
 test("Initial message set when page loads", async ()=>{
@@ -211,38 +176,3 @@ test("Initial message set when page loads", async ()=>{
     },{timeout: 3000})
 
 })
-
-/*
-test("Can't send message until initial message set", async ()=>{
-    vi.doMock("react-router-dom", async () => {
-        const actual = await vi.importActual("react-router-dom");
-        return {
-            ...actual,
-            useLocation: vi.fn().mockReturnValue({
-                pathname: "/generate",
-                state: { initialMessage: "" },
-            }),
-        };
-    });
-
-    const ChatScreen = (await import("../../pages/ChatScreen.js")).default;
-    render(
-        <MemoryRouter>
-            <ChatScreen setPrototype={mockSetPrototype} setPrototypeId={mockSetPrototypeId} />
-        </MemoryRouter>
-    );
-
-
-    const userchat = screen.getByPlaceholderText(/How can we help you today?/i);
-    await waitFor(() => {
-        expect(userchat).toHaveValue('')
-    },{timeout: 3000})
-
-    await userEvent.type(userchat, 'Test initial message')
-    await userEvent.keyboard('{Enter}')
-
-    await waitFor(() => {
-        expect(userchat).toHaveValue('Test initial message')
-    },{timeout: 3000})
-
-})*/
