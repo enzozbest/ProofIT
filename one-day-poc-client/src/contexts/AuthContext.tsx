@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
       const data = await response.json();
       if (data.userId) {
-        await UserService.fetchUserData();
+        // await UserService.fetchUserData();
 
         setIsAuthenticated(true);
         setIsAdmin(data.isAdmin || false);
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         const savedPrompt = sessionStorage.getItem('selectedPrompt');
         if (savedPrompt) {
           sessionStorage.removeItem('selectedPrompt');
-          navigate('/generate', { state: { initialMessage: savedPrompt } });
+          navigate('/generate', { state: { initialMessage: savedPrompt, isPredefined: true } });
         }
       } else {
         setIsAuthenticated(false);
@@ -92,7 +92,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
       setIsAdmin(false);
       UserService.clearUser();
     } catch (error) {
-      console.error('Logout error:', error);
+      //console.error('Logout error:', error);
     }
   };
 
