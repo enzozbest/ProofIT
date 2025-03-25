@@ -73,7 +73,7 @@ class PromptingMain(
      * @return A ServerResponse object containing the generated response and timestamp
      * @throws PromptException If any step in the prompting workflow fails
      */
-    suspend fun run(userPrompt: String): ServerResponse {
+    suspend fun run(userPrompt: String, previousGeneration: String ?= null): ServerResponse {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
@@ -88,7 +88,7 @@ class PromptingMain(
         val templates = TemplateInteractor.fetchTemplates(functionalRequirements)
 
         // Prototype prompt with templates.
-        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates)
+        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates, previousGeneration)
 
         // Second LLM call
         val prototypeOptions =
@@ -102,7 +102,7 @@ class PromptingMain(
     }
 
     /**
-     * Creates a specialized prompt for generating a prototype based on requirements and templates.
+     * Creates a specialised prompt for generating a prototype based on requirements and templates.
      *
      * This method formats a prompt that includes:
      * - The original user prompt
@@ -119,6 +119,7 @@ class PromptingMain(
         userPrompt: String,
         freqsResponse: JsonObject,
         templates: List<String> = emptyList(),
+        previousGeneration: String ?= null,
     ): String {
         val reqs =
             runCatching {
@@ -137,10 +138,15 @@ class PromptingMain(
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
 
+        if (previousGeneration != null) {
+            println("Using previous generation in prototype prompt")
+        }
+
         return PromptingTools.prototypePrompt(
             userPrompt,
             reqs,
             templates,
+            previousGeneration,
         )
     }
 
