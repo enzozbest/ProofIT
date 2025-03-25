@@ -26,7 +26,7 @@ export default function PrototypeWindow({
         </div>
       </div>
       <div className="h-10  w-100px  h-[2px] border-b-[0.2vmin] border-white "></div>
-      <div className="h-[300px] w-[200px] flex items-center justify-center ">
+      <div className="flex-1 w-full flex items-center justify-center ">
         {children}
       </div>
     </div>
