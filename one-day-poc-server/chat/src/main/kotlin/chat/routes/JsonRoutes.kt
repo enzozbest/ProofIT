@@ -79,6 +79,7 @@ private suspend fun handleJsonRequest(
 
     try {
         val response = if (request.predefined) {
+            println("Request was predefined")
             PredefinedPrototypes.run(request.prompt)
         } else {
             getPromptingMain().run(request.prompt)
