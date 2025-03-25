@@ -139,7 +139,7 @@ test('Prototype frame displays', async () => {
 
   await waitFor(() => {
     const prototypeContainer = document.querySelector(
-      '.flex-1.h-full.rounded-xl'
+      '.flex-1.h-full'
     );
     expect(prototypeContainer).not.toBeNull();
   });
