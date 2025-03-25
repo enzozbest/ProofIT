@@ -31,6 +31,7 @@ class PoCDatabaseTest {
 
     @Test
     fun `Test database initialises when accessed`() {
+        PoCDatabase.init()
         val database = PoCDatabase.database
         assertNotNull(database)
     }

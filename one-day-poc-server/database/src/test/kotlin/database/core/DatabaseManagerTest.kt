@@ -16,7 +16,6 @@ import java.io.File
 class DatabaseManagerTest {
     @BeforeAll
     fun setup() {
-        // Ensure container is started and environment file is created with correct connection details
         MockEnvironment.postgresContainer.start()
         generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
@@ -24,21 +23,18 @@ class DatabaseManagerTest {
 
     @BeforeEach
     fun setupEach() {
-        // Reset state but keep container running
         DatabaseManager.reset()
         EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
     }
 
     @AfterEach
     fun cleanupEach() {
-        // Reset state but keep container running for next test
         DatabaseManager.reset()
         EnvironmentLoader.reset()
     }
 
     @AfterAll
     fun cleanup() {
-        // Clean up everything after all tests are done
         DatabaseManager.reset()
         EnvironmentLoader.reset()
         MockEnvironment.stopContainer()
@@ -110,6 +106,17 @@ class DatabaseManagerTest {
 
         generateEnvironmentFile()
         EnvironmentLoader.loadEnvironmentFile(ENV_FILE)
+    }
+
+    @Test
+    fun `test default maxPoolSize is 10`() {
+        val credentials = DatabaseCredentials(
+            url = "jdbc:postgresql://localhost:5432/testdb",
+            username = "test_user",
+            password = "test_pass",
+        )
+
+        assertEquals(10, credentials.maxPoolSize, "Default maxPoolSize should be 10")
     }
 
     @Test
@@ -194,6 +201,32 @@ class DatabaseManagerTest {
 
         val repo2 = DatabaseManager.templateRepository()
         assertSame(repo1, repo2)
+    }
+
+    @Test
+    fun `test chat repository creation and caching`() {
+        DatabaseManager.init()
+
+        val repoField =
+            DatabaseManager::class.java
+                .getDeclaredField("chatRepository")
+                .apply { isAccessible = true }
+
+        assertNull(repoField.get(DatabaseManager))
+
+        val repo1 = DatabaseManager.chatRepository()
+        assertNotNull(repoField.get(DatabaseManager))
+
+        val repo2 = DatabaseManager.chatRepository()
+        assertSame(repo1, repo2)
+    }
+
+    @Test
+    fun `test chat repository throws exception when database is uninitialized`() {
+        val exception = assertThrows<IllegalStateException> {
+            DatabaseManager.chatRepository()
+        }
+        assertEquals("Database connection not initialized. Call init() first.", exception.message)
     }
 
     @Test
