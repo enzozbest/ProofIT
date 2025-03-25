@@ -3,8 +3,6 @@ package routes
 import io.ktor.server.application.Application
 import routes.AuthenticationRoutes.configureAuthenticationRoutes
 import routes.ChatRoutes.configureChatRoutes
-import routes.EmbeddingRoutes.configureEmbeddingRoutes
-import routes.PromptingRoutes.configurePromptingRoutes
 
 /**
  * Main function to configure all routes in the application.
@@ -14,6 +12,4 @@ import routes.PromptingRoutes.configurePromptingRoutes
 fun Application.configureApplicationRoutes() {
     configureAuthenticationRoutes()
     configureChatRoutes()
-    configurePromptingRoutes()
-    configureEmbeddingRoutes()
 }
