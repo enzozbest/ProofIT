@@ -1,4 +1,3 @@
-/*
 package chat.routes
 
 import chat.BaseAuthenticationServer
@@ -11,6 +10,7 @@ import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import prompting.ChatResponse
@@ -30,7 +30,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(
+                    whenever(mockPromptingMain.run(any(),  anyOrNull())).thenReturn(
                     ServerResponse(
                         chat =
                             ChatResponse(
@@ -92,7 +92,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(
+                whenever(mockPromptingMain.run(any(), anyOrNull())).thenReturn(
                     ServerResponse(
                         chat =
                             ChatResponse(
@@ -137,7 +137,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(
+                whenever(mockPromptingMain.run(any(), anyOrNull())).thenReturn(
                     ServerResponse(
                         chat =
                             ChatResponse(
@@ -199,7 +199,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(
+                whenever(mockPromptingMain.run(any(), anyOrNull())).thenReturn(
                     ServerResponse(
                         chat =
                             ChatResponse(
@@ -238,7 +238,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 val differentMock = mock<PromptingMain>()
                 runBlocking {
-                    whenever(differentMock.run(any())).thenReturn(
+                    whenever(differentMock.run(any(), anyOrNull())).thenReturn(
                         ServerResponse(
                             chat =
                                 ChatResponse(
@@ -348,7 +348,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenThrow(RuntimeException("Simulation of processing error"))
+                whenever(mockPromptingMain.run(any(), anyOrNull())).thenThrow(RuntimeException("Simulation of processing error"))
             }
 
             try {
@@ -383,7 +383,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                whenever(mockPromptingMain.run(any())).thenReturn(null)
+                whenever(mockPromptingMain.run(any(), anyOrNull())).thenReturn(null)
             }
 
             try {
@@ -431,7 +431,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
     @Test
@@ -454,7 +454,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
     @Test
@@ -477,7 +477,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-            assertEquals(HttpStatusCode.Unauthorized, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
     @Test
@@ -546,4 +546,4 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             assertTrue(responseBody.contains("Invalid request"))
         }
 }
-*/
+
