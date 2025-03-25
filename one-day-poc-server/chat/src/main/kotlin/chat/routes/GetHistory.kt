@@ -1,11 +1,13 @@
 package chat.routes
 
 import chat.GET
+import chat.storage.*
 import io.ktor.http.*
+import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.get
 import kotlinx.serialization.Serializable
-import chat.storage.*
 
 @Serializable
 data class Conversation(
@@ -13,12 +15,12 @@ data class Conversation(
     val name: String,
     val lastModified: String,
     val messageCount: Int,
-    val userId: String
+    val userId: String,
 )
 
 @Serializable
 data class ConversationHistory(
-    val conversations: List<Conversation>
+    val conversations: List<Conversation>,
 )
 
 @Serializable
@@ -27,58 +29,52 @@ data class MessageDto(
     val conversationId: String,
     val senderId: String,
     val content: String,
-    val timestamp: String
+    val timestamp: String,
 )
 
 @Serializable
 data class PrototypeDto(
-    val files: String
+    val files: String,
 )
 
-internal fun Route.chatRoutes() {
-    // Special route handler for the case where the conversationId is empty
-    get("$GET//msg1") {
-        return@get call.respondText(
-            "Empty conversation ID",
-            status = HttpStatusCode.NotFound
-        )
-    }
+internal fun Route.setGetHistoryRoute() {
     get(GET) {
         try {
             println("Fetching conversations")
-            val userId = call.request.queryParameters["userId"] ?: "user" 
+            val userId = call.request.queryParameters["userId"] ?: "user"
 
-            val conversations = getConversationHistory(userId).map {
-                Conversation(
-                    id = it.id,
-                    name = it.name,
-                    lastModified = it.lastModified,
-                    messageCount = it.messageCount,
-                    userId = it.userId
-                )
-            }
+            val conversations =
+                getConversationHistory(userId).map {
+                    Conversation(
+                        id = it.id,
+                        name = it.name,
+                        lastModified = it.lastModified,
+                        messageCount = it.messageCount,
+                        userId = it.userId,
+                    )
+                }
             println("Fetched ${conversations.size} conversations")
             call.respond(ConversationHistory(conversations))
         } catch (e: Exception) {
             return@get call.respondText(
                 "Error: ${e.message}",
-                status = HttpStatusCode.InternalServerError
+                status = HttpStatusCode.InternalServerError,
             )
         }
     }
+}
+
+internal fun Route.setGetConversationRoute() {
+    get("$GET//msg1") {
+        return@get call.respondText(
+            "Empty conversation ID",
+            status = HttpStatusCode.NotFound,
+        )
+    }
+
     get("$GET/{conversationId}") {
         try {
-            val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
-                "Missing conversation ID",
-                status = HttpStatusCode.BadRequest
-            )
-
-            if (conversationId.isEmpty()) {
-                return@get call.respondText(
-                    "Empty conversation ID",
-                    status = HttpStatusCode.NotFound
-                )
-            }
+            val conversationId = call.parameters["conversationId"]!!
 
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
@@ -87,15 +83,16 @@ internal fun Route.chatRoutes() {
             val messages = getMessageHistory(conversationId, limit, offset)
             println("Fetched $messages messages")
 
-            val messageDtos = messages.map { message ->
-                MessageDto(
-                    id = message.id,
-                    conversationId = message.conversationId,
-                    senderId = message.senderId,
-                    content = message.content,
-                    timestamp = message.timestamp.toString()
-                )
-            }
+            val messageDtos =
+                messages.map { message ->
+                    MessageDto(
+                        id = message.id,
+                        conversationId = message.conversationId,
+                        senderId = message.senderId,
+                        content = message.content,
+                        timestamp = message.timestamp.toString(),
+                    )
+                }
 
             call.respond(messageDtos)
         } catch (e: Exception) {
@@ -103,29 +100,19 @@ internal fun Route.chatRoutes() {
             e.printStackTrace()
             return@get call.respondText(
                 "Error: ${e.message}",
-                status = HttpStatusCode.InternalServerError
+                status = HttpStatusCode.InternalServerError,
             )
         }
     }
+}
+
+internal fun Route.setGetPrototypeRoute() {
     get("$GET/{conversationId}/{messageId}") {
         try {
             println("Fetching prototype")
-            val conversationId = call.parameters["conversationId"] ?: return@get call.respondText(
-                "Missing conversation ID",
-                status = HttpStatusCode.BadRequest
-            )
+            val conversationId = call.parameters["conversationId"]!!
 
-            if (conversationId.isEmpty()) {
-                return@get call.respondText(
-                    "Empty conversation ID",
-                    status = HttpStatusCode.NotFound
-                )
-            }
-            val messageId = call.parameters["messageId"] ?: return@get call.respondText(
-                "Missing message ID",
-                status = HttpStatusCode.BadRequest
-            )
-
+            val messageId = call.parameters["messageId"]!!
             val prototype = retrievePrototype(conversationId, messageId)
 
             if (prototype != null) {
@@ -133,7 +120,7 @@ internal fun Route.chatRoutes() {
             } else {
                 call.respondText(
                     "Prototype not found",
-                    status = HttpStatusCode.NotFound
+                    status = HttpStatusCode.NotFound,
                 )
             }
         } catch (e: Exception) {
@@ -141,7 +128,7 @@ internal fun Route.chatRoutes() {
             e.printStackTrace()
             return@get call.respondText(
                 "Error: ${e.message}",
-                status = HttpStatusCode.InternalServerError
+                status = HttpStatusCode.InternalServerError,
             )
         }
     }

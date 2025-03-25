@@ -28,7 +28,7 @@ import javax.crypto.spec.SecretKeySpec
  * Data class representing the information of a user's authenticated session in the API.
  */
 @Serializable
-internal data class AuthenticatedSession(
+data class AuthenticatedSession(
     val userId: String,
     val token: String,
     val admin: Boolean?,

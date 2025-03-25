@@ -2,6 +2,7 @@ FROM gradle:jdk23 as build
 WORKDIR /app
 COPY . .
 RUN ./gradlew shadowJar -x test
+RUN ./gradlew seed
 
 FROM amazoncorretto:23-alpine-jdk
 WORKDIR /app

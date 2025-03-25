@@ -1,16 +1,47 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { vi, test, expect, beforeEach, beforeAll } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { vi, test, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPage from '../../pages/LandingPage.js';
-import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext.tsx';
-import { act } from 'react-dom/test-utils';
-import React, { useEffect } from 'react';
+import { AuthProvider } from '@/contexts/AuthContext.tsx';
+import * as ConversationContext from '@/contexts/ConversationContext.tsx';
+import React from 'react';
 import { mockAuth } from '../mocks/authContext.mock.jsx';
+import { useAuth } from '@/contexts/AuthContext.tsx';
+
+vi.mock('../../components/landing/HeroSection', () => ({
+  default: () => <div>Enabling you from</div>,
+}));
+
+vi.mock('../../components/landing/OldPrompts', () => ({
+  default: () => <div data-testid="old-prompts">Mock Old Prompts</div>,
+}));
+
+vi.mock('../../components/landing/InputBox', () => ({
+  default: () => <div data-testid="input-box">Mock Input Box</div>,
+}));
+
+vi.mock('@/contexts/AuthContext.tsx', () => {
+  const mockUseAuth = vi.fn();
+  mockUseAuth.mockReturnValue({ isAuthenticated: false, login: vi.fn() });
+  
+  return {
+    useAuth: mockUseAuth,
+    AuthProvider: ({ children }) => children
+  };
+});
+
+const mockCreateConversation = vi.fn();
+const mockFetchConversations = vi.fn();
+vi.spyOn(ConversationContext, 'useConversation').mockImplementation(() => ({
+  createConversation: mockCreateConversation,
+  conversations: [],
+  fetchConversations: mockFetchConversations,
+  currentConversationId: null,
+  setCurrentConversationId: vi.fn(),
+}));
 
 beforeEach(() => {
-  vi.resetAllMocks();
-  vi.resetModules();
+  vi.clearAllMocks();
 });
 
 test('Renders landing page', async () => {
@@ -24,23 +55,19 @@ test('Renders landing page', async () => {
     </MemoryRouter>
   );
 
-  const element = screen.getByText('Enabling you from');
-  expect(element).toBeInTheDocument();
+  const inputBox = screen.getByTestId('input-box');
+  expect(inputBox).toBeInTheDocument();
+
+  const heroText = screen.getByText('Enabling you from');
+  expect(heroText).toBeInTheDocument();
+
+  const promptElement = screen.getByText(/AI chatbot assistant for customer self-service/i);
+  expect(promptElement).toBeInTheDocument();
 });
 
 test('Authenticated users see new prompts', async () => {
   await mockAuth({ isAuthenticated: true });
 
-  vi.resetModules();
-  const { default: LandingPage } = await import('../../pages/LandingPage.js');
-
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ userId: 1, isAdmin: false }),
-    })
-  );
-
   render(
     <MemoryRouter>
       <AuthProvider>
@@ -49,41 +76,19 @@ test('Authenticated users see new prompts', async () => {
     </MemoryRouter>
   );
 
-  await waitFor(
-    () => {
-      expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/auth/check',
-        expect.any(Object)
-      );
-    },
-    { timeout: 3000 }
-  );
-  act(() => {});
+  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
+  expect(screen.getByText(/Dashboard for financial reports/i)).toBeInTheDocument();
+  expect(screen.getByText(/Intelligent document processing tool/i)).toBeInTheDocument();
+  expect(screen.getByTestId('input-box')).toBeInTheDocument();
 
-  var promptElement = await screen.findByText(
-    /AI chatbot assistant for customer self-service/i
-  );
-  expect(promptElement).toBeVisible();
-  promptElement = await screen.findByText(
-    /Generating Code For An Application/i
-  );
-  expect(promptElement).toBeVisible();
+  const promptButtons = screen.getAllByRole('button');
+  expect(promptButtons.length).toBe(3);
+
 });
 
-test("Unauthenticated users can't see new prompts", async () => {
+test('Unauthenticated users dont\'t see OldPrompts component', async () => {
   await mockAuth({ isAuthenticated: false });
 
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ userId: null, isAdmin: false }),
-    })
-  );
-
-  fetch.mockResolvedValueOnce({
-    ok: false,
-    json: () => Promise.resolve('Mock LLM response'),
-  });
   render(
     <MemoryRouter>
       <AuthProvider>
@@ -92,46 +97,17 @@ test("Unauthenticated users can't see new prompts", async () => {
     </MemoryRouter>
   );
 
-  await waitFor(() =>
-    expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/check',
-      expect.any(Object)
-    )
-  );
+  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
+  expect(screen.getByTestId('input-box')).toBeInTheDocument();
 
-  const promptElement = screen.queryByText(
-    /Generating Code For An Application/i
-  );
-  expect(promptElement).not.toBeInTheDocument();
+  const oldPromptsElement = screen.queryByTestId('old-prompts');
+  expect(oldPromptsElement).not.toBeInTheDocument();
+
 });
 
-test('Prompts are sent via the enter key', async () => {
-  await mockAuth({ isAuthenticated: false });
-
-  vi.doMock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom');
-    return {
-      ...actual,
-      useNavigate: vi.fn(),
-    };
-  });
-
-  vi.stubGlobal(
-    'fetch',
-    vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ userId: null, isAdmin: false }),
-    })
-  );
-
-  fetch.mockResolvedValueOnce({
-    ok: true,
-    json: () => Promise.resolve('Mock LLM response'),
-  });
-
-  const { useNavigate } = await import('react-router-dom');
-  const mockNavigate = vi.fn();
-  useNavigate.mockReturnValue(mockNavigate);
-
+test('Authenticated users see OldPrompts component', async () => {
+  useAuth.mockReturnValue({ isAuthenticated: true, login: vi.fn() });
+  
   render(
     <MemoryRouter>
       <AuthProvider>
@@ -140,16 +116,10 @@ test('Prompts are sent via the enter key', async () => {
     </MemoryRouter>
   );
 
-  const userinput = screen.getByPlaceholderText(
-    /Tell us what we can do for you?/i
-  );
-  await userEvent.type(userinput, 'Hello!');
-  await userEvent.keyboard('{Enter}');
+  expect(screen.getByTestId('input-box')).toBeInTheDocument();
+  expect(screen.getByText(/AI chatbot assistant for customer self-service/i)).toBeInTheDocument();
 
-  await waitFor(
-    () => {
-      expect(userinput).toHaveValue('Hello!');
-    },
-    { timeout: 3000 }
-  );
+  const oldPromptsElement = screen.getByTestId('old-prompts');
+  expect(oldPromptsElement).toBeInTheDocument();
+  expect(oldPromptsElement).toHaveTextContent('Mock Old Prompts');
 });

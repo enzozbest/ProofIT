@@ -1,8 +1,7 @@
-import { render, waitFor, screen, fireEvent, within } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, beforeEach } from 'vitest';
 import { MessageBox } from '../../../components/chat/MessagesBox.js';
 import '../../mocks/message-box.mock.jsx';
-import { handleMessageClick } from '@/components/chat/MessagesBox';
 import { getPrototypeForMessage } from '@/api/FrontEndAPI';
 
 vi.mock('@/api/frontEndAPI', () => ({
