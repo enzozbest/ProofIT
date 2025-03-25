@@ -85,21 +85,10 @@ private suspend fun handleJsonRequest(
     try {
         val response = getPromptingMain().run(request.prompt, previousGeneration)
 
-        val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-        response.prototype?.let { prototypeResponse ->
-            val prototype =
-                Prototype(
-                    messageId = savedMessage.id,
-                    filesJson = prototypeResponse.files.toString(),
-                    version = 1,
-                    isSelected = true,
-                )
-            storePrototype(prototype)
-        }
-
+        val messageId = savePrototype(request.conversationId, response)
         val responseWithId =
             response.copy(
-                chat = response.chat.copy(messageId = savedMessage.id),
+                chat = response.chat.copy(messageId = messageId),
             )
 
         println("RECEIVED RESPONSE")
@@ -129,6 +118,24 @@ private suspend fun saveMessage(
         )
     storeMessage(message)
     return message
+}
+
+private suspend fun savePrototype(
+    conversationId: String,
+    response: ServerResponse
+): String {
+    val savedMessage = saveMessage(conversationId, "LLM", response.chat.message)
+    response.prototype?.let { prototypeResponse ->
+        val prototype =
+            Prototype(
+                messageId = savedMessage.id,
+                filesJson = prototypeResponse.files.toString(),
+                version = 1,
+                isSelected = true,
+            )
+        storePrototype(prototype)
+    }
+    return savedMessage.id
 }
 
 /**
