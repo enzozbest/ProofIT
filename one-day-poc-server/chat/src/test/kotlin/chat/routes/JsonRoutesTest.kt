@@ -1,10 +1,14 @@
 package chat.routes
 
 import chat.BaseAuthenticationServer
+import chat.storage.updateConversationName
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import io.mockk.coEvery
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
@@ -545,5 +549,95 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             val responseBody = response.bodyAsText()
             assertTrue(responseBody.contains("Invalid request"))
         }
+
+    @Test
+    fun `Test successful conversation rename`() = testApplication {
+        setupTestApplication()
+        mockkStatic("chat.storage.StorageKt")
+        val conversationId = "123"
+        val newName = "New Conversation Name"
+
+        coEvery { updateConversationName(conversationId, newName) } returns true
+
+        val response = client.post("/api/chat/json/$conversationId/rename") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            contentType(ContentType.Application.Json)
+            setBody(
+                """
+                {
+                    "name": "$newName"
+                }
+                """.trimIndent()
+            )
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertTrue(response.bodyAsText().contains("Conversation renamed successfully"))
+        unmockkAll()
+    }
+
+    @Test
+    fun `Test request with name key missing`() = testApplication {
+        setupTestApplication()
+        val conversationId = "123"
+
+        val response = client.post("/api/chat/json/$conversationId/rename") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            contentType(ContentType.Application.Json)
+            setBody(
+                """
+                {}
+                """.trimIndent()
+            )
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertTrue(response.bodyAsText().contains("Missing name"))
+    }
+
+    @Test
+    fun `Test failed conversation rename due to update failure`() = testApplication {
+        setupTestApplication()
+        mockkStatic("chat.storage.StorageKt")
+        val conversationId = "123"
+        val newName = "New Conversation Name"
+
+        coEvery { updateConversationName(conversationId, newName) } returns false
+
+        val response = client.post("/api/chat/json/$conversationId/rename") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            contentType(ContentType.Application.Json)
+            setBody(
+                """
+                {
+                    "name": "$newName"
+                }
+                """.trimIndent()
+            )
+        }
+
+        assertEquals(HttpStatusCode.InternalServerError, response.status)
+        assertTrue(response.bodyAsText().contains("Failed to update name"))
+        unmockkAll()
+    }
+
+    @Test
+    fun `Test request with malformed JSON`() = testApplication {
+        setupTestApplication()
+        mockkStatic("chat.storage.StorageKt")
+        val conversationId = "123"
+
+        val response = client.post("/api/chat/json/$conversationId/rename") {
+            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+            contentType(ContentType.Application.Json)
+            setBody(
+                """
+                { "name": "New Name"
+                """.trimIndent()
+            )
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
 }
 
