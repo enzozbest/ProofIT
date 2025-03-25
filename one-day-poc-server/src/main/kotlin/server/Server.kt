@@ -27,7 +27,7 @@ fun Application.configurePlugins() {
     configureAuthentication("cognito.json")
 }
 
-private fun Application.configureAuthentication(configFilePath: String) {
+internal fun Application.configureAuthentication(configFilePath: String) {
     val config = PoCJSON.readJsonFile(configFilePath)
     install(Authentication) {
         configureAuthenticators(config)
