@@ -4,6 +4,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
+import { useLocation } from 'react-router-dom';
+
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 
@@ -23,6 +25,7 @@ import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
  * @returns {JSX.Element} The complete prototype generation interface
  */
 export default function Page() {
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showPrototype, setPrototype] = useState<boolean>(true);
   const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
@@ -34,7 +37,12 @@ export default function Page() {
     if (savedMessage) {
       setInitialMessage(savedMessage);
     }
-  }, []);
+    // Check for initialMessage and isPredefined from location state
+    else if (location.state?.initialMessage) {
+      setInitialMessage(location.state.initialMessage);
+      setIsPredefined(location.state.isPredefined || false);
+    }
+  }, [location]);
 
   return (
     <div
