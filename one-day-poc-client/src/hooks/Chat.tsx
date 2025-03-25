@@ -70,6 +70,17 @@ const ChatMessage = ({
         (prototypeResponse) => {
           setPrototype(true);
           setPrototypeFiles(prototypeResponse.files);
+        },
+        (errorMsg) => {
+          const errorSystemMessage: Message = {
+            role: 'LLM',
+            content: errorMsg,
+            timestamp: new Date().toISOString(),
+            conversationId: conversationId,
+            isError: true
+          };
+          setSentMessages((prevMessages) => [...prevMessages, errorSystemMessage]);
+          setErrorMessage('Error. Please check your connection and try again.');
         }
       );
     } catch (error) {
@@ -96,7 +107,8 @@ const ChatMessage = ({
         content: messageContent,
         timestamp: currentTime,
         conversationId: activeConversationId || '',
-        id: messageId
+        id: messageId,
+        isError: false
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);

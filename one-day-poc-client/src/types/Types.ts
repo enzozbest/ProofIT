@@ -27,13 +27,15 @@ export type MessageRole = 'User' | 'LLM';
  * @property {string} timestamp - ISO timestamp indicating when the message was sent
  * @property {string} [conversationId] - Optional ID of the conversation this message belongs to
  * @property {string} [id] - Message ID assigned by the server
+ * @property {boolean} [isError] - Flag indicating if the message is an error message
  */
 export interface Message {
     role: MessageRole;
     content: string;
     timestamp: string;
     conversationId?: string;
-    id?: string; // Added ID field, optional since frontend-created messages won't have it
+    id?: string;
+    isError?: boolean;
 }
 
 /**
