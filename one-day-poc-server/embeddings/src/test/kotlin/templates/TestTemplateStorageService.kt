@@ -12,27 +12,20 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.Logger
 import java.util.*
 
 class TestTemplateStorageService {
     private lateinit var templateRepository: TemplateRepository
-    private lateinit var mockLogger: Logger
-    private lateinit var originalLogger: Logger
 
     @BeforeEach
     fun setUp() {
         mockkObject(DatabaseManager)
         templateRepository = mockk()
         coEvery { DatabaseManager.templateRepository() } returns templateRepository
-        originalLogger = TemplateStorageService.logger
-        mockLogger = mockk<Logger>(relaxed = true)
-        TemplateStorageService.logger = mockLogger
     }
 
     @AfterEach
     fun tearDown() {
-        TemplateStorageService.logger = originalLogger
         unmockkAll()
     }
 
@@ -65,10 +58,6 @@ class TestTemplateStorageService {
 
             unmockkAll()
 
-            val mockLogger = mockk<Logger>(relaxed = true)
-            val originalLogger = TemplateStorageService.logger
-            TemplateStorageService.logger = mockLogger
-
             try {
                 mockkObject(DatabaseManager)
 
@@ -91,7 +80,6 @@ class TestTemplateStorageService {
 
                 assertNull(templateId)
             } finally {
-                TemplateStorageService.logger = originalLogger
                 unmockkAll()
             }
         }

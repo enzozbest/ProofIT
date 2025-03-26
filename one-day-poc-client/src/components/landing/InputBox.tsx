@@ -2,26 +2,28 @@ import React, { FC, useState, useRef, useEffect } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConversation } from '../../contexts/ConversationContext';
 
 /**
  * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
- * 
+ *
  * This component renders an array of text prompts as interactive buttons, typically used
  * for suggested actions or example queries the user can click on. The buttons are styled
  * with hover effects and include a right arrow indicator.
- * 
+ *
  * @component
  * @param {Object} props - Component properties
  * @param {string[]} props.prompts - Array of text strings to display as prompt buttons
- * 
+ *
  * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
  */
-const InputBox: FC = () => {
+const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const { createConversation } = useConversation();
 
   /**
    * Handle form submission
@@ -29,7 +31,7 @@ const InputBox: FC = () => {
    * - Navigates to generate page with text input if authenticated
    */
   const handleSubmit = () => {
-    if(!text.trim()) {
+    if (!text.trim()) {
       return;
     }
 
@@ -40,6 +42,7 @@ const InputBox: FC = () => {
 
     if (text.trim()) {
       setError(null);
+      createConversation();
       navigate('/generate', { state: { initialMessage: text } });
     }
   };
@@ -67,8 +70,7 @@ const InputBox: FC = () => {
         <button
           className="p-3 flex items-center justify-center rounded-full bg-transparent hover:bg-gray-800 transition"
           type="button"
-        >
-        </button>
+        ></button>
         <button
           className="p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2"
           type="button"

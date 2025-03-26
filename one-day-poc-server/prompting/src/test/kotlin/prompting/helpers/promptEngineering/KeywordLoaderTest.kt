@@ -2,16 +2,12 @@ package prompting.helpers.promptEngineering
 
 import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
 import io.mockk.unmockkAll
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.reflect.Field
-import java.net.URL
-import java.util.Collections
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -21,60 +17,6 @@ class KeywordLoaderTest {
     @AfterEach
     fun tearDown() {
         unmockkAll()
-    }
-
-    private fun createLoader(content: String?) =
-        object {
-            fun getKeywordsList(): List<String> {
-                return try {
-                    if (content == null) return emptyList()
-                    Json.decodeFromString<KeywordList>(content).keywords
-                } catch (e: Exception) {
-                    emptyList()
-                }
-            }
-        }
-
-    /**
-     * This test method is commented out because it's not possible to reset the keywords field in KeywordLoader
-     * since it's declared as final. Instead, we're using a different approach to test the behavior.
-     */
-    // private fun resetKeywordsField() {
-    //     val field = KeywordLoader::class.java.getDeclaredField("keywords\$delegate")
-    //     field.isAccessible = true
-    //     field.set(KeywordLoader, null)
-    // }
-
-    @Test
-    fun `test successful keyword loading`() {
-        val loader = createLoader("""{"keywords":["test", "keyword", "list", "example"]}""")
-        val keywords = loader.getKeywordsList()
-        assertContentEquals(
-            listOf("test", "keyword", "list", "example"),
-            keywords,
-            "Keywords should match the test resource content",
-        )
-    }
-
-    @Test
-    fun `test malformed JSON file returns empty list`() {
-        val loader = createLoader("invalid json content")
-        val keywords = loader.getKeywordsList()
-        assertTrue(keywords.isEmpty(), "Keywords list should be empty for malformed JSON")
-    }
-
-    @Test
-    fun `test null resource content returns empty list`() {
-        val loader = createLoader(null)
-        val keywords = loader.getKeywordsList()
-        assertTrue(keywords.isEmpty(), "Keywords list should be empty when resource is null")
-    }
-
-    @Test
-    fun `test empty keywords file returns empty list`() {
-        val loader = createLoader("""{"keywords":[]}""")
-        val keywords = loader.getKeywordsList()
-        assertTrue(keywords.isEmpty(), "Keywords list should be empty")
     }
 
     @Test
@@ -145,7 +87,7 @@ class KeywordLoaderTest {
     }
 
     @Test
-    fun `test actual KeywordLoader loads keywords from resource file`() {
+    fun `test KeywordLoader loads keywords from resource file`() {
         val keywords = KeywordLoader.getKeywordsList()
         assertContentEquals(
             listOf("test1", "test2", "test3"),
@@ -155,14 +97,14 @@ class KeywordLoaderTest {
     }
 
     @Test
-    fun `test actual KeywordLoader returns same instance on multiple calls`() {
+    fun `test KeywordLoader returns same instance on multiple calls`() {
         val keywords1 = KeywordLoader.getKeywordsList()
         val keywords2 = KeywordLoader.getKeywordsList()
         assertTrue(keywords1 === keywords2, "Multiple calls should return the same list instance due to lazy loading")
     }
 
     @Test
-    fun `test actual KeywordLoader list is unmodifiable`() {
+    fun `test KeywordLoader list is unmodifiable`() {
         val keywords = KeywordLoader.getKeywordsList()
         assertThrows<UnsupportedOperationException> {
             (keywords as MutableList<String>).add("new")
@@ -181,25 +123,13 @@ class KeywordLoaderTest {
     }
 
     @Test
-    fun `test resource file not found returns empty list`() {
-        // Create a test class that simulates KeywordLoader with a null resource
-        val testLoader = object {
-            // This simulates the lazy initialization in KeywordLoader but forces the resource to be null
-            val keywords: List<String> by lazy {
-                // Simulate the case where getResource returns null and the code falls back to "[]"
-                // In the actual KeywordLoader, "[]" is used as the default, but when parsed as a KeywordList,
-                // it expects a JSON object with a "keywords" field, so we use {"keywords":[]} here
-                val fileContent = """{"keywords":[]}"""
-                Collections.unmodifiableList(Json.decodeFromString<KeywordList>(fileContent).keywords)
-            }
+    fun `test KeywordLoader returns an empty list when keywords file is not found`() {
+        mockkObject(KeywordLoader)
+        // Reset the keywords to force reinitialization
+        KeywordLoader.resetKeywords()
+        every { KeywordLoader.getResource(any()) } returns null
 
-            fun getKeywordsList(): List<String> = keywords
-        }
-
-        // Call getKeywordsList() to trigger the lazy initialization
-        val keywords = testLoader.getKeywordsList()
-
-        // Verify that the resulting list is empty
-        assertTrue(keywords.isEmpty(), "Keywords list should be empty when resource file is not found")
+        val keywords = KeywordLoader.getKeywordsList()
+        assertEquals(emptyList(), keywords)
     }
 }

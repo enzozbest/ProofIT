@@ -103,6 +103,30 @@ class StorageTest {
     }
 
     @Test
+    fun `test getMessageHistory success with default values`() = runBlocking {
+        val conversationId = "test-conversation"
+        val expectedMessages = listOf(
+            ChatMessage(
+                conversationId = conversationId,
+                senderId = "test-sender",
+                content = "test-content-1"
+            ),
+            ChatMessage(
+                conversationId = conversationId,
+                senderId = "test-sender",
+                content = "test-content-2"
+            )
+        )
+
+        coEvery { mockRepository.getMessagesByConversation(conversationId,50,0) } returns expectedMessages
+
+        val result = getMessageHistory(conversationId)
+
+        coVerify(exactly = 1) { mockRepository.getMessagesByConversation(conversationId, 50,0) }
+        assertEquals(expectedMessages, result)
+    }
+
+    @Test
     fun `test getConversationHistory success`() = runBlocking {
         val userId = "test-user"
         val expectedConversations = listOf(
@@ -234,4 +258,35 @@ class StorageTest {
         coVerify(exactly = 1) { mockRepository.getSelectedPrototypeForMessage(conversationId, messageId) }
         assertNull(result)
     }
+
+    @Test
+    fun `test getPreviousPrototype success`() = runBlocking {
+        val conversationId = "test-conversation"
+        val expectedPrototype = Prototype(
+            messageId = "previous-message",
+            filesJson = "{}",
+            version = 1,
+            isSelected = false
+        )
+
+        coEvery { mockRepository.getPreviousPrototype(conversationId) } returns expectedPrototype
+
+        val result = getPreviousPrototype(conversationId)
+
+        coVerify(exactly = 1) { mockRepository.getPreviousPrototype(conversationId) }
+        assertEquals(expectedPrototype, result)
+    }
+
+    @Test
+    fun `test getPreviousPrototype failure`() = runBlocking {
+        val conversationId = "test-conversation"
+
+        coEvery { mockRepository.getPreviousPrototype(conversationId) } throws RuntimeException("Database error")
+
+        val result = getPreviousPrototype(conversationId)
+
+        coVerify(exactly = 1) { mockRepository.getPreviousPrototype(conversationId) }
+        assertNull(result)
+    }
+
 }

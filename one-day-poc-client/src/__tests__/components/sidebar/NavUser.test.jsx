@@ -5,19 +5,26 @@ import { NavUser } from '@/components/sidebar/NavUser';
 import { useNavigate } from 'react-router-dom';
 import { useSidebar } from '@/components/ui/Sidebar';
 
-// Mock the hooks and components used by NavUser
 vi.mock('react-router-dom', () => ({
   useNavigate: vi.fn(),
 }));
 
 vi.mock('@/components/ui/Sidebar', () => ({
-  SidebarMenu: ({ children }) => <div data-testid="sidebar-menu">{children}</div>,
+  SidebarMenu: ({ children }) => (
+    <div data-testid="sidebar-menu">{children}</div>
+  ),
   SidebarMenuButton: ({ children, size, className }) => (
-    <button data-testid="sidebar-menu-button" data-size={size} className={className}>
+    <button
+      data-testid="sidebar-menu-button"
+      data-size={size}
+      className={className}
+    >
       {children}
     </button>
   ),
-  SidebarMenuItem: ({ children }) => <div data-testid="sidebar-menu-item">{children}</div>,
+  SidebarMenuItem: ({ children }) => (
+    <div data-testid="sidebar-menu-item">{children}</div>
+  ),
   useSidebar: vi.fn(),
 }));
 
@@ -38,7 +45,9 @@ vi.mock('@/components/ui/Avatar', () => ({
 }));
 
 vi.mock('@/components/ui/DropdownMenu', () => ({
-  DropdownMenu: ({ children }) => <div data-testid="dropdown-menu">{children}</div>,
+  DropdownMenu: ({ children }) => (
+    <div data-testid="dropdown-menu">{children}</div>
+  ),
   DropdownMenuTrigger: ({ children, asChild }) => (
     <div data-testid="dropdown-menu-trigger" data-as-child={asChild}>
       {children}
@@ -55,7 +64,9 @@ vi.mock('@/components/ui/DropdownMenu', () => ({
       {children}
     </div>
   ),
-  DropdownMenuGroup: ({ children }) => <div data-testid="dropdown-menu-group">{children}</div>,
+  DropdownMenuGroup: ({ children }) => (
+    <div data-testid="dropdown-menu-group">{children}</div>
+  ),
   DropdownMenuItem: ({ children, className, onClick }) => (
     <div
       data-testid="dropdown-menu-item"
@@ -82,23 +93,19 @@ vi.mock('@radix-ui/react-icons', () => ({
   CaretSortIcon: () => <div data-testid="caret-sort-icon">CaretSortIcon</div>,
 }));
 
-// Store original fetch
 const originalFetch = window.fetch;
 
 beforeEach(() => {
   vi.resetAllMocks();
   window.fetch = vi.fn();
 
-  // Set up window.location mock
   Object.defineProperty(window, 'location', {
     writable: true,
     value: { href: '' },
   });
 
-  // Mock the useSidebar hook
   useSidebar.mockReturnValue({ isMobile: false });
 
-  // Mock the useNavigate hook
   useNavigate.mockReturnValue(vi.fn());
 });
 
@@ -135,7 +142,10 @@ test('Fetches and displays user data', async () => {
   });
 
   const avatarImages = screen.getAllByTestId('avatar-image');
-  expect(avatarImages[0]).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+  expect(avatarImages[0]).toHaveAttribute(
+    'src',
+    'https://example.com/avatar.jpg'
+  );
 });
 
 test('Navigates to profile page when Account is clicked', async () => {
@@ -158,7 +168,6 @@ test('Navigates to profile page when Account is clicked', async () => {
     expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
   });
 
-  // Find all dropdown menu items and click on the Account one
   const accountItem = screen.getAllByTestId('dropdown-menu-item')[0];
   fireEvent.click(accountItem);
 
@@ -215,7 +224,9 @@ test('Handles logout error gracefully', async () => {
     json: () => Promise.resolve(mockUser),
   });
 
-  const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const consoleErrorSpy = vi
+    .spyOn(console, 'error')
+    .mockImplementation(() => {});
   window.fetch.mockRejectedValueOnce(new Error('Network error'));
 
   render(<NavUser />);
@@ -224,7 +235,6 @@ test('Handles logout error gracefully', async () => {
     expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
   });
 
-  // Find the Log out menu item
   const logoutItems = screen.getAllByTestId('dropdown-menu-item');
   const logoutItem = logoutItems[logoutItems.length - 1];
   fireEvent.click(logoutItem);
@@ -279,5 +289,7 @@ test('Renders sidebar menu button with correct attributes', async () => {
 
   const sidebarMenuButton = screen.getByTestId('sidebar-menu-button');
   expect(sidebarMenuButton).toHaveAttribute('data-size', 'lg');
-  expect(sidebarMenuButton.className).toContain('data-[state=open]:bg-sidebar-accent');
+  expect(sidebarMenuButton.className).toContain(
+    'data-[state=open]:bg-sidebar-accent'
+  );
 });

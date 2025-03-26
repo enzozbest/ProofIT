@@ -6,6 +6,6 @@ import kotlin.test.assertEquals
 class ChatEndpointTest {
     @Test
     fun `Test default upload directory`() {
-        assertEquals("uploads", ChatEndpoint.UPLOAD_DIR)
+        assertEquals("uploads", ChatEndpoints.UPLOAD_DIR)
     }
 }

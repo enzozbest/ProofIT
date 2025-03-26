@@ -25,12 +25,27 @@ const AuthConsumer = () => {
   const auth = useAuth();
   return (
     <div>
-      <div data-testid="auth-status">{auth.isAuthenticated ? 'Authenticated' : 'Not Authenticated'}</div>
-      <div data-testid="admin-status">{auth.isAdmin ? 'Admin' : 'Not Admin'}</div>
-      <button data-testid="login-btn" onClick={() => auth.login()}>Login</button>
-      <button data-testid="login-prompt-btn" onClick={() => auth.login('test prompt')}>Login with prompt</button>
-      <button data-testid="logout-btn" onClick={auth.logout}>Logout</button>
-      <button data-testid="check-auth-btn" onClick={auth.checkAuth}>Check Auth</button>
+      <div data-testid="auth-status">
+        {auth.isAuthenticated ? 'Authenticated' : 'Not Authenticated'}
+      </div>
+      <div data-testid="admin-status">
+        {auth.isAdmin ? 'Admin' : 'Not Admin'}
+      </div>
+      <button data-testid="login-btn" onClick={() => auth.login()}>
+        Login
+      </button>
+      <button
+        data-testid="login-prompt-btn"
+        onClick={() => auth.login('test prompt')}
+      >
+        Login with prompt
+      </button>
+      <button data-testid="logout-btn" onClick={auth.logout}>
+        Logout
+      </button>
+      <button data-testid="check-auth-btn" onClick={auth.checkAuth}>
+        Check Auth
+      </button>
     </div>
   );
 };
@@ -93,7 +108,9 @@ describe('AuthContext', () => {
     });
 
     expect(UserService.fetchUserData).toHaveBeenCalled();
-    expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
+    expect(screen.getByTestId('auth-status')).toHaveTextContent(
+      'Authenticated'
+    );
     expect(screen.getByTestId('admin-status')).toHaveTextContent('Admin');
   });
 
@@ -114,8 +131,12 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(window.sessionStorage.getItem).toHaveBeenCalledWith('selectedPrompt');
-      expect(window.sessionStorage.removeItem).toHaveBeenCalledWith('selectedPrompt');
+      expect(window.sessionStorage.getItem).toHaveBeenCalledWith(
+        'selectedPrompt'
+      );
+      expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
+        'selectedPrompt'
+      );
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
         state: { initialMessage: 'saved prompt' },
       });
@@ -136,7 +157,9 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(UserService.clearUser).toHaveBeenCalled();
     });
   });
@@ -156,14 +179,18 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(UserService.clearUser).toHaveBeenCalled();
     });
   });
 
   test('checkAuth handles fetch errors', async () => {
     window.fetch.mockRejectedValueOnce(new Error('Network error'));
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     render(
       <MemoryRouter>
@@ -174,7 +201,9 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Not Authenticated'
+      );
       expect(UserService.clearUser).toHaveBeenCalled();
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -202,7 +231,10 @@ describe('AuthContext', () => {
       await userEvent.click(loginBtn);
     });
 
-    expect(window.sessionStorage.setItem).toHaveBeenCalledWith('selectedPrompt', 'test prompt');
+    expect(window.sessionStorage.setItem).toHaveBeenCalledWith(
+      'selectedPrompt',
+      'test prompt'
+    );
     expect(window.location.href).toBe('http://localhost:8000/api/auth');
   });
 
@@ -249,7 +281,9 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Authenticated'
+      );
     });
 
     const logoutBtn = screen.getByTestId('logout-btn');
@@ -261,7 +295,9 @@ describe('AuthContext', () => {
       'http://localhost:8000/api/auth/logout',
       expect.any(Object)
     );
-    expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+    expect(screen.getByTestId('auth-status')).toHaveTextContent(
+      'Not Authenticated'
+    );
     expect(UserService.clearUser).toHaveBeenCalled();
   });
 
@@ -273,7 +309,9 @@ describe('AuthContext', () => {
       })
       .mockRejectedValueOnce(new Error('Network error'));
 
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     render(
       <MemoryRouter>
@@ -284,7 +322,9 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Authenticated'
+      );
     });
 
     const logoutBtn = screen.getByTestId('logout-btn');
@@ -292,7 +332,10 @@ describe('AuthContext', () => {
       await userEvent.click(logoutBtn);
     });
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith('Logout error:', expect.any(Error));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Logout error:',
+      expect.any(Error)
+    );
     consoleErrorSpy.mockRestore();
   });
 
@@ -315,7 +358,9 @@ describe('AuthContext', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('auth-status')).toHaveTextContent('Not Authenticated');
+      expect(screen.getByTestId('auth-status')).toHaveTextContent(
+        'Not Authenticated'
+      );
     });
 
     const checkAuthBtn = screen.getByTestId('check-auth-btn');
@@ -324,6 +369,8 @@ describe('AuthContext', () => {
     });
 
     expect(window.fetch).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId('auth-status')).toHaveTextContent('Authenticated');
+    expect(screen.getByTestId('auth-status')).toHaveTextContent(
+      'Authenticated'
+    );
   });
 });

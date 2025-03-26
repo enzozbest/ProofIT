@@ -71,3 +71,12 @@ suspend fun retrievePrototype(conversationId: String, messageId: String): Protot
         null
     }
 }
+
+suspend fun getPreviousPrototype(conversationId: String): Prototype? {
+    return runCatching {
+        ChatStorageFactory.getChatRepository().getPreviousPrototype(conversationId)
+    }.getOrElse { e ->
+        println("Error retrieving previous prototype: ${e.message}")
+        null
+    }
+}

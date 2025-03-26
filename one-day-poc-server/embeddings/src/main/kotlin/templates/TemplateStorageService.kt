@@ -2,7 +2,6 @@ package templates
 
 import database.core.DatabaseManager
 import database.tables.templates.Template
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 /**
@@ -10,8 +9,6 @@ import java.util.UUID
  * Uses DatabaseManager to access the TemplateRepository.
  */
 object TemplateStorageService {
-    var logger = LoggerFactory.getLogger(TemplateService::class.java)
-
     /**
      * Creates a new template and stores it in the database.
      *
