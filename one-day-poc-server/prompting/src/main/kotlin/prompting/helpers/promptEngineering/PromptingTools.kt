@@ -230,10 +230,6 @@ object PromptingTools {
             5. Backend Frameworks: Express, Spring.
             6. Building: Vite
             
-            ### Technologies the model must not use
-            1. Babel
-            2. Webpack
-
             ### What the model must do
             Generate production-quality code based on:
             1. The user's prompt.
