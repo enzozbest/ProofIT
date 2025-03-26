@@ -1,9 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { vi, test, expect, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPage from '../../pages/LandingPage.js';
 import { AuthProvider } from '@/contexts/AuthContext.tsx';
-import * as ConversationContext from '@/contexts/ConversationContext.tsx';
+import { useConversation } from '@/contexts/ConversationContext.tsx';
 import React from 'react';
 import { mockAuth } from '../mocks/authContext.mock.jsx';
 import { useAuth } from '@/contexts/AuthContext.tsx';
@@ -32,16 +32,26 @@ vi.mock('@/contexts/AuthContext.tsx', () => {
 
 const mockCreateConversation = vi.fn();
 const mockFetchConversations = vi.fn();
-vi.spyOn(ConversationContext, 'useConversation').mockImplementation(() => ({
-  createConversation: mockCreateConversation,
-  conversations: [],
-  fetchConversations: mockFetchConversations,
-  currentConversationId: null,
-  setCurrentConversationId: vi.fn(),
+
+vi.mock('@/contexts/ConversationContext.tsx', () => ({
+  useConversation: vi.fn(() => ({
+    createConversation: vi.fn(),
+    conversations: [],
+    fetchConversations: vi.fn(),
+    currentConversationId: null,
+    setCurrentConversationId: vi.fn(),
+  })),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useConversation.mockReturnValue({
+    createConversation: mockCreateConversation,
+    conversations: [],
+    fetchConversations: mockFetchConversations,
+    currentConversationId: null,
+    setCurrentConversationId: vi.fn(),
+  });
 });
 
 test('Renders landing page', async () => {
