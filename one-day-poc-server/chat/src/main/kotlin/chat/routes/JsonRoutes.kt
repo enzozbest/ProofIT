@@ -10,6 +10,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import prompting.PredefinedPrototypes
 import prompting.PromptingMain
 import java.time.Instant
 
