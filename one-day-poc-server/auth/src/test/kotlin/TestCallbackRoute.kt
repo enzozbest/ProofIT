@@ -47,7 +47,7 @@ class TestCallbackRoute {
                 }
             val response = myClient.get("/validate")
             assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("localhost:7000/", response.headers["Location"])
+            assertEquals("localhost:22002/", response.headers["Location"])
 
             val setCookieHeaders: List<String>? = response.headers.getAll(HttpHeaders.SetCookie)
             assertNotNull(setCookieHeaders, "Expected at least one Set-Cookie header.")
@@ -162,7 +162,7 @@ class TestCallbackRoute {
                 }
             val response = myClient.get("/validate?redirect=/test")
             assertEquals(HttpStatusCode.Found, response.status)
-            assertEquals("localhost:7000/test", response.headers["Location"])
+            assertEquals("localhost:22002/test", response.headers["Location"])
         }
 
     @Test
