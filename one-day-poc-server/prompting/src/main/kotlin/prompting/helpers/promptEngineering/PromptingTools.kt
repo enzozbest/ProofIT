@@ -144,70 +144,44 @@ object PromptingTools {
             The model's response must strictly obey the schema and examples provided. The model is
             not allowed to change this format in any way.
             
-            Schema:
+            Example (your response must look like this):
             {
-              "${'$'}schema": "http://json-schema.org/draft-07/schema#",
-              "title": "Ollama Response Schema",
-              "type": "object",
-              "properties": {
-                "chat": {
-                  "type": "string",
-                  "description": "Chat response from the server",
-                },
-                "prototype": {
-                  "type": "object",
-                  "description": "Prototype files to render in WebContainer",
-                  "properties": {
-                    "files": {
-                      "type": "object",
-                      "description": "File tree structure compatible with WebContainer",
-                      "additionalProperties": {
-                        "${'$'}ref": "#/definitions/fileEntry"
-                      },
-                      "required": ["package.json", "index.html", "server.js"]
+              "chat": "I've created a React counter application using Vite as the build tool. The app includes proper JSX handling for all JavaScript files, ensuring compatibility with React's syntax. I've also included a vite.config.js file that configures esbuild to properly process JSX in .js files, preventing common build errors.",
+              "prototype": {
+                "files": {
+                  "package.json": {
+                    "name": "react-counter-app",
+                    "version": "1.0.0",
+                    "description": "A simple React counter application using Vite",
+                    "scripts": {
+                      "start": "vite",
+                      "build": "vite build",
+                      "preview": "vite preview"
+                    },
+                    "dependencies": {
+                      "react": "^18.2.0",
+                      "react-dom": "^18.2.0"
+                    },
+                    "devDependencies": {
+                      "@vitejs/plugin-react": "^4.0.0",
+                      "vite": "^4.3.9"
                     }
                   },
-                  "required": ["files"]
-                }
-              },
-              "definitions": {
-                "fileEntry": {
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "additionalProperties": false
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "files": {
-                          "type": "object",
-                          "description": "Nested file tree for a directory",
-                          "additionalProperties": {
-                            "${'$'}ref": "#/definitions/fileEntry"
-                          }
-                        }
-                      },
-                      "required": ["files"],
-                      "additionalProperties": false
-                    }
-                  ]
+                  "vite.config.js": "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n  esbuild: {\n    loader: {\n      '.js': 'jsx',\n    },\n  },\n  server: {\n    port: 3000,\n    open: true\n  }\n});",
+                  "index.html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>React Counter App</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n  <script type=\"module\" src=\"/src/main.js\"></script>\n</body>\n</html>",
+                  "main.jsx": "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './styles.css';\n\nReactDOM.createRoot(document.getElementById('root')).render(\n  <React.StrictMode>\n    <App />\n  </React.StrictMode>\n);",
+                  "App.jsx": "import React, { useState } from 'react';\nimport Counter from './Counter';\n\nfunction App() {\n  return (\n    <div className=\"app\">\n      <h1>React Counter App</h1>\n      <Counter />\n    </div>\n  );\n}\n\nexport default App;",
+                  "Counter.jsx": "import React, { useState } from 'react';\n\nfunction Counter() {\n  const [count, setCount] = useState(0);\n\n  const increment = () => setCount(count + 1);\n  const decrement = () => setCount(count - 1);\n  const reset = () => setCount(0);\n\n  return (\n    <div className=\"counter\">\n      <h2>Count: {count}</h2>\n      <div className=\"buttons\">\n        <button onClick={decrement}>-</button>\n        <button onClick={reset}>Reset</button>\n        <button onClick={increment}>+</button>\n      </div>\n    </div>\n  );\n}\n\nexport default Counter;",
+                  "styles.css": "* {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\nbody {\n  font-family: Arial, sans-serif;\n  line-height: 1.6;\n  background-color: #f5f5f5;\n  color: #333;\n}\n\n.app {\n  max-width: 600px;\n  margin: 2rem auto;\n  padding: 2rem;\n  background-color: white;\n  border-radius: 8px;\n  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);\n  text-align: center;\n}\n\nh1 {\n  margin-bottom: 2rem;\n  color: #444;\n}\n\n.counter {\n  margin: 2rem 0;\n}\n\n.counter h2 {\n  font-size: 2.5rem;\n  margin-bottom: 1.5rem;\n}\n\n.buttons {\n  display: flex;\n  justify-content: center;\n  gap: 1rem;\n}\n\nbutton {\n  padding: 0.5rem 1.5rem;\n  font-size: 1.25rem;\n  border: none;\n  border-radius: 4px;\n  cursor: pointer;\n  background-color: #4a90e2;\n  color: white;\n  transition: background-color 0.2s;\n}\n\nbutton:hover {\n  background-color: #357abd;\n}\n\nbutton:nth-child(2) {\n  background-color: #e27c4a;\n}\n\nbutton:nth-child(2):hover {\n  background-color: #c96a3b;\n}"
                 }
               }
-            }
-            Good Example:
-            {
-                "chat" : "This is a sample message to go in the chat"
-                "prototype": {
-                    "files": {
-                        "package.json": "{
-                        "contents": "{ \"name\": \"prototype\", \"version\": \"1.0.0\" }",
-                    }
-                }
             }
             
             The model must adhere to this; no other response format is allowed. The model's response must include
             both the 'chat' and 'prototype' keys at the top-level and only those. 
+
+            ### File Formats
+            The model must use the .jsx extension for JavaScript files.
 
             ### What the code the model generates must be like
             1. Pages the model generates must use <div class="page">. Only one of those must have class="page active".
@@ -223,7 +197,7 @@ object PromptingTools {
             
             ### Technologies the model can use
             Choose appropriate technologies from:
-            1. Frontend: HTML5, CSS3, JavaScript (ES6+), TypeScript.
+            1. Frontend: HTML5, CSS3, JavaScript (ES6+)
             2. Frameworks: React, Vue, Angular, Svelte.
             3. Styling: Tailwind, Bootstrap, Material-UI.
             4. Backend: Node.js.
@@ -236,7 +210,6 @@ object PromptingTools {
             2. The provided functional requirements (provided).
             3. Available reference templates (provided).
             """.trimIndent()
-
         val userMessage =
             """
             I want you to generate a lightweight proof-of-concept prototype for a system with the following 
@@ -266,20 +239,19 @@ object PromptingTools {
 
         val finalPromptMessage =
             """
-            Now the model will produce the final JSON strictly following the schema provided.
+            Now the model will shortly produce the final JSON strictly following the schema and example provided.
+            The response must include both the 'chat' and 'prototype' keys at the top-level and only those.
+            The 'chat' key must have a string value, representing a short message describing what the model has done.
+            The 'prototype' key must have an object value, containing the prototype structure the model has generated.
             
             The model always incorporates each reference template provided into its respective file in the prototype.files object.
             The model must never use back-ticked strings; the model must convert those to regular strings. For instance, `EXAMPLE` is not allowed, but EXAMPLE is. 
             The model never ignores the reference templates, rather it extends/modifies/combines them to fit the functional requirements. 
             The model should adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
-            The model always adds dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
+            The model always adds dependencies in package.json for React, ReactDOM, Vite, and anything else needed.
             
-            The final code must run `npm install` and `npm start` without errors in a WebContainer. The model always includes
-            the script definition/declaration as files in its response.
-            
-            The final JSON must include:
-             1. A 'chat' key, with a simple message indicating how the model's solution meets the user's original prompt.
-             2.A 'prototype' key, with the file structure of the prototype. 
+            The final code must run `npm install` and `npm start` without errors in a WebContainer. 
+            The model always includes the script definition/declaration as files in its response.
              
             Now the model must produce a response.
             """.trimIndent()
