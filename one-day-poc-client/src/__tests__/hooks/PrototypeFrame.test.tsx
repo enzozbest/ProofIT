@@ -225,7 +225,6 @@ describe('PrototypeFrame Component', () => {
     vi.spyOn(React, 'useRef').mockReturnValue({ current: mockIframe } as any);
 
     const mockSpawn = vi.fn().mockImplementation(() => {
-
       mockIframe.sandbox.add('allow-scripts');
       mockIframe.sandbox.add('allow-same-origin');
       mockIframe.sandbox.add('allow-forms');
@@ -264,7 +263,6 @@ describe('PrototypeFrame Component', () => {
   });
 
   it('handles Error objects correctly in error handling', async () => {
-
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const mockMount = vi
@@ -386,7 +384,6 @@ describe('PrototypeFrame Component', () => {
   });
 
   it('handles object errors with message property correctly', async () => {
-
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const objectError = { message: 'Invalid file format', code: 422 };
@@ -423,7 +420,7 @@ describe('PrototypeFrame Component', () => {
     const mockSpawn = vi.fn().mockImplementation((command, args) => {
       if (command === 'npm' && args[0] === 'install') {
         return {
-          exit: Promise.resolve(1), 
+          exit: Promise.resolve(1),
           output: { pipeTo: vi.fn() },
         };
       }
@@ -436,7 +433,7 @@ describe('PrototypeFrame Component', () => {
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
       instance: {
         on: vi.fn(),
-        mount: vi.fn().mockResolvedValue(undefined), 
+        mount: vi.fn().mockResolvedValue(undefined),
         spawn: mockSpawn,
       },
       loading: false,
@@ -633,7 +630,7 @@ describe('PrototypeFrame Component', () => {
     });
 
     const files: FileTree = {
-      'empty-file.txt': { file: {} }, 
+      'empty-file.txt': { file: {} },
       'normal-file.js': {
         file: { contents: 'console.log("I have content");' },
       },
