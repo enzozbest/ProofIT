@@ -15,40 +15,12 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import prompting.PromptingMain
-import java.time.Instant
-
-/**
- * Represents a response from the chat processing system.
- *
- * @property message The generated text response from the LLM
- * @property role The role of the responder (default: "LLM")
- * @property timestamp Timestamp string indicating when the response was created
- */
-@Serializable
-data class ChatResponse(
-    val message: String,
-    val role: String = "LLM",
-    val timestamp: String,
-    val messageId: String,
-)
-
-@Serializable
-data class ServerResponse(
-    val chat: ChatResponse,
-    val prototype: PrototypeResponse? = null,
-)
-
-@Serializable
-data class PrototypeResponse(
-    val files: JsonObject, // Keep as JsonObject, not Map
-)
 
 private lateinit var promptingMainInstance: PromptingMain
 
@@ -118,10 +90,10 @@ private suspend fun handleJsonRequest(
     try {
         val promptResponse = getPromptingMain().run(request.prompt, previousGeneration)
         val jsonResponse = runBlocking { Json.decodeFromString<JsonObject>(promptResponse) }
-        val response = serverResponse(jsonResponse)
-        val id = savePrototype(request.conversationId, response.prototype!!.files)
-        val responseWithId = response.copy(chat = response.chat.copy(messageId = id))
-        val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
+
+        val id = savePrototype(request.conversationId, jsonResponse)
+        val serverResponse = JsonObject(jsonResponse + ("messageId" to JsonPrimitive(id)))
+        val jsonString = Json.encodeToString(JsonObject.serializer(), serverResponse)
         println("ENCODED RESPONSE: $jsonString")
 
         call.respondText(jsonString, contentType = ContentType.Application.Json)
@@ -165,43 +137,6 @@ private suspend fun savePrototype(
         storePrototype(prototype)
     }
     return savedMessage.id
-}
-
-/**
- * Extracts the functional requirements and prototype files from the LLM response.
- * @param response The LLM response.
- * @return A [ServerResponse] containing both chat response and prototype files.
- */
-private fun serverResponse(response: JsonObject): ServerResponse {
-    val defaultResponse = "Here is your code."
-    val chat =
-        when (val jsonReqs = response["chat"]) {
-            is JsonPrimitive -> jsonReqs.content
-            is JsonObject -> jsonReqs["message"]?.jsonPrimitive?.content ?: defaultResponse
-            else -> defaultResponse
-        }
-    val chatResponse =
-        ChatResponse(
-            message = chat,
-            role = "LLM",
-            timestamp = Instant.now().toString(),
-            messageId = "0",
-        )
-
-    val prototypeResponse =
-        response["prototype"]?.let { prototype ->
-            if (prototype is JsonObject && prototype.containsKey("files")) {
-                PrototypeResponse(
-                    files = prototype["files"] as JsonObject,
-                )
-            } else {
-                null
-            }
-        }
-    return ServerResponse(
-        chat = chatResponse,
-        prototype = prototypeResponse,
-    )
 }
 
 /**
