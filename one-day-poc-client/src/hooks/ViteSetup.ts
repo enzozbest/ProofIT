@@ -23,7 +23,8 @@ export const ensureViteConfig = async (context: ViteSetupContext): Promise<void>
       console.log('vite.config.js exists');
       return;
     } catch (e) {
-      let configType = 'viteReact'; 
+      let configType = 'viteReact';
+      let isReact17 = false;
       
       try {
         const packageJsonText = await webcontainerInstance.fs.readFile('/package.json', 'utf-8');
@@ -31,13 +32,28 @@ export const ensureViteConfig = async (context: ViteSetupContext): Promise<void>
         
         if (!packageJson.dependencies?.react && !packageJson.devDependencies?.react) {
           configType = 'viteJs';
+        } else {
+          const reactVersion = packageJson.dependencies?.react || packageJson.devDependencies?.react;
+          if (reactVersion && reactVersion.includes('17.')) {
+            isReact17 = true;
+            console.log('Detected React 17, using classic JSX runtime');
+          }
         }
       } catch (e) {
         console.log('Error reading package.json, using default React config:', e);
       }
       
-      await webcontainerInstance.fs.writeFile('/vite.config.js', configTemplates[configType]);
-      console.log(`Created vite.config.js with ${configType} template`);
+      let configTemplate = configTemplates[configType];
+      
+      if (isReact17 && configType === 'viteReact') {
+        configTemplate = configTemplate.replace(
+          "plugins: [react()]", 
+          "plugins: [react({ jsxRuntime: 'classic' })]"
+        );
+      }
+      
+      await webcontainerInstance.fs.writeFile('/vite.config.js', configTemplate);
+      console.log(`Created vite.config.js with ${configType} template${isReact17 ? ' (React 17 mode)' : ''}`);
     }
   } catch (e) {
     console.error('Error ensuring Vite config:', e);
@@ -55,11 +71,15 @@ export const ensureViteDependencies = async (context: ViteSetupContext): Promise
     const packageJsonText = await webcontainerInstance.fs.readFile('/package.json', 'utf-8');
     const packageJson = JSON.parse(packageJsonText);
     
+    const reactVersion = packageJson.dependencies?.react || 'latest';
+    const { viteVersion, pluginReactVersion } = getCompatibleVersions(reactVersion);
+    console.log(`Using Vite ${viteVersion} with React ${reactVersion}`);
+    
     const requiredDeps = {
-      'vite': 'latest',
-      '@vitejs/plugin-react': 'latest',
-      'react': packageJson.dependencies?.react || 'latest',
-      'react-dom': packageJson.dependencies?.['react-dom'] || 'latest'
+      'vite': viteVersion,
+      '@vitejs/plugin-react': pluginReactVersion,
+      'react': reactVersion,
+      'react-dom': packageJson.dependencies?.['react-dom'] || reactVersion
     };
     
     let needsInstall = false;
@@ -100,6 +120,36 @@ export const ensureViteDependencies = async (context: ViteSetupContext): Promise
     return false;
   }
 };
+
+/**
+ * Determines compatible Vite and plugin-react versions based on React version
+ */
+function getCompatibleVersions(reactVersion: string): { viteVersion: string, pluginReactVersion: string } {
+  const version = reactVersion.replace(/^\^|~/, '');
+  const majorVersion = parseInt(version.split('.')[0]);
+  
+  // For React 17
+  if (majorVersion === 17) {
+    return {
+      viteVersion: '^2.9.15',
+      pluginReactVersion: '^1.3.2'
+    };
+  }
+  
+  // For React 16
+  if (majorVersion === 16) {
+    return {
+      viteVersion: '^2.8.6',
+      pluginReactVersion: '^1.2.0'
+    };
+  }
+  
+  // For React 18 and later (or if it's underterminable)
+  return {
+    viteVersion: '^4.3.9',
+    pluginReactVersion: '^4.0.0'
+  };
+}
 
 /**
  * Ensure index.html exists for Vite project
