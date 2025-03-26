@@ -3,14 +3,11 @@ package prompting.helpers.promptEngineering
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 object PromptingTools {
-    private val newLineRegex = Regex("(\\n|\\\\n)")
-
     /**
      * Extracts functional requirements from a user's prompt and associated keywords
      *
@@ -129,7 +126,7 @@ object PromptingTools {
         userPrompt: String,
         requirements: String,
         templates: List<String>,
-        previousGeneration: String ?= null,
+        previousGeneration: String? = null,
     ): String {
         val systemMessage =
             """
@@ -285,11 +282,10 @@ object PromptingTools {
         val prevCodeMessage =
             """
             The model must consider the current code when generating new code.
-            If the code is related and useful, the model must base the new code on this and incorporate existing features.
+            If the code is related and useful, the model must base the new code on the current code, incorporating and extending existing features.
             This is the current code:
             $previousGeneration
             """.trimIndent()
-
 
         val messagesArray =
             buildJsonArray {
@@ -315,7 +311,7 @@ object PromptingTools {
                     },
                 )
                 // Previous code message
-                if ( previousGeneration != null ) {
+                if (previousGeneration != null) {
                     println("PREVIOUS CODE MESSAGE IS NOT NULL IN PROMPTING TOOLS")
                     add(
                         buildJsonObject {
@@ -350,17 +346,7 @@ object PromptingTools {
      * @param response The raw response from the LLM as a string
      * @return The formatted JSON response as a JsonObject
      */
-    fun formatResponseJson(response: String): JsonObject {
-        val cleaned = cleanLlmResponse(response).also { println(it) }
-        println("CLEANED RESPONSE")
-        return run {
-            println("DECODING...")
-            runCatching { Json.decodeFromString<JsonObject>(cleaned) }.getOrElse {
-                println(it)
-                error("ERROR: $it")
-            }
-        }
-    }
+    fun formatResponseJson(response: String): String = cleanLlmResponse(response).also { println(it) }
 
     /**
      * Extracts and cleans a JSON object from an LLM response string.
@@ -379,33 +365,6 @@ object PromptingTools {
                     .reversed()
                     .indexOf('}') // As a "forwards" index pointing to the character just after the last '}'
 
-        val jsonString = response.substring(openingBrace, closingBrace)
-        println(jsonString)
-        val cleaned =
-            jsonString
-                .removeComments()
-                .removeEscapedQuotations()
-                .replace(newLineRegex, "")
-                .trim()
-        return cleaned
-    }
-
-    fun String.removeEscapedQuotations(): String {
-        val pattern = Regex("\\\"")
-        return this.replace(pattern, "\"")
-    }
-
-    /**
-     * Removes C-style comments from a string.
-     *
-     * Uses regex with careful pattern matching to avoid false positives like URLs.
-     *
-     * @receiver String containing potential comments
-     * @return String with all comments removed
-     */
-    fun String.removeComments(): String {
-        val cStyleCommentRegex = Regex("""(?<!:)//.*?\\n|/\*[\s\S]*?\*/""", RegexOption.MULTILINE)
-        val pythonStyleCommentRegex = Regex("""#.*?(?:\\n|$)""", RegexOption.MULTILINE)
-        return this.replace(cStyleCommentRegex, "").replace(pythonStyleCommentRegex, "")
+        return response.substring(openingBrace, closingBrace).trim()
     }
 }
