@@ -351,8 +351,6 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   const configureSandbox = () => {
     if (!iframeRef.current) return;
     
-    iframeRef.current.sandbox.add('allow-scripts');
-    iframeRef.current.sandbox.add('allow-same-origin');
     iframeRef.current.sandbox.add('allow-forms');
     iframeRef.current.sandbox.add('allow-modals');
   };
