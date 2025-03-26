@@ -18,7 +18,7 @@ object PromptingMainProvider {
      */
     fun getInstance(): PromptingMain {
         if (!::promptingMainInstance.isInitialized) {
-            promptingMainInstance = PromptingMain()
+            promptingMainInstance = PromptingMain("codellama:7b")
         }
         return promptingMainInstance
     }
@@ -42,6 +42,6 @@ object PromptingMainProvider {
      * workflow, typically after testing or when a fresh state is required.
      */
     fun resetInstance() {
-        promptingMainInstance = PromptingMain()
+        promptingMainInstance = PromptingMain("codellama:7b")
     }
 }
