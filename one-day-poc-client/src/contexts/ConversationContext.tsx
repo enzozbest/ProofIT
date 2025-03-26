@@ -1,6 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Conversation, Message } from '../types/Types';
-import { fetchChatHistory, createNewConversation, apiUpdateConversationName, getConversationHistory } from '../api/FrontEndAPI';
+import {
+  fetchChatHistory,
+  createNewConversation,
+  apiUpdateConversationName,
+  getConversationHistory,
+} from '../api/FrontEndAPI';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationContextType {
@@ -15,12 +20,18 @@ interface ConversationContextType {
   isLoading: boolean;
 }
 
-const ConversationContext = createContext<ConversationContextType | undefined>(undefined);
+const ConversationContext = createContext<ConversationContextType | undefined>(
+  undefined
+);
 
-export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { isAuthenticated } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -39,19 +50,19 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       name: `New Chat ${new Date().toLocaleString()}`,
       lastModified: new Date().toISOString(),
       messageCount: 0,
-      messages: []
+      messages: [],
     };
-    
+
     setConversations([newConversation, ...conversations]);
     setActiveConversationId(newId);
     return newId;
   };
 
   const updateConversationName = async (id: string, name: string) => {
-    setConversations(conversations.map(conv => 
-      conv.id === id ? { ...conv, name } : conv
-    ));
-    
+    setConversations(
+      conversations.map((conv) => (conv.id === id ? { ...conv, name } : conv))
+    );
+
     try {
       await apiUpdateConversationName(id, name);
     } catch (error) {
@@ -61,13 +72,13 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const loadConversationMessages = async (conversationId: string) => {
     if (!conversationId) return;
-    
+
     setLoadingMessages(true);
     try {
       const messagesHistory = await getConversationHistory(conversationId);
       setMessages(messagesHistory);
     } catch (error) {
-      console.error("Error loading conversation messages:", error);
+      console.error('Error loading conversation messages:', error);
     } finally {
       setLoadingMessages(false);
     }
@@ -81,7 +92,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Refresh when authentication status changes
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("User authenticated, fetching conversations");
+      console.log('User authenticated, fetching conversations');
       refreshConversations();
     } else {
       // Clear conversations when logged out
@@ -101,7 +112,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         createConversation,
         refreshConversations,
         updateConversationName,
-        isLoading
+        isLoading,
       }}
     >
       {children}
@@ -112,7 +123,9 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 export const useConversation = () => {
   const context = useContext(ConversationContext);
   if (context === undefined) {
-    throw new Error('useConversation must be used within a ConversationProvider');
+    throw new Error(
+      'useConversation must be used within a ConversationProvider'
+    );
   }
   return context;
 };

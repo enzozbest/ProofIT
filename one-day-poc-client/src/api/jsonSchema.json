@@ -57,7 +57,9 @@
                       "type": "object",
                       "description": "Directory containing files and subdirectories",
                       "patternProperties": {
-                        "^.*$": { "$ref": "#/properties/prototype/properties/files/patternProperties/^.*$" }
+                        "^.*$": {
+                          "$ref": "#/properties/prototype/properties/files/patternProperties/^.*$"
+                        }
                       }
                     }
                   },

@@ -14,15 +14,15 @@ describe('normaliseFiles function', () => {
 
   test('should handle package.json as string', () => {
     const files = {
-      'package.json': 'content  '
+      'package.json': 'content  ',
     };
 
     const result = normaliseFiles(files);
 
     expect(result['package.json']).toEqual({
       file: {
-        contents: 'content'
-      }
+        contents: 'content',
+      },
     });
   });
 
@@ -31,36 +31,36 @@ describe('normaliseFiles function', () => {
       name: 'test-project',
       version: '1.0.0',
       dependencies: {
-        'react': '^18.0.0'
-      }
+        react: '^18.0.0',
+      },
     };
 
     const files = {
-      'package.json': packageObj
+      'package.json': packageObj,
     };
 
     const result = normaliseFiles(files);
 
     expect(result['package.json']).toEqual({
       file: {
-        contents: JSON.stringify(packageObj, null, 2)
-      }
+        contents: JSON.stringify(packageObj, null, 2),
+      },
     });
   });
 
   test('should handle file with contents property at root level', () => {
     const files = {
       'index.js': {
-        contents: 'console.log("Hello");'
-      }
+        contents: 'console.log("Hello");',
+      },
     };
 
     const result = normaliseFiles(files);
 
     expect(result['index.js']).toEqual({
       file: {
-        contents: 'console.log("Hello");'
-      }
+        contents: 'console.log("Hello");',
+      },
     });
   });
 
@@ -68,41 +68,41 @@ describe('normaliseFiles function', () => {
     const files = {
       'index.js': {
         file: {
-          contents: 'console.log("Hello");'
-        }
-      }
+          contents: 'console.log("Hello");',
+        },
+      },
     };
 
     const result = normaliseFiles(files);
 
     expect(result['index.js']).toEqual({
       file: {
-        contents: 'console.log("Hello");'
-      }
+        contents: 'console.log("Hello");',
+      },
     });
   });
 
   test('should handle empty file with file property', () => {
     const files = {
       'empty.js': {
-        file: {}
-      }
+        file: {},
+      },
     };
 
     const result = normaliseFiles(files);
 
     expect(result['empty.js']).toEqual({
       file: {
-        contents: ""
-      }
+        contents: '',
+      },
     });
   });
 
   test('should handle nested file paths with contents property', () => {
     const files = {
       'src/index.js': {
-        contents: 'console.log("Hello");'
-      }
+        contents: 'console.log("Hello");',
+      },
     };
 
     const result = normaliseFiles(files);
@@ -112,11 +112,11 @@ describe('normaliseFiles function', () => {
         directory: {
           'index.js': {
             file: {
-              contents: 'console.log("Hello");'
-            }
-          }
-        }
-      }
+              contents: 'console.log("Hello");',
+            },
+          },
+        },
+      },
     });
   });
 
@@ -124,9 +124,9 @@ describe('normaliseFiles function', () => {
     const files = {
       'src/components/Button.js': {
         file: {
-          contents: 'export default Button = () => {};'
-        }
-      }
+          contents: 'export default Button = () => {};',
+        },
+      },
     };
 
     const result = normaliseFiles(files);
@@ -138,27 +138,27 @@ describe('normaliseFiles function', () => {
             directory: {
               'Button.js': {
                 file: {
-                  contents: 'export default Button = () => {};'
-                }
-              }
-            }
-          }
-        }
-      }
+                  contents: 'export default Button = () => {};',
+                },
+              },
+            },
+          },
+        },
+      },
     });
   });
 
   test('should handle directory property', () => {
     const files = {
-      'src': {
+      src: {
         directory: {
           'index.js': {
             file: {
-              contents: 'console.log("Hello");'
-            }
-          }
-        }
-      }
+              contents: 'console.log("Hello");',
+            },
+          },
+        },
+      },
     };
 
     const result = normaliseFiles(files);
@@ -168,11 +168,11 @@ describe('normaliseFiles function', () => {
         directory: {
           'index.js': {
             file: {
-              contents: 'console.log("Hello");'
-            }
-          }
-        }
-      }
+              contents: 'console.log("Hello");',
+            },
+          },
+        },
+      },
     });
   });
 
@@ -180,22 +180,22 @@ describe('normaliseFiles function', () => {
     const files = {
       'package.json': '{ "name": "test" }',
       'src/index.js': {
-        contents: 'import App from "./App";'
+        contents: 'import App from "./App";',
       },
       'src/App.js': {
         file: {
-          contents: 'export default () => <div>App</div>;'
-        }
+          contents: 'export default () => <div>App</div>;',
+        },
       },
-      'public': {
+      public: {
         directory: {
           'index.html': {
             file: {
-              contents: '<!DOCTYPE html><html></html>'
-            }
-          }
-        }
-      }
+              contents: '<!DOCTYPE html><html></html>',
+            },
+          },
+        },
+      },
     };
 
     const result = normaliseFiles(files);
@@ -203,43 +203,43 @@ describe('normaliseFiles function', () => {
     expect(result).toEqual({
       'package.json': {
         file: {
-          contents: '{ "name": "test" }'
-        }
+          contents: '{ "name": "test" }',
+        },
       },
       src: {
         directory: {
           'index.js': {
             file: {
-              contents: 'import App from "./App";'
-            }
+              contents: 'import App from "./App";',
+            },
           },
           'App.js': {
             file: {
-              contents: 'export default () => <div>App</div>;'
-            }
-          }
-        }
+              contents: 'export default () => <div>App</div>;',
+            },
+          },
+        },
       },
       public: {
         directory: {
           'index.html': {
             file: {
-              contents: '<!DOCTYPE html><html></html>'
-            }
-          }
-        }
-      }
+              contents: '<!DOCTYPE html><html></html>',
+            },
+          },
+        },
+      },
     });
   });
 
   test('should handle existing directories when adding nested files', () => {
     const files = {
       'src/index.js': {
-        contents: 'console.log("Hello");'
+        contents: 'console.log("Hello");',
       },
       'src/components/Button.js': {
-        contents: 'export default Button = () => {};'
-      }
+        contents: 'export default Button = () => {};',
+      },
     };
 
     const result = normaliseFiles(files);
@@ -249,20 +249,20 @@ describe('normaliseFiles function', () => {
         directory: {
           'index.js': {
             file: {
-              contents: 'console.log("Hello");'
-            }
+              contents: 'console.log("Hello");',
+            },
           },
           components: {
             directory: {
               'Button.js': {
                 file: {
-                  contents: 'export default Button = () => {};'
-                }
-              }
-            }
-          }
-        }
-      }
+                  contents: 'export default Button = () => {};',
+                },
+              },
+            },
+          },
+        },
+      },
     });
   });
 });

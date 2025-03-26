@@ -557,7 +557,11 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), "bg-transparent", className)}
+        className={cn(
+          sidebarMenuButtonVariants({ variant, size }),
+          'bg-transparent',
+          className
+        )}
         {...props}
       />
     );

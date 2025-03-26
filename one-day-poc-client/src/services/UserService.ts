@@ -1,7 +1,6 @@
-
 /**
  * User interface representing the structure of user data
- * 
+ *
  * @property {string} name - The user's full name
  * @property {string} email - The user's email address
  * @property {string} dob - The user's date of birth
@@ -18,7 +17,7 @@ interface User {
 
 /**
  * UserService class provides centralized user data management
- * 
+ *
  * This service follows the singleton pattern to ensure consistent user state
  * across the application. It handles API communication, data caching, and
  * error management related to user information.
@@ -45,18 +44,18 @@ class UserService {
 
     this.loading = true;
     this.error = null;
-    
+
     try {
       console.log('Fetching user data');
       const response = await fetch('http://localhost:8000/api/auth/me', {
         method: 'GET',
-        credentials: 'include'
+        credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to load user data');
       }
-      
+
       const userData = await response.json();
       this.currentUser = userData;
       this.loading = false;
@@ -79,17 +78,17 @@ class UserService {
   }
 
   public getUserId(): string {
-    return this.currentUser?.id || this.currentUser?.email || "anonymous";
+    return this.currentUser?.id || this.currentUser?.email || 'anonymous';
   }
-  
+
   public isLoading(): boolean {
     return this.loading;
   }
-  
+
   public getError(): string | null {
     return this.error;
   }
-  
+
   public clearUser(): void {
     this.currentUser = null;
   }

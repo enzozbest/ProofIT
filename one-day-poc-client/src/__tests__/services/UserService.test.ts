@@ -26,12 +26,11 @@ describe('UserService', () => {
   });
 
   test('should behave as singleton', () => {
-
     const mockUser: User = {
       name: 'Singleton Test User',
       email: 'singleton@example.com',
       dob: '1990-01-01',
-      role: 'user'
+      role: 'user',
     };
 
     UserService.setUser(mockUser);
@@ -49,20 +48,23 @@ describe('UserService', () => {
       email: 'test@example.com',
       dob: '1990-01-01',
       role: 'user',
-      id: '123'
+      id: '123',
     };
 
     vi.spyOn(window, 'fetch').mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve(mockUser)
+      json: () => Promise.resolve(mockUser),
     } as Response);
 
     const user = await UserService.fetchUserData();
 
-    expect(window.fetch).toHaveBeenCalledWith('http://localhost:8000/api/auth/me', {
-      method: 'GET',
-      credentials: 'include'
-    });
+    expect(window.fetch).toHaveBeenCalledWith(
+      'http://localhost:8000/api/auth/me',
+      {
+        method: 'GET',
+        credentials: 'include',
+      }
+    );
 
     expect(user).toEqual(mockUser);
     expect(UserService.getUser()).toEqual(mockUser);
@@ -77,7 +79,7 @@ describe('UserService', () => {
       email: 'cached@example.com',
       dob: '1990-01-01',
       role: 'user',
-      id: '456'
+      id: '456',
     };
 
     UserService.setUser(mockUser);
@@ -92,7 +94,7 @@ describe('UserService', () => {
     vi.spyOn(window, 'fetch').mockResolvedValueOnce({
       ok: false,
       status: 401,
-      statusText: 'Unauthorized'
+      statusText: 'Unauthorized',
     } as Response);
 
     const user = await UserService.fetchUserData();
@@ -100,7 +102,10 @@ describe('UserService', () => {
     expect(user).toBe(null);
     expect(UserService.getError()).toBe('Failed to load user data');
     expect(UserService.isLoading()).toBe(false);
-    expect(console.error).toHaveBeenCalledWith('Error fetching user data:', expect.any(Error));
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching user data:',
+      expect.any(Error)
+    );
   });
 
   test('fetchUserData should handle network errors', async () => {
@@ -112,7 +117,10 @@ describe('UserService', () => {
     expect(user).toBe(null);
     expect(UserService.getError()).toBe('Network failure');
     expect(UserService.isLoading()).toBe(false);
-    expect(console.error).toHaveBeenCalledWith('Error fetching user data:', networkError);
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching user data:',
+      networkError
+    );
   });
 
   test('fetchUserData should handle non-Error exceptions', async () => {
@@ -131,7 +139,7 @@ describe('UserService', () => {
       email: 'new@example.com',
       dob: '1995-05-05',
       role: 'admin',
-      id: '789'
+      id: '789',
     };
 
     UserService.setUser(mockUser);
@@ -145,7 +153,7 @@ describe('UserService', () => {
       email: 'withid@example.com',
       dob: '1995-05-05',
       role: 'user',
-      id: 'user-id-123'
+      id: 'user-id-123',
     };
 
     UserService.setUser(mockUser);
@@ -158,7 +166,7 @@ describe('UserService', () => {
       name: 'User without ID',
       email: 'noid@example.com',
       dob: '1995-05-05',
-      role: 'user'
+      role: 'user',
     };
 
     UserService.setUser(mockUser);
@@ -177,7 +185,7 @@ describe('UserService', () => {
       name: 'User to clear',
       email: 'clear@example.com',
       dob: '1995-05-05',
-      role: 'user'
+      role: 'user',
     };
 
     UserService.setUser(mockUser);
