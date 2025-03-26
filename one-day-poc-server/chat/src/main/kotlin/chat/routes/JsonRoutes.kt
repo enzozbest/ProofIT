@@ -109,8 +109,6 @@ private suspend fun handleJsonRequest(
         // Save to database and get message ID
         val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
 
-        println(prototypeFilesJson)
-
         // Construct a proper JSON response directly - no nested serialization
         val finalResponse =
             """
@@ -129,6 +127,7 @@ private suspend fun handleJsonRequest(
 
         call.respondText(finalResponse, contentType = ContentType.Application.Json)
     } catch (e: Exception) {
+        println("Throwing error and predefined value is: ${request.predefined}")
         println("Error in handleJsonRequest: ${e.message}")
         e.printStackTrace()
         call.respondText(
