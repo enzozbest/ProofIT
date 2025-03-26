@@ -95,6 +95,7 @@ export function MessageBox({
                 handleMessageClick(msg);
               }
             }}
+            data-testid={`message-${msg.id || index}`}
           >
             {/* Display a code icon for LLM messages */}
             {!msg.isError && msg.role === 'LLM' && (

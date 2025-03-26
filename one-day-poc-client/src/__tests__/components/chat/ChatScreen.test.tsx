@@ -1,29 +1,146 @@
 import { render, act } from '@testing-library/react';
-import { describe, it, vi, expect } from 'vitest';
+import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest';
 import { toast } from 'sonner';
 import ChatScreen from '@/components/chat/ChatScreen';
 import { MemoryRouter } from 'react-router-dom';
-
 import { AuthProvider } from '@/contexts/AuthContext';
+import { fireEvent, screen } from '@testing-library/react';
+import { FileTree } from '@/types/Types';
+// Add this import
 import { ConversationProvider } from '@/contexts/ConversationContext';
 
-describe('ChatScreen - Error Message Handling', () => {
-  it('should call toast.error and handle setErrorMessage correctly', async () => {
-    const toastErrorSpy = vi
-      .spyOn(toast, 'error')
-      .mockImplementation(() => 'mock-toast-id');
+let capturedOnLoadPrototype: any = null;
+let mockSetErrorMessage = vi.fn();
 
-    vi.mock('@/hooks/Chat', () => ({
-      __esModule: true,
-      default: () => ({
-        message: '',
-        setMessage: vi.fn(),
-        sentMessages: [],
-        handleSend: vi.fn(),
-        errorMessage: 'Test error message',
-        setErrorMessage: vi.fn(),
-      }),
-    }));
+interface Message {
+  id: string;
+  role: string;
+  content: string;
+  timestamp: string;
+  isError?: boolean;
+}
+
+const defaultMocks = {
+  chat: {
+    message: '',
+    setMessage: vi.fn(),
+    sentMessages: [] as Message[],
+    handleSend: vi.fn(),
+    errorMessage: '',
+    setErrorMessage: mockSetErrorMessage, // Use our shared mock
+  },
+  conversation: {
+    messages: [] as Message[],
+    loadingMessages: false,
+    activeConversationId: 'test-id'
+  }
+};
+
+let capturedMessages: any[] = [];
+
+// Update your MessageBox mock to capture the messages it receives
+vi.mock('@/components/chat/MessagesBox', () => ({
+  MessageBox: ({ sentMessages, onLoadPrototype }: { 
+    sentMessages: any[], 
+    onLoadPrototype: (files: FileTree) => void 
+  }) => {
+    capturedOnLoadPrototype = onLoadPrototype;
+    // Store the messages this component receives for verification
+    capturedMessages = sentMessages;
+    
+    return (
+      <div data-testid="message-box">
+        {sentMessages.map((msg: any, index: number) => (
+          <div key={index} data-testid={`message-${msg.id || index}`}>
+            {msg.content}
+          </div>
+        ))}
+      </div>
+    );
+  }
+}));
+
+vi.mock('@/contexts/ConversationContext', () => ({
+  useConversation: () => defaultMocks.conversation,
+  ConversationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
+}));
+
+// Fix the Chat hook mock to directly return the object
+vi.mock('@/hooks/Chat', () => ({
+  __esModule: true,
+  default: () => defaultMocks.chat
+}));
+
+const mockSessionStorage = {
+  removeItem: vi.fn(),
+};
+
+Object.defineProperty(window, 'sessionStorage', {
+  value: mockSessionStorage,
+  writable: true
+});
+
+// Reset mocks between tests
+beforeEach(() => {
+  capturedOnLoadPrototype = null;
+  mockSetErrorMessage = vi.fn(); // Create a fresh mock for each test
+  vi.clearAllMocks();
+  
+  // Reset default mocks to known state
+  Object.assign(defaultMocks.chat, {
+    message: '',
+    setMessage: vi.fn(),
+    sentMessages: [],
+    handleSend: vi.fn(),
+    errorMessage: '',
+    setErrorMessage: mockSetErrorMessage, // Update with our fresh mock
+  });
+  
+  Object.assign(defaultMocks.conversation, {
+    messages: [],
+    loadingMessages: false,
+    activeConversationId: 'test-id'
+  });
+
+  mockSessionStorage.removeItem.mockClear();
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+
+describe('ChatScreen - Prototype Handling', () => {
+  it('should set prototype state when onLoadPrototype is called', async () => {
+    const mockSetPrototype = vi.fn();
+    const mockSetPrototypeFiles = vi.fn();
+
+    const mockFileTree: FileTree = {
+      'index.html': {
+        file: {
+          contents: '<html><body>Hello world</body></html>'
+        }
+      },
+      'styles.css': {
+        file: {
+          contents: 'body { color: red; }'
+        }
+      },
+      'app.js': {
+        file: {
+          contents: 'console.log("Hello");'
+        }
+      },
+      'src': {
+        directory: {
+          'utils.js': {
+            file: {
+              contents: 'export const add = (a, b) => a + b;'
+            }
+          }
+        }
+      }
+    };
 
     await act(async () => {
       render(
@@ -32,8 +149,8 @@ describe('ChatScreen - Error Message Handling', () => {
             <ConversationProvider>
               <ChatScreen
                 showPrototype={false}
-                setPrototype={vi.fn()}
-                setPrototypeFiles={vi.fn()}
+                setPrototype={mockSetPrototype}
+                setPrototypeFiles={mockSetPrototypeFiles}
                 initialMessage={null}
               />
             </ConversationProvider>
@@ -42,32 +159,17 @@ describe('ChatScreen - Error Message Handling', () => {
       );
     });
 
-    expect(toastErrorSpy).toHaveBeenCalledWith(
-      'Test error message',
-      expect.objectContaining({
-        onDismiss: expect.any(Function),
-        onAutoClose: expect.any(Function),
-        closeButton: true,
-      })
-    );
+    expect(screen.getByTestId('message-box')).toBeInTheDocument();
 
-    const [, toastOptions] = toastErrorSpy.mock.calls[0];
+    expect(capturedOnLoadPrototype).toBeDefined();
+    
+    if (capturedOnLoadPrototype) {
+      capturedOnLoadPrototype(mockFileTree);
 
-    expect(toastOptions).toBeDefined();
+      expect(mockSetPrototype).toHaveBeenCalledWith(true);
 
-    const mockToastObject = { id: 'mock-toast-id' };
-
-    if (toastOptions?.onDismiss) {
-      toastOptions.onDismiss(mockToastObject);
+      expect(mockSetPrototypeFiles).toHaveBeenCalledWith(mockFileTree);
     }
-
-    if (toastOptions?.onAutoClose) {
-      toastOptions.onAutoClose(mockToastObject);
-    }
-
-    expect(vi.fn()).toHaveBeenCalledTimes(0);
-
-    toastErrorSpy.mockRestore();
   });
 });
 
@@ -76,19 +178,9 @@ describe('ChatScreen - Initial Message Handling', () => {
     const mockSetMessage = vi.fn();
     const mockHandleSend = vi.fn();
     const mockInitialMessage = 'Hello, this is a test!';
-    const sessionStorageSpy = vi.spyOn(sessionStorage, 'removeItem');
 
-    vi.doMock('@/hooks/Chat', () => ({
-      __esModule: true,
-      default: () => ({
-        message: '',
-        setMessage: mockSetMessage,
-        sentMessages: [],
-        handleSend: mockHandleSend,
-        errorMessage: '',
-        setErrorMessage: vi.fn(),
-      }),
-    }));
+    defaultMocks.chat.setMessage = mockSetMessage;
+    defaultMocks.chat.handleSend = mockHandleSend;
 
     vi.useFakeTimers();
 
@@ -107,15 +199,206 @@ describe('ChatScreen - Initial Message Handling', () => {
       </MemoryRouter>
     );
 
-    expect(mockSetMessage).not.toHaveBeenCalled();
+    expect(mockSetMessage).toHaveBeenCalledWith(mockInitialMessage);
+    // Clear the mock before testing the next behavior if needed
+    mockSetMessage.mockClear();
 
     await act(async () => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(mockHandleSend).not.toHaveBeenCalled();
+    expect(mockHandleSend).toHaveBeenCalledWith(mockInitialMessage);
 
+    expect(mockSessionStorage.removeItem).toHaveBeenCalledWith('initialMessage');
     vi.useRealTimers();
-    sessionStorageSpy.mockRestore();
+  });
+});
+
+describe('ChatScreen - Message Handling', () => {
+  it('should deduplicate and sort messages correctly', () => {
+    capturedMessages = [];
+    
+    const createTimestamp = (secondsAgo: number) => {
+      const date = new Date();
+      date.setSeconds(date.getSeconds() - secondsAgo);
+      return date.toISOString();
+    };
+    
+    // Create messages with duplicate content but slightly different timestamps
+    const mockMessages = [
+      { 
+        id: '1', 
+        role: 'User', 
+        content: 'Hello', 
+        timestamp: createTimestamp(10) 
+      },
+      { 
+        id: '2', 
+        role: 'LLM', 
+        content: 'Hi there', 
+        timestamp: createTimestamp(8) 
+      },
+      // Duplicate message within 1 second (should be filtered out)
+      { 
+        id: '3', 
+        role: 'LLM', 
+        content: 'Hi there', 
+        timestamp: createTimestamp(7.5) 
+      },
+      { 
+        id: '4', 
+        role: 'User', 
+        content: 'How are you?', 
+        timestamp: createTimestamp(5) 
+      },
+    ];
+    
+    // Update conversation mock to include these messages
+    defaultMocks.conversation.messages = mockMessages.slice(0, 3); // First 3 messages from server
+    defaultMocks.chat.sentMessages = [mockMessages[3]]; // Last message from client
+    
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ConversationProvider>
+            <ChatScreen
+              showPrototype={false}
+              setPrototype={vi.fn()}
+              setPrototypeFiles={vi.fn()}
+              initialMessage={null}
+            />
+          </ConversationProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    expect(capturedMessages).toHaveLength(3);
+
+    expect(capturedMessages[0].content).toBe('Hello');
+    expect(capturedMessages[1].content).toBe('Hi there'); // Only one "Hi there"
+    expect(capturedMessages[2].content).toBe('How are you?');
+    
+    const timestamps = capturedMessages.map(msg => new Date(msg.timestamp).getTime());
+    expect(timestamps[0]).toBeLessThan(timestamps[1]);
+    expect(timestamps[1]).toBeLessThan(timestamps[2]);
+    
+    // Verify the duplicate message was removed (ID 3 should not be present)
+    const messageIds = capturedMessages.map(msg => msg.id);
+    expect(messageIds).toContain('1');
+    expect(messageIds).toContain('2');
+    expect(messageIds).not.toContain('3'); // The duplicate
+    expect(messageIds).toContain('4');
+
+  });
+});
+
+describe('ChatScreen - Error Handling', () => {
+  it('should display toast when errorMessage is set', () => {
+    // Spy on toast.error
+    const toastErrorSpy = vi.spyOn(toast, 'error').mockImplementation(() => 'mock-toast-id');
+    
+    // Set an error message in the mock
+    defaultMocks.chat.errorMessage = 'Test error message';
+    
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ConversationProvider>
+            <ChatScreen
+              showPrototype={false}
+              setPrototype={vi.fn()}
+              setPrototypeFiles={vi.fn()}
+              initialMessage={null}
+            />
+          </ConversationProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+    
+    // Verify toast.error was called with the error message
+    expect(toastErrorSpy).toHaveBeenCalledWith(
+      'Test error message',
+      expect.objectContaining({
+        onDismiss: expect.any(Function),
+        onAutoClose: expect.any(Function),
+        closeButton: true,
+      })
+    );
+    
+    // Test that the toast callbacks clear the error
+    const [, options] = toastErrorSpy.mock.calls[0];
+    
+    // Call onDismiss callback
+    if (options?.onDismiss) {
+      options.onDismiss({ id: 'mock-toast-id' });
+      expect(mockSetErrorMessage).toHaveBeenCalledWith('');
+    }
+    
+    // Reset the mock and call onAutoClose callback
+    mockSetErrorMessage.mockClear();
+    if (options?.onAutoClose) {
+      options.onAutoClose({ id: 'mock-toast-id' });
+      expect(mockSetErrorMessage).toHaveBeenCalledWith('');
+    }
+    
+    toastErrorSpy.mockRestore();
+  });
+})
+
+describe('ChatScreen - Loading State', () => {
+  it('should display loading indicator when loadingMessages is true', () => {
+    // Set loadingMessages to true for this test
+    defaultMocks.conversation.loadingMessages = true;
+    
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ConversationProvider>
+            <ChatScreen
+              showPrototype={false}
+              setPrototype={vi.fn()}
+              setPrototypeFiles={vi.fn()}
+              initialMessage={null}
+            />
+          </ConversationProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+    
+    // Verify the loading message is displayed
+    expect(screen.getByText('Loading messages...')).toBeInTheDocument();
+    
+    // Check that the loading overlay has the expected classes
+    const loadingOverlay = screen.getByText('Loading messages...').parentElement;
+    expect(loadingOverlay).toHaveClass('absolute');
+    expect(loadingOverlay).toHaveClass('inset-0');
+    expect(loadingOverlay).toHaveClass('flex');
+    expect(loadingOverlay).toHaveClass('items-center');
+    expect(loadingOverlay).toHaveClass('justify-center');
+    expect(loadingOverlay).toHaveClass('bg-background/80');
+    expect(loadingOverlay).toHaveClass('z-10');
+  });
+
+  it('should not display loading indicator when loadingMessages is false', () => {
+    // Ensure loadingMessages is false
+    defaultMocks.conversation.loadingMessages = false;
+    
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <ConversationProvider>
+            <ChatScreen
+              showPrototype={false}
+              setPrototype={vi.fn()}
+              setPrototypeFiles={vi.fn()}
+              initialMessage={null}
+            />
+          </ConversationProvider>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+    
+    // Verify the loading message is not displayed
+    expect(screen.queryByText('Loading messages...')).not.toBeInTheDocument();
   });
 });
