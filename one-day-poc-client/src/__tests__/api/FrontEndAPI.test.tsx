@@ -20,7 +20,7 @@ import {
   Conversation,
 } from '@/types/Types';
 import UserService from '@/services/UserService';
-import { v4 as uuidv4 } from 'uuid';
+import { getPrototypeForMessage } from '@/api/FrontEndAPI';
 
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
@@ -136,6 +136,190 @@ describe('sendChatMessage', () => {
       sendChatMessage(mockMessage, vi.fn(), vi.fn())
     ).rejects.toThrow('Fetch failed');
 
+    vi.restoreAllMocks();
+  });
+});
+
+describe('getPrototypeForMessage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (console.error as any).mockClear();
+    (console.log as any).mockClear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should return null and log error if either conversationId or messageId is missing', async () => {
+    const result1 = await getPrototypeForMessage('', 'some-message-id');
+    expect(result1).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching prototype:',
+      expect.any(Error),
+      'For IDs:',
+      { conversationId: '', messageId: 'some-message-id' }
+    );
+
+    (console.error as any).mockClear();
+
+    const result2 = await getPrototypeForMessage('some-conversation-id', '');
+    expect(result2).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching prototype:',
+      expect.any(Error),
+      'For IDs:',
+      { conversationId: 'some-conversation-id', messageId: '' }
+    );
+  });
+
+  it('should fetch and return the file tree on successful API call', async () => {
+    const mockFileTree = { 'file1.ts': '// content', 'file2.jsx': '<Component />' };
+    const mockApiResponse = {
+      files: JSON.stringify(mockFileTree)
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockApiResponse,
+      })
+    );
+
+    const result = await getPrototypeForMessage('valid-conversation-id', 'valid-message-id');
+
+    expect(result).toEqual(mockFileTree);
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:8000/api/chat/history/valid-conversation-id/valid-message-id',
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    expect(console.log).toHaveBeenCalledWith('Fetching prototype with:', {
+      conversationId: 'valid-conversation-id',
+      messageId: 'valid-message-id'
+    });
+
+    expect(console.log).toHaveBeenCalledWith('Successfully fetched prototype for:', {
+      conversationId: 'valid-conversation-id',
+      messageId: 'valid-message-id'
+    });
+  });
+
+  it('should return null when API response is not ok', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+      })
+    );
+
+    const result = await getPrototypeForMessage('invalid-conversation-id', 'invalid-message-id');
+
+    expect(result).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      'Request failed for:',
+      { conversationId: 'invalid-conversation-id', messageId: 'invalid-message-id' },
+      'Status:',
+      404
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching prototype:',
+      expect.any(Error),
+      'For IDs:',
+      { conversationId: 'invalid-conversation-id', messageId: 'invalid-message-id' }
+    );
+  });
+
+  it('should return null when network error occurs', async () => {
+    const networkError = new Error('Network failure');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(networkError));
+
+    const result = await getPrototypeForMessage('test-conversation-id', 'test-message-id');
+
+    expect(result).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching prototype:',
+      networkError,
+      'For IDs:',
+      { conversationId: 'test-conversation-id', messageId: 'test-message-id' }
+    );
+  });
+
+  it('should handle parsing errors in the response', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ files: 'not-valid-json' }), // This will cause JSON.parse to throw
+      })
+    );
+
+    const result = await getPrototypeForMessage('valid-id', 'valid-msg-id');
+
+    expect(result).toBeNull();
+    expect(console.error).toHaveBeenCalledWith(
+      'Error fetching prototype:',
+      expect.any(Error),
+      'For IDs:',
+      { conversationId: 'valid-id', messageId: 'valid-msg-id' }
+    );
+  });
+
+  it('should extract error data and call onError for 500 status responses', async () => {
+    const errorText = 'Server internal error details';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => errorText,
+      })
+    );
+
+    const mockMessage: Message = {
+      role: 'User',
+      content: 'Test message',
+      timestamp: new Date().toISOString(),
+    };
+
+    const onError = vi.fn();
+
+    await expect(
+      sendChatMessage(mockMessage, vi.fn(), vi.fn(), onError)
+    ).rejects.toThrow(errorText);
+
+    expect(onError).toHaveBeenCalledWith('There was an error, please try again');
+    vi.restoreAllMocks();
+  });
+
+  it('should not call onError if not provided for 500 status', async () => {
+    const errorText = 'Server internal error details';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => errorText,
+      })
+    );
+
+    const mockMessage: Message = {
+      role: 'User',
+      content: 'Test message',
+      timestamp: new Date().toISOString(),
+    };
+
+    await expect(
+      sendChatMessage(mockMessage, vi.fn(), vi.fn())
+    ).rejects.toThrow(errorText);
+
+    expect(console.error).toHaveBeenCalledWith('API Error:', expect.any(Error));
     vi.restoreAllMocks();
   });
 });
