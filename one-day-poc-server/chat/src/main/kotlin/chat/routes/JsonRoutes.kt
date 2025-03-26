@@ -14,13 +14,9 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import prompting.PromptingMain
+import java.time.Instant
+import kotlin.text.indexOf
 
 private lateinit var promptingMainInstance: PromptingMain
 
@@ -68,10 +64,10 @@ internal fun Route.setJsonRouteRetrieval() {
  *
  * This function takes the prompt from the received request, sends it through
  * the prompting workflow, and returns the generated response to the client.
+ * It avoids unnecessary deserialization/serialization while maintaining the expected response format.
  *
  * @param request The validated Request object containing the user's prompt
  * @param call The ApplicationCall used to send the response back to the client
- * @throws NullPointerException if the prompting workflow returns a null response
  */
 private suspend fun handleJsonRequest(
     request: Request,
@@ -85,20 +81,39 @@ private suspend fun handleJsonRequest(
     }
 
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
-    saveMessage(request.conversationId, request.userID, request.prompt)
-    val previousGeneration = getPreviousPrototype(request.conversationId)?.filesJson
+
+    val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
+
     try {
-        val promptResponse = getPromptingMain().run(request.prompt, previousGeneration)
-        val jsonResponse = runBlocking { Json.decodeFromString<JsonObject>(promptResponse) }
+        // Get raw response from LLM
+        val promptJsonResponse = getPromptingMain().run(request.prompt, previousGenerationJson)
 
-        val id = savePrototype(request.conversationId, jsonResponse)
-        val serverResponse = JsonObject(jsonResponse + ("messageId" to JsonPrimitive(id)))
-        val jsonString = Json.encodeToString(JsonObject.serializer(), serverResponse)
-        println("ENCODED RESPONSE: $jsonString")
+        // Extract chat content and prototype files JSON
+        val (chatContent, prototypeFilesJson) = processRawJsonResponse(promptJsonResponse)
 
-        call.respondText(jsonString, contentType = ContentType.Application.Json)
+        // Save to database and get message ID
+        val messageId = savePrototype(request.conversationId, chatContent, prototypeFilesJson)
+
+        // Construct a proper JSON response directly - no nested serialization
+        val finalResponse =
+            """
+            {
+                "chat": {
+                    "message": "$chatContent",
+                    "role": "LLM",
+                    "timestamp": "${Instant.now()}",
+                    "messageId": "$messageId"
+                },
+                "prototype": {
+                    "files": $prototypeFilesJson
+                }
+            }
+            """.trimIndent()
+
+        call.respondText(finalResponse, contentType = ContentType.Application.Json)
     } catch (e: Exception) {
         println("Error in handleJsonRequest: ${e.message}")
+        e.printStackTrace()
         call.respondText(
             "Error processing request: ${e.message}",
             status = HttpStatusCode.InternalServerError,
@@ -106,6 +121,79 @@ private suspend fun handleJsonRequest(
     }
 }
 
+/**
+ * Extract parts from the raw JSON response using string operations to avoid full deserialization.
+ *
+ * @param jsonString The raw JSON response from the prompting pipeline
+ * @return Triple of (chatContent, prototypeContent, messageId) - any might be null if not found
+ */
+private fun processRawJsonResponse(jsonString: String): Pair<String, String> {
+    // Simple regex to extract chat content
+    val chatRegex = """"chat"\s*:\s*"([^"]*)"|\{\s*"message"\s*:\s*"([^"]*)"""".toRegex()
+    val chatMatch = chatRegex.find(jsonString)
+    val chatContent = chatMatch?.groupValues?.firstOrNull { it.isNotEmpty() && it != chatMatch.value } ?: ""
+
+    // Extract prototype content using string indexing instead of regex
+    var prototypeContent: String = "{}"
+
+    // Find the "files" section within prototype
+    val filesMarker = "\"files\":"
+    val filesStartIndex = jsonString.indexOf(filesMarker)
+
+    if (filesStartIndex >= 0) {
+        // Start after the "files": marker
+        var pos = filesStartIndex + filesMarker.length
+        var depth = 0
+        var foundStart = false
+        val filesJson = StringBuilder()
+
+        // Skip whitespace to find the opening brace
+        while (pos < jsonString.length && !foundStart) {
+            if (jsonString[pos] == '{') {
+                foundStart = true
+                depth = 1
+                filesJson.append('{')
+            }
+            pos++
+        }
+
+        // If we found the opening brace, find the matching closing brace
+        if (foundStart) {
+            while (pos < jsonString.length && depth > 0) {
+                val char = jsonString[pos]
+                filesJson.append(char)
+
+                if (char == '{') {
+                    depth++
+                } else if (char == '}') {
+                    depth--
+                }
+                pos++
+            }
+
+            // If we found a complete JSON object, use it
+            if (depth == 0) {
+                prototypeContent = filesJson.toString()
+            }
+        }
+    }
+
+    // Extract messageId if present
+    val messageIdRegex = """"messageId"\s*:\s*"([^"]*)"?""".toRegex()
+    val messageIdMatch = messageIdRegex.find(jsonString)
+    messageIdMatch?.groupValues?.get(1)
+
+    return Pair(chatContent, prototypeContent)
+}
+
+/**
+ * Saves a message to the database.
+ *
+ * @param conversationId The ID of the conversation
+ * @param senderId The ID of the sender
+ * @param content The content of the message
+ * @return The saved ChatMessage
+ */
 private suspend fun saveMessage(
     conversationId: String,
     senderId: String,
@@ -121,21 +209,33 @@ private suspend fun saveMessage(
     return message
 }
 
+/**
+ * Stores a prototype and LLM message from string content.
+ * This is an adapted version that works with string extraction rather than JsonObject deserialization.
+ *
+ * @param conversationId The ID of the conversation
+ * @param chatContent The content for the LLM message
+ * @param prototypeFilesJson The JSON string for the prototype files or null if no prototype
+ * @return The ID of the saved message
+ */
 private suspend fun savePrototype(
     conversationId: String,
-    response: JsonObject,
+    chatContent: String,
+    prototypeFilesJson: String?,
 ): String {
-    val savedMessage = saveMessage(conversationId, "LLM", response["chat"]!!.jsonPrimitive.content)
-    response["prototype"]!!.jsonObject["files"]!!.let { prototypeResponse ->
+    val savedMessage = saveMessage(conversationId, "LLM", chatContent)
+
+    if (prototypeFilesJson != null) {
         val prototype =
             Prototype(
                 messageId = savedMessage.id,
-                filesJson = prototypeResponse.jsonObject.toString(),
+                filesJson = prototypeFilesJson,
                 version = 1,
                 isSelected = true,
             )
         storePrototype(prototype)
     }
+
     return savedMessage.id
 }
 
