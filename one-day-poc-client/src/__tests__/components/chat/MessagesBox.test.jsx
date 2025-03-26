@@ -4,7 +4,7 @@ import { MessageBox } from '../../../components/chat/MessagesBox.js';
 import '../../mocks/message-box.mock.jsx';
 import { getPrototypeForMessage } from '@/api/FrontEndAPI';
 
-vi.mock('@/api/frontEndAPI', () => ({
+vi.mock('@/api/FrontEndAPI', () => ({
   getPrototypeForMessage: vi.fn().mockResolvedValue([]),
 }));
 

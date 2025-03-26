@@ -87,11 +87,6 @@ private suspend fun handleJsonRequest(
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
     saveMessage(request.conversationId, request.userID, request.prompt)
     val previousGeneration = getPreviousPrototype(request.conversationId)?.filesJson
-    if (previousGeneration != null) {
-        println("Found previous generation: $previousGeneration")
-    } else {
-        println("No previous generation found")
-    }
     try {
         val promptResponse = getPromptingMain().run(request.prompt, previousGeneration)
         val jsonResponse = runBlocking { Json.decodeFromString<JsonObject>(promptResponse) }

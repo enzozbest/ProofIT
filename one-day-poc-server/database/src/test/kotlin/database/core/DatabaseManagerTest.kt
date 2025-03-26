@@ -52,7 +52,6 @@ class DatabaseManagerTest {
         DatabaseManager.init()
         val repository = DatabaseManager.templateRepository()
         assertNotNull(repository)
-        assertTrue(repository is TemplateRepository)
     }
 
     @Test

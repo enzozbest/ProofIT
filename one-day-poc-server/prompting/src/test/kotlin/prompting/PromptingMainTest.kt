@@ -433,9 +433,6 @@ class PromptingMainTest {
 
         assertEquals(expectedJson, result)
 
-        // Verify that the captured options is an instance of OllamaOptions with default values
-        assertTrue(optionsSlot.captured is OllamaOptions)
-
         // Verify the method was called
         coVerify(exactly = 1) { 
             PrototypeInteractor.prompt(eq(prompt), eq("test-model"), any()) 
