@@ -176,24 +176,135 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     
     setStatus('Starting development server...');
     
-    // Try to determine available scripts
     const availableScripts = await getAvailableScripts();
     const startScript = chooseStartScript(availableScripts);
     
     console.log(`Using script: ${startScript}`);
-    const startProcess = await webcontainerInstance.spawn('npm', ['run', startScript]);
+    await runServerWithAutoInstall(startScript);
+  };
+
+  const runServerWithAutoInstall = async (scriptName: string) => {
+    if (!webcontainerInstance) return;
     
-    // Track and monitor the process
+    const startProcess = await webcontainerInstance.spawn('npm', ['run', scriptName]);
     activeProcessesRef.current.push(startProcess);
     setStatus('Running...');
+    
+    let outputBuffer = '';
     
     startProcess.output.pipeTo(
       new WritableStream({
         write(data) {
           console.log('Server output:', data);
+          outputBuffer += data;
+          
+          // Check for missing dependency pattern
+          const missingDep = detectMissingDependency(outputBuffer);
+          if (missingDep) {
+            console.log(`Detected missing dependency: ${missingDep}`);
+            // Reset the buffer after finding a dependency
+            outputBuffer = '';
+            
+            // Auto-install the dependency and restart server
+            (async () => {
+              await killActiveProcesses();
+              await installSpecificDependency(missingDep);
+              await runServerWithAutoInstall(scriptName);
+            })();
+          }
         }
       })
     );
+    
+    startProcess.exit.then((code) => {
+      console.log(`Server process exited with code ${code}`);
+      if (code !== 0 && !outputBuffer.includes('missing dependency')) {
+        setStatus(`Server crashed with exit code ${code}`);
+      }
+    });
+  };
+
+  const detectMissingDependency = (output: string): string | null => {
+    const patterns = [
+      /Cannot find module '([^']+)'/i,
+      /Error: Cannot find module '([^']+)'/i,
+      /Module not found: Error: Can't resolve '([^']+)'/i,
+      /Module not found: Error: Can't resolve '([^']+)'/i,
+      /Cannot resolve module '([^']+)'/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = output.match(pattern);
+      if (match && match[1]) {
+        const dep = match[1];
+        
+        if (!dep.startsWith('./') && !dep.startsWith('../') && !dep.startsWith('/')) {
+          const packageName = dep.startsWith('@') 
+            ? dep.split('/').slice(0, 2).join('/') 
+            : dep.split('/')[0];
+            
+          return packageName;
+        }
+      }
+    }
+    
+    return null;
+  };
+
+  const installSpecificDependency = async (dependency: string) => {
+    if (!webcontainerInstance) return;
+    
+    setStatus(`Installing missing dependency: ${dependency}...`);
+    
+    try {
+      await updatePackageJson(dependency);
+    } catch (e) {
+      console.error('Error updating package.json:', e);
+    }
+    
+    const installProcess = await webcontainerInstance.spawn('npm', ['install', dependency]);
+    
+    installProcess.output.pipeTo(
+      new WritableStream({
+        write(data) {
+          console.log(`Installing ${dependency} output:`, data);
+        }
+      })
+    );
+    
+    const exitCode = await installProcess.exit;
+    
+    if (exitCode !== 0) {
+      throw new Error(`Failed to install ${dependency} with exit code ${exitCode}`);
+    }
+    
+    setStatus(`Dependency ${dependency} installed successfully. Restarting...`);
+  };
+
+  const updatePackageJson = async (dependency: string) => {
+    if (!webcontainerInstance) return;
+    
+    try {
+      const packageJsonText = await webcontainerInstance.fs.readFile('/package.json', 'utf-8');
+      const packageJson = JSON.parse(packageJsonText);
+      
+      if (!packageJson.dependencies) {
+        packageJson.dependencies = {};
+      }
+      
+      if (!packageJson.dependencies[dependency]) {
+        packageJson.dependencies[dependency] = "latest";
+        
+        await webcontainerInstance.fs.writeFile(
+          '/package.json', 
+          JSON.stringify(packageJson, null, 2)
+        );
+        
+        console.log(`Updated package.json with ${dependency}`);
+      }
+    } catch (e) {
+      console.error('Error updating package.json:', e);
+    }
   };
 
   /**
