@@ -32,7 +32,7 @@ abstract class BaseAuthenticationServer {
         private val rsaKeyPair = generateRSAKeyPair()
         private val rsaPrivateKey = rsaKeyPair.first
         private val rsaPublicKey = rsaKeyPair.second
-        const val TEST_PORT = 5000
+        const val TEST_PORT = 9876
 
         init {
             startMockServer()
