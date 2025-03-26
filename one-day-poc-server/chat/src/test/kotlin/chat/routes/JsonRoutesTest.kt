@@ -376,7 +376,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             coEvery { 
                 mockPromptingMain.run(
                     any(),
-                    anyOrNull(),
+                    eq(null),
                 )
             } throws RuntimeException("Simulation of processing error")
 
@@ -643,24 +643,20 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test save prototype`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(mockPromptingMain.run(any<String>(), anyOrNull<String>())).thenReturn(
-                    """
-                    {
-                        "chat": {
-                            "message": "Valid response",
-                            "role": "LLM",
-                            "timestamp": "2025-01-01T12:00:00",
-                            "messageId": "0"
-                        },
-                        "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                        }
+            val mockPromptingMain = mockk<PromptingMain>()
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns """
+                {
+                    "chat": {
+                        "message": "Valid response",
+                        "role": "LLM",
+                        "timestamp": "2025-01-01T12:00:00",
+                        "messageId": "0"
+                    },
+                    "prototype": {
+                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                     }
-                    """.trimIndent(),
-                )
-            }
+                }
+                """.trimIndent()
 
             try {
                 setPromptingMain(mockPromptingMain)
