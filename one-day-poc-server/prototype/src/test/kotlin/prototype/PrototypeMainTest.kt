@@ -85,23 +85,18 @@ class PrototypeMainTest {
     @Test
     fun `prompt throws exception when LLM call fails`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             "Test error"
             val options = OllamaOptions()
 
-            // Create a mock engine that returns an error
             val mockEngine =
                 MockEngine { request ->
                     respondError(HttpStatusCode.InternalServerError)
                 }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
-            // This way, the error will come from the HTTP call, not from the isOllamaRunning check
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
@@ -109,30 +104,24 @@ class PrototypeMainTest {
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act & Assert
             var caughtException: Exception? = null
 
             try {
                 println("[DEBUG_LOG] About to call prompt()")
                 val result = testImpl.prompt(testPrompt, options)
                 println("[DEBUG_LOG] prompt() returned successfully with result: $result")
-                // If we reach here, the test should fail
                 fail("Expected IllegalStateException to be thrown")
             } catch (e: IllegalStateException) {
-                // This is the expected exception
                 println("[DEBUG_LOG] Caught expected IllegalStateException: ${e.message}")
                 caughtException = e
             } catch (e: Exception) {
-                // Unexpected exception
                 println("[DEBUG_LOG] Caught unexpected exception: ${e::class.simpleName} - ${e.message}")
                 fail("Expected IllegalStateException but got ${e::class.simpleName}: ${e.message}")
             }
 
-            // Verify the exception
             assertNotNull(caughtException)
             assertEquals("Failed to receive response from the LLM", caughtException?.message)
 
-            // Clean up
             unmockkObject(OllamaService)
         }
     }
@@ -144,11 +133,9 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles null response correctly`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            // Create a mock engine that returns a valid JSON response but with null fields
             val mockEngine = MockEngine { request ->
                 respond(
                     content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
@@ -158,22 +145,17 @@ class PrototypeMainTest {
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act
             val result = testImpl.prompt(testPrompt, options)
 
-            // Assert
             assertNull(result, "Expected null response")
 
-            // Clean up
             unmockkObject(OllamaService)
         }
     }
@@ -185,7 +167,6 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles exception during generateResponse`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
             val testException = RuntimeException("Test exception")
@@ -197,7 +178,6 @@ class PrototypeMainTest {
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act & Assert
             try {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected exception to be thrown")
@@ -216,26 +196,21 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles specific exception during generateResponse`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            // Create a mock engine that throws a specific exception
             val mockEngine = MockEngine { request ->
                 throw java.net.ConnectException("Connection refused")
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act & Assert
             try {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
@@ -254,12 +229,10 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles non-null response with non-null response field`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
             val expectedResponse = "This is a test response"
 
-            // Create a mock engine that returns a valid JSON response with a non-null response field
             val mockEngine = MockEngine { request ->
                 respond(
                     content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
@@ -269,23 +242,18 @@ class PrototypeMainTest {
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act
             val result = testImpl.prompt(testPrompt, options)
 
-            // Assert
             assertNotNull(result, "Expected non-null result")
-            assertEquals(expectedResponse, result?.response, "Expected response to match")
+            assertEquals(expectedResponse, result.response, "Expected response to match")
 
-            // Clean up
             unmockkObject(OllamaService)
         }
     }
@@ -297,12 +265,10 @@ class PrototypeMainTest {
     @Test
     fun `prompt comprehensive test for all branches`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
             val expectedResponse = "This is a test response"
 
-            // Create a mock engine that returns a valid JSON response with a non-null response field
             val mockEngine = MockEngine { request ->
                 respond(
                     content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
@@ -312,28 +278,21 @@ class PrototypeMainTest {
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService with different behaviors to hit different branches
             mockkObject(OllamaService)
 
-            // First, test the success path with a non-null response
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act - Success path
             val result = testImpl.prompt(testPrompt, options)
 
-            // Assert - Success path
             assertNotNull(result, "Expected non-null result")
             assertEquals(expectedResponse, result?.response, "Expected response to match")
 
-            // Now test the failure path
             coEvery { OllamaService.isOllamaRunning() } returns false
 
-            // Act & Assert - Failure path
             try {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
@@ -341,7 +300,6 @@ class PrototypeMainTest {
                 assertEquals("Failed to receive response from the LLM", e.message)
             }
 
-            // Clean up
             unmockkObject(OllamaService)
         }
     }
@@ -353,27 +311,21 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles getOrNull returning null`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            // Create a mock engine that returns a 500 error
             val mockEngine = MockEngine { request ->
                 respondError(HttpStatusCode.InternalServerError)
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
-            // but the HTTP call will fail, resulting in a failure Result
-            mockkObject(OllamaService)
+           mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act & Assert
             try {
                 val result = testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
@@ -392,11 +344,9 @@ class PrototypeMainTest {
     @Test
     fun `prompt handles non-null response with null response field`() {
         runBlocking {
-            // Arrange
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            // Create a mock engine that returns a valid JSON response but with null response field
             val mockEngine = MockEngine { request ->
                 respond(
                     content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
@@ -406,23 +356,20 @@ class PrototypeMainTest {
             }
             val client = HttpClient(mockEngine)
 
-            // Replace the OllamaService client with our mock
             OllamaService.client = client
 
-            // Mock OllamaService to ensure isOllamaRunning returns true
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
-            // Act
             val result = testImpl.prompt(testPrompt, options)
 
-            // Assert
             assertNull(result, "Expected null result when response.response is null")
 
-            // Clean up
             unmockkObject(OllamaService)
         }
     }
+
+
 }
