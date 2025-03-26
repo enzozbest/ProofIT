@@ -4,7 +4,7 @@ import prompting.PromptingMain
 
 /**
  * Singleton provider for PromptingMain instance.
- * 
+ *
  * This class manages a single instance of PromptingMain throughout the application
  * and provides methods to get, set, and reset the instance.
  */
@@ -18,7 +18,7 @@ object PromptingMainProvider {
      */
     fun getInstance(): PromptingMain {
         if (!::promptingMainInstance.isInitialized) {
-            promptingMainInstance = PromptingMain("codellama:7b")
+            promptingMainInstance = PromptingMain()
         }
         return promptingMainInstance
     }
@@ -42,6 +42,6 @@ object PromptingMainProvider {
      * workflow, typically after testing or when a fresh state is required.
      */
     fun resetInstance() {
-        promptingMainInstance = PromptingMain("codellama:7b")
+        promptingMainInstance = PromptingMain()
     }
 }

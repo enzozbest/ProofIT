@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import utils.environment.EnvironmentLoader
@@ -83,12 +82,14 @@ object OllamaService {
      */
     suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse?> {
         if (!isOllamaRunning()) {
+            println("FUCK1")
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
 
         return try {
             Result.success(callOllama(request))
         } catch (e: Exception) {
+            println("FUCK2")
             Result.failure(Exception("Failed to call Ollama: ${e.message}"))
         }
     }
@@ -102,20 +103,24 @@ object OllamaService {
      */
     private suspend fun callOllama(request: OllamaRequest): OllamaResponse? {
         val ollamaApiUrl = "http://$OLLAMA_HOST:$OLLAMA_PORT/api/generate"
-        val response: HttpResponse = client.post(ollamaApiUrl) {
-            header(HttpHeaders.ContentType, "application/json")
-            setBody(jsonParser.encodeToString<OllamaRequest>(request))
-        }
+        val response: HttpResponse =
+            client.post(ollamaApiUrl) {
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(jsonParser.encodeToString<OllamaRequest>(request))
+            }
 
         if (response.status != HttpStatusCode.OK) {
+            println("FUCK3")
             throw Exception("HTTP error: ${response.status}")
         }
         val responseText = response.bodyAsText()
-        val ollamaResponse = runCatching { 
-            jsonParser.decodeFromString<OllamaResponse>(responseText) 
-        }.getOrElse {
-            throw Exception("Failed to parse Ollama response")
-        }
+        val ollamaResponse =
+            runCatching {
+                jsonParser.decodeFromString<OllamaResponse>(responseText)
+            }.getOrElse {
+                println("FUCK4")
+                throw Exception("Failed to parse Ollama response")
+            }
 
         // Only for debugging
         val jsonPrinter = Json { prettyPrint = true }
