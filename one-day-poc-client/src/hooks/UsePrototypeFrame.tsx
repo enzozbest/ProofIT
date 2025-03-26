@@ -101,6 +101,8 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     console.log('Files mounted successfully');
   };
 
+
+
   /**
    * Install dependencies
    */
@@ -309,6 +311,8 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     
     iframeRef.current.sandbox.add('allow-forms');
     iframeRef.current.sandbox.add('allow-modals');
+    iframeRef.current.sandbox.add('allow-scripts');
+    iframeRef.current.sandbox.add('allow-same-origin');
   };
 
   /**

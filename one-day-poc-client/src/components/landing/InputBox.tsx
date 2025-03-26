@@ -43,7 +43,7 @@ const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
     if (text.trim()) {
       setError(null);
       createConversation();
-      navigate('/generate', { state: { initialMessage: text } });
+      navigate('/generate', { state: { initialMessage: text, isPredefined: false } });
     }
   };
 

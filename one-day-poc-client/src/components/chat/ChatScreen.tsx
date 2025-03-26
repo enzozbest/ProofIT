@@ -1,20 +1,20 @@
-import * as React from "react";
-import { useEffect } from "react";
-import { ChatBox } from "./ChatBox";
-import { MessageBox } from "./MessagesBox";
-import  ChatMessage  from "@/hooks/Chat";
-import { ChatScreenProps } from "../../types/Types";
-import { useConversation } from "@/contexts/ConversationContext";
+import * as React from 'react';
+import { useEffect } from 'react';
+import { ChatBox } from './ChatBox';
+import { MessageBox } from './MessagesBox';
+import ChatMessage from '@/hooks/Chat';
+import { ChatScreenProps } from '../../types/Types';
+import { useConversation } from '@/contexts/ConversationContext';
 
-import {toast} from 'sonner'
-import { FileTree } from "@/types/Types";
+import { toast } from 'sonner';
+import { FileTree } from '@/types/Types';
 
 /**
  * ChatScreen component serves as the main chat interface container.
- * 
+ *
  * Coordinates between the input interface (ChatBox) and the message display (MessageBox)
  * while managing the chat state and prototype generation through the ChatMessage hook.
- * 
+ *
  * @param showPrototype - Boolean flag to control visibility of the prototype panel
  * @param setPrototype - Function to update the prototype state in parent component
  * @param setPrototypeFiles - Function to update the prototype files in parent component
@@ -28,7 +28,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   setPrototype,
   setPrototypeFiles,
   initialMessage,
-  isPredefined = false
+  isPredefined = false,
 }) => {
   const { messages, loadingMessages, activeConversationId } = useConversation();
 
@@ -77,25 +77,25 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
     return deduplicatedMessages;
   }, [messages, sentMessages]);
 
-    /**
-     * Display error messages as toast notifications when they occur
-     */
-    useEffect(() => {
-        if (errorMessage) {
-            toast.error(errorMessage, {
-                onDismiss: () => setErrorMessage(""), 
-                onAutoClose: () => setErrorMessage(""),
-                closeButton: true
-            });
-        }
-    }, [errorMessage]);
+  /**
+   * Display error messages as toast notifications when they occur
+   */
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage, {
+        onDismiss: () => setErrorMessage(''),
+        onAutoClose: () => setErrorMessage(''),
+        closeButton: true,
+      });
+    }
+  }, [errorMessage]);
 
   /**
    * Process initialMessage if provided (typically from routing)
    * Automatically sends the message after a short delay
    */
   useEffect(() => {
-    if (initialMessage) {
+    if (initialMessage && isPredefined) {
       setMessage(initialMessage);
       const timer = setTimeout(() => {
         handleSend(initialMessage, isPredefined);
@@ -104,31 +104,33 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
 
       return () => clearTimeout(timer);
     }
-  }, [initialMessage]);
+  }, [initialMessage, isPredefined]);
 
-    const handleLoadPrototype = (files: FileTree) => {
-        setPrototype(true);
-        setPrototypeFiles(files);
-    };
+  const handleLoadPrototype = (files: FileTree) => {
+    setPrototype(true);
+    setPrototypeFiles(files);
+  };
 
-    return (
-        <div className="relative h-full flex flex-col">
-            {loadingMessages && <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                <p>Loading messages...</p>
-            </div>}
-            
-            <MessageBox 
-                sentMessages={combinedMessages} 
-                onLoadPrototype={handleLoadPrototype} 
-            />
-            <ChatBox
-                setMessage={setMessage}
-                message={message}
-                handleSend={handleSend}
-                setError={setErrorMessage}
-            />
+  return (
+    <div className="relative h-full flex flex-col">
+      {loadingMessages && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+          <p>Loading messages...</p>
         </div>
-    );
-}
+      )}
+
+      <MessageBox
+        sentMessages={combinedMessages}
+        onLoadPrototype={handleLoadPrototype}
+      />
+      <ChatBox
+        setMessage={setMessage}
+        message={message}
+        handleSend={handleSend}
+        setError={setErrorMessage}
+      />
+    </div>
+  );
+};
 
 export default ChatScreen;
