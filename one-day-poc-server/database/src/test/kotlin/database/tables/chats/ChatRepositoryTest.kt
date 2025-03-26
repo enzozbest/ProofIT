@@ -437,4 +437,41 @@ class ChatRepositoryTest {
         assertNotNull(previousPrototype)
         assertEquals(prototype2.filesJson, previousPrototype.filesJson)
     }
+
+    @Test
+    fun `test getting previous prototype with invalid conversationId`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+
+        repository.saveMessage(
+            ChatMessage(
+                id = messageId,
+                conversationId = conversationId,
+                senderId = "user1",
+                content = "Test message",
+                timestamp = Instant.now()
+            )
+        )
+
+        val prototype1 = Prototype(
+            id = UUID.randomUUID().toString(),
+            messageId = messageId,
+            filesJson = """{"files": [{"name": "first.js"}]}""",
+            version = 1,
+            isSelected = false,
+            timestamp = Instant.now().minusSeconds(120)
+        )
+
+        repository.savePrototype(prototype1)
+
+        val previousPrototype = repository.getPreviousPrototype(conversationId+"1")
+        assertNull(previousPrototype)
+    }
+
+    @Test
+    fun `test getting previous prototype with missing messageId`() = runTest {
+        val conversationId = UUID.randomUUID().toString()
+        val previousPrototype = repository.getPreviousPrototype(conversationId)
+        assertNull(previousPrototype)
+    }
 }
