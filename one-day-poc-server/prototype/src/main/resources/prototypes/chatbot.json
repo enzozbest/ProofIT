@@ -15,8 +15,22 @@
       "content": "const chatMessages = document.getElementById('chat-messages');\nconst userInput = document.getElementById('user-input');\nconst sendBtn = document.getElementById('send-btn');\n\n// Sample responses\nconst responses = [\n    \"I'm here to help! What would you like to know?\",\n    \"That's an interesting question. Let me think about it...\",\n    \"I understand your question. Here's what I can tell you...\",\n    \"Thanks for asking! Here's my response...\",\n    \"I'm not sure I understand. Could you rephrase that?\"\n];\n\nfunction addMessage(text, isUser) {\n    const messageDiv = document.createElement('div');\n    messageDiv.classList.add('message');\n    messageDiv.classList.add(isUser ? 'user' : 'bot');\n    \n    const messagePara = document.createElement('p');\n    messagePara.textContent = text;\n    \n    messageDiv.appendChild(messagePara);\n    chatMessages.appendChild(messageDiv);\n    \n    // Scroll to bottom of messages\n    chatMessages.scrollTop = chatMessages.scrollHeight;\n}\n\nfunction getBotResponse(userText) {\n    // In a real app, this would call an API\n    return responses[Math.floor(Math.random() * responses.length)];\n}\n\nfunction handleUserInput() {\n    const text = userInput.value.trim();\n    if (text === '') return;\n    \n    // Add user message\n    addMessage(text, true);\n    userInput.value = '';\n    \n    // Simulate processing time\n    setTimeout(() => {\n        const botResponse = getBotResponse(text);\n        addMessage(botResponse, false);\n    }, 1000);\n}\n\nsendBtn.addEventListener('click', handleUserInput);\n\nuserInput.addEventListener('keypress', (e) => {\n    if (e.key === 'Enter') {\n        handleUserInput();\n    }\n});"
     },
     "package.json": {
-      "language": "json",
-      "content": "{\n  \"name\": \"ai-chatbot-prototype\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Simple AI chatbot prototype\",\n  \"main\": \"index.html\",\n  \"scripts\": {\n    \"start\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\"\n  },\n  \"dependencies\": {\n    \"vite\": \"^4.3.9\"\n  }\n}"
+      "name": "ai-chatbot-prototype",
+      "version": "1.0.0",
+      "description": "Simple AI chatbot prototype",
+      "main": "index.html",
+      "scripts": {
+        "start": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+      },
+      "dependencies": {
+        "vite": "^4.3.9"
+      }
+    },
+    "vite.config.js": {
+      "language": "javascript",
+      "content": "export default {\n  build: {\n    rollupOptions: {\n      input: './index.html'\n    }\n  },\n  optimizeDeps: {\n    disabled: true\n  },\n  server: {\n    host: '0.0.0.0',\n    port: 5173,\n    strictPort: false\n  }\n}"
     }
   }
 }
