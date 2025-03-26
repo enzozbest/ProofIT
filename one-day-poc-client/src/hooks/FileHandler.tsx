@@ -46,6 +46,9 @@ export const normaliseFiles = (files: Record<string, FileData>): NormalisedFiles
       processFileEntry(path, fileData, result);
     } else if (isDirectoryEntry(fileData)) {
       processDirectoryEntry(path, fileData, result);
+    } else if (typeof fileData === 'object') {
+      console.log(`Processing implicit directory object: ${path}`);
+      result[path] = { directory: normaliseFiles(fileData as Record<string, FileData>) };
     }
   });
 
