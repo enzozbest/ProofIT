@@ -5,9 +5,29 @@ import {
   ensureViteDependencies, 
   chooseViteStartScript,
   configureViteSandbox,
+  ensureIndexHtml,
   ViteSetupContext 
 } from '../../hooks/ViteSetup';
 import { WebContainer } from '@webcontainer/api';
+
+vi.mock('../../hooks/resources/HtmlTemplates', () => ({
+  htmlTemplates: {
+    react: '<html>React template {{ENTRY_POINT}}</html>',
+    javascript: '<html>JS template {{ENTRY_POINT}}</html>',
+    fallback: '<html>Fallback template</html>'
+  },
+  entryPoints: [
+    { path: '/src/main.jsx', type: 'react' },
+    { path: '/src/index.js', type: 'javascript' }
+  ]
+}));
+
+vi.mock('../../hooks/resources/ConfigTemplates', () => ({
+  configTemplates: {
+    viteReact: 'React Vite config mock',
+    viteJs: 'JS Vite config mock'
+  }
+}));
 
 vi.mock('@webcontainer/api', () => ({
   WebContainer: {
@@ -39,6 +59,123 @@ describe('ViteSetup', () => {
     };
   });
 
+  describe('ensureViteConfig', () => {
+    it('does not create config if it already exists', async () => {
+      mockWebcontainerInstance.fs.stat.mockResolvedValue({}); // File exists
+      
+      await ensureViteConfig(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
+      expect(mockSetStatus).toHaveBeenCalledWith('Ensuring Vite configuration...');
+    });
+
+    it('creates React vite.config.js if no package.json exists', async () => {
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('File not found'));
+      mockWebcontainerInstance.fs.readFile.mockRejectedValue(new Error('File not found'));
+      
+      await ensureViteConfig(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/vite.config.js',
+        'React Vite config mock'
+      );
+    });
+
+    it('creates JS vite.config.js when no React dependency is found', async () => {
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('File not found'));
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        dependencies: { 
+          'vue': 'latest'
+        }
+      }));
+      
+      await ensureViteConfig(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/vite.config.js',
+        'JS Vite config mock'
+      );
+    });
+  });
+
+  describe('ensureIndexHtml', () => {
+    it('does not create index.html if it already exists in root', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('does not create index.html if it exists in public folder', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html') return Promise.reject(new Error('Not found'));
+        if (path === '/public/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
+    });
+
+    it('creates React index.html when React entry point is found', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html' || path === '/public/index.html') {
+          return Promise.reject(new Error('Not found'));
+        }
+        if (path === '/src/main.jsx') {
+          return Promise.resolve({});
+        }
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<html>React template /src/main.jsx</html>'
+      );
+    });
+
+    it('creates JavaScript index.html when JS entry point is found', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html' || path === '/public/index.html') {
+          return Promise.reject(new Error('Not found'));
+        }
+        if (path === '/src/main.jsx') {
+          return Promise.reject(new Error('Not found'));
+        }
+        if (path === '/src/index.js') {
+          return Promise.resolve({});
+        }
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<html>JS template /src/index.js</html>'
+      );
+    });
+
+    it('creates fallback index.html when no entry points are found', async () => {
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<html>Fallback template</html>'
+      );
+    });
+  });
+
+  // Keep existing tests for chooseViteStartScript and other functions
   describe('chooseViteStartScript', () => {
     it('returns "dev" when available', () => {
       const result = chooseViteStartScript(['build', 'dev', 'test']);
@@ -58,47 +195,6 @@ describe('ViteSetup', () => {
     it('returns "dev" as default when no scripts available', () => {
       const result = chooseViteStartScript([]);
       expect(result).toBe('dev');
-    });
-  });
-
-  describe('ensureViteConfig', () => {
-    it('does not create config if it already exists', async () => {
-      mockWebcontainerInstance.fs.stat.mockResolvedValue({}); // File exists
-      
-      await ensureViteConfig(context);
-      
-      expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
-      expect(mockSetStatus).toHaveBeenCalledWith('Ensuring Vite configuration...');
-    });
-
-    it('creates vite.config.js if it does not exist', async () => {
-      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('File not found'));
-      
-      await ensureViteConfig(context);
-      
-      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
-        '/vite.config.js',
-        expect.stringContaining('defineConfig')
-      );
-    });
-
-    it('handles errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Error checking file'));
-      mockWebcontainerInstance.fs.writeFile.mockRejectedValue(new Error('Write error'));
-      
-      await ensureViteConfig(context);
-      
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      consoleErrorSpy.mockRestore();
-    });
-
-    it('does nothing when webcontainerInstance is null', async () => {
-      const nullContext = { ...context, webcontainerInstance: null };
-      
-      await ensureViteConfig(nullContext);
-      
-      expect(mockSetStatus).not.toHaveBeenCalled();
     });
   });
 

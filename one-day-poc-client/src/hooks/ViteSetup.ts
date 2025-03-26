@@ -1,4 +1,6 @@
 import { WebContainer } from '@webcontainer/api';
+import { htmlTemplates, entryPoints } from './resources/HtmlTemplates';
+import { configTemplates } from './resources/ConfigTemplates';
 
 // Define types for context objects
 export interface ViteSetupContext {
@@ -21,23 +23,21 @@ export const ensureViteConfig = async (context: ViteSetupContext): Promise<void>
       console.log('vite.config.js exists');
       return;
     } catch (e) {
-      const viteConfig = `
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    host: true,
-    hmr: {
-      clientPort: 443, // Fix for WebContainer environment
-    }
-  }
-});
-`;
-      await webcontainerInstance.fs.writeFile('/vite.config.js', viteConfig);
-      console.log('Created vite.config.js');
+      let configType = 'viteReact'; 
+      
+      try {
+        const packageJsonText = await webcontainerInstance.fs.readFile('/package.json', 'utf-8');
+        const packageJson = JSON.parse(packageJsonText);
+        
+        if (!packageJson.dependencies?.react && !packageJson.devDependencies?.react) {
+          configType = 'viteJs';
+        }
+      } catch (e) {
+        console.log('Error reading package.json, using default React config:', e);
+      }
+      
+      await webcontainerInstance.fs.writeFile('/vite.config.js', configTemplates[configType]);
+      console.log(`Created vite.config.js with ${configType} template`);
     }
   } catch (e) {
     console.error('Error ensuring Vite config:', e);
@@ -98,6 +98,61 @@ export const ensureViteDependencies = async (context: ViteSetupContext): Promise
   } catch (e) {
     console.error('Error ensuring Vite dependencies:', e);
     return false;
+  }
+};
+
+/**
+ * Ensure index.html exists for Vite project
+ * Looks for entry point files and creates an appropriate index.html if missing
+ */
+export const ensureIndexHtml = async (context: ViteSetupContext): Promise<void> => {
+  const { webcontainerInstance, setStatus } = context;
+  if (!webcontainerInstance) return;
+  
+  setStatus?.('Checking for index.html...');
+  
+  try {
+    try {
+      await webcontainerInstance.fs.stat('/index.html');
+      console.log('index.html exists in root');
+      return;
+    } catch (e) {
+      try {
+        await webcontainerInstance.fs.stat('/public/index.html');
+        console.log('index.html exists in public folder');
+        return;
+      } catch (e) {
+        console.log('No index.html found, creating one');
+      }
+    }
+    
+    let foundEntry = null;
+    
+    for (const entry of entryPoints) {
+      try {
+        await webcontainerInstance.fs.stat(entry.path);
+        foundEntry = entry;
+        console.log(`Found entry point: ${entry.path}`);
+        break;
+      } catch (e) {
+        // Continue checking
+      }
+    }
+    
+    let indexHtml = '';
+    
+    if (foundEntry) {
+      const template = htmlTemplates[foundEntry.type] || htmlTemplates.fallback;
+      indexHtml = template.replace('{{ENTRY_POINT}}', foundEntry.path);
+    } else {
+      indexHtml = htmlTemplates.fallback;
+    }
+    
+    await webcontainerInstance.fs.writeFile('/index.html', indexHtml);
+    console.log('Created index.html');
+    
+  } catch (e) {
+    console.error('Error ensuring index.html:', e);
   }
 };
 
