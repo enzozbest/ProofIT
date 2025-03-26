@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  ReactNode,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserService from '../services/UserService';
 
@@ -18,14 +24,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * Authentication Provider Component
- * 
+ *
  * Manages authentication state and provides authentication-related
  * functionality to child components through React Context.
- * 
+ *
  * @param {Object} props - Component props
  * @param {ReactNode} props.children - Child components that will have access to auth context
  */
-export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -72,7 +80,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   /**
    * Initiates the login process by redirecting to the auth endpoint
    * Optionally saves a prompt text to session storage to be restored after login
-   * 
+   *
    * @param {string | React.MouseEvent} promptTextOrEvent - Optional prompt text to save or click event
    */
   const login = (promptTextOrEvent?: string | React.MouseEvent) => {
@@ -101,7 +109,9 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isAdmin, checkAuth, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, isAdmin, checkAuth, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -109,9 +119,9 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
 /**
  * Custom hook to access the authentication context
- * 
+ *
  * Provides easy access to authentication state and methods from any component
- * 
+ *
  * @returns {AuthContextType} The authentication context value
  * @throws {Error} If used outside of an AuthProvider
  */

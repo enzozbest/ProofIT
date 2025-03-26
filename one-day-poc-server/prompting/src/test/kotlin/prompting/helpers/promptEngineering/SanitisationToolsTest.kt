@@ -1,11 +1,16 @@
 package prompting.helpers.promptEngineering
 
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SanitisationToolsTest {
+    @BeforeEach
+    fun setUp() {
+        KeywordLoader.resetKeywords()
+    }
     @Test
     fun `test sanitisePrompt with HTML tags`() {
         val input = "<p>Hello <b>World</b></p>"

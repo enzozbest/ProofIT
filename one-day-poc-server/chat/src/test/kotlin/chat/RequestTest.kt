@@ -23,6 +23,20 @@ class RequestTest {
         assertEquals("Hello", request.prompt)
         assertEquals("test-conversation-id", request.conversationId)
     }
+    @Test
+
+    fun `Test Request creation with default conversationId`() {
+        val request = Request(
+            userID = "testUser",
+            time = "2025-01-01T12:00:00",
+            prompt = "Hello"
+        )
+
+        assertEquals("testUser", request.userID)
+        assertEquals("2025-01-01T12:00:00", request.time)
+        assertEquals("Hello", request.prompt)
+        assertEquals("default-conversation", request.conversationId)
+    }
 
     @Test
     fun `Test Request serialization`() {
@@ -47,6 +61,20 @@ class RequestTest {
         assertThrows<SerializationException> {
             Json.decodeFromString<Request>(invalidJson)
         }
+    }
+
+    @Test
+    fun `Test Request serialization with default conversationId`() {
+        val request = Request(
+            userID = "testUser",
+            time = "2025-01-01T12:00:00",
+            prompt = "Hello"
+        )
+
+        val jsonString = Json.encodeToString(Request.serializer(), request)
+        val deserializedRequest = Json.decodeFromString(Request.serializer(), jsonString)
+
+        assertEquals("default-conversation", deserializedRequest.conversationId)
     }
 
     @Test

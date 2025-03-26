@@ -155,13 +155,12 @@ describe('ChatMessage Hook', () => {
     );
 
     await act(async () => {
-      // Set a message that should be ignored in favor of the explicit parameter
       result.current.setMessage('This should be ignored');
       await result.current.handleSend('Explicit message');
     });
 
     expect(result.current.sentMessages[0].content).toBe('Explicit message');
-    expect(result.current.message).toBe(''); // Should still clear the message input
+    expect(result.current.message).toBe('');
 
     vi.useRealTimers();
   });
@@ -204,6 +203,8 @@ describe('ChatMessage Hook', () => {
       content: 'AI response to your message',
       timestamp: mockDate.toISOString(),
       conversationId: 'test-conversation-id',
+      id: undefined,
+      isError: false,
     });
 
     vi.useRealTimers();
@@ -243,7 +244,6 @@ describe('ChatMessage Hook', () => {
     expect(mockSetPrototypeFiles).toHaveBeenCalledWith(mockPrototypeFiles);
   });
   it('should set error message when API call fails', async () => {
-    // Mock the sendChatMessage to throw an error
     (sendChatMessage as any).mockRejectedValue(new Error('API Error'));
 
     const { result } = renderHook(() =>
@@ -289,5 +289,58 @@ describe('ChatMessage Hook', () => {
     });
 
     expect(result.current.sentMessages[1].conversationId).toBe('');
+
+    expect(result.current.sentMessages[1].role).toBe('LLM');
+    expect(result.current.sentMessages[1].content).toBe('LLM response');
+    expect(result.current.sentMessages[1].isError).toBe(false);
+  });
+
+  it('should handle error callback from sendChatMessage', async () => {
+    const mockDate = new Date('2023-01-01T00:00:00Z');
+    vi.setSystemTime(mockDate);
+
+    (sendChatMessage as any).mockImplementation(
+      (
+        message: any,
+        chatCallback: any,
+        prototypeCallback: any,
+        errorCallback: (errorMsg: string) => void
+      ) => {
+        errorCallback('Custom error from API');
+        return Promise.resolve();
+      }
+    );
+
+    const { result } = renderHook(() =>
+      ChatMessage({
+        setPrototype: mockSetPrototype,
+        setPrototypeFiles: mockSetPrototypeFiles,
+      })
+    );
+
+    await act(async () => {
+      await result.current.handleSend('Test message with error');
+    });
+
+    expect(result.current.sentMessages[0]).toEqual({
+      role: 'User',
+      content: 'Test message with error',
+      timestamp: mockDate.toISOString(),
+      conversationId: 'test-conversation-id',
+    });
+
+    expect(result.current.sentMessages[1]).toEqual({
+      role: 'LLM',
+      content: 'Custom error from API',
+      timestamp: mockDate.toISOString(),
+      conversationId: 'test-conversation-id',
+      isError: true,
+    });
+
+    expect(result.current.errorMessage).toBe(
+      'Error. Please check your connection and try again.'
+    );
+
+    vi.useRealTimers();
   });
 });

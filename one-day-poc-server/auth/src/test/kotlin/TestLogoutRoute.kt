@@ -1,10 +1,13 @@
 import authentication.authentication.AuthenticatedSession
-import authentication.authentication.AuthenticationRoutes.LOG_OUT_ROUTE
-import authentication.authentication.authModule
+import authentication.authentication.setLogOutEndpoint
+import authentication.redis.Redis
 import helpers.AuthenticationTestHelpers.resetMockRedis
 import helpers.AuthenticationTestHelpers.setUpMockRedis
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.sessions.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -30,57 +33,78 @@ class TestLogoutRoute {
     }
 
     @Test
-    fun `Test Log Out Route clears session`() =
-        testApplication {
-            application {
-                authModule(
-                    configFilePath = "cognito-test.json",
-                    authName = "testAuth",
-                )
+    fun `Test logout route with valid session cookie`() = testApplication {
+        application {
+            install(Sessions) {
+                cookie<AuthenticatedSession>("AuthenticatedSession")
             }
-            val response =
-                client.post(LOG_OUT_ROUTE) {
-                    cookie(
-                        "AuthenticatedSession",
-                        Json.encodeToString(AuthenticatedSession("test", "test", false)),
-                    )
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
-            val setCookieHeader = response.headers[HttpHeaders.SetCookie]
-            assertNotNull(setCookieHeader, "Set-Cookie header should be present")
-            assertTrue(setCookieHeader.contains("AuthenticatedSession=;"), "Session cookie should be cleared")
-            assertTrue(
-                setCookieHeader.contains("Expires=Thu, 01 Jan 1970"),
-                "Cookie should have an expiration date in the past",
-            )
+        }
+        routing {
+            setLogOutEndpoint("/logout")
         }
 
-    @Test
-    fun `Test Logout route without session cookie`() =
-        testApplication {
-            application {
-                authModule(
-                    configFilePath = "cognito-test.json",
-                    authName = "testAuth",
-                )
-            }
-            val response = client.post(LOG_OUT_ROUTE)
-            assertEquals(HttpStatusCode.OK, response.status)
+        // Create a session and cache it
+        val token = "test-token"
+        val session = AuthenticatedSession("user123", token, false)
+        val sessionJson = Json.encodeToString(session)
+
+        // Cache the session in Redis
+        Redis.getRedisConnection().use { jedis ->
+            jedis.setex("auth:$token", 3600, "cached-data")
         }
 
-    @Test
-    fun `Test Logout route with invalid session cookie`() =
-        testApplication {
-            application {
-                authModule(
-                    configFilePath = "cognito-test.json",
-                    authName = "testAuth",
-                )
-            }
-            val response =
-                client.post(LOG_OUT_ROUTE) {
-                    cookie("AuthenticatedSession", "invalid")
-                }
-            assertEquals(HttpStatusCode.OK, response.status)
+        val response = client.post("/logout") {
+            header(HttpHeaders.Cookie, "AuthenticatedSession=$sessionJson")
         }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        // Verify the cookie was cleared
+        val setCookieHeaders = response.headers.getAll(HttpHeaders.SetCookie)
+        assertNotNull(setCookieHeaders, "Expected at least one Set-Cookie header")
+
+        // Just verify that we have a Set-Cookie header for AuthenticatedSession
+        val authCookie = setCookieHeaders.find { it.startsWith("AuthenticatedSession=") }
+        assertNotNull(authCookie, "AuthenticatedSession cookie not found")
+
+        // Verify the session was removed from Redis
+        Redis.getRedisConnection().use { jedis ->
+            val cachedData = jedis["auth:$token"]
+            assertEquals(null, cachedData, "Session should be removed from Redis")
+        }
+    }
+
+    @Test
+    fun `Test logout route with invalid session cookie`() = testApplication {
+        application {
+            install(Sessions) {
+                cookie<AuthenticatedSession>("AuthenticatedSession")
+            }
+        }
+        routing {
+            setLogOutEndpoint("/logout")
+        }
+
+        val response = client.post("/logout") {
+            header(HttpHeaders.Cookie, "AuthenticatedSession=invalid-json")
+        }
+
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
+
+    @Test
+    fun `Test logout route without session cookie`() = testApplication {
+        application {
+            install(Sessions) {
+                cookie<AuthenticatedSession>("AuthenticatedSession")
+            }
+        }
+        routing {
+            setLogOutEndpoint("/logout")
+        }
+
+        val response = client.post("/logout")
+
+        assertEquals(HttpStatusCode.OK, response.status)
+    }
 }

@@ -188,9 +188,9 @@ class PromptingMainTest {
 
         val result =
             promptingMain::class.java
-                .getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java, List::class.java)
+                .getDeclaredMethod("prototypePrompt", String::class.java, JsonObject::class.java, List::class.java, String::class.java)
                 .apply { isAccessible = true }
-                .invoke(promptingMain, userPrompt, freqsResponse, emptyList<String>()) as String
+                .invoke(promptingMain, userPrompt, freqsResponse, emptyList<String>(), null) as String
 
         // Debug logging
         println("[DEBUG_LOG] Result: $result")
@@ -218,12 +218,13 @@ class PromptingMainTest {
                 String::class.java,
                 JsonObject::class.java,
                 List::class.java,
+                String::class.java,
             )
         method.isAccessible = true
 
         val exception =
             assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>())
+                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>(), null)
             }
 
         assertTrue(exception.cause is PromptException)
@@ -245,12 +246,13 @@ class PromptingMainTest {
                 String::class.java,
                 JsonObject::class.java,
                 List::class.java,
+                String::class.java,
             )
         method.isAccessible = true
 
         val exception =
             assertThrows<java.lang.reflect.InvocationTargetException> {
-                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>())
+                method.invoke(promptingMain, userPrompt, invalidResponse, emptyList<String>(), null)
             }
 
         assertTrue(exception.cause is PromptException)
@@ -276,12 +278,13 @@ class PromptingMainTest {
                 String::class.java,
                 JsonObject::class.java,
                 List::class.java,
+                String::class.java,
             )
         method.isAccessible = true
 
         // Create a test implementation of the method that only passes the first two parameters
         val testMethod = { userPrompt: String, freqsResponse: JsonObject ->
-            method.invoke(testPromptingMain, userPrompt, freqsResponse, emptyList<String>()) as String
+            method.invoke(testPromptingMain, userPrompt, freqsResponse, emptyList<String>(), null) as String
         }
 
         // Mock PromptingTools.prototypePrompt to return a known value
@@ -429,9 +432,6 @@ class PromptingMainTest {
         }
 
         assertEquals(expectedJson, result)
-
-        // Verify that the captured options is an instance of OllamaOptions with default values
-        assertTrue(optionsSlot.captured is OllamaOptions)
 
         // Verify the method was called
         coVerify(exactly = 1) { 

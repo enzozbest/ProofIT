@@ -47,6 +47,7 @@ bin/
 
 ### .env files ###
 .env
+docker.env
 
 ### Python ###
 venv/
