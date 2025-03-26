@@ -15,7 +15,7 @@ import java.time.Instant
 
 /**
  * Sets up the main JSON route for handling chat requests.
- * 
+ *
  * This route receives JSON requests containing prompts and processes them
  * through the prompting pipeline.
  */
@@ -37,7 +37,7 @@ internal fun Route.setJsonRoute() {
 
 /**
  * Sets up the route for conversation renaming.
- * 
+ *
  * This route allows clients to rename existing conversations.
  */
 internal fun Route.setJsonRouteRetrieval() {
@@ -109,7 +109,7 @@ private suspend fun handleJsonRequest(
                     "messageId": "$messageId"
                 },
                 "prototype": {
-                    "files": ${prototypeFilesJson ?: "\"{}\""}
+                    "files": $prototypeFilesJson
                 }
             }
             """.trimIndent()

@@ -2,12 +2,11 @@ package chat.routes
 
 /**
  * Utility class for processing JSON responses from the prompting pipeline.
- * 
+ *
  * This class provides methods to extract specific parts from JSON strings
  * without requiring full deserialization.
  */
 object JsonProcessor {
-
     /**
      * Extract parts from the raw JSON response using string operations to avoid full deserialization.
      *
@@ -56,64 +55,41 @@ object JsonProcessor {
             while (pos < jsonString.length && jsonString[pos].isWhitespace()) {
                 pos++
             }
+            // Handle case where it's a JSON object directly (not a string)
+            var depth = 0
+            var foundStart = false
+            val filesJson = StringBuilder()
 
-            // Check if the next character is a quote (for string value)
-            if (pos < jsonString.length && jsonString[pos] == '"') {
-                val startQuote = pos
-                pos++ // Move past the opening quote
-
-                // Find the closing quote, accounting for escaped quotes
-                var foundEndQuote = false
-                while (pos < jsonString.length && !foundEndQuote) {
-                    if (jsonString[pos] == '"' && jsonString[pos - 1] != '\\') {
-                        foundEndQuote = true
-                    } else {
-                        pos++
-                    }
+            // Skip whitespace to find the opening brace
+            while (pos < jsonString.length && !foundStart) {
+                if (jsonString[pos] == '{') {
+                    foundStart = true
+                    depth = 1
+                    filesJson.append('{')
                 }
+                pos++
+            }
 
-                if (foundEndQuote) {
-                    // Extract the content including the quotes
-                    prototypeContent = jsonString.substring(startQuote, pos + 1)
-                }
-            } else {
-                // Handle case where it's a JSON object directly (not a string)
-                var depth = 0
-                var foundStart = false
-                val filesJson = StringBuilder()
+            // If we found the opening brace, find the matching closing brace
+            if (foundStart) {
+                while (pos < jsonString.length && depth > 0) {
+                    val char = jsonString[pos]
+                    filesJson.append(char)
 
-                // Skip whitespace to find the opening brace
-                while (pos < jsonString.length && !foundStart) {
-                    if (jsonString[pos] == '{') {
-                        foundStart = true
-                        depth = 1
-                        filesJson.append('{')
+                    if (char == '{') {
+                        depth++
+                    } else if (char == '}') {
+                        depth--
                     }
                     pos++
                 }
 
-                // If we found the opening brace, find the matching closing brace
-                if (foundStart) {
-                    while (pos < jsonString.length && depth > 0) {
-                        val char = jsonString[pos]
-                        filesJson.append(char)
-
-                        if (char == '{') {
-                            depth++
-                        } else if (char == '}') {
-                            depth--
-                        }
-                        pos++
-                    }
-
-                    // If we found a complete JSON object, use it
-                    if (depth == 0) {
-                        prototypeContent = "\"" + filesJson.toString().replace("\"", "\\\"") + "\""
-                    }
+                // If we found a complete JSON object, use it
+                if (depth == 0) {
+                    prototypeContent = filesJson.toString()
                 }
             }
         }
-
         return prototypeContent
     }
 }
