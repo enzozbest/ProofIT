@@ -1,3 +1,5 @@
+import { WebContainer } from '@webcontainer/api';
+
 /**
  * Normalises file structure to ensure compatibility with WebContainer API
  * Properly handles nested paths like "src/index.js" by creating directory structure
@@ -168,4 +170,41 @@ const createDirectoryStructure = (path: string, result: NormalisedFiles) => {
   }
 
   return { directory: current, fileName };
+};
+
+/**
+ * Clean the filesystem for a fresh start
+ * @param webcontainerInstance The WebContainer instance
+ * @returns Promise that resolves when cleaning is complete
+ */
+export const cleanFileSystem = async (webcontainerInstance: WebContainer | null): Promise<void> => {
+  if (!webcontainerInstance) return;
+  
+  try {
+    const entries = await webcontainerInstance.fs.readdir('/');
+    console.log('Current root entries:', entries);
+    
+    // Remove critical directories
+    for (const dir of ['src', 'public', 'node_modules']) {
+      if (entries.includes(dir)) {
+        await webcontainerInstance.fs.rm(`/${dir}`, { recursive: true, force: true });
+      }
+    }
+    
+    // Remove other non-hidden files
+    for (const entry of entries) {
+      if (!entry.startsWith('.') && !['src', 'public', 'node_modules'].includes(entry)) {
+        try {
+          await webcontainerInstance.fs.rm(`/${entry}`);
+          console.log(`Removed file: ${entry}`);
+        } catch (e) {
+          console.log(`Error removing ${entry}:`, e);
+        }
+      }
+    }
+    
+    console.log('Filesystem reset complete');
+  } catch (e) {
+    console.log('Error during filesystem reset:', e);
+  }
 };
