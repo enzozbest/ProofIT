@@ -8,7 +8,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
 import prompting.helpers.PrototypeInteractor
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
@@ -18,7 +17,6 @@ import prototype.helpers.OllamaOptions
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import utils.environment.EnvironmentLoader
-import java.time.Instant
 
 /**
  * Represents a response from the chat processing system.
@@ -43,7 +41,7 @@ data class ServerResponse(
 
 @Serializable
 data class PrototypeResponse(
-    val files: JsonObject, // Keep as JsonObject, not Map
+    val files: String, // Keep as JsonObject, not Map
 )
 
 /**
@@ -170,43 +168,6 @@ class PromptingMain(
                     ?: throw PromptException("LLM did not respond!")
             PromptingTools.formatResponseJson(llmResponse.response ?: throw PromptException("LLM response was null!"))
         }
-
-    /**
-     * Extracts the functional requirements and prototype files from the LLM response.
-     * @param response The LLM response.
-     * @return A [ServerResponse] containing both chat response and prototype files.
-     */
-    private fun serverResponse(response: JsonObject): ServerResponse {
-        val defaultResponse = "Here is your code."
-        val chat =
-            when (val jsonReqs = response["chat"]) {
-                is JsonPrimitive -> jsonReqs.content
-                is JsonObject -> jsonReqs["message"]?.jsonPrimitive?.content ?: defaultResponse
-                else -> defaultResponse
-            }
-        val chatResponse =
-            ChatResponse(
-                message = chat,
-                role = "LLM",
-                timestamp = Instant.now().toString(),
-                messageId = "0",
-            )
-
-        val prototypeResponse =
-            response["prototype"]?.let { prototype ->
-                if (prototype is JsonObject && prototype.containsKey("files")) {
-                    PrototypeResponse(
-                        files = prototype["files"] as JsonObject,
-                    )
-                } else {
-                    null
-                }
-            }
-        return ServerResponse(
-            chat = chatResponse,
-            prototype = prototypeResponse,
-        )
-    }
 
     /**
      * Checks the security of the code snippets in the LLM response.
