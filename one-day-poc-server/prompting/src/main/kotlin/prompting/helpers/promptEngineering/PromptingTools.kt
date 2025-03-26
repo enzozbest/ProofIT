@@ -139,7 +139,6 @@ object PromptingTools {
             ### Response Format
             The model always responds with a single valid JSON object only. The model never includes any explanations,
             comments, or additional text. 
-            THE MODEL MUST NEVER USE BACKTICKED STRINGS (`) IN ITS RESPONSE. THE MODEL MUST ALWAYS USE ONLY VALID JSON NOTATION.
 
             ### Response Structure
             The model's response must strictly obey the schema and examples provided. The model is
@@ -229,7 +228,8 @@ object PromptingTools {
             3. Styling: Tailwind, Bootstrap, Material-UI.
             4. Backend: Node.js.
             5. Backend Frameworks: Express, Spring.
-
+            6. Building: Vite
+            
             ### What the model must do
             Generate production-quality code based on:
             1. The user's prompt.
@@ -268,7 +268,8 @@ object PromptingTools {
             """
             Now the model will produce the final JSON strictly following the schema provided.
             
-            The model always incorporates each reference template provided into its respective file in the prototype.files object. 
+            The model always incorporates each reference template provided into its respective file in the prototype.files object.
+            The model must never use back-ticked strings; the model must convert those to regular strings. For instance, `EXAMPLE` is not allowed, but EXAMPLE is. 
             The model never ignores the reference templates, rather it extends/modifies/combines them to fit the functional requirements. 
             The model should adjust the code from the templates to ensure they compile and run in the WebContainer environment. 
             The model always adds dependencies in package.json for React, ReactDOM, Webpack/Vite, and anything else needed (e.g., ws for WebSockets). 
