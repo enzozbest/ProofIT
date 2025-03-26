@@ -13,7 +13,7 @@ object JsonProcessor {
      * @param jsonString The raw JSON response from the prompting pipeline
      * @return Pair of (chatContent, prototypeFilesJson) - any might be empty if not found
      */
-    fun processRawJsonResponse(jsonString: String): Pair<String, String?> {
+    fun processRawJsonResponse(jsonString: String): Pair<String, String> {
         val chatContent = extractChatContent(jsonString)
         val prototypeFilesJson = extractPrototypeContent(jsonString)
 
@@ -39,7 +39,7 @@ object JsonProcessor {
      * @param jsonString The JSON string to extract from
      * @return The extracted prototype content or null if not found
      */
-    private fun extractPrototypeContent(jsonString: String): String? {
+    private fun extractPrototypeContent(jsonString: String): String {
         // Default value if no prototype content is found
         var prototypeContent: String? = null
 
@@ -90,6 +90,6 @@ object JsonProcessor {
                 }
             }
         }
-        return prototypeContent
+        return prototypeContent ?: "{}"
     }
 }

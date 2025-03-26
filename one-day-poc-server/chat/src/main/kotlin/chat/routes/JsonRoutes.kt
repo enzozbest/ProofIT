@@ -103,13 +103,13 @@ private suspend fun handleJsonRequest(
             """
             {
                 "chat": {
-                    "message": "$chatContent",
+                    "message": "${chatContent.trim()}",
                     "role": "LLM",
                     "timestamp": "${Instant.now()}",
                     "messageId": "$messageId"
                 },
                 "prototype": {
-                    "files": $prototypeFilesJson
+                    "files": ${prototypeFilesJson.trim()}
                 }
             }
             """.trimIndent()
