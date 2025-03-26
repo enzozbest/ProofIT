@@ -1,23 +1,21 @@
 package prompting
 
+import kotlinx.serialization.json.JsonObject
 import prototype.PredefinedPrototypeService
 import prototype.PrototypeTemplate
-import java.time.Instant
+
+data class PredefinedPrototypeTemplate(
+    val chatMessage: String,
+    val files: String,
+)
 
 object PredefinedPrototypes {
-    fun run(prompt: String): ServerResponse {
+    fun run(prompt: String): PredefinedPrototypeTemplate {
         val prototypeTemplate = PredefinedPrototypeService.getPrototypeForPrompt(prompt)
 
-        return ServerResponse(
-            chat = ChatResponse(
-                message = prototypeTemplate.chatMessage,
-                role = "LLM",
-                timestamp = Instant.now().toString(),
-                messageId = "0"
-            ),
-            prototype = PrototypeResponse(
-                files = prototypeTemplate.files
-            )
+        return PredefinedPrototypeTemplate(
+            chatMessage = prototypeTemplate.chatMessage,
+            files = prototypeTemplate.files.toString(),
         )
     }
 }
