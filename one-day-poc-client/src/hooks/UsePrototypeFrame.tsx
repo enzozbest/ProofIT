@@ -60,8 +60,8 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
       try {
         await resetEnvironment();
         await mountFiles();
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Ensure Vite essentials exist
         const needsDepsInstall = await ensureViteDependencies(viteContext);
         await ensureViteConfig(viteContext);
         
