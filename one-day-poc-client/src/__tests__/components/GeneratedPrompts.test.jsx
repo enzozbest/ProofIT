@@ -21,7 +21,9 @@ beforeEach(() => {
 test('Renders all prompt buttons', async () => {
   await mockAuth({ isAuthenticated: false });
 
-  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import(
+    '../../components/landing/GeneratedPrompts'
+  );
 
   const prompts = ['Prompt 1', 'Prompt 2', 'Prompt 3'];
 
@@ -33,7 +35,7 @@ test('Renders all prompt buttons', async () => {
     </MemoryRouter>
   );
 
-  prompts.forEach(prompt => {
+  prompts.forEach((prompt) => {
     const promptButton = screen.getByText(`${prompt} →`);
     expect(promptButton).toBeInTheDocument();
   });
@@ -45,12 +47,14 @@ test('Handles click when user is not authenticated', async () => {
   vi.doMock('@/contexts/AuthContext', () => ({
     useAuth: () => ({
       isAuthenticated: false,
-      login: mockLogin
+      login: mockLogin,
     }),
-    AuthProvider: ({ children }) => children
+    AuthProvider: ({ children }) => children,
   }));
 
-  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import(
+    '../../components/landing/GeneratedPrompts'
+  );
 
   const prompts = ['Test Prompt'];
 
@@ -73,7 +77,9 @@ test('Handles click when user is authenticated', async () => {
   const navigateMock = vi.fn();
   useNavigate.mockReturnValue(navigateMock);
 
-  const { default: GeneratedPrompts } = await import('../../components/landing/GeneratedPrompts');
+  const { default: GeneratedPrompts } = await import(
+    '../../components/landing/GeneratedPrompts'
+  );
 
   const prompts = ['Test Prompt'];
 
@@ -89,6 +95,6 @@ test('Handles click when user is authenticated', async () => {
   await userEvent.click(promptButton);
 
   expect(navigateMock).toHaveBeenCalledWith('/generate', {
-    state: { initialMessage: 'Test Prompt' }
+    state: { initialMessage: 'Test Prompt' },
   });
 });

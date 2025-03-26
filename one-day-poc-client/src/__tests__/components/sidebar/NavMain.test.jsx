@@ -5,7 +5,11 @@ import { NavMain } from '@/components/sidebar/NavMain';
 
 vi.mock('@/components/ui/Collapsible', () => ({
   Collapsible: ({ children, asChild, defaultOpen, className }) => (
-    <div data-testid="collapsible" data-default-open={defaultOpen} className={className}>
+    <div
+      data-testid="collapsible"
+      data-default-open={defaultOpen}
+      className={className}
+    >
       {asChild ? children : null}
     </div>
   ),
@@ -18,15 +22,23 @@ vi.mock('@/components/ui/Collapsible', () => ({
 }));
 
 vi.mock('@/components/ui/Sidebar', () => ({
-  SidebarGroup: ({ children }) => <div data-testid="sidebar-group">{children}</div>,
-  SidebarGroupLabel: ({ children }) => <div data-testid="sidebar-group-label">{children}</div>,
+  SidebarGroup: ({ children }) => (
+    <div data-testid="sidebar-group">{children}</div>
+  ),
+  SidebarGroupLabel: ({ children }) => (
+    <div data-testid="sidebar-group-label">{children}</div>
+  ),
   SidebarMenu: ({ children, className }) => (
     <div data-testid="sidebar-menu" className={className}>
       {children}
     </div>
   ),
   SidebarMenuButton: ({ children, tooltip, className }) => (
-    <button data-testid="sidebar-menu-button" data-tooltip={tooltip} className={className}>
+    <button
+      data-testid="sidebar-menu-button"
+      data-tooltip={tooltip}
+      className={className}
+    >
       {children}
     </button>
   ),
@@ -41,7 +53,11 @@ vi.mock('@/components/ui/Sidebar', () => ({
     </div>
   ),
   SidebarMenuSubButton: ({ children, className, onClick }) => (
-    <button data-testid="sidebar-menu-sub-button" className={className} onClick={onClick}>
+    <button
+      data-testid="sidebar-menu-sub-button"
+      className={className}
+      onClick={onClick}
+    >
       {children}
     </button>
   ),
@@ -53,7 +69,9 @@ vi.mock('@/components/ui/Sidebar', () => ({
 }));
 
 vi.mock('@radix-ui/react-icons', () => ({
-  ChevronRightIcon: () => <div data-testid="chevron-right-icon">ChevronRightIcon</div>,
+  ChevronRightIcon: () => (
+    <div data-testid="chevron-right-icon">ChevronRightIcon</div>
+  ),
 }));
 
 const MockIcon = () => <div data-testid="mock-icon">MockIcon</div>;
@@ -128,7 +146,10 @@ test('Renders NavMain with custom className for main items', () => {
 
   render(<NavMain items={items} />);
 
-  expect(screen.getByTestId('sidebar-menu-button')).toHaveAttribute('class', 'custom-class');
+  expect(screen.getByTestId('sidebar-menu-button')).toHaveAttribute(
+    'class',
+    'custom-class'
+  );
 });
 
 test('Renders NavMain with isActive for main items', () => {
@@ -142,7 +163,10 @@ test('Renders NavMain with isActive for main items', () => {
 
   render(<NavMain items={items} />);
 
-  expect(screen.getByTestId('collapsible')).toHaveAttribute('data-default-open', 'true');
+  expect(screen.getByTestId('collapsible')).toHaveAttribute(
+    'data-default-open',
+    'true'
+  );
 });
 
 test('Renders NavMain with sub-items', () => {
@@ -210,7 +234,9 @@ test('Renders NavMain with subtitle for sub-items', () => {
   render(<NavMain items={items} />);
 
   expect(screen.getByText('Subtitle 1')).toBeInTheDocument();
-  expect(screen.getByText('Subtitle 1').className).toContain('text-xs text-muted-foreground mt-1 truncate w-full');
+  expect(screen.getByText('Subtitle 1').className).toContain(
+    'text-xs text-muted-foreground mt-1 truncate w-full'
+  );
 });
 
 test('Sub-item without onClick handler does not throw error', () => {
@@ -222,7 +248,6 @@ test('Sub-item without onClick handler does not throw error', () => {
         {
           title: 'Sub Item 1',
           url: '#',
-          // No onClick handler
         },
       ],
     },
@@ -232,10 +257,7 @@ test('Sub-item without onClick handler does not throw error', () => {
 
   const subButton = screen.getByTestId('sidebar-menu-sub-button');
 
-  // This should not throw an error
   fireEvent.click(subButton);
-
-  // If we get here, the test passed
   expect(true).toBe(true);
 });
 
@@ -256,6 +278,5 @@ test('Renders NavMain with ID for sub-items', () => {
 
   render(<NavMain items={items} />);
 
-  // Testing that it renders properly with IDs
   expect(screen.getByText('Sub Item 1')).toBeInTheDocument();
 });

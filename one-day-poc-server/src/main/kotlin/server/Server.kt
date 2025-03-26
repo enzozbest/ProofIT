@@ -1,10 +1,18 @@
 package server
 
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.*
+import authentication.authentication.AuthenticatedSession
+import authentication.authentication.configureAuthenticators
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.sessions.Sessions
+import io.ktor.server.sessions.cookie
+import utils.json.PoCJSON
 
 val frontendHost = Pair("localhost:5173", listOf("http"))
 
@@ -16,6 +24,30 @@ fun Application.configurePlugins() {
         credentials = true,
     )
     configureContentNegotiation()
+    configureAuthentication("cognito.json")
+}
+
+internal fun Application.configureAuthentication(configFilePath: String) {
+    val config = PoCJSON.readJsonFile(configFilePath)
+    install(Authentication) {
+        configureAuthenticators(config)
+    }
+    configureSessions()
+}
+
+/**
+ * Sets up the sessions for the application.
+ */
+private fun Application.configureSessions() {
+    install(Sessions) {
+        cookie<AuthenticatedSession>("AuthenticatedSession") {
+            cookie.maxAgeInSeconds = 3600L
+            cookie.secure = true
+            cookie.httpOnly = true
+            cookie.path = "/"
+            cookie.extensions["SameSite"] = "None"
+        }
+    }
 }
 
 private fun Application.configureCORS(

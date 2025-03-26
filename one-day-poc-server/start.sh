@@ -37,4 +37,4 @@ done
 echo "Python microservice is running!"
 
 echo "Running Kotlin server..."
-./gradlew run
+./gradlew run &

@@ -194,7 +194,7 @@ object TemplateLibrarySeeder {
     /**
      * Seeds the Template Library with templates and annotations.
      */
-    suspend fun seed() {
+    fun seed() {
         if (seeded) {
             println("Template Library already seeded.")
             return
@@ -303,7 +303,7 @@ object TemplateLibrarySeeder {
      * @param annotationMap A map of annotation files by base name.
      * @return A map of template names to annotation IDs for successfully processed templates.
      */
-    private suspend fun processTemplates(
+    private fun processTemplates(
         templates: List<File>,
         annotationMap: Map<String, File>,
     ): Map<String, String> =
@@ -351,11 +351,7 @@ object TemplateLibrarySeeder {
     }
 }
 
-/**
- * Main function to execute the seeding process.
- */
-fun main() {
+fun main() =
     runBlocking {
         TemplateLibrarySeeder.seed()
     }
-}
