@@ -217,8 +217,8 @@ describe('ViteSetup', () => {
       // Should have added vite and other missing deps
       const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
       const updatedJson = JSON.parse(writeCallArg);
-      expect(updatedJson.dependencies.vite).toBe('latest');
-      expect(updatedJson.dependencies['@vitejs/plugin-react']).toBe('latest');
+      expect(updatedJson.dependencies.vite).toBe('^4.3.9');
+      expect(updatedJson.dependencies['@vitejs/plugin-react']).toBe('^4.0.0');
     });
 
     it('adds dev script if missing', async () => {
