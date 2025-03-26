@@ -87,7 +87,7 @@ private suspend fun handleJsonRequest(
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
 
     val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
-
+    MessageHandler.saveMessage(request.conversationId, request.userID, request.prompt)
     try {
         // Get raw response from LLM
         val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
@@ -109,7 +109,7 @@ private suspend fun handleJsonRequest(
                     "messageId": "$messageId"
                 },
                 "prototype": {
-                    "files": ${prototypeFilesJson.trim()}
+                    "files": "\"${prototypeFilesJson.trim().replace("\"", "\\\\\"")}\""
                 }
             }
             """.trimIndent()

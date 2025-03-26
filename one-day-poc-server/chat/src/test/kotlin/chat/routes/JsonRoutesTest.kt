@@ -102,24 +102,22 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test json route with error response from PromptingMain`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(mockPromptingMain.run(any<String>(), anyOrNull())).thenReturn(
-                    """
-                    {
-                        "chat": {
-                            "message": "Error processing prompt",
-                            "role": "LLM",
-                            "timestamp": "2025-01-01T12:00:00",
-                            "messageId": "0"
-                        },
-                        "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                        }
+            val mockPromptingMain = mockk<PromptingMain>()
+            val jsonResponse =
+                """
+                {
+                    "chat": {
+                        "message": "Error processing prompt",
+                        "role": "LLM",
+                        "timestamp": "2025-01-01T12:00:00",
+                        "messageId": "0"
+                    },
+                    "prototype": {
+                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                     }
-                    """.trimIndent(),
-                )
-            }
+                }
+                """.trimIndent()
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns jsonResponse
 
             try {
                 setPromptingMain(mockPromptingMain)
@@ -152,24 +150,22 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test successful request parsing`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(mockPromptingMain.run(any(), anyOrNull())).thenReturn(
-                    """
-                    {
-                        "chat": {
-                            "message": "Valid response",
-                            "role": "LLM",
-                            "timestamp": "2025-01-01T12:00:00",
-                            "messageId": "0"
-                        },
-                        "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                        }
+            val mockPromptingMain = mockk<PromptingMain>()
+            val jsonResponse =
+                """
+                {
+                    "chat": {
+                        "message": "Valid response",
+                        "role": "LLM",
+                        "timestamp": "2025-01-01T12:00:00",
+                        "messageId": "0"
+                    },
+                    "prototype": {
+                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                     }
-                    """.trimIndent(),
-                )
-            }
+                }
+                """.trimIndent()
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns jsonResponse
 
             try {
                 setPromptingMain(mockPromptingMain)
@@ -219,24 +215,22 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test resetPromptingMain functionality`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(mockPromptingMain.run(any<String>(), anyOrNull<String>())).thenReturn(
-                    """
-                    {
-                        "chat": {
-                            "message": "Mock response",
-                            "role": "LLM",
-                            "timestamp": "2025-01-01T12:00:00",
-                            "messageId": "0"
-                        },
-                        "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                        }
+            val mockPromptingMain = mockk<PromptingMain>()
+            val jsonResponse =
+                """
+                {
+                    "chat": {
+                        "message": "Mock response",
+                        "role": "LLM",
+                        "timestamp": "2025-01-01T12:00:00",
+                        "messageId": "0"
+                    },
+                    "prototype": {
+                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                     }
-                    """.trimIndent(),
-                )
-            }
+                }
+                """.trimIndent()
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns jsonResponse
 
             try {
                 setPromptingMain(mockPromptingMain)
@@ -263,24 +257,22 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 resetPromptingMain()
 
-                val differentMock = mock<PromptingMain>()
-                runBlocking {
-                    whenever(differentMock.run(any<String>(), anyOrNull<String>())).thenReturn(
-                        """
-                        {
-                            "chat": {
-                                "message": "Default response after reset",
-                                "role": "LLM",
-                                "timestamp": "2025-01-01T12:00:00",
-                                "messageId": "0"
-                            },
-                            "prototype": {
-                                "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                            }
+                val differentMock = mockk<PromptingMain>()
+                val differentJsonResponse =
+                    """
+                    {
+                        "chat": {
+                            "message": "Default response after reset",
+                            "role": "LLM",
+                            "timestamp": "2025-01-01T12:00:00",
+                            "messageId": "0"
+                        },
+                        "prototype": {
+                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                         }
-                        """.trimIndent(),
-                    )
-                }
+                    }
+                    """.trimIndent()
+                coEvery { differentMock.run(any<String>(), anyOrNull<String>()) } returns differentJsonResponse
 
                 setPromptingMain(differentMock)
                 val secondResponse =
@@ -380,15 +372,13 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test exception thrown by PromptingMain`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            runBlocking {
-                whenever(
-                    mockPromptingMain.run(
-                        any(),
-                        anyOrNull(),
-                    ),
-                ).thenThrow(RuntimeException("Simulation of processing error"))
-            }
+            val mockPromptingMain = mockk<PromptingMain>()
+            coEvery { 
+                mockPromptingMain.run(
+                    any(),
+                    eq(null),
+                )
+            } throws RuntimeException("Simulation of processing error")
 
             try {
                 setPromptingMain(mockPromptingMain)
@@ -653,25 +643,20 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     @Test
     fun `Test save prototype`() =
         testApplication {
-            val mockPromptingMain = mock<PromptingMain>()
-            """"\"{\\\"file\\\":\\\"content\\\"}\""""
-            runBlocking {
-                whenever(mockPromptingMain.run(any<String>(), anyOrNull<String>())).thenReturn(
-                    """
-                    {
-                        "chat": {
-                            "message": "Valid response",
-                            "role": "LLM",
-                            "timestamp": "2025-01-01T12:00:00",
-                            "messageId": "0"
-                        },
-                        "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
-                        }
+            val mockPromptingMain = mockk<PromptingMain>()
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns """
+                {
+                    "chat": {
+                        "message": "Valid response",
+                        "role": "LLM",
+                        "timestamp": "2025-01-01T12:00:00",
+                        "messageId": "0"
+                    },
+                    "prototype": {
+                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
                     }
-                    """.trimIndent(),
-                )
-            }
+                }
+                """.trimIndent()
 
             try {
                 setPromptingMain(mockPromptingMain)
