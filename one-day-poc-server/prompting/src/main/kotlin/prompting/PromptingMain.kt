@@ -2,9 +2,11 @@ package prompting
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import prompting.helpers.PrototypeInteractor
@@ -73,32 +75,35 @@ class PromptingMain(
      * @return A ServerResponse object containing the generated response and timestamp
      * @throws PromptException If any step in the prompting workflow fails
      */
-    suspend fun run(userPrompt: String, previousGeneration: String ?= null): ServerResponse {
+    suspend fun run(
+        userPrompt: String,
+        previousGeneration: String? = null,
+    ): String {
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
         // First LLM call
         val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
-        val freqs: JsonObject = promptLlm(freqsPrompt, freqsOptions)
+        val freqs: String = promptLlm(freqsPrompt, freqsOptions)
 
-        val functionalRequirements =
-            freqs["requirements"]?.jsonArray?.joinToString(",") + ", $userPrompt"
+        val freqsResponse: JsonObject =
+            runCatching { Json.decodeFromString<JsonObject>(freqs) }.getOrElse { buildJsonObject { } }
+        val requirements = freqsResponse["requirements"]?.jsonArray?.joinToString(",") ?: ""
+        val fetcherInput = "$requirements, $userPrompt"
 
         // Use functional requirements to and user prompt fetch templates
-        val templates = TemplateInteractor.fetchTemplates(functionalRequirements)
+        val templates = TemplateInteractor.fetchTemplates(fetcherInput)
 
         // Prototype prompt with templates.
-        val prototypePrompt = prototypePrompt(userPrompt, freqs, templates, previousGeneration)
+        val prototypePrompt = prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration)
 
         // Second LLM call
         val prototypeOptions =
             OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
-        val prototypeResponse: JsonObject = promptLlm(prototypePrompt, prototypeOptions)
+        val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions)
         println("DONE DECODING!")
 
-//        val dummyResponse = createDummyResponse()
-//        println("USING DUMMY RESPONSE INSTEAD OF LLM!")
-        return serverResponse(prototypeResponse)
+        return prototypeResponse
     }
 
     /**
@@ -119,7 +124,7 @@ class PromptingMain(
         userPrompt: String,
         freqsResponse: JsonObject,
         templates: List<String> = emptyList(),
-        previousGeneration: String ?= null,
+        previousGeneration: String? = null,
     ): String {
         val reqs =
             runCatching {
@@ -128,12 +133,10 @@ class PromptingMain(
                 throw PromptException("Failed to extract requirements from LLM response")
             }
 
-        // This check is only needed for the test, as the actual implementation doesn't use keywords
         if (!freqsResponse.containsKey("keywords")) {
             throw PromptException("Failed to extract keywords from LLM response")
         }
 
-        // Extract keywords for the test
         runCatching {
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
@@ -160,10 +163,10 @@ class PromptingMain(
     private fun promptLlm(
         prompt: String,
         options: OllamaOptions = OllamaOptions(),
-    ): JsonObject =
+    ): String =
         runBlocking {
             val llmResponse =
-                PrototypeInteractor.prompt(prompt, model, options)?.let { it }
+                PrototypeInteractor.prompt(prompt, model, options)
                     ?: throw PromptException("LLM did not respond!")
             PromptingTools.formatResponseJson(llmResponse.response ?: throw PromptException("LLM response was null!"))
         }

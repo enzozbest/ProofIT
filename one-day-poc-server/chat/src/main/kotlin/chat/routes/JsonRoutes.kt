@@ -2,7 +2,10 @@ package chat.routes
 
 import chat.JSON
 import chat.Request
-import chat.storage.*
+import chat.storage.getPreviousPrototype
+import chat.storage.storeMessage
+import chat.storage.storePrototype
+import chat.storage.updateConversationName
 import database.tables.chats.ChatMessage
 import database.tables.chats.Prototype
 import io.ktor.http.*
@@ -11,9 +14,13 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import prompting.PromptingMain
-import prompting.ServerResponse
 
 private lateinit var promptingMainInstance: PromptingMain
 
@@ -86,16 +93,12 @@ private suspend fun handleJsonRequest(
         println("No previous generation found")
     }
     try {
-        val response = getPromptingMain().run(request.prompt, previousGeneration)
+        val promptResponse = getPromptingMain().run(request.prompt, previousGeneration)
+        val jsonResponse = runBlocking { Json.decodeFromString<JsonObject>(promptResponse) }
 
-        val messageId = savePrototype(request.conversationId, response)
-        val responseWithId =
-            response.copy(
-                chat = response.chat.copy(messageId = messageId),
-            )
-
-        println("RECEIVED RESPONSE")
-        val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
+        val id = savePrototype(request.conversationId, jsonResponse)
+        val serverResponse = JsonObject(jsonResponse + ("messageId" to JsonPrimitive(id)))
+        val jsonString = Json.encodeToString(JsonObject.serializer(), serverResponse)
         println("ENCODED RESPONSE: $jsonString")
 
         call.respondText(jsonString, contentType = ContentType.Application.Json)
@@ -125,14 +128,14 @@ private suspend fun saveMessage(
 
 private suspend fun savePrototype(
     conversationId: String,
-    response: ServerResponse,
+    response: JsonObject,
 ): String {
-    val savedMessage = saveMessage(conversationId, "LLM", response.chat.message)
-    response.prototype?.let { prototypeResponse ->
+    val savedMessage = saveMessage(conversationId, "LLM", response["chat"]!!.jsonPrimitive.content)
+    response["prototype"]!!.jsonObject["files"]!!.let { prototypeResponse ->
         val prototype =
             Prototype(
                 messageId = savedMessage.id,
-                filesJson = prototypeResponse.files.toString(),
+                filesJson = prototypeResponse.jsonObject.toString(),
                 version = 1,
                 isSelected = true,
             )
