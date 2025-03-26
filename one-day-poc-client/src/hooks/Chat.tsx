@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { sendChatMessage } from '../api/FrontEndAPI';
-import { Message, ChatHookReturn, ChatMessageProps, ChatResponse } from '../types/Types';
+import {
+  Message,
+  ChatHookReturn,
+  ChatMessageProps,
+  ChatResponse,
+} from '../types/Types';
 import { useConversation } from '../contexts/ConversationContext';
 
 /**
  * ChatMessage hook manages state and functionality for chat interactions
- * 
+ *
  * This hook handles:
  * - Managing input message state
  * - Storing conversation history
@@ -13,11 +18,11 @@ import { useConversation } from '../contexts/ConversationContext';
  * - Processing text responses from the LLM
  * - Handling prototype file generation
  * - Error handling for API interactions
- * 
+ *
  * @param {Object} props - Hook properties
  * @param {Function} props.setPrototype - Function to update prototype visibility state
  * @param {Function} props.setPrototypeFiles - Function to update prototype file content
- * 
+ *
  * @returns {ChatHookReturn} Object containing chat state and functions
  */
 const ChatMessage = ({
@@ -29,8 +34,13 @@ const ChatMessage = ({
   const [llmResponse, setLlmResponse] = useState<string>('');
   const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
-  const { activeConversationId, createConversation, messages, loadingMessages } = useConversation();
+
+  const {
+    activeConversationId,
+    createConversation,
+    messages,
+    loadingMessages,
+  } = useConversation();
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -48,19 +58,19 @@ const ChatMessage = ({
     if (!messageToSend.trim()) return;
 
     const currentTime = new Date().toISOString();
-    
+
     const conversationId = activeConversationId || createConversation();
 
     const newMessage: Message = {
       role: 'User',
       content: messageToSend,
       timestamp: currentTime,
-      conversationId: conversationId
+      conversationId: conversationId,
     };
-    
+
     setSentMessages((prevMessages) => [...prevMessages, newMessage]);
     setMessage('');
-    
+
     try {
       await sendChatMessage(
         newMessage,
@@ -71,7 +81,21 @@ const ChatMessage = ({
           setPrototype(true);
           setPrototypeFiles(prototypeResponse.files);
         },
-        isPredefined
+        isPredefined,
+        (errorMsg) => {
+          const errorSystemMessage: Message = {
+            role: 'LLM',
+            content: errorMsg,
+            timestamp: new Date().toISOString(),
+            conversationId: conversationId,
+            isError: true,
+          };
+          setSentMessages((prevMessages) => [
+            ...prevMessages,
+            errorSystemMessage,
+          ]);
+          setErrorMessage('Error. Please check your connection and try again.');
+        }
       );
     } catch (error) {
       console.error('Error:', error);

@@ -3,6 +3,7 @@ package prompting.helpers.promptEngineering
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import java.net.URL
 import java.util.Collections
 
 /**
@@ -13,9 +14,20 @@ import java.util.Collections
  * immutable list to prevent modifications after loading.
  */
 object KeywordLoader {
-    private val keywords: List<String> by lazy {
-        val fileContent = this::class.java.getResource("/keywords.json")?.readText() ?: "[]"
-        Collections.unmodifiableList(Json.decodeFromString<KeywordList>(fileContent).keywords)
+    private lateinit var keywordsInternal: List<String>
+
+    /**
+     * Flag to indicate if the keywords need to be reloaded.
+     * This is used by the resetKeywords method to force reloading of the keywords.
+     */
+    private var needsReload = false
+
+    /**
+     * Resets the internal keywords list, forcing it to be reloaded on the next call to getKeywordsList.
+     * This method is primarily used for testing purposes.
+     */
+    internal fun resetKeywords() {
+        needsReload = true
     }
 
     /**
@@ -23,7 +35,18 @@ object KeywordLoader {
      *
      * @return An immutable list of keywords that can be safely used throughout the application
      */
-    fun getKeywordsList(): List<String> = keywords
+    fun getKeywordsList(): List<String> {
+        if (!::keywordsInternal.isInitialized || needsReload) {
+            val fileContent = getResource("/keywords.json")?.readText() ?: """{"keywords":[]}"""
+            needsReload = false
+            return Collections
+                .unmodifiableList(Json.decodeFromString<KeywordList>(fileContent).keywords)
+                .also { keywordsInternal = it }
+        }
+        return keywordsInternal
+    }
+
+    internal fun getResource(resource: String): URL? = this::class.java.getResource(resource)
 }
 
 /**

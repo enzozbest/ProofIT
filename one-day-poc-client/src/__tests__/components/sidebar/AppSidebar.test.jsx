@@ -33,23 +33,40 @@ vi.mock('@/components/sidebar/NavUser', () => ({
 vi.mock('@/components/ui/Sidebar', () => ({
   // eslint-disable-next-line react/prop-types
   Sidebar: ({ children, collapsible, className, ...props }) => (
-    <div data-testid="sidebar" data-collapsible={collapsible} className={className} {...props}>
+    <div
+      data-testid="sidebar"
+      data-collapsible={collapsible}
+      className={className}
+      {...props}
+    >
       {children}
     </div>
   ),
   // eslint-disable-next-line react/prop-types
-  SidebarHeader: ({ children }) => <div data-testid="sidebar-header">{children}</div>,
+  SidebarHeader: ({ children }) => (
+    <div data-testid="sidebar-header">{children}</div>
+  ),
   // eslint-disable-next-line react/prop-types
-  SidebarContent: ({ children }) => <div data-testid="sidebar-content">{children}</div>,
+  SidebarContent: ({ children }) => (
+    <div data-testid="sidebar-content">{children}</div>
+  ),
   // eslint-disable-next-line react/prop-types
-  SidebarFooter: ({ children }) => <div data-testid="sidebar-footer">{children}</div>,
+  SidebarFooter: ({ children }) => (
+    <div data-testid="sidebar-footer">{children}</div>
+  ),
   SidebarRail: () => <div data-testid="sidebar-rail"></div>,
 }));
 
 vi.mock('@/components/ui/Button', () => ({
   // eslint-disable-next-line react/prop-types
   Button: ({ children, onClick, variant, className, ...props }) => (
-    <button data-testid="new-chat-button" onClick={onClick} data-variant={variant} className={className} {...props}>
+    <button
+      data-testid="new-chat-button"
+      onClick={onClick}
+      data-variant={variant}
+      className={className}
+      {...props}
+    >
       {children}
     </button>
   ),
@@ -93,9 +110,7 @@ test('Renders sidebar with conversations', () => {
 test('New Chat button calls createConversation when clicked', () => {
   const mockCreateConversation = vi.fn();
   useConversation.mockReturnValue({
-    conversations: [
-      { id: '1', name: 'Conversation 1' },
-    ],
+    conversations: [{ id: '1', name: 'Conversation 1' }],
     activeConversationId: '1',
     setActiveConversationId: vi.fn(),
     createConversation: mockCreateConversation,
@@ -140,8 +155,12 @@ test('Active conversation is highlighted', () => {
 
   render(<AppSidebar />);
 
-  expect(screen.getByTestId('conversation-2').getAttribute('data-active')).toBe('true');
-  expect(screen.getByTestId('conversation-1').getAttribute('data-active')).toBe('false');
+  expect(screen.getByTestId('conversation-2').getAttribute('data-active')).toBe(
+    'true'
+  );
+  expect(screen.getByTestId('conversation-1').getAttribute('data-active')).toBe(
+    'false'
+  );
 });
 
 test('Renders with empty conversations array', () => {
@@ -162,9 +181,7 @@ test('Renders with empty conversations array', () => {
 
 test('Sidebar can be passed additional props', () => {
   useConversation.mockReturnValue({
-    conversations: [
-      { id: '1', name: 'Conversation 1' },
-    ],
+    conversations: [{ id: '1', name: 'Conversation 1' }],
     activeConversationId: '1',
     setActiveConversationId: vi.fn(),
     createConversation: vi.fn(),
@@ -172,14 +189,14 @@ test('Sidebar can be passed additional props', () => {
 
   render(<AppSidebar data-custom="test-value" />);
 
-  expect(screen.getByTestId('sidebar').getAttribute('data-custom')).toBe('test-value');
+  expect(screen.getByTestId('sidebar').getAttribute('data-custom')).toBe(
+    'test-value'
+  );
 });
 
 test('Sidebar has the correct attributes', () => {
   useConversation.mockReturnValue({
-    conversations: [
-      { id: '1', name: 'Conversation 1' },
-    ],
+    conversations: [{ id: '1', name: 'Conversation 1' }],
     activeConversationId: '1',
     setActiveConversationId: vi.fn(),
     createConversation: vi.fn(),

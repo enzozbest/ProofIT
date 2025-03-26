@@ -6,14 +6,13 @@ type GeneratedPromptsProps = {
   prompts: string[];
 };
 
-
 /**
  * GeneratedPrompts component displays a horizontally scrollable list of prompt buttons.
- * 
+ *
  * This component renders an array of text prompts as interactive buttons, typically used
  * for suggested actions or example queries the user can click on. The buttons are styled
  * with hover effects and include a right arrow indicator.
- * 
+ *
  * @returns {JSX.Element} A horizontally scrollable container with clickable prompt buttons
  */
 const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {

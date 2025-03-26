@@ -32,7 +32,7 @@ abstract class BaseAuthenticationServer {
         private val rsaKeyPair = generateRSAKeyPair()
         private val rsaPrivateKey = rsaKeyPair.first
         private val rsaPublicKey = rsaKeyPair.second
-        const val TEST_PORT = 5000
+        const val TEST_PORT = 9876
 
         init {
             startMockServer()
@@ -114,7 +114,13 @@ abstract class BaseAuthenticationServer {
     }
 
     protected open fun Application.testModule() {
-        chatModule()
+        routing {
+            with(ChatEndpoints) {
+                setChatRoutes()
+                setJsonRoutes()
+                setUploadRoutes()
+            }
+        }
     }
 
     protected fun ApplicationTestBuilder.setupTestApplication(moduleConfig: Application.() -> Unit = { testModule() }) {

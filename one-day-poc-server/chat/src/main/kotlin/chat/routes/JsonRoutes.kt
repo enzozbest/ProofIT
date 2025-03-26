@@ -2,22 +2,24 @@ package chat.routes
 
 import chat.JSON
 import chat.Request
-import chat.storage.*
-import database.tables.chats.ChatMessage
-import database.tables.chats.Prototype
+import chat.storage.getPreviousPrototype
+import chat.storage.updateConversationName
 import io.ktor.http.*
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import kotlinx.serialization.json.Json
-import prompting.*
+import prompting.PromptingMain
 import java.time.Instant
 
-private lateinit var promptingMainInstance: PromptingMain
-
-fun Route.jsonRoutes() {
+/**
+ * Sets up the main JSON route for handling chat requests.
+ *
+ * This route receives JSON requests containing prompts and processes them
+ * through the prompting pipeline.
+ */
+internal fun Route.setJsonRoute() {
     post(JSON) {
         println("Received JSON request")
         val request: Request =
@@ -31,6 +33,14 @@ fun Route.jsonRoutes() {
             }
         handleJsonRequest(request, call)
     }
+}
+
+/**
+ * Sets up the route for conversation renaming.
+ *
+ * This route allows clients to rename existing conversations.
+ */
+internal fun Route.setJsonRouteRetrieval() {
     post("$JSON/{conversationId}/rename") {
         try {
             println("Received conversation rename request")
@@ -58,10 +68,10 @@ fun Route.jsonRoutes() {
  *
  * This function takes the prompt from the received request, sends it through
  * the prompting workflow, and returns the generated response to the client.
+ * It avoids unnecessary deserialization/serialization while maintaining the expected response format.
  *
  * @param request The validated Request object containing the user's prompt
  * @param call The ApplicationCall used to send the response back to the client
- * @throws NullPointerException if the prompting workflow returns a null response
  */
 private suspend fun handleJsonRequest(
     request: Request,
@@ -75,122 +85,48 @@ private suspend fun handleJsonRequest(
     }
 
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
-    saveMessage(request.conversationId, request.userID, request.prompt)
+
+    val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
 
     try {
-        val response = if (request.predefined) {
-            PredefinedPrototypes.run(request.prompt)
+        val promptJsonResponse = if (request.predefined) {
+            PredefinedPrototypes.run(request.prompt).toString()
         } else {
-            getPromptingMain().run(request.prompt)
+            // Get raw response from LLM
+            PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
         }
 
-        val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-        response.prototype?.let { prototypeResponse ->
-            val prototype =
-                Prototype(
-                    messageId = savedMessage.id,
-                    filesJson = prototypeResponse.files.toString(),
-                    version = 1,
-                    isSelected = true,
-                )
-            storePrototype(prototype)
-        }
+        // Extract chat content and prototype files JSON
+        val (chatContent, prototypeFilesJson) = JsonProcessor.processRawJsonResponse(promptJsonResponse)
 
-        println("MessageId: ${savedMessage.id}")
+        // Save to database and get message ID
+        val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
 
-        val responseWithId =
-            response.copy(
-                chat = response.chat.copy(messageId = savedMessage.id),
-            )
+        // Construct a proper JSON response directly - no nested serialization
+        val finalResponse =
+            """
+            {
+                "chat": {
+                    "message": "$chatContent",
+                    "role": "LLM",
+                    "timestamp": "${Instant.now()}",
+                    "messageId": "$messageId"
+                },
+                "prototype": {
+                    "files": $prototypeFilesJson
+                }
+            }
+            """.trimIndent()
 
-        println("RECEIVED RESPONSE")
-        val jsonString = Json.encodeToString(ServerResponse.serializer(), responseWithId)
-        println("ENCODED RESPONSE: $jsonString")
-
-        call.respondText(jsonString, contentType = ContentType.Application.Json)
+        call.respondText(finalResponse, contentType = ContentType.Application.Json)
     } catch (e: Exception) {
         println("Error in handleJsonRequest: ${e.message}")
+        e.printStackTrace()
         call.respondText(
             "Error processing request: ${e.message}",
             status = HttpStatusCode.InternalServerError,
         )
     }
-}
-
-/*
-/**
- * Handles predefined prompt requests by loading the appropriate template
- */
-private suspend fun handlePredefinedPrompt(request: Request): ServerResponse {
-    val response = PredefinedPrototypes.run(request.prompt)
-    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-
-    response.prototype?.let { prototypeResponse ->
-        val prototype = Prototype(
-            messageId = savedMessage.id,
-            filesJson = prototypeResponse.files.toString(),
-            version = 1,
-            isSelected = true,
-        )
-        storePrototype(prototype)
-    }
-
-    return response.copy(
-        chat = response.chat.copy(messageId = savedMessage.id)
-    )
-}
-
-/**
- * Handles LLM-based prompt requests
- */
-private suspend fun handleLLMPrompt(request: Request): ServerResponse {
-    val response = getPromptingMain().run(request.prompt)
-    val savedMessage = saveMessage(request.conversationId, "LLM", response.chat.message)
-
-    response.prototype?.let { prototypeResponse ->
-        val prototype = Prototype(
-            messageId = savedMessage.id,
-            filesJson = prototypeResponse.files.toString(),
-            version = 1,
-            isSelected = true,
-        )
-        storePrototype(prototype)
-    }
-
-    return response.copy(
-        chat = response.chat.copy(messageId = savedMessage.id)
-    )
-}
- */
-
-private suspend fun saveMessage(
-    conversationId: String,
-    senderId: String,
-    content: String,
-): ChatMessage {
-    val message =
-        ChatMessage(
-            conversationId = conversationId,
-            senderId = senderId,
-            content = content,
-        )
-    println("Saving message: $message")
-    storeMessage(message)
-    println("Stored message: ${message.id}")
-    return message
-}
-
-/**
- * This function serves as a getter for the singleton promptingMainInstance
- * to ensure consistent access throughout the application.
- *
- * @return The current PromptingMain instance
- */
-private fun getPromptingMain(): PromptingMain {
-    if (!::promptingMainInstance.isInitialized) {
-        promptingMainInstance = PromptingMain()
-    }
-    return promptingMainInstance
 }
 
 /**
@@ -202,7 +138,7 @@ private fun getPromptingMain(): PromptingMain {
  * @param promptObject The PromptingMain instance to use for processing requests
  */
 internal fun setPromptingMain(promptObject: PromptingMain) {
-    promptingMainInstance = promptObject
+    PromptingMainProvider.setInstance(promptObject)
 }
 
 /**
@@ -212,5 +148,5 @@ internal fun setPromptingMain(promptObject: PromptingMain) {
  * workflow, typically after testing or when a fresh state is required.
  */
 internal fun resetPromptingMain() {
-    promptingMainInstance = PromptingMain()
+    PromptingMainProvider.resetInstance()
 }

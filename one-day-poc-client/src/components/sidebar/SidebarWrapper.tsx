@@ -52,7 +52,7 @@ export default function SidebarWrapper({
     useConversation();
   const [projectName, setProjectName] = useState<string>('Untitled Project');
   const [inputProjectName, setInputProjectName] = useState<string>(projectName);
-  const [open,setOpen] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (activeConversationId && conversations) {
@@ -68,7 +68,7 @@ export default function SidebarWrapper({
 
   const updateProjectName = async () => {
     setProjectName(inputProjectName);
-    
+
     if (activeConversationId) {
       updateConversationName(activeConversationId, inputProjectName);
     }

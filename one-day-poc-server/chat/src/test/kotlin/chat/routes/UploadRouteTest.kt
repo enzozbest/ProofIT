@@ -1,13 +1,12 @@
 package chat.routes
 
 import chat.BaseAuthenticationServer
-import chat.ChatEndpoint
+import chat.ChatEndpoints
 import chat.UPLOAD
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.http.content.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.AfterEach
@@ -22,14 +21,14 @@ import kotlin.test.assertTrue
 class UploadRoutesTest : BaseAuthenticationServer() {
     @BeforeEach
     fun setup() {
-        ChatEndpoint.UPLOAD_DIR = "test_uploads"
+        ChatEndpoints.UPLOAD_DIR = "test_uploads"
         File("test_uploads").deleteRecursively()
     }
 
     @AfterEach
     fun cleanup() {
         File("test_uploads").deleteRecursively()
-        ChatEndpoint.UPLOAD_DIR = "uploads"
+        ChatEndpoints.UPLOAD_DIR = "uploads"
     }
 
     @Test
@@ -342,315 +341,337 @@ class UploadRoutesTest : BaseAuthenticationServer() {
     }
 
     @Test
-    fun `Test upload without file does not cause errors`() = testApplication {
-        setupTestApplication()
+    fun `Test upload without file does not cause errors`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("description", "No File Attached")
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("description", "No File Attached")
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(response.bodyAsText().contains("No File Attached"))
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        assertTrue(response.bodyAsText().contains("No File Attached"))
-    }
 
     @Test
-    fun `Test upload with form items but no file item`() = testApplication {
-        setupTestApplication()
+    fun `Test upload with form items but no file item`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("description", "Description Only")
-                        append("message", """
-                        {
-                            "userID": "testUser",
-                            "time": "2025-01-01T12:00:00",
-                            "prompt": "Hello",
-                            "conversationId": "test-conversation-id"
-                        }
-                    """.trimIndent())
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("description", "Description Only")
+                                append(
+                                    "message",
+                                    """
+                                    {
+                                        "userID": "testUser",
+                                        "time": "2025-01-01T12:00:00",
+                                        "prompt": "Hello",
+                                        "conversationId": "test-conversation-id"
+                                    }
+                                    """.trimIndent(),
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseJson = Json.decodeFromString<Response>(response.bodyAsText())
+            assertEquals("Hello, testUser!", responseJson.message)
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-        val responseJson = Json.decodeFromString<Response>(response.bodyAsText())
-        assertEquals("Hello, testUser!", responseJson.message)
-    }
 
     @Test
-    fun `Test createUploadDirectory reuses existing directory`() = testApplication {
-        setupTestApplication()
-        val testDir = File("test_uploads")
-        testDir.mkdirs()
+    fun `Test createUploadDirectory reuses existing directory`() =
+        testApplication {
+            setupTestApplication()
+            val testDir = File("test_uploads")
+            testDir.mkdirs()
 
-        val markerFile = File(testDir, "marker.txt")
-        markerFile.writeText("marker")
+            val markerFile = File(testDir, "marker.txt")
+            markerFile.writeText("marker")
 
-        client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "file",
-                            "test".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
-                            }
-                        )
-                    }
+            client.post(UPLOAD) {
+                header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append(
+                                "file",
+                                "test".toByteArray(),
+                                Headers.build {
+                                    append(HttpHeaders.ContentType, "text/plain")
+                                    append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                                },
+                            )
+                        },
+                    ),
                 )
-            )
-        }
+            }
 
-        assertTrue(markerFile.exists(), "Directory should be reused, not recreated")
-    }
+            assertTrue(markerFile.exists(), "Directory should be reused, not recreated")
+        }
 
     @Test
-    fun `Test multipart upload without any parts`() = testApplication {
-        setupTestApplication()
+    fun `Test multipart upload without any parts`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {}
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {},
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
 
     @Test
-    fun `Test upload with multiple files`() = testApplication {
-        setupTestApplication()
+    fun `Test upload with multiple files`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "file",
-                            "first file content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"first.txt\"")
-                            }
-                        )
-                        append(
-                            "file",
-                            "second file content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"second.txt\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append(
+                                    "file",
+                                    "first file content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"first.txt\"")
+                                    },
+                                )
+                                append(
+                                    "file",
+                                    "second file content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"second.txt\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            val testDir = File("test_uploads")
+            val files = testDir.listFiles() ?: emptyArray()
+
+            assertTrue(files.any { it.name.startsWith("first_") })
+            assertTrue(files.any { it.name.startsWith("second_") })
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-
-        val testDir = File("test_uploads")
-        val files = testDir.listFiles() ?: emptyArray()
-
-        assertTrue(files.any { it.name.startsWith("first_") })
-        assertTrue(files.any { it.name.startsWith("second_") })
-    }
 
     @Test
-    fun `Test upload with blank filename`() = testApplication {
-        setupTestApplication()
+    fun `Test upload with blank filename`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "file",
-                            "content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append(
+                                    "file",
+                                    "content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            val testDir = File("test_uploads")
+            val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
+            assertNotNull(uploadedFile, "File with generated name should exist")
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-
-        val testDir = File("test_uploads")
-        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
-        assertNotNull(uploadedFile, "File with generated name should exist")
-    }
 
     @Test
-    fun `Test binary file upload`() = testApplication {
-        setupTestApplication()
+    fun `Test binary file upload`() =
+        testApplication {
+            setupTestApplication()
 
-        // Create a sample binary content
-        val binaryContent = ByteArray(256) { it.toByte() }
+            // Create a sample binary content
+            val binaryContent = ByteArray(256) { it.toByte() }
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append(
-                            "file",
-                            binaryContent,
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "application/octet-stream")
-                                append(HttpHeaders.ContentDisposition, "filename=\"binary.dat\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append(
+                                    "file",
+                                    binaryContent,
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "application/octet-stream")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"binary.dat\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            val testDir = File("test_uploads")
+            val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("binary_") }
+            assertNotNull(uploadedFile, "Binary file should be uploaded")
+
+            if (uploadedFile != null) {
+                val uploadedContent = uploadedFile.readBytes()
+                assertTrue(binaryContent.contentEquals(uploadedContent), "Binary content should match")
+            }
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-
-        val testDir = File("test_uploads")
-        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("binary_") }
-        assertNotNull(uploadedFile, "Binary file should be uploaded")
-
-        if (uploadedFile != null) {
-            val uploadedContent = uploadedFile.readBytes()
-            assertTrue(binaryContent.contentEquals(uploadedContent), "Binary content should match")
-        }
-    }
 
     @Test
-    fun `Test form item with unknown name is ignored`() = testApplication {
-        setupTestApplication()
+    fun `Test form item with unknown name is ignored`() =
+        testApplication {
+            setupTestApplication()
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("unknownField", "This should be ignored")
-                        append(
-                            "file",
-                            "test content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("unknownField", "This should be ignored")
+                                append(
+                                    "file",
+                                    "test content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-    }
 
     @Test
-    fun `Test handleMessagePart with null message skips let block`() = testApplication {
-        setupTestApplication()
+    fun `Test handleMessagePart with null message skips let block`() =
+        testApplication {
+            setupTestApplication()
 
-        // Create a test description to verify in the response
-        val testDescription = "Test with null message"
+            // Create a test description to verify in the response
+            val testDescription = "Test with null message"
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        // Include description and a message with value "null"
-                        append("description", testDescription)
-                        append("message", "null")
-                        append(
-                            "file",
-                            "test content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                // Include description and a message with value "null"
+                                append("description", testDescription)
+                                append("message", "null")
+                                append(
+                                    "file",
+                                    "test content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        append(HttpHeaders.ContentDisposition, "filename=\"test.txt\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            // Verify the response contains the default text format (not JSON)
+            val responseText = response.bodyAsText()
+            assertTrue(responseText.contains(testDescription))
+            assertTrue(responseText.contains("is uploaded to"))
+
+            // Try to parse as JSON to verify it's not a JSON response
+            runCatching {
+                Json.decodeFromString<Response>(responseText)
+            }.onSuccess {
+                // If parsing succeeds, the test should fail because we expect a text response, not JSON
+                assertTrue(false, "Response should not be in JSON format when message is null")
+            }
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-
-        // Verify the response contains the default text format (not JSON)
-        val responseText = response.bodyAsText()
-        assertTrue(responseText.contains(testDescription))
-        assertTrue(responseText.contains("is uploaded to"))
-
-        // Try to parse as JSON to verify it's not a JSON response
-        runCatching {
-            Json.decodeFromString<Response>(responseText)
-        }.onSuccess {
-            // If parsing succeeds, the test should fail because we expect a text response, not JSON
-            assertTrue(false, "Response should not be in JSON format when message is null")
-        }
-    }
 
     @Test
-    fun `Test upload with missing filename parameter`() = testApplication {
-        setupTestApplication()
+    fun `Test upload with missing filename parameter`() =
+        testApplication {
+            setupTestApplication()
 
-        // Create a test description to verify in the response
-        val testDescription = "Test with missing filename parameter"
+            // Create a test description to verify in the response
+            val testDescription = "Test with missing filename parameter"
 
-        val response = client.post(UPLOAD) {
-            header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-            setBody(
-                MultiPartFormDataContent(
-                    formData {
-                        append("description", testDescription)
-                        append(
-                            "file",
-                            "test content".toByteArray(),
-                            Headers.build {
-                                append(HttpHeaders.ContentType, "text/plain")
-                                // Use a ContentDisposition with an empty filename parameter
-                                append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"\"")
-                            }
-                        )
-                    }
-                )
-            )
+            val response =
+                client.post(UPLOAD) {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    setBody(
+                        MultiPartFormDataContent(
+                            formData {
+                                append("description", testDescription)
+                                append(
+                                    "file",
+                                    "test content".toByteArray(),
+                                    Headers.build {
+                                        append(HttpHeaders.ContentType, "text/plain")
+                                        // Use a ContentDisposition with an empty filename parameter
+                                        append(HttpHeaders.ContentDisposition, "form-data; name=\"file\"; filename=\"\"")
+                                    },
+                                )
+                            },
+                        ),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+
+            // Verify the file was uploaded with a generated name
+            val testDir = File("test_uploads")
+            val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
+            assertNotNull(uploadedFile, "File with generated name should exist")
+
+            // Verify the file content
+            if (uploadedFile != null) {
+                assertEquals("test content", uploadedFile.readText())
+            }
+
+            // Verify the response contains the expected text
+            val responseText = response.bodyAsText()
+            assertTrue(responseText.contains(testDescription))
+            assertTrue(responseText.contains("is uploaded to"))
         }
-
-        assertEquals(HttpStatusCode.OK, response.status)
-
-        // Verify the file was uploaded with a generated name
-        val testDir = File("test_uploads")
-        val uploadedFile = testDir.listFiles()?.firstOrNull { it.name.startsWith("unknown_") }
-        assertNotNull(uploadedFile, "File with generated name should exist")
-
-        // Verify the file content
-        if (uploadedFile != null) {
-            assertEquals("test content", uploadedFile.readText())
-        }
-
-        // Verify the response contains the expected text
-        val responseText = response.bodyAsText()
-        assertTrue(responseText.contains(testDescription))
-        assertTrue(responseText.contains("is uploaded to"))
-    }
 }
