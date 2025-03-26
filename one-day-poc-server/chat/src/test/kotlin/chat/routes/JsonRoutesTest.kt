@@ -40,7 +40,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             val mockPromptingMain = mock<PromptingMain>()
             runBlocking {
-                    whenever(mockPromptingMain.run(any(),  anyOrNull())).thenReturn(
+                    whenever(mockPromptingMain.run(any<String>(),  anyOrNull<String>())).thenReturn(
                     ServerResponse(
                         chat =
                             ChatResponse(
