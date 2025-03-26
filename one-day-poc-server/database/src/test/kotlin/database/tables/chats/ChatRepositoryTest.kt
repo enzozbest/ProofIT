@@ -47,8 +47,6 @@ class ChatRepositoryTest {
         MockEnvironment.stopContainer()
     }
 
-    // ==== Message Tests ====
-
     @Test
     fun `test saving and retrieving chat message`() = runTest {
         val messageId = UUID.randomUUID().toString()
@@ -79,7 +77,7 @@ class ChatRepositoryTest {
         )
 
         val saveResult = repository.saveMessage(message)
-        assertTrue(saveResult) // Should still succeed but use a random UUID
+        assertTrue(saveResult)
     }
     
     @Test
@@ -98,7 +96,7 @@ class ChatRepositoryTest {
         
         val retrieved = repository.getMessageById(messageId)
         assertNotNull(retrieved)
-        assertNotEquals("", retrieved.conversationId) // Should have generated a valid UUID
+        assertNotEquals("", retrieved.conversationId)
     }
     
     @Test
@@ -150,8 +148,6 @@ class ChatRepositoryTest {
         val retrieved = repository.getMessageById(messageId)
         assertNull(retrieved)
     }
-
-    // ==== Conversation Tests ====
     
     @Test
     fun `test updating conversation name`() = runTest {
@@ -224,8 +220,6 @@ class ChatRepositoryTest {
         assertEquals("Conversation 2", conversations[0].name)
         assertEquals("Conversation 1", conversations[1].name)
     }
-
-    // ==== Prototype Tests ====
     
     @Test
     fun `test saving and retrieving prototype`() = runTest {
@@ -401,5 +395,46 @@ class ChatRepositoryTest {
         val invalidId = "invalid-uuid"
         val prototypes = repository.getAllPrototypesInConversation(invalidId)
         assertTrue(prototypes.isEmpty())
+    }
+
+    @Test
+    fun `test getting previous prototype`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+
+        repository.saveMessage(
+            ChatMessage(
+                id = messageId,
+                conversationId = conversationId,
+                senderId = "user1",
+                content = "Test message",
+                timestamp = Instant.now()
+            )
+        )
+
+        val prototype1 = Prototype(
+            id = UUID.randomUUID().toString(),
+            messageId = messageId,
+            filesJson = """{"files": [{"name": "first.js"}]}""",
+            version = 1,
+            isSelected = false,
+            timestamp = Instant.now().minusSeconds(120)
+        )
+
+        val prototype2 = Prototype(
+            id = UUID.randomUUID().toString(),
+            messageId = messageId,
+            filesJson = """{"files": [{"name": "second.js"}]}""",
+            version = 2,
+            isSelected = true,
+            timestamp = Instant.now().minusSeconds(60)
+        )
+
+        repository.savePrototype(prototype1)
+        repository.savePrototype(prototype2)
+
+        val previousPrototype = repository.getPreviousPrototype(conversationId)
+        assertNotNull(previousPrototype)
+        assertEquals(prototype2.filesJson, previousPrototype.filesJson)
     }
 }
