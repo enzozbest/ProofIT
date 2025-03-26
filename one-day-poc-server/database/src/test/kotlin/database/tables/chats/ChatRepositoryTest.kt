@@ -2,8 +2,10 @@ package database.tables.chats
 
 import database.core.DatabaseManager
 import database.helpers.MockEnvironment
+import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
@@ -473,5 +475,111 @@ class ChatRepositoryTest {
         val conversationId = UUID.randomUUID().toString()
         val previousPrototype = repository.getPreviousPrototype(conversationId)
         assertNull(previousPrototype)
+    }
+
+    @Test
+    fun `test getting conversations with invalid conversationId fails`() = runTest {
+        val conversationId = UUID.randomUUID().toString()+"12345"
+        val conversations = repository.getMessagesByConversation(conversationId,10,10)
+        assertEquals(conversations,emptyList())
+    }
+
+    @Test
+    fun `test deleting messages with invalid id fails`() = runTest {
+        val messageId = "random-id"
+        val deleted = repository.deleteMessage(messageId)
+        assertFalse(deleted)
+    }
+
+    @Test
+    fun `test deleting messages with non existent id return true`() = runTest {
+        val conversationId = UUID.randomUUID().toString()
+        val deleted = repository.deleteMessage(conversationId)
+        assertTrue(deleted)
+    }
+
+    @Test
+    fun `test updateConversationName fails with invalid id`() = runTest {
+        val conversationId = "not valid"
+        val result = repository.updateConversationName(conversationId, "New Name")
+        assertFalse(result)
+    }
+
+    @Test
+    fun `test getConversationMessageCount fails with invalid id`() = runTest {
+        val conversationId = "not valid"
+        val count = repository.getConversationMessageCount(conversationId)
+        assertEquals(0, count)
+    }
+
+    @Test
+    fun `test getConversationsByUser fails with invalid id`() = runTest {
+        val userId = "1"
+        mockkObject(ConversationEntity.Companion)
+        every {ConversationEntity.find(any<Op<Boolean>>()) } throws Exception("Database error")
+        val conversations = repository.getConversationsByUser(userId)
+        println(conversations)
+        assertTrue(conversations.isEmpty())
+        unmockkAll()
+    }
+
+    @Test
+    fun `test saveMessage returns false if an error is thrown in the outer try block`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        mockkObject(ConversationEntity.Companion)
+        every {ConversationEntity.find(any<Op<Boolean>>()) } throws Exception("Database error")
+        val message = ChatMessage(
+            id = messageId,
+            conversationId = UUID.randomUUID().toString(),
+            senderId = "user1",
+            content = "Hello",
+            timestamp = Instant.now()
+        )
+        val result = repository.saveMessage(message)
+        assertFalse(result)
+        unmockkAll()
+
+    }
+
+    @Test
+    fun `test savePrototype returns false if message is not found`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        mockkObject(ChatMessageEntity.Companion)
+        every {ChatMessageEntity.find(any<Op<Boolean>>()) } throws IllegalArgumentException("Message not found")
+        val prototypeId = UUID.randomUUID().toString()
+        val prototype = Prototype(
+            id = prototypeId,
+            messageId = messageId,
+            filesJson = """{"files": []}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
+        )
+        val result = repository.savePrototype(prototype)
+        assertFalse(result)
+        unmockkAll()
+
+    }
+
+    @Test
+    fun `test getPrototypesByMessageId returns false if Prototype not found`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        mockkObject(PrototypeEntity.Companion)
+        every {PrototypeEntity.find(any<Op<Boolean>>()) } throws Exception("Database error")
+        val result = repository.getPrototypesByMessageId(messageId)
+        assertEquals(result,emptyList())
+        unmockkAll()
+    }
+
+    @Test
+    fun `test getSelectedPrototypeForMessage returns false if Prototype not found`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+        mockkObject(ChatMessageEntity.Companion)
+        every {ChatMessageEntity.find(any<Op<Boolean>>()) } throws Exception("Database error")
+        val result = repository.getSelectedPrototypeForMessage(conversationId,messageId)
+        assertNull(result)
+        unmockkAll()
+
     }
 }
