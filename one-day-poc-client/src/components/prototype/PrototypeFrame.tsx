@@ -17,7 +17,7 @@ const PrototypeFrame: React.FC<PrototypeFrameProps> = ({ files }) => {
         src={url}
         className="w-full h-full"
         title="Prototype Preview"
-        sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
+        sandbox="allow-forms allow-modals"
       />
     </div>
   );
