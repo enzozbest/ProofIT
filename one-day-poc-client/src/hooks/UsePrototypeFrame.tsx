@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './UseWebContainer';
-import { normaliseFiles } from './FileHandler';
+import { normaliseFiles, cleanFileSystem } from './FileHandler';
 import { WebContainerProcess } from '@webcontainer/api';
 
 /**
@@ -13,8 +13,6 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   const [status, setStatus] = useState('Initialising...');
   const { instance: webcontainerInstance, loading, error } = useWebContainer();
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  
-  // Track active processes for cleanup
   const activeProcessesRef = useRef<WebContainerProcess[]>([]);
 
   /**
@@ -67,12 +65,8 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     
     setStatus('Resetting environment...');
     setUrl('');
-    
-    // Kill all running processes
     await killActiveProcesses();
-    
-    // Clean filesystem
-    await cleanFileSystem();
+    await cleanFileSystem(webcontainerInstance);
   };
 
   /**
@@ -88,41 +82,6 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     }
     
     activeProcessesRef.current = [];
-  };
-
-  /**
-   * Clean the filesystem for a fresh start
-   */
-  const cleanFileSystem = async () => {
-    if (!webcontainerInstance) return;
-    
-    try {
-      const entries = await webcontainerInstance.fs.readdir('/');
-      console.log('Current root entries:', entries);
-      
-      // Remove critical directories
-      for (const dir of ['src', 'public', 'node_modules']) {
-        if (entries.includes(dir)) {
-          await webcontainerInstance.fs.rm(`/${dir}`, { recursive: true, force: true });
-        }
-      }
-      
-      // Remove other non-hidden files
-      for (const entry of entries) {
-        if (!entry.startsWith('.') && !['src', 'public', 'node_modules'].includes(entry)) {
-          try {
-            await webcontainerInstance.fs.rm(`/${entry}`);
-            console.log(`Removed file: ${entry}`);
-          } catch (e) {
-            console.log(`Error removing ${entry}:`, e);
-          }
-        }
-      }
-      
-      console.log('Filesystem reset complete');
-    } catch (e) {
-      console.log('Error during filesystem reset:', e);
-    }
   };
 
   /**
@@ -327,7 +286,6 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
    * Choose the best available start script
    */
   const chooseStartScript = (availableScripts: string[]) => {
-    // Priority order of scripts to try
     const scriptPriority = ['start', 'dev', 'serve', 'develop'];
     
     for (const script of scriptPriority) {
@@ -336,12 +294,10 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
       }
     }
     
-    // If no recognized script is found but we have scripts
     if (availableScripts.length > 0) {
-      return availableScripts[0]; // Use the first available script
+      return availableScripts[0];
     }
     
-    // Fallback to 'start' even if not found - will throw appropriate error
     return 'start';
   };
 
