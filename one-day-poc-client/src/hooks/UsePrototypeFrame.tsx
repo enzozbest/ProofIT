@@ -8,7 +8,8 @@ import {
   ensureViteDependencies, 
   chooseViteStartScript,
   configureViteSandbox,
-  ViteSetupContext 
+  ViteSetupContext,
+  ensureIndexHtml
 } from './ViteSetup';
 
 /**
@@ -60,8 +61,11 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         await resetEnvironment();
         await mountFiles();
         
+        // Ensure Vite essentials exist
         const needsDepsInstall = await ensureViteDependencies(viteContext);
         await ensureViteConfig(viteContext);
+        
+        await ensureIndexHtml(viteContext);
         
         if (needsDepsInstall) {
           await installDependencies();
@@ -70,7 +74,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         }
         
         await startServer();
-        configureViteSandbox(iframeRef); // Use the external function
+        configureViteSandbox(iframeRef);
       } catch (error: unknown) {
         handleError(error);
       }
