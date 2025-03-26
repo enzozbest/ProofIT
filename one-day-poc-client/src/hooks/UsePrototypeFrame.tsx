@@ -3,6 +3,13 @@ import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './UseWebContainer';
 import { normaliseFiles, cleanFileSystem } from './FileHandler';
 import { WebContainerProcess } from '@webcontainer/api';
+import { 
+  ensureViteConfig, 
+  ensureViteDependencies, 
+  chooseViteStartScript,
+  configureViteSandbox,
+  ViteSetupContext 
+} from './ViteSetup';
 
 /**
  * Hook for creating and managing a prototype frame using WebContainer
@@ -14,6 +21,10 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   const { instance: webcontainerInstance, loading, error } = useWebContainer();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const activeProcessesRef = useRef<WebContainerProcess[]>([]);
+  const viteContext: ViteSetupContext = {
+    webcontainerInstance,
+    setStatus
+  };
 
   /**
    * Effect to set up server-ready listener
@@ -48,9 +59,18 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
       try {
         await resetEnvironment();
         await mountFiles();
-        await installDependencies();
+        
+        const needsDepsInstall = await ensureViteDependencies(viteContext);
+        await ensureViteConfig(viteContext);
+        
+        if (needsDepsInstall) {
+          await installDependencies();
+        } else {
+          console.log('Vite dependencies already installed');
+        }
+        
         await startServer();
-        configureSandbox();
+        configureViteSandbox(iframeRef); // Use the external function
       } catch (error: unknown) {
         handleError(error);
       }
@@ -110,7 +130,6 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     setStatus('Installing dependencies...');
     const installProcess = await webcontainerInstance.spawn('npm', ['install']);
     
-    // Track and log the process
     activeProcessesRef.current.push(installProcess);
     installProcess.output.pipeTo(
       new WritableStream({
@@ -136,7 +155,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     setStatus('Starting development server...');
     
     const availableScripts = await getAvailableScripts();
-    const startScript = chooseStartScript(availableScripts);
+    const startScript = chooseViteStartScript(availableScripts);
     
     console.log(`Using script: ${startScript}`);
     await runServerWithAutoInstall(startScript);
@@ -283,32 +302,10 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
   };
 
   /**
-   * Choose the best available start script
-   */
-  const chooseStartScript = (availableScripts: string[]) => {
-    const scriptPriority = ['start', 'dev', 'serve', 'develop'];
-    
-    for (const script of scriptPriority) {
-      if (availableScripts.includes(script)) {
-        return script;
-      }
-    }
-    
-    if (availableScripts.length > 0) {
-      return availableScripts[0];
-    }
-    
-    return 'start';
-  };
-
-  /**
    * Configure iframe sandbox permissions
    */
   const configureSandbox = () => {
-    if (!iframeRef.current) return;
-    
-    iframeRef.current.sandbox.add('allow-forms');
-    iframeRef.current.sandbox.add('allow-modals');
+    configureViteSandbox(iframeRef);
   };
 
   /**
