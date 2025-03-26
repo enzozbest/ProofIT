@@ -109,7 +109,7 @@ private suspend fun handleJsonRequest(
                     "messageId": "$messageId"
                 },
                 "prototype": {
-                    "files": ${prototypeFilesJson.trim()}
+                    "files": "\"${prototypeFilesJson.trim().replace("\"", "\\\\\"")}\""
                 }
             }
             """.trimIndent()
