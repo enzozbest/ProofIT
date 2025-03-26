@@ -1,3 +1,5 @@
+export type TemplateType = 'react' | 'javascript' | 'fallback';
+
 /**
  * HTML templates for various project types
  */
@@ -51,7 +53,7 @@ export const htmlTemplates = {
 /**
  * Common entry points to search for
  */
-export const entryPoints = [
+export const entryPoints: Array<{path: string, type: TemplateType}> = [
   { path: '/src/main.jsx', type: 'react' },
   { path: '/src/main.tsx', type: 'react' },
   { path: '/src/index.jsx', type: 'react' },
