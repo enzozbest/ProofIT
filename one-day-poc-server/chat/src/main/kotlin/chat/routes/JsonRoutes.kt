@@ -87,18 +87,24 @@ private suspend fun handleJsonRequest(
 
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
 
-    val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
-
     try {
-        val promptJsonResponse = if (request.predefined) {
-            PredefinedPrototypes.run(request.prompt).toString()
-        } else {
-            // Get raw response from LLM
-            PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
-        }
+        val chatContent: String
+        val prototypeFilesJson: String?
 
-        // Extract chat content and prototype files JSON
-        val (chatContent, prototypeFilesJson) = JsonProcessor.processRawJsonResponse(promptJsonResponse)
+        if (request.predefined) {
+            val predefinedResponse = PredefinedPrototypes.run(request.prompt)
+
+            chatContent = predefinedResponse.chatMessage
+            prototypeFilesJson = predefinedResponse.files
+        } else {
+            val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
+            val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
+
+            // Extract chat content and prototype files JSON
+            val processed = JsonProcessor.processRawJsonResponse(promptJsonResponse)
+            chatContent = processed.first
+            prototypeFilesJson = processed.second
+        }
 
         // Save to database and get message ID
         val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
