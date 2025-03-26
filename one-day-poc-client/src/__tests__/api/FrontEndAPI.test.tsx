@@ -256,7 +256,7 @@ describe('getPrototypeForMessage', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ files: 'not-valid-json' }), // This will cause JSON.parse to throw
+        json: async () => ({ files: 'not-valid-json' }), 
       })
     );
 
