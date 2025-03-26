@@ -4,7 +4,7 @@ import prompting.PromptingMain
 
 /**
  * Singleton provider for PromptingMain instance.
- * 
+ *
  * This class manages a single instance of PromptingMain throughout the application
  * and provides methods to get, set, and reset the instance.
  */
