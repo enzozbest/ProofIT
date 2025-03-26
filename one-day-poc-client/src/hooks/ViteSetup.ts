@@ -159,52 +159,142 @@ export const ensureIndexHtml = async (context: ViteSetupContext): Promise<void> 
   const { webcontainerInstance, setStatus } = context;
   if (!webcontainerInstance) return;
   
-  setStatus?.('Checking for index.html...');
-  
+  setStatus?.('Performing comprehensive search for index.html...');
   try {
-    try {
-      await webcontainerInstance.fs.stat('/index.html');
-      console.log('index.html exists in root');
-      return;
-    } catch (e) {
-      try {
-        await webcontainerInstance.fs.stat('/public/index.html');
-        console.log('index.html exists in public folder');
-        return;
-      } catch (e) {
-        console.log('No index.html found, creating one');
+    const indexHtmlPath = await findIndexHtml(webcontainerInstance);
+    if (indexHtmlPath) {
+      console.log(`Found existing index.html at ${indexHtmlPath}`);
+      
+      if (indexHtmlPath !== '/index.html') {
+        console.log(`Copying index.html from ${indexHtmlPath} to root...`);
+        const content = await webcontainerInstance.fs.readFile(indexHtmlPath, 'utf-8');
+        await webcontainerInstance.fs.writeFile('/index.html', content);
       }
+      return;
     }
     
-    let foundEntry = null;
+    console.log(' No index.html found anywhere, creating one...');
+    // Find best entry point
+    let entryPoint = '/src/index.js';
+    let templateType: 'react' | 'javascript' | 'fallback' = 'javascript';
     
     for (const entry of entryPoints) {
       try {
         await webcontainerInstance.fs.stat(entry.path);
-        foundEntry = entry;
-        console.log(`Found entry point: ${entry.path}`);
+        entryPoint = entry.path;
+        templateType = entry.type;
+        console.log(`Found entry point: ${entryPoint}`);
         break;
       } catch (e) {
-        // Continue checking
+        // Entry point doesn't exist
       }
     }
     
-    let indexHtml = '';
+    let template = htmlTemplates[templateType].replace('{{ENTRY_POINT}}', entryPoint);
     
-    if (foundEntry) {
-      const template = htmlTemplates[foundEntry.type] || htmlTemplates.fallback;
-      indexHtml = template.replace('{{ENTRY_POINT}}', foundEntry.path);
-    } else {
-      indexHtml = htmlTemplates.fallback;
-    }
-    
-    await webcontainerInstance.fs.writeFile('/index.html', indexHtml);
-    console.log('Created index.html');
-    
+    await webcontainerInstance.fs.writeFile('/index.html', template);
+    console.log(`Created index.html with ${templateType} template`);
   } catch (e) {
-    console.error('Error ensuring index.html:', e);
+    console.error('Error in ensureIndexHtml:', e);
   }
 };
+
+/**
+ * Perform a comprehensive search for index.html in the project
+ */
+export const findIndexHtml = async (webcontainerInstance: WebContainer): Promise<string | null> => {
+  console.log('Starting comprehensive search for index.html...');
+  const commonLocations = [
+    '/index.html',
+    '/public/index.html',
+    '/src/index.html',
+    '/app/index.html',
+    '/dist/index.html',
+    '/client/index.html',
+    '/static/index.html'
+  ];
+  try {
+    const rootFiles = await webcontainerInstance.fs.readdir('/');
+    console.log('Files in root directory:', rootFiles);
+    
+    if (rootFiles.includes('index.html')) {
+      console.log('Found index.html in root directly');
+      return '/index.html';
+    }
+    
+    if (rootFiles.includes('src')) {
+      const srcFiles = await webcontainerInstance.fs.readdir('/src');
+      console.log('Files in src directory:', srcFiles);
+      
+      if (srcFiles.includes('index.html')) {
+        console.log('Found index.html in /src directory');
+        return '/src/index.html';
+      }
+    }
+  } catch (e) {
+    console.error('Error listing directory contents:', e);
+  }
+  
+  for (const location of commonLocations) {
+    try {
+      await webcontainerInstance.fs.stat(location);
+      console.log(`✅ Found index.html at ${location}`);
+      return location;
+    } catch (e) {
+      // File doesn't exist at this location
+    }
+  }
+  
+  try {
+    const rootEntries = await webcontainerInstance.fs.readdir('/', { withFileTypes: true });
+    for (const entry of rootEntries) {
+      if (entry.isDirectory) {
+        const path = `/${entry.name}`;
+        const result = await recursiveSearch(webcontainerInstance, path, 2);
+        if (result) return result;
+      }
+    }
+  } catch (e) {
+    console.error('Error in directory search:', e);
+  }
+  
+  return null;
+};
+
+/**
+ * Fixed recursive search function
+ */
+async function recursiveSearch(
+  webcontainerInstance: WebContainer, 
+  dir: string, 
+  maxDepth: number
+): Promise<string | null> {
+  if (maxDepth <= 0) return null;
+  
+  try {
+    const entries = await webcontainerInstance.fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      if (!entry.isDirectory && entry.name === 'index.html') {
+        const path = `${dir}${dir.endsWith('/') ? '' : '/'}index.html`;
+        console.log(`Found index.html during recursive search at ${path}`);
+        return path;
+      }
+    }
+    
+    for (const entry of entries) {
+      if (entry.isDirectory) {
+        const subdir = `${dir}${dir.endsWith('/') ? '' : '/'}${entry.name}`;
+        const result = await recursiveSearch(webcontainerInstance, subdir, maxDepth - 1);
+        if (result) return result;
+      }
+    }
+  } catch (e) {
+    console.error(`Error searching directory ${dir}:`, e);
+  }
+  
+  return null;
+}
 
 /**
  * Choose the best available start script - prioritizing Vite scripts
