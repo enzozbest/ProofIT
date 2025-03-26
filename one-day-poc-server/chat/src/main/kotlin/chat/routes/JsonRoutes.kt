@@ -109,6 +109,8 @@ private suspend fun handleJsonRequest(
         // Save to database and get message ID
         val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
 
+        println(prototypeFilesJson)
+
         // Construct a proper JSON response directly - no nested serialization
         val finalResponse =
             """
