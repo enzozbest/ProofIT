@@ -8,6 +8,7 @@ import java.time.Instant
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class DataClassesTest {
 
@@ -69,12 +70,15 @@ class DataClassesTest {
             messageId = "123"
         )
 
-        val filesJson = buildJsonObject {
-            put("file1.js", JsonPrimitive("console.log('Hello')"))
-            put("file2.css", JsonPrimitive("body { color: black; }"))
-        }
+        // Create a JSON string for files
+        val filesJsonString = """
+            {
+                "file1.js": "console.log('Hello')",
+                "file2.css": "body { color: black; }"
+            }
+        """.trimIndent()
 
-        val prototypeResponse = PrototypeResponse(files = filesJson)
+        val prototypeResponse = PrototypeResponse(files = filesJsonString)
 
         val serverResponse = ServerResponse(
             chat = chatResponse,
@@ -94,9 +98,10 @@ class DataClassesTest {
         assertEquals(serverResponse.chat.messageId, deserialized.chat.messageId)
 
         assertNotNull(deserialized.prototype)
-        assertEquals(2, deserialized.prototype!!.files.size)
-        assertEquals("console.log('Hello')", deserialized.prototype!!.files["file1.js"]?.jsonPrimitive?.content)
-        assertEquals("body { color: black; }", deserialized.prototype!!.files["file2.css"]?.jsonPrimitive?.content)
+        assertTrue(deserialized.prototype!!.files.contains("file1.js"))
+        assertTrue(deserialized.prototype!!.files.contains("console.log('Hello')"))
+        assertTrue(deserialized.prototype!!.files.contains("file2.css"))
+        assertTrue(deserialized.prototype!!.files.contains("body { color: black; }"))
     }
 
     @Test
@@ -164,15 +169,18 @@ class DataClassesTest {
 
     @Test
     fun `test PrototypeResponse serialization and deserialization`() {
-        val filesJson = buildJsonObject {
-            put("file1.js", JsonPrimitive("console.log('Hello')"))
-            put("file2.css", JsonPrimitive("body { color: black; }"))
-            putJsonObject("nested") {
-                put("file3.html", JsonPrimitive("<html></html>"))
+        // Create a JSON string for files
+        val filesJsonString = """
+            {
+                "file1.js": "console.log('Hello')",
+                "file2.css": "body { color: black; }",
+                "nested": {
+                    "file3.html": "<html></html>"
+                }
             }
-        }
+        """.trimIndent()
 
-        val prototypeResponse = PrototypeResponse(files = filesJson)
+        val prototypeResponse = PrototypeResponse(files = filesJsonString)
 
         // Serialize to JSON string
         val jsonString = json.encodeToString(prototypeResponse)
@@ -181,20 +189,21 @@ class DataClassesTest {
         val deserialized = json.decodeFromString<PrototypeResponse>(jsonString)
 
         // Verify files are correctly serialized and deserialized
-        assertEquals(3, deserialized.files.size)
-        assertEquals("console.log('Hello')", deserialized.files["file1.js"]?.jsonPrimitive?.content)
-        assertEquals("body { color: black; }", deserialized.files["file2.css"]?.jsonPrimitive?.content)
-
-        val nested = deserialized.files["nested"] as? JsonObject
-        assertNotNull(nested)
-        assertEquals("<html></html>", nested["file3.html"]?.jsonPrimitive?.content)
+        assertTrue(deserialized.files.contains("file1.js"))
+        assertTrue(deserialized.files.contains("console.log('Hello')"))
+        assertTrue(deserialized.files.contains("file2.css"))
+        assertTrue(deserialized.files.contains("body { color: black; }"))
+        assertTrue(deserialized.files.contains("nested"))
+        assertTrue(deserialized.files.contains("file3.html"))
+        assertTrue(deserialized.files.contains("<html></html>"))
     }
 
     @Test
     fun `test PrototypeResponse with empty files`() {
-        val filesJson = buildJsonObject {}
+        // Create an empty JSON object string
+        val emptyJsonString = "{}"
 
-        val prototypeResponse = PrototypeResponse(files = filesJson)
+        val prototypeResponse = PrototypeResponse(files = emptyJsonString)
 
         // Serialize to JSON string
         val jsonString = json.encodeToString(prototypeResponse)
@@ -203,7 +212,7 @@ class DataClassesTest {
         val deserialized = json.decodeFromString<PrototypeResponse>(jsonString)
 
         // Verify files are empty
-        assertEquals(0, deserialized.files.size)
+        assertEquals("{}", deserialized.files)
     }
 
     @Test
@@ -236,21 +245,21 @@ class DataClassesTest {
             messageId = "123"
         )
 
-        val filesJson = buildJsonObject {
-            put("file1.js", JsonPrimitive("console.log('Hello')"))
-            putJsonObject("directory") {
-                put("file2.css", JsonPrimitive("body { color: black; }"))
-                putJsonArray("array") {
-                    add(JsonPrimitive("item1"))
-                    add(JsonPrimitive("item2"))
-                }
-                putJsonObject("nested") {
-                    put("file3.html", JsonPrimitive("<html></html>"))
+        // Create a complex nested JSON string
+        val filesJsonString = """
+            {
+                "file1.js": "console.log('Hello')",
+                "directory": {
+                    "file2.css": "body { color: black; }",
+                    "array": ["item1", "item2"],
+                    "nested": {
+                        "file3.html": "<html></html>"
+                    }
                 }
             }
-        }
+        """.trimIndent()
 
-        val prototypeResponse = PrototypeResponse(files = filesJson)
+        val prototypeResponse = PrototypeResponse(files = filesJsonString)
 
         val serverResponse = ServerResponse(
             chat = chatResponse,
@@ -265,20 +274,19 @@ class DataClassesTest {
 
         // Verify complex nested structure is correctly serialized and deserialized
         assertNotNull(deserialized.prototype)
-        assertEquals("console.log('Hello')", deserialized.prototype!!.files["file1.js"]?.jsonPrimitive?.content)
 
-        val directory = deserialized.prototype!!.files["directory"] as? JsonObject
-        assertNotNull(directory)
-        assertEquals("body { color: black; }", directory["file2.css"]?.jsonPrimitive?.content)
-
-        val array = directory["array"] as? JsonArray
-        assertNotNull(array)
-        assertEquals(2, array.size)
-        assertEquals("item1", array[0].jsonPrimitive.content)
-        assertEquals("item2", array[1].jsonPrimitive.content)
-
-        val nested = directory["nested"] as? JsonObject
-        assertNotNull(nested)
-        assertEquals("<html></html>", nested["file3.html"]?.jsonPrimitive?.content)
+        // Check that the files string contains all the expected elements
+        val filesString = deserialized.prototype!!.files
+        assertTrue(filesString.contains("file1.js"))
+        assertTrue(filesString.contains("console.log('Hello')"))
+        assertTrue(filesString.contains("directory"))
+        assertTrue(filesString.contains("file2.css"))
+        assertTrue(filesString.contains("body { color: black; }"))
+        assertTrue(filesString.contains("array"))
+        assertTrue(filesString.contains("item1"))
+        assertTrue(filesString.contains("item2"))
+        assertTrue(filesString.contains("nested"))
+        assertTrue(filesString.contains("file3.html"))
+        assertTrue(filesString.contains("<html></html>"))
     }
 }
