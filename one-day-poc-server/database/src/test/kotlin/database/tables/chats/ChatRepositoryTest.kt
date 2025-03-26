@@ -4,9 +4,7 @@ import database.core.DatabaseManager
 import database.helpers.MockEnvironment
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -230,6 +228,36 @@ class ChatRepositoryTest {
             id = messageId,
             conversationId = UUID.randomUUID().toString(),
             senderId = "user1",
+            content = "Hello",
+            timestamp = Instant.now()
+        )
+        repository.saveMessage(message)
+
+        val prototypeId = UUID.randomUUID().toString()
+        val prototype = Prototype(
+            id = prototypeId,
+            messageId = messageId,
+            filesJson = """{"files": []}""",
+            version = 1,
+            isSelected = true,
+            timestamp = Instant.now()
+        )
+
+        val saveResult = repository.savePrototype(prototype)
+        assertTrue(saveResult)
+
+        val retrieved = repository.getPrototypesByMessageId(messageId)
+        assertEquals(1, retrieved.size)
+        assertEquals(prototype.filesJson, retrieved[0].filesJson)
+    }
+
+    @Test
+    fun `test saving a prototype as an LLM`() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val message = ChatMessage(
+            id = messageId,
+            conversationId = UUID.randomUUID().toString(),
+            senderId = "LLM",
             content = "Hello",
             timestamp = Instant.now()
         )
@@ -538,14 +566,12 @@ class ChatRepositoryTest {
         val result = repository.saveMessage(message)
         assertFalse(result)
         unmockkAll()
-
-    }
+        }
 
     @Test
     fun `test savePrototype returns false if message is not found`() = runTest {
         val messageId = UUID.randomUUID().toString()
-        mockkObject(ChatMessageEntity.Companion)
-        every {ChatMessageEntity.find(any<Op<Boolean>>()) } throws IllegalArgumentException("Message not found")
+
         val prototypeId = UUID.randomUUID().toString()
         val prototype = Prototype(
             id = prototypeId,
@@ -572,7 +598,7 @@ class ChatRepositoryTest {
     }
 
     @Test
-    fun `test getSelectedPrototypeForMessage returns false if Prototype not found`() = runTest {
+    fun `test getSelectedPrototypeForMessage returns null if an exception is thrown`() = runTest {
         val messageId = UUID.randomUUID().toString()
         val conversationId = UUID.randomUUID().toString()
         mockkObject(ChatMessageEntity.Companion)
@@ -580,6 +606,66 @@ class ChatRepositoryTest {
         val result = repository.getSelectedPrototypeForMessage(conversationId,messageId)
         assertNull(result)
         unmockkAll()
-
     }
+
+    @Test
+    fun `test getSelectedPrototypeForMessage returns null if no message is found `() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+        mockkObject(ChatMessageEntity.Companion)
+        every {ChatMessageEntity.find(any<Op<Boolean>>()) } returns emptySized()
+        val result = repository.getSelectedPrototypeForMessage(conversationId,messageId)
+        assertNull(result)
+        unmockkAll()
+    }
+
+    @Test
+    fun `test getSelectedPrototypeForMessage returns null if no prototype is found `() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+        mockkObject(PrototypeEntity.Companion)
+        every {PrototypeEntity.find(any<Op<Boolean>>()) } returns emptySized()
+        val result = repository.getSelectedPrototypeForMessage(conversationId,messageId)
+        assertNull(result)
+        unmockkAll()
+    }
+
+    @Test
+    fun `test getting all prototypes in a conversation with missing message id`() = runTest {
+        val conversationId = UUID.randomUUID().toString()
+        mockkObject(ChatMessageEntity.Companion)
+        every {ChatMessageEntity.find(any<Op<Boolean>>()) } returns emptySized()
+
+        val result = repository.getAllPrototypesInConversation(conversationId)
+        assertTrue(result.isEmpty())
+        unmockkAll()
+    }
+
+    @Test
+    fun `test getPreviousPrototype returns null if toPrototype fails `() = runTest {
+        val messageId = UUID.randomUUID().toString()
+        val conversationId = UUID.randomUUID().toString()
+        val prototypeEntity = mockk<PrototypeEntity>()
+        val prototypeEntities = mockk<SizedIterable<PrototypeEntity>>()
+        mockkObject(PrototypeEntity.Companion)
+        every {PrototypeEntity.find(any<Op<Boolean>>()) } returns prototypeEntities
+        every { prototypeEntity.toPrototype() } throws Exception("Error converting to Prototype")
+        val result = repository.getPreviousPrototype(conversationId)
+        assertNull(result)
+        unmockkAll()
+    }
+
+    @Test
+    fun `test updating conversation name with no conversation`() = runTest {
+        val conversationId = UUID.randomUUID().toString()
+        val name = "new name"
+        mockkObject(ConversationEntity.Companion)
+        every {ConversationEntity.find(any<Op<Boolean>>()) } returns emptySized()
+
+        val result = repository.updateConversationName(conversationId, name)
+        assertFalse(result)
+        unmockkAll()
+    }
+
+
 }
