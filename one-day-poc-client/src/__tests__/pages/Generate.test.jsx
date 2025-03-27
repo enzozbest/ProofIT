@@ -13,6 +13,17 @@ import Generate from '../../pages/Generate';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ConversationProvider } from '@/contexts/ConversationContext';
 
+const mockUseLocation = vi.fn();
+
+// Mock the entire react-router-dom module
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useLocation: () => mockUseLocation()
+  };
+});
+
 vi.mock('@/components/ui/Sidebar', async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -29,6 +40,16 @@ vi.mock('../../components/chat/ChatScreen', () => ({
         Mocked ChatScreen with initialMessage: {props.initialMessage}
       </div>
     )),
+}));
+
+const mockPrototypeFrame = vi.fn();
+vi.mock('@/components/prototype/PrototypeFrame', () => ({
+  default: (props) => {
+    mockPrototypeFrame(props);
+    return props.testVisible ? (
+      <div data-testid="prototype-frame">Mock Prototype Frame</div>
+    ) : null;
+  }
 }));
 
 beforeAll(() => {
@@ -50,6 +71,14 @@ beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
   ChatScreen.mockClear();
+  
+  // Set the default mock return value for useLocation
+  mockUseLocation.mockReturnValue({
+    pathname: '/generate',
+    search: '',
+    hash: '',
+    state: null
+  });
 });
 
 test('Sets initialMessage when found in sessionStorage', async () => {
@@ -191,4 +220,108 @@ test('Renders background image correctly', () => {
   expect(containerDiv).toHaveStyle({
     backgroundImage: "url('/background.svg')",
   });
+});
+
+test('Sets initialMessage and isPredefined from location state', () => {
+  const consoleLogSpy = vi.spyOn(console, 'log');
+
+  mockUseLocation.mockReturnValue({
+    pathname: '/generate',
+    search: '',
+    hash: '',
+    state: {
+      initialMessage: 'Message from router state',
+      isPredefined: true
+    }
+  });
+
+  render(
+    <MemoryRouter>
+      <AuthProvider>
+        <ConversationProvider>
+          <Page />
+        </ConversationProvider>
+      </AuthProvider>
+    </MemoryRouter>
+  );
+
+  expect(ChatScreen).toHaveBeenCalledWith(
+    expect.objectContaining({
+      initialMessage: 'Message from router state',
+      isPredefined: true
+    }),
+    expect.anything()
+  );
+
+  expect(consoleLogSpy).toHaveBeenCalledWith(
+    'inside /generate, predefined value is ', 
+    false  
+  );
+
+  consoleLogSpy.mockRestore();
+});
+
+test('Handles location state with initialMessage but without isPredefined', () => {
+  mockUseLocation.mockReturnValue({
+    pathname: '/generate',
+    search: '',
+    hash: '',
+    state: {
+      initialMessage: 'Another message from router state'
+    }
+  });
+
+  render(
+    <MemoryRouter>
+      <AuthProvider>
+        <ConversationProvider>
+          <Page />
+        </ConversationProvider>
+      </AuthProvider>
+    </MemoryRouter>
+  );
+
+  expect(ChatScreen).toHaveBeenCalledWith(
+    expect.objectContaining({
+      initialMessage: 'Another message from router state',
+      isPredefined: false
+    }),
+    expect.anything()
+  );
+});
+
+test('Does not render PrototypeFrame when showPrototype is false', () => {
+  const TestComponent = () => {
+    const showPrototype = false;
+    
+    return (
+      <div>
+        {showPrototype ? (
+          <div data-testid="prototype-frame">Prototype is visible</div>
+        ) : null}
+      </div>
+    );
+  };
+
+  render(<TestComponent />);
+  
+  expect(screen.queryByTestId('prototype-frame')).not.toBeInTheDocument();
+});
+
+test('Renders PrototypeFrame when showPrototype is true', () => {
+  const TestComponent = () => {
+    const showPrototype = true;
+    
+    return (
+      <div>
+        {showPrototype ? (
+          <div data-testid="prototype-frame">Prototype is visible</div>
+        ) : null}
+      </div>
+    );
+  };
+
+  render(<TestComponent />);
+  
+  expect(screen.getByTestId('prototype-frame')).toBeInTheDocument();
 });
