@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       const data = await response.json();
       if (data.userId) {
-        // await UserService.fetchUserData();
+        await UserService.fetchUserData();
 
         setIsAuthenticated(true);
         setIsAdmin(data.isAdmin || false);
