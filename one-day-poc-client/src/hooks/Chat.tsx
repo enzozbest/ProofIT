@@ -110,22 +110,33 @@ const ChatMessage = ({
 
       const messageContent = chatResponse.message;
       const messageId = chatResponse.messageId;
+      const conversationId = chatResponse.conversationId;
 
-      console.log('Extracted values:', {
-        content: messageContent,
-        id: messageId,
-      });
+      if (activeConversationId) {
+        console.log('Extracted values:', {
+          content: messageContent,
+          id: messageId,
+          activeConversationId
+        });
 
-      const newLLMMessage: Message = {
-        role: 'LLM',
-        content: messageContent,
-        timestamp: currentTime,
-        conversationId: activeConversationId || '',
-        id: messageId,
-        isError: false,
-      };
+        const newLLMMessage: Message = {
+          role: 'LLM',
+          content: messageContent,
+          timestamp: currentTime,
+          conversationId: conversationId,
+          id: messageId,
+          isError: false,
+        };
 
-      setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
+        if (newLLMMessage.conversationId === activeConversationId) {
+          setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
+        } else {
+          console.log('Message from different conversation, not displaying', {
+            messageConversationId: newLLMMessage.conversationId,
+            activeConversationId
+          });
+        }
+      }
     }
   }, [chatResponse, activeConversationId]);
 
