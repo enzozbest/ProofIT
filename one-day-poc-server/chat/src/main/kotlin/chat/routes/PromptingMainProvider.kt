@@ -42,6 +42,8 @@ object PromptingMainProvider {
      * workflow, typically after testing or when a fresh state is required.
      */
     fun resetInstance() {
-        promptingMainInstance = PromptingMain()
+        if (::promptingMainInstance.isInitialized) {
+            promptingMainInstance = PromptingMain()
+        }
     }
 }
