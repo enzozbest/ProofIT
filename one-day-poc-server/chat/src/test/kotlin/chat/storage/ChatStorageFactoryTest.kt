@@ -22,7 +22,6 @@ class ChatStorageFactoryTest {
 
     @BeforeEach
     fun setUp() {
-        // Mock DatabaseManager
         mockkObject(DatabaseManager)
         every { DatabaseManager.externalInit() } just runs
         every { DatabaseManager.chatRepository() } returns mockRepository
@@ -41,30 +40,22 @@ class ChatStorageFactoryTest {
      */
     @Test
     fun `test ChatStorageFactory initialization and caching behavior`() {
-        // Create a clean spy of ChatStorageFactory for this test
         mockkObject(ChatStorageFactory)
         
-        // First call to getChatRepository() should trigger the lazy initialization
         val repository1 = ChatStorageFactory.getChatRepository()
         
-        // Verify that externalInit and chatRepository were called
         verify(exactly = 1) { DatabaseManager.externalInit() }
         verify(exactly = 1) { DatabaseManager.chatRepository() }
         
-        // Verify that the returned repository is the mock repository
         assertEquals(mockRepository, repository1)
         
-        // Clear the verification marks to start fresh for the second call
         clearMocks(DatabaseManager, verificationMarks = true)
         
-        // Second call to getChatRepository() should return the cached repository
         val repository2 = ChatStorageFactory.getChatRepository()
         
-        // Verify that externalInit and chatRepository were NOT called on the second call
         verify(exactly = 0) { DatabaseManager.externalInit() }
         verify(exactly = 0) { DatabaseManager.chatRepository() }
         
-        // Verify that both calls return the same instance
         assertSame(repository1, repository2)
     }
 }

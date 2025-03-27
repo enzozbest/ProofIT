@@ -101,18 +101,15 @@ object TemplateLibrarySeeder {
      */
     private fun runDockerCommand(vararg args: String) {
         runCatching {
-            // Try docker-compose syntax first
             val process = ProcessBuilder("docker-compose", *args).start()
             val exitCode = process.waitFor()
 
-            // If docker-compose failed, try docker compose syntax
             if (exitCode != 0) {
                 ProcessBuilder("docker", "compose", *args)
                     .start()
                     .waitFor()
             }
         }.onFailure {
-            // If an exception occurred, try docker compose syntax
             ProcessBuilder("docker", "compose", *args)
                 .inheritIO()
                 .start()

@@ -194,10 +194,6 @@ class TestPromptingTools {
 
         val result = promptingTools.prototypePrompt(userPrompt, requirements, listOf(templates))
 
-        // Print the result for debugging
-        println("[DEBUG_LOG] Result: $result")
-        println("[DEBUG_LOG] User prompt: $userPrompt")
-
         // The userPrompt is embedded within a larger string in the JSON
         // The format has changed, so we need to check for different content
         assertTrue(result.contains(userPrompt), "Result should contain the user prompt somewhere in the string")
