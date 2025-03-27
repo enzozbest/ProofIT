@@ -50,7 +50,7 @@ data class OllamaOptions(
 object OllamaService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
     private const val OLLAMA_PORT = 11434
-    private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST").also { println(it) }
+    private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST")
     private const val REQUEST_TIMEOUT_MILLIS = 600_000_000L
     private const val CONNECT_TIMEOUT_MILLIS = 30_000_000L
     private const val SOCKET_TIMEOUT_MILLIS = 600_000_000L
@@ -118,9 +118,6 @@ object OllamaService {
                 throw Exception("Failed to parse Ollama response")
             }
 
-        // Only for debugging
-        val jsonPrinter = Json { prettyPrint = true }
-        println("Formatted JSON Response:\n" + jsonPrinter.encodeToString(ollamaResponse))
         return ollamaResponse
     }
 }

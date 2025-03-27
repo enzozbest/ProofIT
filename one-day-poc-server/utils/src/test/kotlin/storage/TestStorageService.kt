@@ -1,5 +1,6 @@
 package storage
 
+import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,6 +24,7 @@ import kotlin.test.assertTrue
 class TestStorageService {
     @AfterEach
     fun tearDown() {
+        clearAllMocks()
         unmockkAll()
     }
 
