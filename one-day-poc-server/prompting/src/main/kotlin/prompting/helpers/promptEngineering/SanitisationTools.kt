@@ -71,7 +71,6 @@ object SanitisationTools {
     internal fun sanitisePrompt(prompt: String): SanitisedPromptResult {
         val sanitisedPrompt = cleanPrompt(prompt)
         val keywords = extractKeywords(sanitisedPrompt)
-        println("Keywords are: $keywords")
         return SanitisedPromptResult(sanitisedPrompt, keywords)
     }
 }

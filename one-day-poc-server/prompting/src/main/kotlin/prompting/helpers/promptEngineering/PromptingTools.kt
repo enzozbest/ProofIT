@@ -281,7 +281,6 @@ object PromptingTools {
                 )
                 // Previous code message
                 if (previousGeneration != null) {
-                    println("PREVIOUS CODE MESSAGE IS NOT NULL IN PROMPTING TOOLS")
                     add(
                         buildJsonObject {
                             put("role", "system")
@@ -315,7 +314,7 @@ object PromptingTools {
      * @param response The raw response from the LLM as a string
      * @return The formatted JSON response as a JsonObject
      */
-    fun formatResponseJson(response: String): String = cleanLlmResponse(response).also { println(it) }
+    fun formatResponseJson(response: String): String = cleanLlmResponse(response)
 
     /**
      * Extracts and cleans a JSON object from an LLM response string.

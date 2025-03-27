@@ -309,6 +309,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
 
   /**
    * Configure iframe sandbox permissions
+   * this can be removed if not needed
    */
   const configureSandbox = () => {
     if (!iframeRef.current) return;

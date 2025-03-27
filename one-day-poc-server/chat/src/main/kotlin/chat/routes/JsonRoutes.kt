@@ -22,7 +22,6 @@ import java.time.Instant
  */
 internal fun Route.setJsonRoute() {
     post(JSON) {
-        println("Received JSON request")
         val request: Request =
             runCatching {
                 call.receive<Request>()
@@ -44,12 +43,10 @@ internal fun Route.setJsonRoute() {
 internal fun Route.setJsonRouteRetrieval() {
     post("$JSON/{conversationId}/rename") {
         try {
-            println("Received conversation rename request")
             val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
             val requestBody = call.receive<Map<String, String>>()
             val name = requestBody["name"] ?: throw IllegalArgumentException("Missing name")
             val success = updateConversationName(conversationId, name)
-            println("Renamed conversation $conversationId to $name")
             if (success) {
                 call.respondText("Conversation renamed successfully", status = HttpStatusCode.OK)
             } else {
@@ -85,7 +82,6 @@ private suspend fun handleJsonRequest(
         )
     }
 
-    println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
 
     println("received a request, predefined value is ${request.predefined}")
 
@@ -110,10 +106,8 @@ private suspend fun handleJsonRequest(
             prototypeFilesJson = processed.second
         }
 
-        // Save to database and get message ID
         val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
 
-        // Construct a proper JSON response directly - no nested serialization
         val finalResponse =
             """
             {
@@ -131,8 +125,6 @@ private suspend fun handleJsonRequest(
 
         call.respondText(finalResponse, contentType = ContentType.Application.Json)
     } catch (e: Exception) {
-        println("Error in handleJsonRequest: ${e.message}")
-        e.printStackTrace()
         call.respondText(
             "Error processing request: ${e.message}",
             status = HttpStatusCode.InternalServerError,
