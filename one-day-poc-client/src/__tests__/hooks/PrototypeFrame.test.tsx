@@ -207,59 +207,23 @@ describe('PrototypeFrame Component', () => {
     });
   });
 
-  it('sets iframe sandbox attributes correctly', async () => {
-    const sandboxTokens: string[] = [];
-    const addSandboxMock = vi.fn((token: string) => {
-      if (!sandboxTokens.includes(token)) {
-        sandboxTokens.push(token);
-      }
-    });
-
-    const mockIframe = {
-      sandbox: {
-        add: addSandboxMock,
-        contains: (token: string) => sandboxTokens.includes(token),
-      },
-    };
-
-    vi.spyOn(React, 'useRef').mockReturnValue({ current: mockIframe } as any);
-
-    const mockSpawn = vi.fn().mockImplementation(() => {
-      mockIframe.sandbox.add('allow-scripts');
-      mockIframe.sandbox.add('allow-same-origin');
-      mockIframe.sandbox.add('allow-forms');
-      mockIframe.sandbox.add('allow-modals');
-
-      return {
-        output: { pipeTo: vi.fn() },
-        exit: Promise.resolve(0),
-      };
-    });
-
+  it('renders iframe with correct sandbox attributes', () => {
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
-      instance: {
-        on: vi.fn(),
-        mount: vi.fn().mockResolvedValue(undefined),
-        spawn: mockSpawn,
-      },
+      instance: { on: vi.fn(), mount: vi.fn(), spawn: vi.fn() },
       loading: false,
       error: null,
     });
-
-    render(
-      <PrototypeFrame
-        files={{ 'index.js': { file: { contents: 'console.log("hello");' } } }}
-      />
-    );
-
-    await new Promise(process.nextTick);
-
-    expect(mockSpawn).toHaveBeenCalled();
-
-    expect(sandboxTokens).toContain('allow-scripts');
-    expect(sandboxTokens).toContain('allow-same-origin');
-    expect(sandboxTokens).toContain('allow-forms');
-    expect(sandboxTokens).toContain('allow-modals');
+  
+    render(<PrototypeFrame files={{}} />);
+  
+    const iframe = screen.getByTitle('Prototype Preview');
+    expect(iframe).toBeInTheDocument();
+    
+    const sandboxAttr = iframe.getAttribute('sandbox');
+    expect(sandboxAttr).toContain('allow-scripts');
+    expect(sandboxAttr).toContain('allow-same-origin');
+    expect(sandboxAttr).toContain('allow-forms');
+    expect(sandboxAttr).toContain('allow-modals');
   });
 
   it('handles Error objects correctly in error handling', async () => {
