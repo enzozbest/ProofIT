@@ -429,4 +429,25 @@ describe('error message conditional rendering', () => {
 
     expect(screen.queryByText('Error message 1')).not.toBeInTheDocument();
   });
+
+  it('should not render error paragraph when error is null', () => {
+    render(<InputBox testError={null} />);
+    
+    const errorElements = document.getElementsByClassName('text-red-500');
+    expect(errorElements.length).toBe(0);
+    
+    expect(screen.queryByRole('paragraph')).not.toBeInTheDocument();
+  });
+
+  it('should render error with proper styling when error is present', () => {
+    const errorText = "This is a test error";
+    
+    render(<InputBox testError={errorText} />);
+    
+    const errorElement = screen.getByText(errorText);
+    expect(errorElement).toBeInTheDocument();
+    expect(errorElement).toHaveClass('text-red-500');
+    expect(errorElement).toHaveClass('text-sm');
+    expect(errorElement).toHaveClass('mt-2');
+  });
 });
