@@ -82,14 +82,12 @@ object OllamaService {
      */
     suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse?> {
         if (!isOllamaRunning()) {
-            println("FUCK1")
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
 
         return try {
             Result.success(callOllama(request))
         } catch (e: Exception) {
-            println("FUCK2")
             Result.failure(Exception("Failed to call Ollama: ${e.message}"))
         }
     }
@@ -110,7 +108,6 @@ object OllamaService {
             }
 
         if (response.status != HttpStatusCode.OK) {
-            println("FUCK3")
             throw Exception("HTTP error: ${response.status}")
         }
         val responseText = response.bodyAsText()
@@ -118,7 +115,6 @@ object OllamaService {
             runCatching {
                 jsonParser.decodeFromString<OllamaResponse>(responseText)
             }.getOrElse {
-                println("FUCK4")
                 throw Exception("Failed to parse Ollama response")
             }
 
