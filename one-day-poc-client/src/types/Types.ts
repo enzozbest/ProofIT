@@ -121,10 +121,11 @@ export interface PrototypeResponse {
  * @property {string} prompt - The actual text content of the user's message
  */
 export interface MessagePayload {
-  userID: string;
-  time: string;
-  prompt: string;
-  conversationId?: string;
+    userID: string;
+    time: string;
+    prompt: string;
+    conversationId?: string;
+    predefined: boolean;
 }
 
 /**
@@ -136,10 +137,11 @@ export interface MessagePayload {
  * @property {string|null} [initialMessage] - Optional initial message to process automatically
  */
 export interface ChatScreenProps {
-  showPrototype: boolean;
-  setPrototype: Dispatch<SetStateAction<boolean>>;
-  setPrototypeFiles: Dispatch<SetStateAction<FileTree>>;
-  initialMessage?: string | null;
+    showPrototype: boolean;
+    setPrototype: Dispatch<SetStateAction<boolean>>;
+    setPrototypeFiles: Dispatch<SetStateAction<FileTree>>;
+    initialMessage? : string | null;
+    isPredefined?: boolean;
 }
 
 /**
@@ -164,12 +166,12 @@ export interface ChatMessageProps {
  * @property {Function} setErrorMessage - Function to update the error message
  */
 export interface ChatHookReturn {
-  message: string;
-  setMessage: (message: string) => void;
-  sentMessages: Message[];
-  handleSend: (messageToSend?: string) => Promise<void>;
-  errorMessage: string | null;
-  setErrorMessage: (error: string | null) => void;
+    message: string;
+    setMessage: (message: string) => void;
+    sentMessages: Message[];
+    handleSend: (messageToSend?: string, isPredefined?: boolean) => Promise<void>;
+    errorMessage: string | null;
+    setErrorMessage: (error:string | null) => void;
 }
 
 /**

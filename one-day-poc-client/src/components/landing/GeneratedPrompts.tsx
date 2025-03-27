@@ -21,11 +21,11 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
 
   const handleSubmit = (promptText: string) => {
     if (!isAuthenticated) {
-      login(promptText);
+      login(promptText, true);
       return;
     }
-    navigate('/generate', { state: { initialMessage: promptText } });
-  };
+    navigate('/generate', { state: { initialMessage: promptText, isPredefined: true } });
+  }
 
   return (
     <div className="mt-5 flex md:flex-nowrap flex-wrap gap-4 w-full max-w-6xl overflow-x-auto justify-center pb-9 no-scrollbar text-sm">

@@ -67,7 +67,7 @@ test('Handles click when user is not authenticated', async () => {
   const promptButton = screen.getByText('Test Prompt →');
   await userEvent.click(promptButton);
 
-  expect(mockLogin).toHaveBeenCalledWith('Test Prompt');
+  expect(mockLogin).toHaveBeenCalledWith('Test Prompt', true);
 });
 
 test('Handles click when user is authenticated', async () => {
@@ -95,6 +95,6 @@ test('Handles click when user is authenticated', async () => {
   await userEvent.click(promptButton);
 
   expect(navigateMock).toHaveBeenCalledWith('/generate', {
-    state: { initialMessage: 'Test Prompt' },
+    state: { initialMessage: 'Test Prompt', isPredefined: true },
   });
 });
