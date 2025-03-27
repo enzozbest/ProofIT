@@ -546,7 +546,6 @@ class ChatRepositoryTest {
         mockkObject(ConversationEntity.Companion)
         every {ConversationEntity.find(any<Op<Boolean>>()) } throws Exception("Database error")
         val conversations = repository.getConversationsByUser(userId)
-        println(conversations)
         assertTrue(conversations.isEmpty())
         unmockkAll()
     }

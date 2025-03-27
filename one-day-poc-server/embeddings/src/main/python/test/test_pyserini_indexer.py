@@ -13,7 +13,6 @@ def setup_index():
         try:
             shutil.rmtree(LUCENE_INDEX_DIR)
         except Exception as e:
-            print(f"Error removing directory: {e}")
             # If shutil.rmtree fails, try using os.system as a fallback
             os.system(f"rm -rf {LUCENE_INDEX_DIR}")
             # If the directory still exists, clear its contents
@@ -109,7 +108,6 @@ def test_invalid_index_with_subdirectory():
         try:
             shutil.rmtree(LUCENE_INDEX_DIR)
         except Exception as e:
-            print(f"Error removing directory: {e}")
             # If shutil.rmtree fails, try using os.system as a fallback
             os.system(f"rm -rf {LUCENE_INDEX_DIR}")
             # If the directory still exists, clear its contents
@@ -157,7 +155,6 @@ def test_empty_index_directory():
         try:
             shutil.rmtree(LUCENE_INDEX_DIR)
         except Exception as e:
-            print(f"Error removing directory: {e}")
             # If shutil.rmtree fails, try using os.system as a fallback
             os.system(f"rm -rf {LUCENE_INDEX_DIR}")
             # If the directory still exists, clear its contents

@@ -40,7 +40,6 @@ data class PrototypeDto(
 internal fun Route.setGetHistoryRoute() {
     get(GET) {
         try {
-            println("Fetching conversations")
             val userId = call.request.queryParameters["userId"] ?: "user"
 
             val conversations =
@@ -53,7 +52,6 @@ internal fun Route.setGetHistoryRoute() {
                         userId = it.userId,
                     )
                 }
-            println("Fetched ${conversations.size} conversations")
             call.respond(ConversationHistory(conversations))
         } catch (e: Exception) {
             return@get call.respondText(
@@ -79,9 +77,7 @@ internal fun Route.setGetConversationRoute() {
             val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: 50
             val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
-            println("Fetching messages")
             val messages = getMessageHistory(conversationId, limit, offset)
-            println("Fetched $messages messages")
 
             val messageDtos =
                 messages.map { message ->
@@ -96,7 +92,6 @@ internal fun Route.setGetConversationRoute() {
 
             call.respond(messageDtos)
         } catch (e: Exception) {
-            println("Error getting messages: ${e.message}")
             e.printStackTrace()
             return@get call.respondText(
                 "Error: ${e.message}",
@@ -109,7 +104,6 @@ internal fun Route.setGetConversationRoute() {
 internal fun Route.setGetPrototypeRoute() {
     get("$GET/{conversationId}/{messageId}") {
         try {
-            println("Fetching prototype")
             val conversationId = call.parameters["conversationId"]!!
 
             val messageId = call.parameters["messageId"]!!
@@ -124,7 +118,6 @@ internal fun Route.setGetPrototypeRoute() {
                 )
             }
         } catch (e: Exception) {
-            println("Error getting messages: ${e.message}")
             e.printStackTrace()
             return@get call.respondText(
                 "Error: ${e.message}",

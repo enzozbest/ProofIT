@@ -55,27 +55,22 @@ class PrototypeTableTest {
 
             val messageIdColumn = columns.first { it.name == "message_id" }
             val messageIdSqlType = messageIdColumn.columnType.sqlType()
-            println("[DEBUG_LOG] message_id SQL type: $messageIdSqlType")
             assertTrue(messageIdSqlType.uppercase().contains("UUID"), "Expected SQL type to contain 'UUID', but was: $messageIdSqlType")
 
             val filesJsonColumn = columns.first { it.name == "files_json" }
             val filesJsonSqlType = filesJsonColumn.columnType.sqlType()
-            println("[DEBUG_LOG] files_json SQL type: $filesJsonSqlType")
             assertTrue(filesJsonSqlType.uppercase().contains("TEXT"), "Expected SQL type to contain 'TEXT', but was: $filesJsonSqlType")
 
             val versionColumn = columns.first { it.name == "version" }
             val versionSqlType = versionColumn.columnType.sqlType()
-            println("[DEBUG_LOG] version SQL type: $versionSqlType")
             assertTrue(versionSqlType.uppercase().contains("INT"), "Expected SQL type to contain 'INT', but was: $versionSqlType")
 
             val isSelectedColumn = columns.first { it.name == "is_selected" }
             val isSelectedSqlType = isSelectedColumn.columnType.sqlType()
-            println("[DEBUG_LOG] is_selected SQL type: $isSelectedSqlType")
             assertTrue(isSelectedSqlType.uppercase().contains("BOOL"), "Expected SQL type to contain 'BOOL', but was: $isSelectedSqlType")
 
             val timestampColumn = columns.first { it.name == "timestamp" }
             val timestampSqlType = timestampColumn.columnType.sqlType()
-            println("[DEBUG_LOG] timestamp SQL type: $timestampSqlType")
             assertTrue(timestampSqlType.uppercase().contains("TIMESTAMP"), "Expected SQL type to contain 'TIMESTAMP', but was: $timestampSqlType")
         }
     }

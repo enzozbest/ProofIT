@@ -16,13 +16,11 @@ class ChatRepository(private val db: Database){
         return try {
             newSuspendedTransaction(IO_DISPATCHER, db) {
                 val conversationId = if (message.conversationId.isNullOrBlank()) {
-                    println("DEBUG - Using random UUID since conversationId was empty")
                     UUID.randomUUID()
                 } else {
                     try {
                         UUID.fromString(message.conversationId)
                     } catch (e: Exception) {
-                        println("DEBUG - UUID parse failed: ${e.message}")
                         UUID.randomUUID()
                     }
                 }
@@ -46,7 +44,6 @@ class ChatRepository(private val db: Database){
             }
             true
         } catch (e: Exception) {
-            println("Error saving message: ${e.message}")
             false
         }
     }
@@ -58,7 +55,6 @@ class ChatRepository(private val db: Database){
                 ChatMessageEntity.findById(id)?.toChatMessage()
             }
         } catch (e: Exception) {
-            println("Error retrieving message: ${e.message}")
             null
         }
     }
@@ -77,7 +73,6 @@ class ChatRepository(private val db: Database){
                     .map { it.toChatMessage() }
             }
         } catch (e: Exception) {
-            println("Error retrieving conversation messages: ${e.message}")
             emptyList()
         }
     }
@@ -90,7 +85,6 @@ class ChatRepository(private val db: Database){
                 true
             }
         } catch (e: Exception) {
-            println("Error deleting message: ${e.message}")
             false
         }
     }
@@ -108,7 +102,6 @@ class ChatRepository(private val db: Database){
                 }
             }
         } catch (e: Exception) {
-            println("Error updating conversation name: ${e.message}")
             false
         }
     }
@@ -120,7 +113,6 @@ class ChatRepository(private val db: Database){
                 ChatMessageEntity.find { ChatMessageTable.conversationId eq id }.count().toInt()
             }
         } catch (e: Exception) {
-            println("Error counting messages: ${e.message}")
             0
         }
     }
@@ -139,7 +131,6 @@ class ChatRepository(private val db: Database){
                 }.sortedByDescending { it.lastModified }
             }
         } catch (e: Exception) {
-            println("Error retrieving user conversations: ${e.message}")
             emptyList()
         }
     }
@@ -162,7 +153,6 @@ class ChatRepository(private val db: Database){
             }
             true
         } catch (e: Exception) {
-            println("Error saving prototype: ${e.message}")
             e.printStackTrace()
             false
         }
@@ -177,7 +167,6 @@ class ChatRepository(private val db: Database){
                 }.map { it.toPrototype() }
             }
         } catch (e: Exception) {
-            println("Error retrieving prototypes: ${e.message}")
             emptyList()
         }
     }
@@ -200,7 +189,6 @@ class ChatRepository(private val db: Database){
                 }
             }
         } catch (e: Exception) {
-            println("Error retrieving conversation prototypes: ${e.message}")
             emptyList()
         }
     }
@@ -222,7 +210,6 @@ class ChatRepository(private val db: Database){
                 }.firstOrNull()?.toPrototype()
             }
         } catch (e: Exception) {
-            println("Error retrieving selected prototype: ${e.message}")
             null
         }
     }
@@ -248,7 +235,6 @@ class ChatRepository(private val db: Database){
                 }
             }
         } catch (e: Exception) {
-            println("Error retrieving previous prototype: ${e.message}")
             null
         }
     }

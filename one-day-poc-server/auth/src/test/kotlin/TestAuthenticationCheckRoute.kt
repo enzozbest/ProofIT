@@ -104,7 +104,6 @@ class TestAuthenticationCheckRoute {
                 )
             val validationResponse = JWTValidationResponse("user123", true)
             cacheSession(jwt, validationResponse)
-            println("REDIS CACHE: ${Redis.getRedisConnection().get("auth:$jwt")}")
             val response =
                 client.get("/check") {
                     cookie("AuthenticatedSession", Json.encodeToString(sessionCookie))
