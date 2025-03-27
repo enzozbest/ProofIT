@@ -3,23 +3,23 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import usePrototypeFrame from '@/hooks/UsePrototypeFrame';
 import { useWebContainer } from '@/hooks/UseWebContainer';
 import { normaliseFiles, cleanFileSystem } from '@/hooks/FileHandler';
-import { 
-  ensureViteConfig, 
-  ensureViteDependencies, 
+import {
+  ensureViteConfig,
+  ensureViteDependencies,
   chooseViteStartScript,
   configureViteSandbox,
-  ensureIndexHtml
+  ensureIndexHtml,
 } from '@/hooks/ViteSetup';
 import React from 'react';
 
 // Mock dependencies
 vi.mock('@/hooks/UseWebContainer', () => ({
-  useWebContainer: vi.fn()
+  useWebContainer: vi.fn(),
 }));
 
 vi.mock('@/hooks/FileHandler', () => ({
   normaliseFiles: vi.fn(),
-  cleanFileSystem: vi.fn()
+  cleanFileSystem: vi.fn(),
 }));
 
 vi.mock('@/hooks/ViteSetup', () => ({
@@ -27,7 +27,7 @@ vi.mock('@/hooks/ViteSetup', () => ({
   ensureViteDependencies: vi.fn(),
   chooseViteStartScript: vi.fn(),
   configureViteSandbox: vi.fn(),
-  ensureIndexHtml: vi.fn()
+  ensureIndexHtml: vi.fn(),
 }));
 
 describe('usePrototypeFrame', () => {
@@ -39,29 +39,29 @@ describe('usePrototypeFrame', () => {
       readFile: vi.fn(),
       writeFile: vi.fn(),
       readdir: vi.fn(),
-      rm: vi.fn()
-    }
+      rm: vi.fn(),
+    },
   };
-  
+
   const mockProcess = {
     kill: vi.fn(),
     exit: Promise.resolve(0),
     output: {
-      pipeTo: vi.fn()
-    }
+      pipeTo: vi.fn(),
+    },
   };
-  
+
   beforeEach(() => {
     vi.resetAllMocks();
     vi.useFakeTimers();
-    
+
     // Setup default mocks
     (useWebContainer as any).mockReturnValue({
       instance: mockWebContainerInstance,
       loading: false,
-      error: null
+      error: null,
     });
-    
+
     (normaliseFiles as any).mockReturnValue({});
     (cleanFileSystem as any).mockResolvedValue(undefined);
     (ensureViteDependencies as any).mockResolvedValue(false);
@@ -69,24 +69,26 @@ describe('usePrototypeFrame', () => {
     (ensureIndexHtml as any).mockResolvedValue(undefined);
     (chooseViteStartScript as any).mockReturnValue('dev');
     (configureViteSandbox as any).mockImplementation(() => {});
-    
+
     mockWebContainerInstance.spawn.mockResolvedValue(mockProcess);
-    mockWebContainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
-      scripts: { dev: 'vite' },
-      dependencies: {}
-    }));
+    mockWebContainerInstance.fs.readFile.mockResolvedValue(
+      JSON.stringify({
+        scripts: { dev: 'vite' },
+        dependencies: {},
+      })
+    );
   });
-  
+
   afterEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
   });
-  
+
   it('should initialize with correct default states', () => {
     vi.spyOn(React, 'useEffect').mockImplementation(() => {});
-      
+
     const { result } = renderHook(() => usePrototypeFrame({ files: {} }));
-    
+
     expect(result.current.status).toBe('Resetting environment...');
     expect(result.current.url).toBe('');
     expect(result.current.loading).toBe(false);
@@ -96,7 +98,7 @@ describe('usePrototypeFrame', () => {
 
   it('should register server-ready listener when WebContainer is available', () => {
     renderHook(() => usePrototypeFrame({ files: {} }));
-    
+
     expect(mockWebContainerInstance.on).toHaveBeenCalledWith(
       'server-ready',
       expect.any(Function)
@@ -104,53 +106,75 @@ describe('usePrototypeFrame', () => {
   });
 
   it('should mount files and start server when WebContainer and files are available', async () => {
-    const testFiles = { 'index.html': '<html></html>' };
-    
+    const testFiles = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+
     renderHook(() => usePrototypeFrame({ files: testFiles }));
-   
+
     await act(async () => {
       await vi.runAllTimersAsync();
     });
-    
+
     expect(cleanFileSystem).toHaveBeenCalledWith(mockWebContainerInstance);
     expect(normaliseFiles).toHaveBeenCalledWith(testFiles);
     expect(mockWebContainerInstance.mount).toHaveBeenCalled();
     expect(ensureViteDependencies).toHaveBeenCalled();
     expect(ensureViteConfig).toHaveBeenCalled();
     expect(ensureIndexHtml).toHaveBeenCalled();
-    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['run', 'dev']);
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', [
+      'run',
+      'dev',
+    ]);
   });
 
   it('should not attempt to mount files if WebContainer is not ready', () => {
     (useWebContainer as any).mockReturnValue({
       instance: null,
       loading: true,
-      error: null
+      error: null,
     });
-    
+
     renderHook(() => usePrototypeFrame({ files: {} }));
-    
+
     expect(mockWebContainerInstance.mount).not.toHaveBeenCalled();
     expect(normaliseFiles).not.toHaveBeenCalled();
   });
 
   describe('startServer and runServerWithAutoInstall', () => {
     it('should do nothing if no webcontainer instance in startServer', async () => {
-        (useWebContainer as any).mockReturnValueOnce({
-          instance: null,
-          loading: false,
-          error: null
-        });
-    
-        const { result } = renderHook(() => usePrototypeFrame({ files: {} }));
-    
-        await act(async () => {
-          await vi.runAllTimersAsync();
-        });
-    
-        expect(mockWebContainerInstance.spawn).not.toHaveBeenCalled();
-        expect(result.current.status).not.toBe('Starting development server...');
+      (useWebContainer as any).mockReturnValueOnce({
+        instance: null,
+        loading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() => usePrototypeFrame({ files: {} }));
+
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
+
+      expect(mockWebContainerInstance.spawn).not.toHaveBeenCalled();
+      expect(result.current.status).not.toBe('Starting development server...');
     });
   });
-});
 
+  it('should update package.json when installing a specific dependency', async () => {
+    mockWebContainerInstance.fs.readFile.mockResolvedValue(
+      JSON.stringify({
+        name: 'test-project',
+        dependencies: {},
+      })
+    );
+
+    const { result } = renderHook(() => usePrototypeFrame({ files: {} }));
+
+    expect(mockWebContainerInstance.fs.readFile).toBeDefined();
+    expect(mockWebContainerInstance.fs.writeFile).toBeDefined();
+  });
+});

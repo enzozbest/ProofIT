@@ -41,12 +41,10 @@ object TemplateStorageService {
             runCatching {
                 DatabaseManager.templateRepository().getTemplateFromDB(templateId)
             }.getOrElse {
-                println("Error retrieving template with ID $templateId: ${it.message}")
                 null
             }
 
         return template ?: run {
-            println("Failed to get template with the following id: $templateId")
             null
         }
     }

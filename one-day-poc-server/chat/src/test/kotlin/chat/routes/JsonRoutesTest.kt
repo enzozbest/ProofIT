@@ -2,24 +2,18 @@ package chat.routes
 
 import chat.BaseAuthenticationServer
 import chat.storage.updateConversationName
-import database.tables.chats.ChatMessage
-import database.tables.chats.Prototype
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import io.mockk.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import prompting.PromptingMain
-import prompting.ServerResponse
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -48,7 +42,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": "{}"
                     }
                 }
                 """.trimIndent()
@@ -75,8 +69,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
-                assertEquals("This is a test response", serverResponse.chat.message)
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("This is a test response", chatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -113,7 +108,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {
+                            "file": "content"
+                        }
                     }
                 }
                 """.trimIndent()
@@ -140,8 +137,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
-                assertTrue(serverResponse.chat.message.contains("Error processing prompt"))
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertTrue(chatMessage?.contains("Error processing prompt") == true)
             } finally {
                 resetPromptingMain()
             }
@@ -161,7 +159,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {
+                            "file":"content"
+                        }
                     }
                 }
                 """.trimIndent()
@@ -188,8 +188,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
-                assertEquals("Valid response", serverResponse.chat.message)
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Valid response", chatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -226,7 +227,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {
+                            "file": "content"
+                        }
                     }
                 }
                 """.trimIndent()
@@ -252,8 +255,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     }
 
                 val firstResponseBody = firstResponse.bodyAsText()
-                val firstServerResponse = Json.decodeFromString<ServerResponse>(firstResponseBody)
-                assertEquals("Mock response", firstServerResponse.chat.message)
+                val firstJsonObject = Json.parseToJsonElement(firstResponseBody).jsonObject
+                val firstChatMessage = firstJsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Mock response", firstChatMessage)
 
                 resetPromptingMain()
 
@@ -268,7 +272,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                             "messageId": "0"
                         },
                         "prototype": {
-                            "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                            "files": {"file":"content"}
                         }
                     }
                     """.trimIndent()
@@ -291,8 +295,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     }
 
                 val secondResponseBody = secondResponse.bodyAsText()
-                val secondServerResponse = Json.decodeFromString<ServerResponse>(secondResponseBody)
-                assertEquals("Default response after reset", secondServerResponse.chat.message)
+                val secondJsonObject = Json.parseToJsonElement(secondResponseBody).jsonObject
+                val secondChatMessage = secondJsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Default response after reset", secondChatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -327,7 +332,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     fun `Test empty prompt in request`() =
         testApplication {
             val mockPromptingMain = mockk<PromptingMain>()
-            val jsonResponse = """
+            val jsonResponse =
+                """
                 {
                     "chat": {
                         "message": "Response to empty prompt",
@@ -336,7 +342,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {"file":"content"}
                     }
                 }
                 """.trimIndent()
@@ -373,7 +379,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     fun `Test exception thrown by PromptingMain`() =
         testApplication {
             val mockPromptingMain = mockk<PromptingMain>()
-            coEvery { 
+            coEvery {
                 mockPromptingMain.run(
                     any(),
                     eq(null),
@@ -453,30 +459,6 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
-    /*
-        @Test
-        fun `Test malformed authorization header`() =
-            testApplication {
-                setupTestApplication()
-
-                val response =
-                    client.post("/api/chat/json") {
-                        header(HttpHeaders.Authorization, "InvalidHeaderFormat")
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            """
-                            {
-                                "userID": "testUser",
-                                "time": "2025-01-01T12:00:00",
-                                "prompt": "Test prompt"
-                            }
-                            """.trimIndent(),
-                        )
-                    }
-
-                assertEquals(HttpStatusCode.InternalServerError, response.status)
-            }
-     */
     @Test
     fun `Test null prompt in request`() =
         testApplication {
@@ -644,7 +626,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
     fun `Test save prototype`() =
         testApplication {
             val mockPromptingMain = mockk<PromptingMain>()
-            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns """
+            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns
+                """
                 {
                     "chat": {
                         "message": "Valid response",
@@ -653,7 +636,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {
+                            "file": "content"
+                        }
                     }
                 }
                 """.trimIndent()
@@ -679,8 +664,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
                 assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                val serverResponse = Json.decodeFromString<ServerResponse>(responseBody)
-                assertEquals("Valid response", serverResponse.chat.message)
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Valid response", chatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -700,7 +686,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         "messageId": "0"
                     },
                     "prototype": {
-                        "files": "\"{\\\"file\\\":\\\"content\\\"}\""
+                        "files": {
+                            "file": "content"
+                        }
                     }
                 }
                 """.trimIndent()
@@ -710,7 +698,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
             val response =
                 client.post("/api/chat/json") {
-                    header(HttpHeaders.Authorization, "Bearer valid_token")
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     contentType(ContentType.Application.Json)
                     setBody(
                         """
@@ -724,7 +712,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 }
             assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
-            val responseObject = Json.decodeFromString<ServerResponse>(responseBody)
-            assertEquals("Valid response", responseObject.chat.message)
+            val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+            val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+            assertEquals("Valid response", chatMessage)
         }
 }

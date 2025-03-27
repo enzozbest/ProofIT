@@ -16,12 +16,9 @@ object ChatStorageFactory {
 }
 
 suspend fun storeMessage(message: ChatMessage): Boolean {
-    println("Storing message: ${message.content} from ${message.senderId} in ${message.conversationId}")
     return runCatching {
-        println("Storing message: ${message.content} from ${message.senderId} in ${message.conversationId}")
         ChatStorageFactory.getChatRepository().saveMessage(message)
     }.getOrElse { e ->
-        println("Error storing message: ${e.message}")
         false
     }
 }
@@ -30,7 +27,6 @@ suspend fun getMessageHistory(conversationId: String, limit: Int = 50, offset: I
     return runCatching {
         ChatStorageFactory.getChatRepository().getMessagesByConversation(conversationId, limit, offset)
     }.getOrElse { e ->
-        println("Error retrieving message history: ${e.message}")
         emptyList()
     }
 }
@@ -39,7 +35,6 @@ suspend fun getConversationHistory(userId: String): List<Conversation> {
     return runCatching {
         ChatStorageFactory.getChatRepository().getConversationsByUser(userId)
     }.getOrElse { e ->
-        println("Error retrieving conversation history: ${e.message}")
         emptyList()
     }
 }
@@ -48,7 +43,6 @@ suspend fun updateConversationName(conversationId: String, name: String): Boolea
     return runCatching {
         ChatStorageFactory.getChatRepository().updateConversationName(conversationId, name)
     }.getOrElse { e ->
-        println("Error updating conversation name: ${e.message}")
         false
     }
 }
@@ -58,7 +52,6 @@ suspend fun storePrototype(prototype: Prototype): Boolean {
         ChatStorageFactory.getChatRepository().savePrototype(prototype)
         true
     }.getOrElse { e ->
-        println("Error storing prototype: ${e.message}")
         false
     }
 }
@@ -67,7 +60,6 @@ suspend fun retrievePrototype(conversationId: String, messageId: String): Protot
     return runCatching {
         ChatStorageFactory.getChatRepository().getSelectedPrototypeForMessage(conversationId, messageId)
     }.getOrElse { e ->
-        println("Error retrieving prototype: ${e.message}")
         null
     }
 }
@@ -76,7 +68,6 @@ suspend fun getPreviousPrototype(conversationId: String): Prototype? {
     return runCatching {
         ChatStorageFactory.getChatRepository().getPreviousPrototype(conversationId)
     }.getOrElse { e ->
-        println("Error retrieving previous prototype: ${e.message}")
         null
     }
 }

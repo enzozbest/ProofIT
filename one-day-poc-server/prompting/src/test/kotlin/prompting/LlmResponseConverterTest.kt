@@ -54,10 +54,6 @@ class LlmResponseConverterTest {
 
         val llmResponse = convertJsonToLlmResponse(mockJsonResponse)
 
-        println("LlmResponse structure:")
-        println("Files: ${llmResponse.files.keys}")
-        println("Main file: ${llmResponse.mainFile}")
-
         assertEquals(1, llmResponse.files.size)
 
         assertTrue(llmResponse.files.containsKey("javascript"))
@@ -67,7 +63,6 @@ class LlmResponseConverterTest {
 
         for ((language, fileContent) in llmResponse.files) {
             val isSecure = mockSecureCodeCheck(fileContent.content, language)
-            println("Security check for $language code: ${if (isSecure) "PASSED" else "FAILED"}")
             assertTrue(isSecure, "Security check should pass for $language code")
         }
     }
@@ -98,7 +93,6 @@ class LlmResponseConverterTest {
             }
         val llmResponse = convertJsonToLlmResponse(mockJsonWithMaliciousCode)
         val isSecure = mockSecureCodeCheck(llmResponse.files["python"]?.content ?: "", "python")
-        println("Security check for suspicious Python code: ${if (isSecure) "PASSED" else "FAILED"}")
         assertFalse(isSecure, "Security check should detect suspicious Python code")
     }
 }

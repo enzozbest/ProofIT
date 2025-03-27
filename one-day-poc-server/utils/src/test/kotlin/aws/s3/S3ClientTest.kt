@@ -1,6 +1,5 @@
 package aws.s3
 
-import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.sts.StsClient
 import aws.sdk.kotlin.services.sts.model.AssumeRoleResponse
@@ -19,11 +18,6 @@ class S3ClientTest {
     private lateinit var mockStsClient: StsClient
     private lateinit var mockS3Client: S3Client
     private lateinit var s3Manager: S3Manager
-    private val dummyCredentialsProvider =
-        StaticCredentialsProvider {
-            accessKeyId = "dummyAccessKey"
-            secretAccessKey = "dummySecretKey"
-        }
 
     @BeforeAll
     fun setup() {

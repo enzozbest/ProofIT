@@ -53,7 +53,7 @@ class TestRedis {
         redis.setex("auth:$token", 60, invalidJson)
         val result = checkCache(token)
         assertNull(result, "Should return null when JSON decoding fails")
-        redis.del("auth:$token") // Clean up for other tests
+        redis.del("auth:$token")
     }
 
     @Test
@@ -65,7 +65,7 @@ class TestRedis {
 
         val result = checkCache(token)
         assertNull(result, "Should not have found token without auth: prefix")
-        redis.del(token) // Clean up for other tests
+        redis.del(token)
     }
 
     @Test
@@ -79,7 +79,7 @@ class TestRedis {
         assertNotNull(result, "Should have decoded the JSON properly")
         assertEquals("123", result!!.userId, "Should have the correct userId")
         assertEquals(true, result.admin, "Should have the correct admin status")
-        redis.del("auth:$token") // Clean up for other tests
+        redis.del("auth:$token")
     }
 
     @Test
@@ -93,6 +93,6 @@ class TestRedis {
         val result = redis.get("auth:$token")
         assertNotNull(result)
         assertEquals("{\"userId\":\"123\",\"admin\":true}", result)
-        redis.del("auth:$token") // Clean up for other tests
+        redis.del("auth:$token")
     }
 }
