@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import Generate from './pages/Generate';
 import ErrorRoutes from './pages/ErrorPages';
 
@@ -36,26 +36,8 @@ const App: React.FC = () => {
         <NavBar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route
-            path="/profile"
-            element={
-              AuthProvider.isAuthenticated ? (
-                <ProfilePage />
-              ) : (
-                <Navigate replace to="/" />
-              )
-            }
-          ></Route>
-          <Route
-            path="/generate"
-            element={
-              AuthProvider.isAuthenticated ? (
-                <Generate />
-              ) : (
-                <Navigate replace to="/" />
-              )
-            }
-          ></Route>
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/generate" element={<Generate />} />
           <Route path="/*" element={<ErrorRoutes />} />
         </Routes>
       </ConversationProvider>
