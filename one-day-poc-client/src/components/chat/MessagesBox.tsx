@@ -7,7 +7,7 @@ import {
   MessageBubbleContent,
   MessageBubbleTimestamp,
 } from './MessageBubble';
-import { Message, FileTree, MessageBoxProps } from '@/types/Types';
+import { Message, MessageBoxProps } from '@/types/Types';
 import { getPrototypeForMessage } from '@/api/FrontEndAPI';
 
 /**

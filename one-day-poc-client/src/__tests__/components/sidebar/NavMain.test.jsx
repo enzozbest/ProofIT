@@ -280,3 +280,31 @@ test('Renders NavMain with ID for sub-items', () => {
 
   expect(screen.getByText('Sub Item 1')).toBeInTheDocument();
 });
+
+test('Sub-item with onClick handler calls the handler when clicked', () => {
+  const mockOnClick = vi.fn();
+  
+  const items = [
+    {
+      title: 'Item 1',
+      url: '#',
+      items: [
+        {
+          title: 'Sub Item 1',
+          url: '#',
+          onClick: mockOnClick, 
+        },
+      ],
+    },
+  ];
+
+  render(<NavMain items={items} />);
+
+  const subButton = screen.getByTestId('sidebar-menu-sub-button');
+  
+  expect(mockOnClick).not.toHaveBeenCalled();
+  
+  fireEvent.click(subButton);
+  
+  expect(mockOnClick).toHaveBeenCalledTimes(1);
+});

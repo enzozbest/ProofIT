@@ -356,4 +356,124 @@ describe('ConversationContext', () => {
 
     console.error = originalConsoleError;
   });
+
+  test('updateConversationName only updates the specified conversation', async () => {
+    const mockConversations = [
+      {
+        id: 'test-id-1',
+        name: 'Conversation 1',
+        lastModified: '2023-01-01',
+        messageCount: 0,
+        messages: [],
+      },
+      {
+        id: 'test-id-2',
+        name: 'Conversation 2',
+        lastModified: '2023-01-02',
+        messageCount: 0,
+        messages: [],
+      }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+
+    const ConversationStateExposer = () => {
+      const { updateConversationName, conversations } = useConversation();
+      
+      return (
+        <div>
+          <div data-testid="conversation-1-name">
+            {conversations.find(c => c.id === 'test-id-1')?.name || 'not found'}
+          </div>
+          <div data-testid="conversation-2-name">
+            {conversations.find(c => c.id === 'test-id-2')?.name || 'not found'}
+          </div>
+          <button
+            data-testid="update-conversation-1"
+            onClick={() => updateConversationName('test-id-1', 'Updated Conversation 1')}
+          >
+            Update Conversation 1
+          </button>
+        </div>
+      );
+    };
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationStateExposer />
+      </ConversationProvider>
+    );
+
+    expect(screen.getByTestId('conversation-1-name').textContent).toBe('Conversation 1');
+    expect(screen.getByTestId('conversation-2-name').textContent).toBe('Conversation 2');
+
+    const updateButton = screen.getByTestId('update-conversation-1');
+    await act(async () => {
+      await userEvent.click(updateButton);
+    });
+
+    expect(screen.getByTestId('conversation-1-name').textContent).toBe('Updated Conversation 1');
+    expect(screen.getByTestId('conversation-2-name').textContent).toBe('Conversation 2');
+
+    expect(FrontEndAPI.apiUpdateConversationName).toHaveBeenCalledWith(
+      'test-id-1',
+      'Updated Conversation 1'
+    );
+    
+    expect(FrontEndAPI.apiUpdateConversationName).toHaveBeenCalledTimes(1);
+  });
+
+  test('loadConversationMessages returns early if conversationId is falsy', async () => {
+    const LoadMessagesTestComponent = () => {
+      const { setActiveConversationId } = useConversation();
+      
+      return (
+        <div>
+          <button 
+            data-testid="load-with-empty-string" 
+            onClick={() => setActiveConversationId('')}
+          >
+            Load with empty string
+          </button>
+          <button 
+            data-testid="load-with-null"
+            onClick={() => setActiveConversationId(null)}
+          >
+            Load with null
+          </button>
+          <button 
+            data-testid="load-with-undefined" 
+            onClick={() => setActiveConversationId(undefined)}
+          >
+            Load with undefined
+          </button>
+        </div>
+      );
+    };
+  
+    FrontEndAPI.getConversationHistory.mockClear();
+  
+    await renderWithAct(
+      <ConversationProvider>
+        <LoadMessagesTestComponent />
+      </ConversationProvider>
+    );
+  
+    const emptyStringButton = screen.getByTestId('load-with-empty-string');
+    await act(async () => {
+      await userEvent.click(emptyStringButton);
+    });
+  
+    const nullButton = screen.getByTestId('load-with-null');
+    await act(async () => {
+      await userEvent.click(nullButton);
+    });
+  
+    const undefinedButton = screen.getByTestId('load-with-undefined');
+    await act(async () => {
+      await userEvent.click(undefinedButton);
+    });
+  
+    expect(FrontEndAPI.getConversationHistory).not.toHaveBeenCalled();
+  });
 });
