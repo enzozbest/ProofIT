@@ -277,7 +277,7 @@ class TemplateRetrievalTest {
 
 
     @Test
-    fun `storeTemplateFiles creates files and calls TemplateInteractor`() = runBlocking {
+    fun `storeTemplateFiles creates files and calls TemplateInteractor`(): Unit = runBlocking {
         val componentName = "TestComponent"
         val templateCode = "export const TestComponent = () => <div>Test</div>;"
         val jsonLD = "{\"json\":\"data\"}"
