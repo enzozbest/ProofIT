@@ -34,12 +34,6 @@ data class ChatResponse(
 )
 
 @Serializable
-data class ServerResponse(
-    val chat: ChatResponse,
-    val prototype: PrototypeResponse? = null,
-)
-
-@Serializable
 data class PrototypeResponse(
     val files: String, // Keep as JsonObject, not Map
 )
