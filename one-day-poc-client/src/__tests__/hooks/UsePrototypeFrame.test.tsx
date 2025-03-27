@@ -161,8 +161,6 @@ describe('usePrototypeFrame', () => {
       },
     };
 
-    // const spy = vi.spyOn(usePrototypeFrame, 'installDependencies');
-
     renderHook(() => usePrototypeFrame({ files: testFiles }));
 
     await act(async () => {
@@ -175,7 +173,6 @@ describe('usePrototypeFrame', () => {
     expect(ensureViteDependencies).toHaveBeenCalled();
     expect(ensureViteConfig).toHaveBeenCalled();
     expect(ensureIndexHtml).toHaveBeenCalled();
-    // expect(spy).toHaveBeenCalled();
     expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', [
       'run',
       'dev',
