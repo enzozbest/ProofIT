@@ -55,27 +55,34 @@ vi.mock('@/components/ui/Sidebar', () => ({
     <div data-testid="sidebar-footer">{children}</div>
   ),
   SidebarRail: () => <div data-testid="sidebar-rail"></div>,
-}));
-
-vi.mock('@/components/ui/Button', () => ({
-  // eslint-disable-next-line react/prop-types
-  Button: ({ children, onClick, variant, className, ...props }) => (
-    <button
-      data-testid="new-chat-button"
-      onClick={onClick}
-      data-variant={variant}
-      className={className}
-      {...props}
-    >
+  SidebarMenuButton: ({ children, tooltip, className, ...props }) => (
+    <button data-tooltip={tooltip} className={className} {...props}>
       {children}
     </button>
   ),
 }));
 
+// vi.mock('@/components/ui/Button', () => ({
+//   // eslint-disable-next-line react/prop-types
+//   Button: ({ children, onClick, variant, className, ...props }) => (
+//     <button
+//       data-testid="new-chat-button"
+//       onClick={onClick}
+//       data-variant={variant}
+//       className={className}
+//       {...props}
+//     >
+//       {children}
+//     </button>
+//   ),
+// }));
+
 vi.mock('lucide-react', () => ({
   History: () => <div data-testid="history-icon">History Icon</div>,
   PlusCircle: () => <div data-testid="plus-circle-icon">Plus Circle Icon</div>,
 }));
+
+
 
 beforeEach(() => {
   vi.resetAllMocks();
