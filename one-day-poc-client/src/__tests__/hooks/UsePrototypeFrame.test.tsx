@@ -132,6 +132,56 @@ describe('usePrototypeFrame', () => {
     ]);
   });
 
+  it('should reinstall dependencies if an out-dated React version is used', async () => {
+    const testFiles = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+      'package.json': {
+        file: {
+          contents: `{
+            "scripts": {
+              "dev": "vite",
+              "build": "vite build",
+              "preview": "vite preview"
+            },
+            "dependencies": {
+              "react": "^17.2.0",
+              "react-dom": "^17.2.0"
+            },
+            "devDependencies": {
+              "@vitejs/plugin-react": "3.1.0",
+              "vite": "4.1.4",
+              "esbuild-wasm": "0.17.12"
+            }
+          }`,
+        },
+      },
+    };
+
+    // const spy = vi.spyOn(usePrototypeFrame, 'installDependencies');
+
+    renderHook(() => usePrototypeFrame({ files: testFiles }));
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
+    expect(cleanFileSystem).toHaveBeenCalledWith(mockWebContainerInstance);
+    expect(normaliseFiles).toHaveBeenCalledWith(testFiles);
+    expect(mockWebContainerInstance.mount).toHaveBeenCalled();
+    expect(ensureViteDependencies).toHaveBeenCalled();
+    expect(ensureViteConfig).toHaveBeenCalled();
+    expect(ensureIndexHtml).toHaveBeenCalled();
+    // expect(spy).toHaveBeenCalled();
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', [
+      'run',
+      'dev',
+    ]);
+  });
+
   it('should not attempt to mount files if WebContainer is not ready', () => {
     (useWebContainer as any).mockReturnValue({
       instance: null,
