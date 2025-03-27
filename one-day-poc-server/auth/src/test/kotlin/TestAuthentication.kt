@@ -1,5 +1,4 @@
 import authentication.authentication.AuthenticatedSession
-import authentication.authentication.AuthenticationRoutes.AUTHENTICATION_ROUTE
 import authentication.authentication.Authenticators.configureJWTValidator
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -64,8 +63,8 @@ class TestAuthentication {
     @Test
     fun `Test JWT Validator is set up and works with Authorization Header`() =
         testApplication {
-            val mockJWKSUrl = "http://localhost:5000"
-            setUpMockJWKSEndpoint(5000)
+            val mockJWKSUrl = "http://localhost:21001"
+            setUpMockJWKSEndpoint(21001)
 
             this.application {
                 this@application.install(Authentication) {
@@ -93,7 +92,7 @@ class TestAuthentication {
 
             val responseWithToken =
                 client.get("test/protected") {
-                    header(HttpHeaders.Authorization, "Bearer ${createValidToken(5000)}")
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken(21001)}")
                 }
             assertEquals(HttpStatusCode.OK, responseWithToken.status)
         }
@@ -101,8 +100,8 @@ class TestAuthentication {
     @Test
     fun `Test JWT Validator is set up and works with AuthenticatedSession cookie`() =
         testApplication {
-            val mockJWKSUrl = "http://localhost:6000"
-            setUpMockJWKSEndpoint(6000)
+            val mockJWKSUrl = "http://localhost:21002"
+            setUpMockJWKSEndpoint(21002)
             this.application {
                 this@application.install(Authentication) {
                     val jwtConfig = MockJsonConfig(mockJWKSUrl).getJson()
@@ -128,7 +127,7 @@ class TestAuthentication {
             assertEquals(HttpStatusCode.Unauthorized, responseWithInvalidCookie.status)
             val responseWithValidCookie =
                 client.get("test/protected") {
-                    val session = AuthenticatedSession("id", createValidToken(6000), false)
+                    val session = AuthenticatedSession("id", createValidToken(21002), false)
                     cookie(
                         "AuthenticatedSession",
                         Json.encodeToString(AuthenticatedSession.serializer(), session),
@@ -137,7 +136,7 @@ class TestAuthentication {
             assertEquals(HttpStatusCode.OK, responseWithValidCookie.status)
             val responseWithInvalidToken =
                 client.get("test/protected") {
-                    cookie("AuthenticatedSession", createInvalidToken(6000))
+                    cookie("AuthenticatedSession", createInvalidToken(21002))
                 }
             assertEquals(HttpStatusCode.Unauthorized, responseWithInvalidToken.status)
         }

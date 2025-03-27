@@ -6,30 +6,26 @@ import kotlinx.coroutines.runBlocking
 /**
  * Default implementation of AWSCredentialsProvider that uses the DefaultChainCredentialsProvider
  * from the AWS SDK to resolve AWS credentials.
- * 
+ *
  * This implementation lazily resolves the credentials only when they are actually needed,
  * and handles the case when credentials are not available by providing default values.
  */
 internal class DefaultAWSCredentialsProvider : AWSCredentialsProvider {
     private val credentialsProvider = DefaultChainCredentialsProvider()
 
-    override fun getAccessKeyId(): String {
-        return try {
+    override fun getAccessKeyId(): String =
+        try {
             runBlocking { credentialsProvider.resolve().accessKeyId }
         } catch (e: Exception) {
-            // Return a default value if credentials cannot be resolved
             "default-access-key-id"
         }
-    }
 
-    override fun getSecretAccessKey(): String {
-        return try {
+    override fun getSecretAccessKey(): String =
+        try {
             runBlocking { credentialsProvider.resolve().secretAccessKey }
         } catch (e: Exception) {
-            // Return a default value if credentials cannot be resolved
             "default-secret-access-key"
         }
-    }
 
     override fun getRegion(): String = credentialsProvider.region ?: "eu-west-2"
 }

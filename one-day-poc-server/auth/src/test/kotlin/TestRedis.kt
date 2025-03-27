@@ -24,6 +24,6 @@ class TestRedis {
     fun `Test getRedisConnection returns a valid connection`() {
         val connection = Redis.getRedisConnection()
         assertNotNull(connection, "Redis connection should not be null")
-        connection.close() // Close the connection after use
+        connection.close()
     }
 }
