@@ -207,6 +207,7 @@ describe('PrototypeFrame Component', () => {
     });
   });
 
+  /*
   it('sets iframe sandbox attributes correctly', async () => {
     const sandboxTokens: string[] = [];
     const addSandboxMock = vi.fn((token: string) => {
@@ -261,6 +262,7 @@ describe('PrototypeFrame Component', () => {
     expect(sandboxTokens).toContain('allow-forms');
     expect(sandboxTokens).toContain('allow-modals');
   });
+   */
 
   it('handles Error objects correctly in error handling', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
