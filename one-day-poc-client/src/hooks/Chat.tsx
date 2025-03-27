@@ -52,6 +52,7 @@ const ChatMessage = ({
 
   useEffect(() => {
     setSentMessages([]);
+    setChatResponse(null);
   }, [activeConversationId]);
 
   const handleSend = async (messageToSend: string = message): Promise<void> => {
