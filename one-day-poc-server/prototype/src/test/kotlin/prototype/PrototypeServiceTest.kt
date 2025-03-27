@@ -132,8 +132,6 @@ class PrototypeServiceTest {
             convertJsonToLlmResponse(json)
         }
 
-        println("[DEBUG_LOG] Exception message: ${exception.message}")
-
         assertEquals("Missing 'files' field in LLM response", exception.message)
     }
 
@@ -146,8 +144,6 @@ class PrototypeServiceTest {
         val exception = assertThrows(PromptException::class.java) {
             convertJsonToLlmResponse(mockJson)
         }
-
-        println("[DEBUG_LOG] Exception message: ${exception.message}")
 
         assertEquals("Failed to parse LLM response: Test exception", exception.message)
     }
@@ -164,8 +160,6 @@ class PrototypeServiceTest {
         val exception = assertThrows(PromptException::class.java) {
             convertJsonToLlmResponse(json)
         }
-
-        println("[DEBUG_LOG] Exception message: ${exception.message}")
 
         assertEquals("Unexpected format for file content in language: javascript", exception.message)
     }
