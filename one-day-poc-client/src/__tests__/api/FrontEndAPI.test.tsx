@@ -272,7 +272,6 @@ describe('getPrototypeForMessage', () => {
     );
   });
 
-  /*
   it('should extract error data and call onError for 500 status responses', async () => {
     const errorText = 'Server internal error details';
     vi.stubGlobal(
@@ -293,14 +292,12 @@ describe('getPrototypeForMessage', () => {
     const onError = vi.fn();
 
     await expect(
-      sendChatMessage(mockMessage, vi.fn(), vi.fn(), onError)
+      sendChatMessage(mockMessage, vi.fn(), vi.fn(), false, onError)
     ).rejects.toThrow(errorText);
 
     expect(onError).toHaveBeenCalledWith('There was an error, please try again');
-    vi.restoreAllMocks();
+    expect(onError).toHaveBeenCalledTimes(2);
   });
-
-   */
 
   it('should not call onError if not provided for 500 status', async () => {
     const errorText = 'Server internal error details';
