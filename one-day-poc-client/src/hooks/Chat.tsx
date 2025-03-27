@@ -107,10 +107,10 @@ const ChatMessage = ({
     if (chatResponse) {
       const currentTime = new Date().toISOString();
       console.log('Chat response:', chatResponse);
-      
+
       const messageContent = chatResponse.message;
       const messageId = chatResponse.messageId;
-      
+
       console.log('Extracted values:', { 
         content: messageContent, 
         id: messageId 
@@ -121,7 +121,8 @@ const ChatMessage = ({
         content: messageContent,
         timestamp: currentTime,
         conversationId: activeConversationId || '',
-        id: messageId
+        id: messageId,
+        isError: false
       };
 
       setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);

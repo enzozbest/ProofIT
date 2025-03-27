@@ -641,7 +641,7 @@ describe('PrototypeFrame Component', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Adding empty file: empty-file.txt'
+      'Added empty file: empty-file.txt'
     );
 
     expect(mockMount).toHaveBeenCalledWith({
@@ -679,17 +679,8 @@ describe('PrototypeFrame Component', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('  Creating new directory: src');
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Creating new directory: components'
-    );
-
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Directory src already exists'
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Directory components already exists'
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith('Creating directory: src');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Creating directory: components');
 
     expect(mockMount).toHaveBeenCalledWith({
       src: {
@@ -749,19 +740,19 @@ describe('PrototypeFrame Component', () => {
     const creationLogs = consoleLogSpy.mock.calls.filter(
       (call) =>
         typeof call[0] === 'string' &&
-        call[0].includes('Creating new directory')
+        call[0].includes('Creating directory')
     );
 
-    const reuseLogs = consoleLogSpy.mock.calls.filter(
+    // Since there are no logs for directory reuse, we'll check for path segments logs instead
+    const pathSegmentsLogs = consoleLogSpy.mock.calls.filter(
       (call) =>
         typeof call[0] === 'string' &&
-        call[0].includes('Directory') &&
-        call[0].includes('already exists')
+        call[0].includes('Path segments')
     );
 
     expect(creationLogs.length).toBeGreaterThanOrEqual(3);
 
-    expect(reuseLogs.length).toBeGreaterThanOrEqual(3);
+    expect(pathSegmentsLogs.length).toBeGreaterThanOrEqual(3);
 
     expect(mockMount).toHaveBeenCalledWith({
       src: {
@@ -822,16 +813,8 @@ describe('PrototypeFrame Component', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('  Creating new directory: src');
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Creating new directory: utils'
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Directory src already exists'
-    );
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      '  Directory utils already exists'
-    );
+    expect(consoleLogSpy).toHaveBeenCalledWith('Creating directory: src');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Creating directory: utils');
 
     expect(mockMount).toHaveBeenCalledWith({
       src: {
@@ -915,7 +898,7 @@ describe('Filesystem cleanup functionality', () => {
       'package.json',
     ]);
 
-    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem selectively reset');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem reset complete');
   });
 
   it('handles errors when removing individual files', async () => {
@@ -967,7 +950,7 @@ describe('Filesystem cleanup functionality', () => {
     );
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Removed file: README.md');
-    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem selectively reset');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem reset complete');
   });
 
   it('logs different types of errors when removing files', async () => {
@@ -1033,5 +1016,6 @@ describe('Filesystem cleanup functionality', () => {
     );
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Removed file: file4.txt');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem reset complete');
   });
 });

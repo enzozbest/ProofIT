@@ -101,6 +101,7 @@ describe('sendChatMessage', () => {
       time: mockMessage.timestamp,
       prompt: mockMessage.content,
       conversationId: 'mocked-uuid-value',
+      predefined: false,
     });
   });
 

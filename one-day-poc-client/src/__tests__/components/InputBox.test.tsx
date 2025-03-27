@@ -57,7 +57,7 @@ describe('InputBox', () => {
 
       expect(mockCreateConversation).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
-        state: { initialMessage: testText },
+        state: { initialMessage: testText, isPredefined: false },
       });
     });
 
@@ -103,7 +103,7 @@ describe('InputBox', () => {
       fireEvent.click(submitButton!);
 
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
-        state: { initialMessage: testText },
+        state: { initialMessage: testText, isPredefined: false },
       });
     });
 
@@ -121,7 +121,7 @@ describe('InputBox', () => {
       fireEvent.click(submitButton!);
 
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
-        state: { initialMessage: textWithWhitespace },
+        state: { initialMessage: textWithWhitespace, isPredefined: false },
       });
 
       mockNavigate.mockClear();
@@ -152,7 +152,7 @@ describe('InputBox', () => {
 
       expect(mockCreateConversation).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
-        state: { initialMessage: testText },
+        state: { initialMessage: testText, isPredefined: false },
       });
     });
 
@@ -224,7 +224,7 @@ describe('InputBox', () => {
 
       expect(mockCreateConversation).toHaveBeenCalled();
       expect(mockNavigate).toHaveBeenCalledWith('/generate', {
-        state: { initialMessage: testText },
+        state: { initialMessage: testText, isPredefined: false },
       });
     });
   });
