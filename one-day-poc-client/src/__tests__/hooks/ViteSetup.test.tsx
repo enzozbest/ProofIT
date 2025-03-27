@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
 import { 
   ensureViteConfig, 
@@ -6,7 +6,8 @@ import {
   chooseViteStartScript,
   configureViteSandbox,
   ensureIndexHtml,
-  ViteSetupContext 
+  ViteSetupContext ,
+  findIndexHtml
 } from '../../hooks/ViteSetup';
 import { WebContainer } from '@webcontainer/api';
 
@@ -35,6 +36,14 @@ vi.mock('@webcontainer/api', () => ({
   }
 }));
 
+vi.mock('../../hooks/ViteSetup', async (importOriginal) => {
+  const actual = await importOriginal() as Record<string, any>;
+  return {
+    ...actual,
+    findIndexHtml: vi.fn(actual.findIndexHtml),
+  };
+});
+
 describe('ViteSetup', () => {
   let mockWebcontainerInstance: any;
   let context: ViteSetupContext;
@@ -48,6 +57,7 @@ describe('ViteSetup', () => {
         stat: vi.fn(),
         readFile: vi.fn(),
         writeFile: vi.fn(),
+        readdir: vi.fn(),
       }
     };
 
@@ -57,6 +67,10 @@ describe('ViteSetup', () => {
       webcontainerInstance: mockWebcontainerInstance as unknown as WebContainer,
       setStatus: mockSetStatus
     };
+  });
+
+  afterEach(() => {
+    vi.mocked(findIndexHtml).mockRestore();
   });
 
   describe('ensureViteConfig', () => {
@@ -110,18 +124,6 @@ describe('ViteSetup', () => {
       expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
     });
 
-    it('does not create index.html if it exists in public folder', async () => {
-      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
-        if (path === '/index.html') return Promise.reject(new Error('Not found'));
-        if (path === '/public/index.html') return Promise.resolve({});
-        return Promise.reject(new Error('Not found'));
-      });
-      
-      await ensureIndexHtml(context);
-      
-      expect(mockWebcontainerInstance.fs.writeFile).not.toHaveBeenCalled();
-    });
-
     it('creates React index.html when React entry point is found', async () => {
       mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
         if (path === '/index.html' || path === '/public/index.html') {
@@ -141,19 +143,8 @@ describe('ViteSetup', () => {
       );
     });
 
-    it('creates JavaScript index.html when JS entry point is found', async () => {
-      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
-        if (path === '/index.html' || path === '/public/index.html') {
-          return Promise.reject(new Error('Not found'));
-        }
-        if (path === '/src/main.jsx') {
-          return Promise.reject(new Error('Not found'));
-        }
-        if (path === '/src/index.js') {
-          return Promise.resolve({});
-        }
-        return Promise.reject(new Error('Not found'));
-      });
+    it('creates javascript template when no entry points are found', async () => {
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
       
       await ensureIndexHtml(context);
       
@@ -163,19 +154,73 @@ describe('ViteSetup', () => {
       );
     });
 
-    it('creates fallback index.html when no entry points are found', async () => {
-      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
+    it('copies index.html from public folder to root if it exists there', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html') return Promise.reject(new Error('Not found'));
+        if (path === '/public/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      mockWebcontainerInstance.fs.readFile.mockImplementation((path) => {
+        if (path === '/public/index.html') return Promise.resolve('<!DOCTYPE html><html></html>');
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      vi.mocked(findIndexHtml).mockResolvedValue('/public/index.html');
       
       await ensureIndexHtml(context);
       
       expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
         '/index.html',
-        '<html>Fallback template</html>'
+        '<!DOCTYPE html><html></html>'
+      );
+    });
+
+    it('copies index.html from public folder to root', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html') return Promise.reject(new Error('Not found'));
+        if (path === '/public/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      mockWebcontainerInstance.fs.readFile.mockImplementation((path) => {
+        if (path === '/public/index.html') return Promise.resolve('<!DOCTYPE html><html></html>');
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      vi.mocked(findIndexHtml).mockResolvedValue('/public/index.html');
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<!DOCTYPE html><html></html>'
+      );
+    });
+
+    it('copies file from public/index.html to root when it exists in public folder', async () => {
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/index.html') return Promise.reject(new Error('Not found'));
+        if (path === '/public/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      mockWebcontainerInstance.fs.readFile.mockImplementation((path) => {
+        if (path === '/public/index.html') return Promise.resolve('<!DOCTYPE html><html></html>');
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      vi.mocked(findIndexHtml).mockResolvedValue('/public/index.html');
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<!DOCTYPE html><html></html>'
       );
     });
   });
 
-  // Keep existing tests for chooseViteStartScript and other functions
   describe('chooseViteStartScript', () => {
     it('returns "dev" when available', () => {
       const result = chooseViteStartScript(['build', 'dev', 'test']);
@@ -214,7 +259,6 @@ describe('ViteSetup', () => {
       expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalled();
       expect(mockSetStatus).toHaveBeenCalledWith('Installing Vite dependencies...');
       
-      // Should have added vite and other missing deps
       const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
       const updatedJson = JSON.parse(writeCallArg);
       expect(updatedJson.dependencies.vite).toBe('^4.3.9');
@@ -292,4 +336,229 @@ describe('ViteSetup', () => {
       }).not.toThrow();
     });
   });
+  
+  describe('findIndexHtml', () => {
+    it('returns path when index.html is in the root directory', async () => {
+      mockWebcontainerInstance.fs.readdir.mockImplementation((path) => {
+        if (path === '/') return Promise.resolve(['index.html', 'src']);
+        return Promise.resolve([]);
+      });
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe('/index.html');
+    });
+    
+    it('returns path when index.html is in the src directory', async () => {
+      mockWebcontainerInstance.fs.readdir.mockImplementation((path) => {
+        if (path === '/') return Promise.resolve(['src', 'package.json']);
+        if (path === '/src') return Promise.resolve(['index.html', 'app.js']);
+        return Promise.resolve([]);
+      });
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe('/src/index.html');
+    });
+    
+    it('checks common locations when not in root or src', async () => {
+      mockWebcontainerInstance.fs.readdir.mockImplementation((path) => {
+        if (path === '/') return Promise.resolve(['src', 'package.json']);
+        if (path === '/src') return Promise.resolve(['app.js']);
+        return Promise.resolve([]);
+      });
+      
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/public/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe('/public/index.html');
+    });
+    
+    it('performs recursive search when not found in common locations', async () => {
+      mockWebcontainerInstance.fs.readdir.mockImplementation((path, options) => {
+        if (path === '/') {
+          if (options?.withFileTypes) {
+            return Promise.resolve([
+              { name: 'client', isDirectory: true }
+            ]);
+          }
+          return Promise.resolve(['client']);
+        }
+        if (path === '/client') {
+          if (options?.withFileTypes) {
+            return Promise.resolve([
+              { name: 'assets', isDirectory: true }
+            ]);
+          }
+          return Promise.resolve(['assets']);
+        }
+        if (path === '/client/assets') {
+          if (options?.withFileTypes) {
+            return Promise.resolve([
+              { name: 'index.html', isDirectory: false }
+            ]);
+          }
+          return Promise.resolve(['index.html']);
+        }
+        return Promise.resolve([]);
+      });
+      
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe('/client/assets/index.html');
+    });
+    
+    it('returns null when index.html is not found anywhere', async () => {
+      mockWebcontainerInstance.fs.readdir.mockImplementation((path, options) => {
+        if (path === '/') {
+          if (options?.withFileTypes) {
+            return Promise.resolve([
+              { name: 'src', isDirectory: true }
+            ]);
+          }
+          return Promise.resolve(['src']);
+        }
+        if (path === '/src') {
+          if (options?.withFileTypes) {
+            return Promise.resolve([
+              { name: 'app.js', isDirectory: false }
+            ]);
+          }
+          return Promise.resolve(['app.js']);
+        }
+        return Promise.resolve([]);
+      });
+      
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe(null);
+    });
+    
+    it('handles errors during search gracefully', async () => {
+      mockWebcontainerInstance.fs.readdir.mockRejectedValue(new Error('Permission denied'));
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('Not found'));
+      
+      const result = await findIndexHtml(mockWebcontainerInstance);
+      
+      expect(result).toBe(null);
+    });
+  });
+  
+  describe('React version compatibility', () => {
+    it('selects correct versions for React 17', async () => {
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        dependencies: { 
+          'react': '17.0.2'
+        }
+      }));
+      
+      await ensureViteDependencies(context);
+      
+      const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
+      const updatedJson = JSON.parse(writeCallArg);
+      expect(updatedJson.dependencies.vite).toBe('^2.9.15');
+      expect(updatedJson.dependencies['@vitejs/plugin-react']).toBe('^1.3.2');
+    });
+    
+    it('selects correct versions for React 16', async () => {
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        dependencies: { 
+          'react': '16.13.1'
+        }
+      }));
+      
+      await ensureViteDependencies(context);
+      
+      const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
+      const updatedJson = JSON.parse(writeCallArg);
+      expect(updatedJson.dependencies.vite).toBe('^2.8.6');
+      expect(updatedJson.dependencies['@vitejs/plugin-react']).toBe('^1.2.0');
+    });
+    
+    it('creates React 17 compatible Vite configuration', async () => {
+      mockWebcontainerInstance.fs.stat.mockRejectedValue(new Error('File not found'));
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        dependencies: { 
+          'react': '17.0.2'
+        }
+      }));
+      
+      await ensureViteConfig(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalled();
+    });
+  });
+  
+  describe('Error handling and edge cases', () => {
+    it('creates dependencies object if missing in package.json', async () => {
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        name: 'test-project'
+        // No dependencies object
+      }));
+      
+      await ensureViteDependencies(context);
+      
+      const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
+      const updatedJson = JSON.parse(writeCallArg);
+      expect(updatedJson.dependencies).toBeDefined();
+      expect(updatedJson.dependencies.vite).toBeDefined();
+    });
+    
+    it('creates scripts object if missing in package.json', async () => {
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+        dependencies: {
+          'react': 'latest'
+        }
+        // No scripts object
+      }));
+      
+      await ensureViteDependencies(context);
+      
+      const writeCallArg = mockWebcontainerInstance.fs.writeFile.mock.calls[0][1];
+      const updatedJson = JSON.parse(writeCallArg);
+      expect(updatedJson.scripts).toBeDefined();
+      expect(updatedJson.scripts.dev).toBe('vite');
+    });
+    
+    it('handles JSON parse errors gracefully', async () => {
+      mockWebcontainerInstance.fs.readFile.mockResolvedValue('invalid json');
+      
+      const result = await ensureViteDependencies(context);
+      
+      expect(result).toBe(false);
+    });
+    
+    it('copies index.html from non-root location to root', async () => {
+      const originalFindIndexHtml = findIndexHtml;
+      vi.mocked(findIndexHtml).mockResolvedValue('/src/index.html');
+      
+      mockWebcontainerInstance.fs.stat.mockImplementation((path) => {
+        if (path === '/src/index.html') return Promise.resolve({});
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      mockWebcontainerInstance.fs.readFile.mockImplementation((path) => {
+        if (path === '/src/index.html') return Promise.resolve('<!DOCTYPE html><html></html>');
+        return Promise.reject(new Error('Not found'));
+      });
+      
+      await ensureIndexHtml(context);
+      
+      expect(mockWebcontainerInstance.fs.writeFile).toHaveBeenCalledWith(
+        '/index.html',
+        '<!DOCTYPE html><html></html>'
+      );
+      
+      vi.mocked(findIndexHtml).mockRestore();
+    });
+  });
+
 });
