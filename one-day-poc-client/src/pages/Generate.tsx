@@ -40,6 +40,7 @@ export default function Page() {
     }
     // Check for initialMessage and isPredefined from location state
     else if (location.state?.initialMessage) {
+      console.log("inside /generate, predefined value is ", isPredefined)
       setInitialMessage(location.state.initialMessage);
       setIsPredefined(location.state.isPredefined || false);
     }

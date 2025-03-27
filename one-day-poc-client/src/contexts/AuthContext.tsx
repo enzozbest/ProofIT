@@ -12,7 +12,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   checkAuth: () => Promise<void>;
-  login: (promptTextOrEvent?: string | React.MouseEvent) => void;
+  login: (promptTextOrEvent?: string | React.MouseEvent, isPredefined?: boolean) => void;
   logout: () => Promise<void>;
 }
 
@@ -61,8 +61,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
         const savedPrompt = sessionStorage.getItem('selectedPrompt');
         if (savedPrompt) {
+          const isPredefined = sessionStorage.getItem('isPredefined') === 'true';
+          sessionStorage.removeItem('isPredefined');
           sessionStorage.removeItem('selectedPrompt');
-          navigate('/generate', { state: { initialMessage: savedPrompt, isPredefined: true } });
+          navigate('/generate', { state: { initialMessage: savedPrompt, isPredefined } });
         }
       } else {
         setIsAuthenticated(false);
@@ -82,10 +84,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
    * Optionally saves a prompt text to session storage to be restored after login
    *
    * @param {string | React.MouseEvent} promptTextOrEvent - Optional prompt text to save or click event
+   * @param isPredefined
    */
-  const login = (promptTextOrEvent?: string | React.MouseEvent) => {
+  const login = (promptTextOrEvent?: string | React.MouseEvent, isPredefined?: boolean) => {
     if (promptTextOrEvent && typeof promptTextOrEvent === 'string') {
       sessionStorage.setItem('selectedPrompt', promptTextOrEvent);
+      sessionStorage.setItem('isPredefined', String(isPredefined));
     }
     window.location.href = 'http://localhost:8000/api/auth';
   };

@@ -21,7 +21,7 @@ const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
 
   const handleSubmit = (promptText: string) => {
     if (!isAuthenticated) {
-      login(promptText);
+      login(promptText, true);
       return;
     }
     navigate('/generate', { state: { initialMessage: promptText, isPredefined: true } });

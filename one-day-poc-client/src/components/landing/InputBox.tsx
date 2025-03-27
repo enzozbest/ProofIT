@@ -36,13 +36,14 @@ const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
     }
 
     if (!isAuthenticated) {
-      login(text);
+      login(text, false);
       return;
     }
 
     if (text.trim()) {
       setError(null);
       createConversation();
+      console.log("navigating to generate page, setting isPredefined to false")
       navigate('/generate', { state: { initialMessage: text, isPredefined: false } });
     }
   };
