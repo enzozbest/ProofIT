@@ -251,7 +251,6 @@ class OllamaServiceTest {
 
     @Test
     fun `Test OllamaResponse data class properties and behavior`() {
-        // Create an instance with specific values
         val response =
             OllamaResponse(
                 model = "llama2",
@@ -261,23 +260,19 @@ class OllamaServiceTest {
                 done_reason = "stop",
             )
 
-        // Test property access
         assertEquals("llama2", response.model)
         assertEquals("2023-01-01T12:00:00Z", response.created_at)
         assertEquals("This is a test response", response.response)
         assertTrue(response.done)
         assertEquals("stop", response.done_reason)
 
-        // Test copy functionality
         val copiedResponse = response.copy(model = "gpt4", response = "Updated response")
         assertEquals("gpt4", copiedResponse.model)
         assertEquals("Updated response", copiedResponse.response)
-        // Other properties should remain the same
         assertEquals(response.created_at, copiedResponse.created_at)
         assertEquals(response.done, copiedResponse.done)
         assertEquals(response.done_reason, copiedResponse.done_reason)
 
-        // Test equality
         val sameResponse =
             OllamaResponse(
                 model = "llama2",
@@ -289,7 +284,6 @@ class OllamaServiceTest {
         assertEquals(response, sameResponse)
         assertNotEquals(response, copiedResponse)
 
-        // Test toString() contains all properties
         val toStringResult = response.toString()
         assertTrue(toStringResult.contains("model=llama2"))
         assertTrue(toStringResult.contains("created_at=2023-01-01T12:00:00Z"))
@@ -309,20 +303,16 @@ class OllamaServiceTest {
                 done_reason = "stop",
             )
 
-        // Serialize to JSON
         val json = Json.encodeToString(OllamaResponse.serializer(), original)
 
-        // Verify JSON contains expected values
         assertTrue(json.contains("\"model\":\"llama2\""))
         assertTrue(json.contains("\"created_at\":\"2023-01-01T12:00:00Z\""))
         assertTrue(json.contains("\"response\":\"This is a test response\""))
         assertTrue(json.contains("\"done\":true"))
         assertTrue(json.contains("\"done_reason\":\"stop\""))
 
-        // Deserialize back to object
         val deserialized = Json.decodeFromString(OllamaResponse.serializer(), json)
 
-        // Verify deserialized object matches original
         assertEquals(original, deserialized)
         assertEquals(original.model, deserialized.model)
         assertEquals(original.created_at, deserialized.created_at)
@@ -333,7 +323,6 @@ class OllamaServiceTest {
 
     @Test
     fun `Test OllamaOptions data class properties and behavior`() {
-        // Test default values
         val defaultOptions = OllamaOptions()
         assertNull(defaultOptions.temperature)
         assertNull(defaultOptions.top_k)
@@ -341,7 +330,6 @@ class OllamaServiceTest {
         assertNull(defaultOptions.num_predict)
         assertNull(defaultOptions.stop)
 
-        // Create an instance with specific values
         val options =
             OllamaOptions(
                 temperature = 0.7,
@@ -351,23 +339,19 @@ class OllamaServiceTest {
                 stop = listOf(".", "?", "!"),
             )
 
-        // Test property access
         assertEquals(0.7, options.temperature)
         assertEquals(40, options.top_k)
         assertEquals(0.9, options.top_p)
         assertEquals(100, options.num_predict)
         assertEquals(listOf(".", "?", "!"), options.stop)
 
-        // Test copy functionality
         val copiedOptions = options.copy(temperature = 0.5, top_k = 50)
         assertEquals(0.5, copiedOptions.temperature)
         assertEquals(50, copiedOptions.top_k)
-        // Other properties should remain the same
         assertEquals(options.top_p, copiedOptions.top_p)
         assertEquals(options.num_predict, copiedOptions.num_predict)
         assertEquals(options.stop, copiedOptions.stop)
 
-        // Test equality
         val sameOptions =
             OllamaOptions(
                 temperature = 0.7,
@@ -380,7 +364,6 @@ class OllamaServiceTest {
         assertNotEquals(options, copiedOptions)
         assertNotEquals(options, defaultOptions)
 
-        // Test toString() contains all properties
         val toStringResult = options.toString()
         assertTrue(toStringResult.contains("temperature=0.7"))
         assertTrue(toStringResult.contains("top_k=40"))
@@ -400,20 +383,16 @@ class OllamaServiceTest {
                 stop = listOf(".", "?", "!"),
             )
 
-        // Serialize to JSON
         val json = Json.encodeToString(OllamaOptions.serializer(), original)
 
-        // Verify JSON contains expected values
         assertTrue(json.contains("\"temperature\":0.7"))
         assertTrue(json.contains("\"top_k\":40"))
         assertTrue(json.contains("\"top_p\":0.9"))
         assertTrue(json.contains("\"num_predict\":100"))
         assertTrue(json.contains("\"stop\":[\".\",\"?\",\"!\"]"))
 
-        // Deserialize back to object
         val deserialized = Json.decodeFromString(OllamaOptions.serializer(), json)
 
-        // Verify deserialized object matches original
         assertEquals(original, deserialized)
         assertEquals(original.temperature, deserialized.temperature)
         assertEquals(original.top_k, deserialized.top_k)
@@ -424,7 +403,6 @@ class OllamaServiceTest {
 
     @Test
     fun `Test OllamaOptions with null values serialization and deserialization`() {
-        // Test with some null values
         val original =
             OllamaOptions(
                 temperature = 0.7,
@@ -434,20 +412,16 @@ class OllamaServiceTest {
                 stop = null,
             )
 
-        // Serialize to JSON
         val json = Json.encodeToString(OllamaOptions.serializer(), original)
 
-        // Verify JSON contains expected values and nulls are properly handled
         assertTrue(json.contains("\"temperature\":0.7"))
         assertTrue(json.contains("\"top_p\":0.9"))
         assertTrue(json.contains("\"top_k\":null") || !json.contains("\"top_k\""))
         assertTrue(json.contains("\"num_predict\":null") || !json.contains("\"num_predict\""))
         assertTrue(json.contains("\"stop\":null") || !json.contains("\"stop\""))
 
-        // Deserialize back to object
         val deserialized = Json.decodeFromString(OllamaOptions.serializer(), json)
 
-        // Verify deserialized object matches original
         assertEquals(original, deserialized)
         assertEquals(original.temperature, deserialized.temperature)
         assertEquals(original.top_k, deserialized.top_k)

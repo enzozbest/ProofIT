@@ -47,14 +47,12 @@ fun convertJsonToLlmResponse(json: JsonObject): LlmResponse {
             val content =
                 when (fileContentJson) {
                     is JsonObject -> {
-                        // Look for "code" field first (as per prompt), then try "content" for backward compatibility
                         (fileContentJson["code"] as? JsonPrimitive)?.content
                             ?: (fileContentJson["content"] as? JsonPrimitive)?.content
                             ?: throw PromptException("Missing 'code' or 'content' field in file for language: $language")
                     }
 
                     is JsonPrimitive -> {
-                        // If it's directly a string content
                         fileContentJson.content
                     }
 
@@ -64,7 +62,6 @@ fun convertJsonToLlmResponse(json: JsonObject): LlmResponse {
             files[language] = FileContent(content)
         }
 
-        // Set default mainFile to "index.html" if not provided
         val mainFile = (json["mainFile"] as? JsonPrimitive)?.content ?: "html"
         return LlmResponse(mainFile, files)
     } catch (e: Exception) {

@@ -1,6 +1,5 @@
 package prompting.helpers.promptEngineering
 
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -11,9 +10,6 @@ class TestPromptingTools {
     companion object {
         private val promptingTools = PromptingTools
     }
-
-    // Note: removeComments method has been removed from PromptingTools
-    // The functionality is now handled internally by cleanLlmResponse
 
     @Test
     fun `test formatResponseJson with valid JSON`() {
@@ -77,9 +73,6 @@ class TestPromptingTools {
 
     @Test
     fun `test formatResponseJson with malformed JSON throws exception`() {
-        // The cleanLlmResponse method now just extracts the JSON object by finding braces,
-        // without validating the JSON. So we can't expect an exception to be thrown.
-        // Instead, we'll just check that the result contains the input.
         val input = "{ \"key\": \"value\", \"broken\": }"
         val result = promptingTools.formatResponseJson(input)
         assertTrue(result.contains("key"))
@@ -116,9 +109,6 @@ class TestPromptingTools {
         assertTrue(result.contains("\"data\""))
         assertTrue(result.contains("\"array\""))
 
-        // The cleanLlmResponse method now just extracts the JSON object by finding braces
-        // It doesn't specifically remove comments, but they should be excluded from the result
-        // if they're outside the JSON object
         assertFalse(result.contains("// This is a header comment"))
         assertFalse(result.contains("/* trailing"))
     }
@@ -130,16 +120,13 @@ class TestPromptingTools {
 
         val result = promptingTools.functionalRequirementsPrompt(prompt, keywords)
 
-        // The result is now a JSON string, so we need to check that it contains the keywords and prompt
         keywords.forEach { keyword ->
             assertTrue(result.contains(keyword))
         }
         assertTrue(result.contains(prompt))
 
-        // Check that the JSON string contains the system message with the expected content
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
-        // The text has changed, so we need to check for different content
         assertTrue(result.contains("Response Structure"))
         assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate"))
@@ -152,18 +139,14 @@ class TestPromptingTools {
 
         val result = promptingTools.functionalRequirementsPrompt(prompt, keywords)
 
-        // The result is now a JSON string, so we need to check that it contains the prompt
         assertTrue(result.contains(prompt))
 
-        // Check that the JSON string contains the system message with the expected content
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
-        // The text has changed, so we need to check for different content
         assertTrue(result.contains("Response Structure"))
         assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate"))
 
-        // The keywords message format has changed
         assertTrue(result.contains("keywords"))
     }
 
@@ -194,29 +177,22 @@ class TestPromptingTools {
 
         val result = promptingTools.prototypePrompt(userPrompt, requirements, listOf(templates))
 
-        // The userPrompt is embedded within a larger string in the JSON
-        // The format has changed, so we need to check for different content
         assertTrue(result.contains(userPrompt), "Result should contain the user prompt somewhere in the string")
 
-        // Check for requirements and templates with more flexible assertions
         assertTrue(result.contains("Must include email"), "Result should contain part of the requirements")
         assertTrue(result.contains("validation"), "Result should contain part of the requirements")
         assertTrue(result.contains("form"), "Result should contain part of the templates")
         assertTrue(result.contains("React"), "Result should contain part of the templates")
 
-        // Check that the JSON string contains the system message with the expected content
         assertTrue(result.contains("\"role\":\"system\""))
         assertTrue(result.contains("Response Format"))
-        // The text has changed, so we need to check for different content
         assertTrue(result.contains("Response Structure"))
         assertTrue(result.contains("What the model must do"))
         assertTrue(result.contains("Generate"))
 
-        // Check that the templates and requirements are included
         assertTrue(result.contains("requirements"))
         assertTrue(result.contains("templates"))
 
-        // Check that the technology information is included
         assertTrue(result.contains("Technologies"))
     }
 }

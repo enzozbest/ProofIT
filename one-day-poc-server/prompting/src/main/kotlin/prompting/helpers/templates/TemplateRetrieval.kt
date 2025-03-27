@@ -101,7 +101,6 @@ object TemplateRetrieval {
      * @return The component name or null if it couldn't be extracted
      */
     fun extractComponentName(templateCode: String): String? {
-        // Look for common React component patterns
         val exportPatterns = listOf(
             """export\s+const\s+(\w+)""".toRegex(),
             """export\s+default\s+function\s+(\w+)""".toRegex(),
@@ -116,7 +115,6 @@ object TemplateRetrieval {
             }
         }
 
-        // Fallback to a UUID if name can't be extracted
         return "Component${UUID.randomUUID().toString().take(8)}"
     }
 
@@ -130,11 +128,9 @@ object TemplateRetrieval {
      */
     suspend fun storeTemplateFiles(componentName: String, templateCode: String, jsonLD: String): Boolean {
         try {
-            // Ensure parent directories exist
             File(templatesDir).mkdirs()
             File(metadataDir).mkdirs()
 
-            // Use property accessors for paths
             val templateFile = File(templatesDir, "$componentName.templ")
             val jsonLdFile = File(metadataDir, "$componentName.jsonld")
 
@@ -168,8 +164,6 @@ object TemplateRetrieval {
             val jsonText = response.response ?: throw PromptException("Empty response from LLM")
             val jsonElement = Json.parseToJsonElement(jsonText)
 
-            // Extract the annotation field from the JSON
-            // Check if it's an object with an "annotation" field
             when (jsonElement) {
                 is JsonObject -> {
                     val annotation = jsonElement["annotation"]?.jsonPrimitive?.content

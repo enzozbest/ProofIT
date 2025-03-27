@@ -74,7 +74,6 @@ class PromptingMain(
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
 
-        // First LLM call
         val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
         val freqs: String = promptLlm(freqsPrompt, freqsOptions)
 
@@ -83,13 +82,10 @@ class PromptingMain(
         val requirements = freqsResponse["requirements"]?.jsonArray?.joinToString(",") ?: ""
         val fetcherInput = "$requirements, $userPrompt"
 
-        // Use functional requirements to and user prompt fetch templates
         val templates = TemplateInteractor.fetchTemplates(fetcherInput)
 
-        // Prototype prompt with templates.
         val prototypePrompt = prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration)
 
-        // Second LLM call
         val prototypeOptions =
             OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
         val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions)
