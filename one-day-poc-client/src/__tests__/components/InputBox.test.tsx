@@ -250,7 +250,7 @@ describe('InputBox', () => {
 
       fireEvent.click(submitButton!);
 
-      expect(mockLogin).toHaveBeenCalledWith(testText);
+      expect(mockLogin).toHaveBeenCalledWith(testText, false);
 
       expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockCreateConversation).not.toHaveBeenCalled();
@@ -277,7 +277,7 @@ describe('InputBox', () => {
         charCode: 13,
       });
 
-      expect(mockLogin).toHaveBeenCalledWith(testText);
+      expect(mockLogin).toHaveBeenCalledWith(testText, false);
 
       expect(mockNavigate).not.toHaveBeenCalled();
       expect(mockCreateConversation).not.toHaveBeenCalled();
