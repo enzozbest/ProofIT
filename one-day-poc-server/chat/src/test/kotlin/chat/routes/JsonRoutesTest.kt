@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import prompting.PredefinedPrototypes
+import prompting.PredefinedPrototypeTemplate
 import prompting.PromptingMain
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -703,5 +705,49 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             assertEquals(HttpStatusCode.BadRequest, response.status)
             val responseBody = response.bodyAsText()
             assertTrue(responseBody.contains("Invalid request"))
+        }
+
+    @Test
+    fun `Test predefined prototype functionality`() =
+        testApplication {
+            // Mock PredefinedPrototypes.run
+            mockkObject(PredefinedPrototypes)
+            val predefinedTemplate = PredefinedPrototypeTemplate(
+                chatMessage = "This is a predefined response",
+                files = """{"file1": "content1", "file2": "content2"}"""
+            )
+            every { PredefinedPrototypes.run(any()) } returns predefinedTemplate
+
+            setupTestApplication()
+
+            val response =
+                client.post("/api/chat/json") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        """
+                        {
+                            "userID": "testUser",
+                            "time": "2025-01-01T12:00:00",
+                            "prompt": "Test predefined prompt",
+                            "conversationId": "test-conversation-id",
+                            "predefined": true
+                        }
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText()
+
+            // Verify the response contains the predefined message
+            assertTrue(responseBody.contains("This is a predefined response"))
+            assertTrue(responseBody.contains("file1"))
+            assertTrue(responseBody.contains("content1"))
+
+            // Verify PredefinedPrototypes.run was called with the correct prompt
+            verify { PredefinedPrototypes.run("Test predefined prompt") }
+
+            unmockkObject(PredefinedPrototypes)
         }
 }
