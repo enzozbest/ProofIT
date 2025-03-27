@@ -48,7 +48,7 @@ def test_load_data_returns_none(mock_pickle_load, mock_open, mock_faiss_read):
 
 @mock.patch("faiss.read_index", return_value=None)
 @mock.patch("builtins.open", new_callable=mock.mock_open, read_data=b"")
-@mock.patch("pickle.load", side_effect=EOFError)  # Simulates empty file
+@mock.patch("pickle.load", side_effect=EOFError) 
 def test_load_data_empty_file(mock_pickle_load, mock_open, mock_faiss_read):
     """Test handling of empty files."""
     index, vector_store = load_data()

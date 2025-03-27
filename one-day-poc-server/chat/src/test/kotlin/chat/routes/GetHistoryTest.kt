@@ -570,7 +570,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
 
     @Test
     fun `Test serializable annotations`() {
-        // This test is to cover the @Serializable annotations
         val conversation = Conversation("1", "Test", "2023-01-01", 5, "user1")
         val history = ConversationHistory(listOf(conversation))
         val message = MessageDto("1", "conv1", "user1", "Hello", "2023-01-01")
@@ -581,7 +580,6 @@ class GetHistoryTest : BaseAuthenticationServer() {
         assertEquals("1", message.id)
         assertEquals("files", prototype.files)
 
-        // Test JSON serialization to ensure @Serializable is used
         val json =
             kotlinx.serialization.json.Json
                 .encodeToString(Conversation.serializer(), conversation)
@@ -646,7 +644,7 @@ class GetHistoryTest : BaseAuthenticationServer() {
             setupTestApplication()
 
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is invalid
+            val limit = 50 
             val mockMessages =
                 listOf(
                     DbChatMessage(
@@ -682,7 +680,7 @@ class GetHistoryTest : BaseAuthenticationServer() {
 
             val conversationId = "conv1"
             val limit = 50
-            val offset = 0 // Default value when offset is invalid
+            val offset = 0
             val mockMessages =
                 listOf(
                     DbChatMessage(
@@ -753,8 +751,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
             setupTestApplication()
 
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is null
-            val offset = 0 // Default offset
+            val limit = 50 
+            val offset = 0 
             val mockMessages =
                 listOf(
                     DbChatMessage(
@@ -789,8 +787,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
             setupTestApplication()
 
             val conversationId = "conv1"
-            val limit = 30 // Custom limit
-            val offset = 0 // Default value when offset is null
+            val limit = 30 
+            val offset = 0 
             val mockMessages =
                 listOf(
                     DbChatMessage(
@@ -825,8 +823,8 @@ class GetHistoryTest : BaseAuthenticationServer() {
             setupTestApplication()
 
             val conversationId = "conv1"
-            val limit = 50 // Default value when limit is null
-            val offset = 0 // Default value when offset is null
+            val limit = 50 
+            val offset = 0 
             val mockMessages =
                 listOf(
                     DbChatMessage(

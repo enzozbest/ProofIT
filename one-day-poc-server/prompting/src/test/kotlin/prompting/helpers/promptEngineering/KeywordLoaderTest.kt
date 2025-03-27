@@ -125,7 +125,6 @@ class KeywordLoaderTest {
     @Test
     fun `test KeywordLoader returns an empty list when keywords file is not found`() {
         mockkObject(KeywordLoader)
-        // Reset the keywords to force reinitialization
         KeywordLoader.resetKeywords()
         every { KeywordLoader.getResource(any()) } returns null
 

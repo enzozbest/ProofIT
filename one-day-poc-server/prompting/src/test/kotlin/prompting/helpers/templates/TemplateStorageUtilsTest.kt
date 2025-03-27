@@ -30,17 +30,14 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test retrieveFileContent from local storage`() =
         runBlocking {
-            // Arrange
             val path = "local/path/to/file.txt"
             val fileContent = "file content".toByteArray()
 
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "true"
             every { StorageService.getFileLocal(path) } returns fileContent
 
-            // Act
             val result = TemplateStorageUtils.retrieveFileContent(path)
 
-            // Assert
             assertArrayEquals(fileContent, result)
             verify {
                 EnvironmentLoader.get("LOCAL_STORAGE")
@@ -51,13 +48,11 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test retrieveFileContent from local storage throws exception when file not found`() =
         runBlocking {
-            // Arrange
             val path = "local/path/to/nonexistent.txt"
 
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "true"
             every { StorageService.getFileLocal(path) } returns null
 
-            // Act & Assert
             val exception =
                 assertThrows(TemplateRetrievalException::class.java) {
                     runBlocking { TemplateStorageUtils.retrieveFileContent(path) }
@@ -73,17 +68,14 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test retrieveFileContent from remote storage`() =
         runBlocking {
-            // Arrange
             val url = "https://test-bucket.s3.amazonaws.com/path/to/file.txt"
             val fileContent = "file content".toByteArray()
 
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "false"
             coEvery { StorageService.getFileRemote("test-bucket", "path/to/file.txt") } returns fileContent
 
-            // Act
             val result = TemplateStorageUtils.retrieveFileContent(url)
 
-            // Assert
             assertArrayEquals(fileContent, result)
             verify { EnvironmentLoader.get("LOCAL_STORAGE") }
             coVerify { StorageService.getFileRemote("test-bucket", "path/to/file.txt") }
@@ -92,13 +84,11 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test retrieveFileContent from remote storage throws exception when file not found`() =
         runBlocking {
-            // Arrange
             val url = "https://test-bucket.s3.amazonaws.com/path/to/nonexistent.txt"
 
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "false"
             coEvery { StorageService.getFileRemote("test-bucket", "path/to/nonexistent.txt") } returns null
 
-            // Act & Assert
             val exception =
                 assertThrows(TemplateRetrievalException::class.java) {
                     runBlocking { TemplateStorageUtils.retrieveFileContent(url) }
@@ -131,7 +121,6 @@ class TemplateStorageUtilsTest {
 
     @Test
     fun `parseS3Url throws exception when key pattern doesn't match`() {
-        // This URL passes the bucket regex but fails the key regex
         val invalidUrl = "https://bucket.s3.amazonaws.com"
 
         val exception =
@@ -143,7 +132,6 @@ class TemplateStorageUtilsTest {
 
     @Test
     fun `parseS3Url correctly handles URLs with complex paths`() {
-        // Test URL with multiple path segments and special characters
         val complexUrl = "https://test-bucket.s3.amazonaws.com/path/to/my%20file.pdf"
 
         val (bucket, key) = parseS3Url(complexUrl)
@@ -214,7 +202,6 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test storeFile to local storage`() =
         runBlocking {
-            // Arrange
             val content = "file content"
             val filePrefix = "prefix_"
             val fileSuffix = ".txt"
@@ -226,30 +213,24 @@ class TemplateStorageUtilsTest {
                 )
             val expectedPath = "local/path/file.txt"
 
-            // Mock environment and storage service
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "true"
 
-            // Use a spy on the actual implementation to avoid mocking static methods
             val tempFilePath = createTempFile(prefix = filePrefix, suffix = fileSuffix)
             tempFilePath.toFile()
 
-            // Mock the storage service call
             every {
                 StorageService.storeFileLocal(storageConfig.path, storageConfig.key, any())
             } returns expectedPath
 
             try {
-                // Act
                 val result = TemplateStorageUtils.storeFile(content, filePrefix, fileSuffix, storageConfig)
 
-                // Assert
                 assertEquals(expectedPath, result)
                 verify {
                     EnvironmentLoader.get("LOCAL_STORAGE")
                     StorageService.storeFileLocal(storageConfig.path, storageConfig.key, any())
                 }
             } finally {
-                // Clean up
                 tempFilePath.deleteIfExists()
             }
         }
@@ -257,7 +238,6 @@ class TemplateStorageUtilsTest {
     @Test
     fun `test storeFile to remote storage`() =
         runBlocking {
-            // Arrange
             val content = "file content"
             val filePrefix = "prefix_"
             val fileSuffix = ".txt"
@@ -269,47 +249,38 @@ class TemplateStorageUtilsTest {
                 )
             val expectedPath = "https://test-bucket.s3.amazonaws.com/file.txt"
 
-            // Mock environment and storage service
             every { EnvironmentLoader.get("LOCAL_STORAGE") } returns "false"
 
-            // Use a spy on the actual implementation to avoid mocking static methods
             val tempFilePath = createTempFile(prefix = filePrefix, suffix = fileSuffix)
             tempFilePath.toFile()
 
-            // Mock the storage service call
             coEvery {
                 StorageService.storeFileRemote(storageConfig.bucket, storageConfig.key, any())
             } returns expectedPath
 
             try {
-                // Act
                 val result = TemplateStorageUtils.storeFile(content, filePrefix, fileSuffix, storageConfig)
 
-                // Assert
                 assertEquals(expectedPath, result)
                 verify {
                     EnvironmentLoader.get("LOCAL_STORAGE")
                 }
                 coVerify { StorageService.storeFileRemote(storageConfig.bucket, storageConfig.key, any()) }
             } finally {
-                // Clean up
                 tempFilePath.deleteIfExists()
             }
         }
 
     @Test
     fun `test StorageConfig data class`() {
-        // Arrange
         val path = "local/path"
         val key = "file.txt"
         val bucket = "test-bucket"
 
-        // Act
         val config = TemplateStorageUtils.StorageConfig(path, key, bucket)
         val copy = config.copy(path = "new/path")
         val (p, k, b) = config
 
-        // Assert
         assertEquals(path, config.path)
         assertEquals(key, config.key)
         assertEquals(bucket, config.bucket)

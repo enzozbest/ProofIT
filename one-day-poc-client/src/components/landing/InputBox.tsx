@@ -22,8 +22,14 @@ const InputBox: FC<{ testError?: string | null }> = ({ testError = null }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(testError);
   const { createConversation } = useConversation();
+
+  useEffect(() => {
+    if (testError !== null) {
+      setError(testError);
+    }
+  }, [testError]);
 
   /**
    * Handle form submission

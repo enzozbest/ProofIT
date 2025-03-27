@@ -177,7 +177,6 @@ class JsonProcessorTest {
         val result = JsonProcessor.processRawJsonResponse(jsonString)
 
         assertEquals("Test message", result.first)
-        // The JsonProcessor is able to handle unbalanced braces and extract the content
         assertTrue(result.second.contains("file1.txt"))
         assertTrue(result.second.contains("content1"))
         assertTrue(result.second.contains("unbalanced"))
@@ -262,7 +261,6 @@ class JsonProcessorTest {
         val result = JsonProcessor.processRawJsonResponse(jsonString)
 
         assertEquals("Test message", result.first)
-        // Even with incomplete JSON, the processor should extract what it can
         assertTrue(result.second.contains("incomplete"))
     }
 }

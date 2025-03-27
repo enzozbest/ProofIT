@@ -14,7 +14,7 @@ const val JSON = "$CHAT/json"
 const val UPLOAD = "$CHAT/upload"
 
 object ChatEndpoints {
-    var UPLOAD_DIR: String = "uploads" // Do not use val for testing!
+    var UPLOAD_DIR: String = "uploads"
 
     fun Route.setChatRoutes() {
         setGetHistoryRoute()

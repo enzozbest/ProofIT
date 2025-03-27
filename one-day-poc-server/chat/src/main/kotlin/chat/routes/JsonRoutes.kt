@@ -99,7 +99,7 @@ private suspend fun handleJsonRequest(
 
             val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
 
-            // Extract chat content and prototype files JSON
+            
             val processed = JsonProcessor.processRawJsonResponse(promptJsonResponse)
             chatContent = processed.first
             prototypeFilesJson = processed.second

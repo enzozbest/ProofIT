@@ -7,7 +7,6 @@ import io.ktor.http.isSuccess
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respond
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
@@ -49,7 +48,7 @@ class ResponseHandlerTest {
     @Test
     fun `test createResponse formats message correctly`() = runBlocking {
         val message = "Test message"
-        val currentTimePrefix = LocalDateTime.now().toString().substring(0, 10) // Get just the date part for comparison
+        val currentTimePrefix = LocalDateTime.now().toString().substring(0, 10)
 
         val response = ResponseHandler::class.java.getDeclaredMethod("createResponse", String::class.java)
             .apply { isAccessible = true }

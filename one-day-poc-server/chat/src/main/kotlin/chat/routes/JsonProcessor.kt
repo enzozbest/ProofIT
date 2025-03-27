@@ -27,7 +27,6 @@ object JsonProcessor {
      * @return The extracted chat content or an empty string if not found
      */
     private fun extractChatContent(jsonString: String): String {
-        // Simple regex to extract chat content
         val chatRegex = """"chat"\s*:\s*"([^"]*)"|\{\s*"message"\s*:\s*"([^"]*)"""".toRegex()
         val chatMatch = chatRegex.find(jsonString)
         return chatMatch?.groupValues?.firstOrNull { it.isNotEmpty() && it != chatMatch.value } ?: ""
@@ -48,19 +47,15 @@ object JsonProcessor {
         val filesStartIndex = jsonString.indexOf(filesMarker)
 
         if (filesStartIndex >= 0) {
-            // Start after the "files": marker
             var pos = filesStartIndex + filesMarker.length
 
-            // Skip whitespace
             while (pos < jsonString.length && jsonString[pos].isWhitespace()) {
                 pos++
             }
-            // Handle case where it's a JSON object directly (not a string)
             var depth = 0
             var foundStart = false
             val filesJson = StringBuilder()
 
-            // Skip whitespace to find the opening brace
             while (pos < jsonString.length && !foundStart) {
                 if (jsonString[pos] == '{') {
                     foundStart = true
@@ -69,8 +64,6 @@ object JsonProcessor {
                 }
                 pos++
             }
-
-            // If we found the opening brace, find the matching closing brace
             if (foundStart) {
                 while (pos < jsonString.length && depth > 0) {
                     val char = jsonString[pos]
@@ -83,8 +76,6 @@ object JsonProcessor {
                     }
                     pos++
                 }
-
-                // If we found a complete JSON object, use it
                 if (depth == 0) {
                     prototypeContent = filesJson.toString()
                 }

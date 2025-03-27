@@ -47,7 +47,6 @@ def new_template_route():
     if not vector_success or not keyword_success:
         return jsonify({"status": "error", "message": f"Failed to store template: Vector DB: {vector_success}, Keyword DB: {keyword_success}"})
 
-    # Save data to disk after successful storage
     save_data(vs.index, vs.store)
 
     return jsonify({"status": "success", "message": "New template stored successfully!"})
