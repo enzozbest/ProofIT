@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useConversation } from '../../contexts/ConversationContext';
 import { useNavigate } from 'react-router-dom';
 
 type GeneratedPromptsProps = {
@@ -18,12 +19,14 @@ type GeneratedPromptsProps = {
 const GeneratedPrompts: FC<GeneratedPromptsProps> = ({ prompts }) => {
   const navigate = useNavigate();
   const { isAuthenticated, login } = useAuth();
+  const { createConversation } = useConversation();
 
   const handleSubmit = (promptText: string) => {
     if (!isAuthenticated) {
       login(promptText, true);
       return;
     }
+    createConversation();
     navigate('/generate', { state: { initialMessage: promptText, isPredefined: true } });
   }
 
