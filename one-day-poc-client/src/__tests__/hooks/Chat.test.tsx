@@ -168,18 +168,18 @@ describe('ChatMessage Hook', () => {
   it('should handle chat responses from the API', async () => {
     (sendChatMessage as any).mockImplementation(
       (
-        message: any, 
+        message: any,
         chatCallback: (response: ChatResponse) => void,
         prototypeCallback?: any,
         isPredefined?: boolean,
         onError?: any
       ) => {
-        chatCallback({ 
+        chatCallback({
           message: 'AI response to your message',
           role: 'LLM',
           timestamp: new Date('2023-01-01T00:00:00Z').toISOString(),
-          conversationId: 'test-conversation-id', 
-          messageId: undefined 
+          conversationId: 'test-conversation-id',
+          messageId: undefined,
         });
         return Promise.resolve();
       }
@@ -220,7 +220,7 @@ describe('ChatMessage Hook', () => {
     });
 
     vi.useRealTimers();
-});
+  });
 
   it('should handle prototype files from the API', async () => {
     const mockPrototypeFiles = [
@@ -275,91 +275,60 @@ describe('ChatMessage Hook', () => {
     );
   });
 
-  /*
-  it('should handle empty activeConversationId when creating LLM response', async () => {
-    // Start with empty activeConversationId
-    (useConversation as any).mockReturnValue({
-      activeConversationId: '',
-      createConversation: mockCreateConversation,
-      messages: [],
-      loadingMessages: false,
-    });
-  
-    const mockDate = new Date('2023-01-01T00:00:00Z');
-    vi.setSystemTime(mockDate);
-  
-    // Set up the initial mock implementation
+  it('should not display chat responses from different conversations', async () => {
+    // Mock console.log to track when it's called
+    const consoleLogSpy = vi.spyOn(console, 'log');
+
+    // Set up sendChatMessage to return a response from a different conversation
     (sendChatMessage as any).mockImplementation(
       (
-        message: any, 
+        message: any,
         chatCallback: (response: ChatResponse) => void,
         prototypeCallback?: any,
         isPredefined?: boolean,
         onError?: any
       ) => {
-        // Don't call the callback yet - we need to update the mock first
-        return new Promise(resolve => {
-          // Short delay to allow the state to update
-          setTimeout(() => {
-            // Now update the activeConversationId mock to simulate what happens in the real context
-            (useConversation as any).mockReturnValue({
-              activeConversationId: 'new-conversation-id', // This simulates the context updating after createConversation
-              createConversation: mockCreateConversation,
-              messages: [],
-              loadingMessages: false,
-            });
-            
-            // Now call the callback with the correct conversationId
-            chatCallback({ 
-              message: 'LLM response',
-              role: 'LLM',
-              timestamp: mockDate.toISOString(),
-              conversationId: 'new-conversation-id', 
-              messageId: undefined
-            });
-            
-            resolve();
-          }, 10);
+        chatCallback({
+          message: 'Response from a different conversation',
+          role: 'LLM',
+          timestamp: new Date().toISOString(),
+          conversationId: 'different-conversation-id', // Different from the active one
+          messageId: 'different-message-id',
         });
+        return Promise.resolve();
       }
     );
-  
+
     const { result } = renderHook(() =>
       ChatMessage({
         setPrototype: mockSetPrototype,
         setPrototypeFiles: mockSetPrototypeFiles,
       })
     );
-  
+
+    // Initial length should be 0
+    const initialLength = result.current.sentMessages.length;
+
     await act(async () => {
       await result.current.handleSend('Test message');
     });
-  
-    // Wait for both messages to be added
-    await waitFor(() => {
-      expect(result.current.sentMessages.length).toBe(1);
-    });
-  
-    // Verify the messages
-    expect(result.current.sentMessages[0]).toEqual({
-      role: 'User',
-      content: 'Test message',
-      timestamp: mockDate.toISOString(),
-      conversationId: 'new-conversation-id', 
-    });
-    
-    expect(result.current.sentMessages[1]).toEqual({
-      role: 'LLM',
-      content: 'LLM response',
-      timestamp: mockDate.toISOString(),
-      conversationId: 'new-conversation-id',
-      id: undefined,
-      isError: false,
-    });
-  
-    vi.useRealTimers();
-});
-*/
+
+    // Should only have the user message added, not the LLM response
+    expect(result.current.sentMessages.length).toBe(initialLength + 1);
+    expect(result.current.sentMessages[initialLength].role).toBe('User');
+
+    // Verify the log message about not displaying the message was called
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      'Message from different conversation, not displaying',
+      {
+        messageConversationId: 'different-conversation-id',
+        activeConversationId: 'test-conversation-id',
+      }
+    );
+
+    // Clean up
+    consoleLogSpy.mockRestore();
+  });
 
   it('should handle error callback from sendChatMessage', async () => {
     const mockDate = new Date('2023-01-01T00:00:00Z');
