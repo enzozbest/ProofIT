@@ -228,7 +228,6 @@ class StorageTest {
                     isSelected = true,
                 )
 
-            // For a Unit-returning suspend function, we need to use a different approach
             coEvery { mockRepository.savePrototype(any()) } returns true
 
             val result = storePrototype(prototype)

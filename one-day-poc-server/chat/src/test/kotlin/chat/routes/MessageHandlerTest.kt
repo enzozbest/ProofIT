@@ -26,15 +26,14 @@ class MessageHandlerTest {
     @Test
     fun `Test saveMessage with valid parameters`() =
         runBlocking {
-            // Given
             val conversationId = "test-conversation-id"
             val senderId = "test-sender-id"
             val content = "Test message content"
 
-            // When
+         
             val result = MessageHandler.saveMessage(conversationId, senderId, content)
 
-            // Then
+
             assertEquals(conversationId, result.conversationId)
             assertEquals(senderId, result.senderId)
             assertEquals(content, result.content)
@@ -47,15 +46,13 @@ class MessageHandlerTest {
     @Test
     fun `Test savePrototype with valid parameters and non-null prototypeFilesJson`() =
         runBlocking {
-            // Given
+
             val conversationId = "test-conversation-id"
             val chatContent = "Test chat content"
             val prototypeFilesJson = """{"file1.txt": "content1"}"""
 
-            // When
             val result = MessageHandler.savePrototype(conversationId, chatContent, prototypeFilesJson)
 
-            // Then
             assertNotNull(result)
 
             coVerify(exactly = 1) { storeMessage(any()) }
@@ -65,15 +62,12 @@ class MessageHandlerTest {
     @Test
     fun `Test savePrototype with valid parameters and null prototypeFilesJson`() =
         runBlocking {
-            // Given
             val conversationId = "test-conversation-id"
             val chatContent = "Test chat content"
             val prototypeFilesJson: String? = null
 
-            // When
             val result = MessageHandler.savePrototype(conversationId, chatContent, prototypeFilesJson)
 
-            // Then
             assertNotNull(result)
 
             coVerify(exactly = 1) { storeMessage(any()) }
@@ -83,15 +77,12 @@ class MessageHandlerTest {
     @Test
     fun `Test savePrototype with empty prototypeFilesJson`() =
         runBlocking {
-            // Given
             val conversationId = "test-conversation-id"
             val chatContent = "Test chat content"
             val prototypeFilesJson = ""
 
-            // When
             val result = MessageHandler.savePrototype(conversationId, chatContent, prototypeFilesJson)
 
-            // Then
             assertNotNull(result)
 
             coVerify(exactly = 1) { storeMessage(any()) }
@@ -101,15 +92,12 @@ class MessageHandlerTest {
     @Test
     fun `Test savePrototype with empty conversationId`() =
         runBlocking {
-            // Given
             val conversationId = ""
             val chatContent = "Test chat content"
             val prototypeFilesJson = """{"file1.txt": "content1"}"""
 
-            // When
             val result = MessageHandler.savePrototype(conversationId, chatContent, prototypeFilesJson)
 
-            // Then
             assertNotNull(result)
 
             coVerify(exactly = 1) { storeMessage(any()) }
@@ -119,15 +107,12 @@ class MessageHandlerTest {
     @Test
     fun `Test savePrototype with empty chatContent`() =
         runBlocking {
-            // Given
             val conversationId = "test-conversation-id"
             val chatContent = ""
             val prototypeFilesJson = """{"file1.txt": "content1"}"""
 
-            // When
             val result = MessageHandler.savePrototype(conversationId, chatContent, prototypeFilesJson)
 
-            // Then
             assertNotNull(result)
 
             coVerify(exactly = 1) { storeMessage(any()) }

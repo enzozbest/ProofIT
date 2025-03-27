@@ -493,7 +493,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                 client.post("/api/chat/json") {
                     header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
                     contentType(ContentType.Application.Json)
-                    setBody("") // Empty body should cause a different exception than malformed JSON
+                    setBody("") 
                 }
 
             assertEquals(HttpStatusCode.BadRequest, response.status)

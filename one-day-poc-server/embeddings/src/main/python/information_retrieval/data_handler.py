@@ -3,10 +3,10 @@ import pickle
 import os
 import pathlib
 
-# Get the absolute path of the current directory
+
 BASE_DIR = str(pathlib.Path(__file__).parent.parent.absolute())
 
-# Define file paths relative to the base directory
+
 FAISS_FILE = os.path.join(BASE_DIR, "faiss.index")
 MAPPINGS_FILE = os.path.join(BASE_DIR, "mappings.pkl")
 LUCENE_INDEX_DIR = os.path.join(BASE_DIR, "jsonld_index")
@@ -35,7 +35,6 @@ def load_data():
         print(f"Could not load mapping from {MAPPINGS_FILE} ({e}). Creating new mapping.")
         vector_store = {}
 
-    # Ensure the Lucene index directory exists
     os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)
 
     return index, vector_store

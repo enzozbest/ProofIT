@@ -1,6 +1,5 @@
 package prompting
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import org.junit.jupiter.api.Test
@@ -26,13 +25,10 @@ class DataClassesTest {
                 messageId = "123",
             )
 
-        // Serialize to JSON string
         val jsonString = json.encodeToString(original)
 
-        // Deserialize from JSON string
         val deserialized = json.decodeFromString<ChatResponse>(jsonString)
 
-        // Verify all fields are correctly serialized and deserialized
         assertEquals(original.message, deserialized.message)
         assertEquals(original.role, deserialized.role)
         assertEquals(original.timestamp, deserialized.timestamp)
@@ -49,10 +45,8 @@ class DataClassesTest {
                 messageId = "123",
             )
 
-        // Verify default role is "LLM"
         assertEquals("LLM", chatResponse.role)
 
-        // Serialize and deserialize to verify default value is preserved
         val jsonString = json.encodeToString(chatResponse)
         val deserialized = json.decodeFromString<ChatResponse>(jsonString)
 

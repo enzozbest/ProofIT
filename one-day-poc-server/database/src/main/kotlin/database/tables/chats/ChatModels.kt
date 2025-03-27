@@ -9,7 +9,7 @@ import java.util.UUID
 data class ChatMessage(
     val id: String = UUID.randomUUID().toString(),
     val conversationId: String,
-    val senderId: String, // Will be converted to isFromLLM in the database
+    val senderId: String,
     val content: String,
     val timestamp: Instant = Instant.now()
 )

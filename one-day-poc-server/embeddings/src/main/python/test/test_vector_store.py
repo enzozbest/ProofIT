@@ -9,14 +9,14 @@ from information_retrieval.vector_search.vector_store import semantic_search, st
 def setup_faiss_index():
     """Fixture to set up a FAISS index for testing."""
 
-    vector_store.index = faiss.IndexFlatIP(384)  # 384 is the assumed embedding size
+    vector_store.index = faiss.IndexFlatIP(384) 
     vector_store.store = {}
 
 
 @pytest.fixture
 def sample_embedding():
     """Fixture to create a sample embedding."""
-    return np.random.rand(384).astype(np.float32)  # Random normalized vector
+    return np.random.rand(384).astype(np.float32)
 
 
 def test_semantic_search_empty_index(setup_faiss_index):
@@ -45,7 +45,7 @@ def test_store_embedding_success(setup_faiss_index, sample_embedding):
 
 def test_store_embedding_untrained_index():
     """Test storing an embedding when the index is untrained (should fail)."""
-    vector_store.index = faiss.IndexIVFFlat(faiss.IndexFlatL2(384), 384, 10) # Not trained by default!
+    vector_store.index = faiss.IndexIVFFlat(faiss.IndexFlatL2(384), 384, 10) 
     sample_vector = np.random.rand(384).astype(np.float32)
     result = store_embedding("test_name", sample_vector)
     assert not result, "store_embedding should return False if index is untrained"

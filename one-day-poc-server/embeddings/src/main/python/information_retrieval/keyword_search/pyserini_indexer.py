@@ -11,19 +11,15 @@ def store_jsonld(name:str, data: dict) -> bool:
     if not isinstance(data, dict):
         return False
 
-    # Ensure the directory exists
     os.makedirs(LUCENE_INDEX_DIR, exist_ok=True)
 
-    # Check if there are existing documents in the index
     existing_docs = []
     if os.path.exists(LUCENE_INDEX_DIR) and os.listdir(LUCENE_INDEX_DIR):
         try:
-            # Try to search for existing documents to check if the index is valid
             searcher = LuceneSearcher(LUCENE_INDEX_DIR)
             searcher.close()
         except Exception as e:
             print(f"Error with existing index: {e}. Creating a new one.")
-            # If there's an error, we'll create a new index
             for item in os.listdir(LUCENE_INDEX_DIR):
                 item_path = os.path.join(LUCENE_INDEX_DIR, item)
                 if os.path.isfile(item_path):
@@ -32,7 +28,6 @@ def store_jsonld(name:str, data: dict) -> bool:
                     import shutil
                     shutil.rmtree(item_path)
 
-    # Create or append to the index
     indexer = LuceneIndexer(LUCENE_INDEX_DIR)
     indexer.add_doc_dict({
         "id": name,
