@@ -72,6 +72,7 @@ const ChatMessage = ({
     setMessage('');
 
     try {
+      console.log("handleSend, isPredefined value is ", isPredefined);
       await sendChatMessage(
         newMessage,
         (chatResponse) => {
