@@ -2,9 +2,7 @@ package kcl.seg.rtt.prompting.helpers.helpers
 
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockkConstructor
-import io.mockk.mockkObject
 import io.mockk.unmockkAll
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.AfterEach
@@ -42,8 +40,7 @@ class PrototypeInteractorTest {
                     done_reason = "stop",
                 )
 
-            // Use a more explicit mocking approach
-            coEvery { 
+            coEvery {
                 anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
             } returns expectedResponse
 
@@ -58,8 +55,7 @@ class PrototypeInteractorTest {
             val testPrompt = "test prompt"
             val testModel = "llama2"
 
-            // Use a more explicit mocking approach
-            coEvery { 
+            coEvery {
                 anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
             } returns null
 

@@ -1,12 +1,10 @@
 package prototype.helpers
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertNotEquals
 
@@ -133,16 +131,14 @@ class EnhancedResponseTest {
         val templates2 = listOf("<Template3 />", "<Template4 />")
 
         val response1 = EnhancedResponse(ollamaResponse1, templates1)
-        val response2 = EnhancedResponse(ollamaResponse1, templates1) // Same as response1
-        val response3 = EnhancedResponse(ollamaResponse2, templates1) // Different OllamaResponse
-        val response4 = EnhancedResponse(ollamaResponse1, templates2) // Different templates
+        val response2 = EnhancedResponse(ollamaResponse1, templates1)
+        val response3 = EnhancedResponse(ollamaResponse2, templates1)
+        val response4 = EnhancedResponse(ollamaResponse1, templates2)
 
-        // Test equality
         assertEquals(response1, response2)
         assertNotEquals(response1, response3)
         assertNotEquals(response1, response4)
 
-        // Test hashCode
         assertEquals(response1.hashCode(), response2.hashCode())
     }
 

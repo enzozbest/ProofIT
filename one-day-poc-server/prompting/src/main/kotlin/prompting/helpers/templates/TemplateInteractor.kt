@@ -50,7 +50,6 @@ object TemplateInteractor {
         jsonLD: String,
     ): Boolean =
         runCatching {
-            // Store template file
             val templateConfig =
                 TemplateStorageUtils.StorageConfig(
                     path = "templates",
@@ -67,7 +66,6 @@ object TemplateInteractor {
 
             if (templateFilePath.isEmpty()) return@runCatching false
 
-            // Store JSON-LD file
             val jsonLDConfig =
                 TemplateStorageUtils.StorageConfig(
                     path = "templates/metadata",
@@ -84,7 +82,6 @@ object TemplateInteractor {
 
             if (jsonLDFilePath.isEmpty()) return@runCatching false
 
-            // Create template in database and store in template service
             val createdTemplateId = TemplateStorageService.createTemplate(templateFilePath)
             if (createdTemplateId == null) return@runCatching false
 

@@ -332,7 +332,7 @@ class TemplateInteractorTest {
                     fileSuffix = ".txt",
                     storageConfig = any(),
                 )
-            } returns "" // Empty path indicates failure
+            } returns ""
 
             val result = TemplateInteractor.storeNewTemplate(templateID, templateCode, jsonLD)
 
@@ -388,7 +388,7 @@ class TemplateInteractorTest {
                     fileSuffix = ".json",
                     storageConfig = any(),
                 )
-            } returns "" // Empty path indicates failure
+            } returns ""
 
             val result = TemplateInteractor.storeNewTemplate(templateID, templateCode, jsonLD)
 
@@ -449,7 +449,7 @@ class TemplateInteractorTest {
 
             coEvery {
                 TemplateStorageService.createTemplate(templateFilePath)
-            } returns null // Null ID indicates failure
+            } returns null
 
             val result = TemplateInteractor.storeNewTemplate(templateID, templateCode, jsonLD)
 
