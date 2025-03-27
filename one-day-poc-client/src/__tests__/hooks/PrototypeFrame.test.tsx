@@ -225,7 +225,6 @@ describe('PrototypeFrame Component', () => {
     expect(sandboxAttr).toContain('allow-forms');
     expect(sandboxAttr).toContain('allow-modals');
   });
-   */
 
   it('handles Error objects correctly in error handling', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
