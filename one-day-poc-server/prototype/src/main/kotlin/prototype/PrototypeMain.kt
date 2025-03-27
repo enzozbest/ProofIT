@@ -25,7 +25,7 @@ class PrototypeMain(
         options: OllamaOptions,
     ): OllamaResponse? {
         val request =
-            OllamaRequest(prompt = prompt, model = model, stream = false, options = options).also { println(it) }
+            OllamaRequest(prompt = prompt, model = model, stream = false, options = options)
         val llmResponse = OllamaService.generateResponse(request)
         if (!llmResponse.isSuccess) {
             throw IllegalStateException("Failed to receive response from the LLM")

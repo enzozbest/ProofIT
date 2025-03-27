@@ -340,4 +340,20 @@ describe('ConversationContext', () => {
       'User authenticated, fetching conversations'
     );
   });
+
+  test('useConversation throws error when used outside provider', () => {
+    const originalConsoleError = console.error;
+    console.error = vi.fn();
+
+    const ComponentWithoutProvider = () => {
+      useConversation();
+      return <div>This should never render</div>;
+    };
+
+    expect(() => {
+      render(<ComponentWithoutProvider />);
+    }).toThrow('useConversation must be used within a ConversationProvider');
+
+    console.error = originalConsoleError;
+  });
 });

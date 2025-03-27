@@ -85,7 +85,7 @@ data class EnhancedResponse(
 object OllamaService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
     private const val OLLAMA_PORT = 11434
-    private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST").also { println(it) }
+    private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST")
     private const val REQUEST_TIMEOUT_MILLIS = 600_000_000L
     private const val CONNECT_TIMEOUT_MILLIS = 30_000_000L
     private const val SOCKET_TIMEOUT_MILLIS = 600_000_000L
@@ -117,14 +117,12 @@ object OllamaService {
      */
     suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse?> {
         if (!isOllamaRunning()) {
-            println("FUCK1")
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }
 
         return try {
             Result.success(callOllama(request))
         } catch (e: Exception) {
-            println("FUCK2")
             Result.failure(Exception("Failed to call Ollama: ${e.message}"))
         }
     }
@@ -145,7 +143,6 @@ object OllamaService {
             }
 
         if (response.status != HttpStatusCode.OK) {
-            println("FUCK3")
             throw Exception("HTTP error: ${response.status}")
         }
         val responseText = response.bodyAsText()
@@ -153,13 +150,9 @@ object OllamaService {
             runCatching {
                 jsonParser.decodeFromString<OllamaResponse>(responseText)
             }.getOrElse {
-                println("FUCK4")
                 throw Exception("Failed to parse Ollama response")
             }
 
-        // Only for debugging
-        val jsonPrinter = Json { prettyPrint = true }
-        println("Formatted JSON Response:\n" + jsonPrinter.encodeToString(ollamaResponse))
         return ollamaResponse
     }
 }

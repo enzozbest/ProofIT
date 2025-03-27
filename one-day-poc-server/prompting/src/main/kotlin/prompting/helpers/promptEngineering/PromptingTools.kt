@@ -141,7 +141,7 @@ object PromptingTools {
             comments, or additional text. 
 
             ### Response Structure
-            The model's response must strictly obey the schema and examples provided. The model is
+            The model's response must strictly obey the example provided. The model is
             not allowed to change this format in any way.
             
             Example (your response must look like this):
@@ -198,7 +198,7 @@ object PromptingTools {
             ### Technologies the model can use
             Choose appropriate technologies from:
             1. Frontend: HTML5, CSS3, JavaScript (ES6+)
-            2. Frameworks: React, Vue, Angular, Svelte.
+            2. Frameworks: React (18+).
             3. Styling: Tailwind, Bootstrap, Material-UI.
             4. Backend: Node.js.
             5. Backend Frameworks: Express, Spring.
@@ -239,7 +239,7 @@ object PromptingTools {
 
         val finalPromptMessage =
             """
-            Now the model will shortly produce the final JSON strictly following the schema and example provided.
+            Now the model will shortly produce the final JSON strictly following the format of the example provided.
             The response must include both the 'chat' and 'prototype' keys at the top-level and only those.
             The 'chat' key must have a string value, representing a short message describing what the model has done.
             The 'prototype' key must have an object value, containing the prototype structure the model has generated.
@@ -281,7 +281,6 @@ object PromptingTools {
                 )
                 // Previous code message
                 if (previousGeneration != null) {
-                    println("PREVIOUS CODE MESSAGE IS NOT NULL IN PROMPTING TOOLS")
                     add(
                         buildJsonObject {
                             put("role", "system")
@@ -315,7 +314,7 @@ object PromptingTools {
      * @param response The raw response from the LLM as a string
      * @return The formatted JSON response as a JsonObject
      */
-    fun formatResponseJson(response: String): String = cleanLlmResponse(response).also { println(it) }
+    fun formatResponseJson(response: String): String = cleanLlmResponse(response)
 
     /**
      * Extracts and cleans a JSON object from an LLM response string.

@@ -50,8 +50,6 @@ fun secureCodeCheck(
         return false
     }
 
-    // Consider sandboxing or other checks here
-
     // All checks passed
     return true
 }
@@ -145,7 +143,6 @@ fun checkCssSyntax(cssCode: String): Boolean {
         ProcessBuilder("npx", "stylelint", tempPath.toString())
             .redirectErrorStream(true)
             .start()
-
     val reader = BufferedReader(InputStreamReader(process.inputStream))
     val errorOutput = StringBuilder()
     var line: String?

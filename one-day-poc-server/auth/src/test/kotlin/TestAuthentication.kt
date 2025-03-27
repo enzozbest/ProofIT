@@ -56,7 +56,6 @@ class TestAuthentication {
                     header(HttpHeaders.Authorization, "Basic ${"test:password".encodeBase64()}")
                 }.apply {
                     assertEquals(HttpStatusCode.OK, status)
-                    println(headers["Origin"])
                 }
         }
 
