@@ -325,7 +325,7 @@ object PromptingTools {
      * @param response The raw string from an LLM that may contain a JSON object
      * @return A cleaned string containing only the JSON object ready for parsing
      */
-    private fun cleanLlmResponse(response: String): String {
+    fun cleanLlmResponse(response: String): String {
         val openingBrace = response.indexOf('{')
         val closingBrace =
             response.length -
