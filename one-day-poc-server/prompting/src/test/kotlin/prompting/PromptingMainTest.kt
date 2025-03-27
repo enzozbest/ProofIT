@@ -778,4 +778,48 @@ class PromptingMainTest {
         // Verify that the exception message contains the expected text
         assertTrue(exception.message?.contains("is not a JsonPrimitive") == true)
     }
+
+    @Test
+    fun `test promptLlm when llmResponse response is null`() {
+        val prompt = "test prompt"
+
+        // Create a response object with a null response field
+        coEvery {
+            PrototypeInteractor.prompt(prompt, any(), OllamaOptions())
+        } returns OllamaResponse(
+            model = "test-model",
+            created_at = "2024-01-01",
+            response = null, // This is the key part - returning null for the response field
+            done = true,
+            done_reason = "test"
+        )
+
+        // No need to mock PromptingTools.formatResponseJson since we expect an exception before it's called
+
+        val method = promptingMain::class.java.getDeclaredMethod(
+            "promptLlm",
+            String::class.java,
+            OllamaOptions::class.java
+        )
+        method.isAccessible = true
+
+        // Execute the method and expect an exception
+        val exception = assertThrows<java.lang.reflect.InvocationTargetException> {
+            runBlocking {
+                method.invoke(promptingMain, prompt, OllamaOptions())
+            }
+        }
+
+        // Verify that the exception is a PromptException with the correct message
+        assertTrue(exception.cause is PromptException)
+        assertEquals("LLM response was null!", exception.cause?.message)
+
+        // Verify that the prompt method was called but formatResponseJson was not
+        coVerify(exactly = 1) {
+            PrototypeInteractor.prompt(prompt, any(), OllamaOptions())
+        }
+        verify(exactly = 0) {
+            PromptingTools.formatResponseJson(any())
+        }
+    }
 }
