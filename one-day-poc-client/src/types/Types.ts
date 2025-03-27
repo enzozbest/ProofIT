@@ -101,6 +101,7 @@ export interface ChatResponse {
   role: MessageRole;
   timestamp: string;
   messageId?: string;
+  conversationId?: string;
 }
 
 /**
