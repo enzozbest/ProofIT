@@ -5,6 +5,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
+import { useLocation } from 'react-router-dom';
+
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 
@@ -24,17 +26,25 @@ import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
  * @returns {JSX.Element} The complete prototype generation interface
  */
 export default function Page() {
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState<boolean>(true);
   const [showPrototype, setPrototype] = useState<boolean>(true);
   const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
+  const [isPredefined, setIsPredefined] = useState<boolean>(false);
 
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
     if (savedMessage) {
       setInitialMessage(savedMessage);
     }
-  }, []);
+    // Check for initialMessage and isPredefined from location state
+    else if (location.state?.initialMessage) {
+      console.log("inside /generate, predefined value is ", isPredefined)
+      setInitialMessage(location.state.initialMessage);
+      setIsPredefined(location.state.isPredefined || false);
+    }
+  }, [location]);
 
   return (
     <div
@@ -59,6 +69,7 @@ export default function Page() {
             setPrototype={setPrototype}
             setPrototypeFiles={setPrototypeFiles}
             initialMessage={initialMessage}
+            isPredefined={isPredefined}
           />
         </div>
         <div className="flex h-full items-center justify-center">

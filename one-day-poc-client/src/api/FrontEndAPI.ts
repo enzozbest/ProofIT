@@ -163,6 +163,7 @@ export async function getPrototypeForMessage(
  * @param message - The user message to send to the server
  * @param onChatResponse - Callback function that handles chat response data
  * @param onPrototypeResponse - Callback function that handles prototype response data
+ * @param isPredefined - boolean flag to control whether the prototype is served from hardcoded library or generated with LLM
  * @param onError - Optional callback function that handles error messages
  *
  * @returns A promise that resolves when the API call is complete
@@ -190,6 +191,7 @@ export async function sendChatMessage(
   message: Message,
   onChatResponse: ChatCallback,
   onPrototypeResponse: PrototypeCallback,
+  isPredefined: boolean = false,
   onError?: (message: string) => void
 ): Promise<void> {
   try {
@@ -202,6 +204,7 @@ export async function sendChatMessage(
       time: message.timestamp,
       prompt: message.content,
       conversationId: message.conversationId,
+      predefined: isPredefined,
     };
 
     const response = await fetch('http://localhost:8000/api/chat/json', {

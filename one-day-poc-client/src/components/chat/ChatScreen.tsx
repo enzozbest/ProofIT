@@ -19,6 +19,7 @@ import { FileTree } from '@/types/Types';
  * @param setPrototype - Function to update the prototype state in parent component
  * @param setPrototypeFiles - Function to update the prototype files in parent component
  * @param initialMessage - Optional initial message to be processed automatically
+ * @param isPredefined - flag to determine if LLM call is needed for prototype generation
  *
  * @returns A complete chat interface with message history and input box
  */
@@ -27,6 +28,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   setPrototype,
   setPrototypeFiles,
   initialMessage,
+  isPredefined = false,
 }) => {
   const { messages, loadingMessages, activeConversationId } = useConversation();
 
@@ -93,16 +95,16 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
    * Automatically sends the message after a short delay
    */
   useEffect(() => {
-    if (initialMessage) {
+    if (initialMessage && isPredefined) {
       setMessage(initialMessage);
       const timer = setTimeout(() => {
-        handleSend(initialMessage);
+        handleSend(initialMessage, isPredefined);
         sessionStorage.removeItem('initialMessage');
       }, 500);
 
       return () => clearTimeout(timer);
     }
-  }, [initialMessage]);
+  }, [initialMessage, isPredefined]);
 
   const handleLoadPrototype = (files: FileTree) => {
     setPrototype(true);

@@ -55,7 +55,7 @@ const ChatMessage = ({
     setChatResponse(null);
   }, [activeConversationId]);
 
-  const handleSend = async (messageToSend: string = message): Promise<void> => {
+  const handleSend = async (messageToSend: string = message, isPredefined: boolean = false): Promise<void> => {
     if (!messageToSend.trim()) return;
 
     const currentTime = new Date().toISOString();
@@ -73,6 +73,7 @@ const ChatMessage = ({
     setMessage('');
 
     try {
+      console.log("handleSend, isPredefined value is ", isPredefined);
       await sendChatMessage(
         newMessage,
         (chatResponse) => {
@@ -82,6 +83,7 @@ const ChatMessage = ({
           setPrototype(true);
           setPrototypeFiles(prototypeResponse.files);
         },
+        isPredefined,
         (errorMsg) => {
           const errorSystemMessage: Message = {
             role: 'LLM',

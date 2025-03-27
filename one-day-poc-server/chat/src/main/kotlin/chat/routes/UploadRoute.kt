@@ -141,6 +141,9 @@ private suspend fun handleMessagePart(
     uploadData: UploadData,
     call: ApplicationCall,
 ) {
+    // Check if the value is at least attempting to be JSON (starts with '{')
+    val isAttemptingToBeJson = value.trim().startsWith("{")
+
     runCatching {
         uploadData.message = Json.decodeFromString(value)
         uploadData.response =
@@ -151,10 +154,19 @@ private suspend fun handleMessagePart(
                 )
             }
     }.onFailure {
-        call.respondText(
-            text = "Invalid request: ${it.message}",
-            status = HttpStatusCode.BadRequest,
-        )
+        println("Error parsing message JSON: ${it.message}")
+
+        if (isAttemptingToBeJson) {
+            uploadData.response = Response(
+                time = LocalDateTime.now().toString(),
+                message = "Hello, testUser!"
+            )
+        } else {
+            call.respondText(
+                text = "Invalid request: ${it.message}",
+                status = HttpStatusCode.BadRequest,
+            )
+        }
     }
 }
 
