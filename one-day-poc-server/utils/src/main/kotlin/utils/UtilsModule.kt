@@ -7,6 +7,10 @@ import utils.aws.S3Service
 import utils.environment.EnvironmentLoader
 import utils.json.PoCJSON
 
+/**
+ * Function to configure the utils module.
+ * This function is called automatically by Ktor on server startup.
+ */
 fun Application.configureUtils() {
     val awsRegion = EnvironmentLoader.get("AWS_REGION")
     val s3Manager =

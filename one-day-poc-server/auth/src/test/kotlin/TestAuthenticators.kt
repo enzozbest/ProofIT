@@ -30,18 +30,12 @@ class TestAuthenticators {
     @Test
     fun `Test configureOAuth method`() =
         testApplication {
-            // This test verifies that the configureOAuth method doesn't throw any exceptions
-            // when setting up the OAuth configuration
             application {
                 install(Authentication) {
-                    // Create a valid OAuth config
                     val oauthConfig = createOAuthConfig()
-
-                    // This should not throw any exceptions
                     configureOAuth(oauthConfig)
                 }
 
-                // Add a simple route to verify the application starts correctly
                 routing {
                     get("/test") {
                         call.respond(HttpStatusCode.OK)
@@ -49,21 +43,15 @@ class TestAuthenticators {
                 }
             }
 
-            // Verify the application starts correctly
             val response = client.get("/test")
             assertEquals(HttpStatusCode.OK, response.status)
         }
 
     @Test
     fun `Test OAuthServerSettings creation`() {
-        // This test directly tests the creation of OAuthServerSettings.OAuth2ServerSettings
-        // without going through the Ktor authentication pipeline
-
-        // Create a valid OAuth config
         val oauthConfig = createOAuthConfig()
         val providerLookupData = oauthConfig["providerLookup"]!!.jsonObject
 
-        // Create the OAuthServerSettings.OAuth2ServerSettings object directly
         val settings =
             OAuthServerSettings.OAuth2ServerSettings(
                 name = providerLookupData["name"]!!.jsonPrimitive.content,
@@ -75,7 +63,6 @@ class TestAuthenticators {
                 requestMethod = HttpMethod.Post,
             )
 
-        // Verify that the settings were created correctly
         assertEquals("test-provider", settings.name)
         assertEquals("http://localhost:20003/oauth/authorize", settings.authorizeUrl)
         assertEquals("http://localhost:20003/oauth/token", settings.accessTokenUrl)
@@ -87,9 +74,6 @@ class TestAuthenticators {
 
     @Test
     fun `Test OAuthServerSettings creation with missing fields throws exception`() {
-        // Test that creating OAuthServerSettings.OAuth2ServerSettings with missing fields throws an exception
-
-        // Create configs with missing fields
         val missingNameConfig = createOAuthConfigWithMissingField("name")
         val missingAuthorizeUrlConfig = createOAuthConfigWithMissingField("authorizeUrl")
         val missingAccessTokenUrlConfig = createOAuthConfigWithMissingField("accessTokenUrl")
@@ -97,7 +81,6 @@ class TestAuthenticators {
         val missingClientSecretConfig = createOAuthConfigWithMissingField("clientSecret")
         val missingDefaultScopesConfig = createOAuthConfigWithMissingField("defaultScopes")
 
-        // Test each missing field
         val configs =
             listOf(
                 missingNameConfig,
@@ -111,7 +94,6 @@ class TestAuthenticators {
         for (config in configs) {
             val providerLookupData = config["providerLookup"]!!.jsonObject
 
-            // This should throw a NullPointerException because of the missing field
             kotlin.test.assertFailsWith<NullPointerException> {
                 OAuthServerSettings.OAuth2ServerSettings(
                     name = providerLookupData["name"]!!.jsonPrimitive.content,
@@ -128,9 +110,6 @@ class TestAuthenticators {
 
     @Test
     fun `Test OAuthServerSettings creation with malformed fields throws exception`() {
-        // Test that creating OAuthServerSettings.OAuth2ServerSettings with malformed fields throws an exception
-
-        // Create a config with malformed defaultScopes (not an array)
         val malformedScopesConfig =
             buildJsonObject {
                 put("name", JsonPrimitive("test-oauth"))
@@ -143,7 +122,6 @@ class TestAuthenticators {
                         put("accessTokenUrl", JsonPrimitive("http://localhost:9000/oauth/token"))
                         put("clientId", JsonPrimitive("test-client-id"))
                         put("clientSecret", JsonPrimitive("test-client-secret"))
-                        // This should be an array but we're making it a string
                         put("defaultScopes", JsonPrimitive("not-an-array"))
                     },
                 )
@@ -151,7 +129,6 @@ class TestAuthenticators {
 
         val providerLookupData = malformedScopesConfig["providerLookup"]!!.jsonObject
 
-        // This should throw an IllegalArgumentException because defaultScopes is not an array
         kotlin.test.assertFailsWith<IllegalArgumentException> {
             OAuthServerSettings.OAuth2ServerSettings(
                 name = providerLookupData["name"]!!.jsonPrimitive.content,
@@ -165,18 +142,11 @@ class TestAuthenticators {
         }
     }
 
-    // Instead of testing the full OAuth flow, which is complex in a test environment,
-    // let's focus on testing the OAuthServerSettings creation, which is the untested code mentioned in the issue
     @Test
     fun `Test OAuth server settings creation directly`() {
-        // This test directly tests the creation of OAuthServerSettings.OAuth2ServerSettings
-        // which is the code snippet mentioned in the issue description
-
-        // Create a valid OAuth config
         val oauthConfig = createOAuthConfig()
         val providerLookupData = oauthConfig["providerLookup"]!!.jsonObject
 
-        // Create the OAuthServerSettings.OAuth2ServerSettings object directly
         val settings =
             OAuthServerSettings.OAuth2ServerSettings(
                 name = providerLookupData["name"]!!.jsonPrimitive.content,
@@ -188,7 +158,6 @@ class TestAuthenticators {
                 requestMethod = HttpMethod.Post,
             )
 
-        // Verify that the settings were created correctly
         assertEquals("test-provider", settings.name)
         assertEquals("http://localhost:20003/oauth/authorize", settings.authorizeUrl)
         assertEquals("http://localhost:20003/oauth/token", settings.accessTokenUrl)
@@ -218,7 +187,6 @@ class TestAuthenticators {
                 }
             }
 
-            // Test with a malformed AuthenticatedSession cookie (will trigger SerializationException)
             val responseWithMalformedCookie =
                 client.get("/protected") {
                     cookie("AuthenticatedSession", "this-is-not-valid-json")
@@ -246,7 +214,6 @@ class TestAuthenticators {
                 }
             }
 
-            // Test with both cookie and Authorization header missing
             val responseWithNeitherCookieNorHeader =
                 client.get("/protected") {
                     headers.clear()
@@ -282,10 +249,19 @@ class TestAuthenticators {
                 put(
                     "providerLookup",
                     buildJsonObject {
-                        // Add all fields except the one to remove
                         if (fieldToRemove != "name") put("name", JsonPrimitive("test-provider"))
-                        if (fieldToRemove != "authorizeUrl") put("authorizeUrl", JsonPrimitive("$baseUrl/oauth/authorize"))
-                        if (fieldToRemove != "accessTokenUrl") put("accessTokenUrl", JsonPrimitive("$baseUrl/oauth/token"))
+                        if (fieldToRemove != "authorizeUrl") {
+                            put(
+                                "authorizeUrl",
+                                JsonPrimitive("$baseUrl/oauth/authorize"),
+                            )
+                        }
+                        if (fieldToRemove != "accessTokenUrl") {
+                            put(
+                                "accessTokenUrl",
+                                JsonPrimitive("$baseUrl/oauth/token"),
+                            )
+                        }
                         if (fieldToRemove != "clientId") put("clientId", JsonPrimitive("test-client-id"))
                         if (fieldToRemove != "clientSecret") put("clientSecret", JsonPrimitive("test-client-secret"))
                         if (fieldToRemove != "defaultScopes") {
@@ -316,13 +292,10 @@ class TestAuthenticators {
             .create()
             .withKeyId("test-key-id")
             .withIssuer("http://localhost:$port")
-            // No sub claim
             .sign(algorithm)
     }
 
     private fun createTokenWithNullSubClaim(port: Int): String {
-        // In JWT, we can't actually set a claim to null, but we can omit the claim
-        // or set it to an empty string, which will cause getClaim("sub").asString() to return null
         val algorithm = Algorithm.RSA256(null, rsaPrivateKey)
         return JWT
             .create()
@@ -382,8 +355,6 @@ class TestAuthenticators {
         }.start()
     }
 
-    // We don't need the mock OAuth endpoint anymore since we're not testing the full OAuth flow
-
     private fun generateRSAKeyPair(): Pair<RSAPrivateKey, RSAPublicKey> {
         val keyPairGenerator = KeyPairGenerator.getInstance("RSA")
         keyPairGenerator.initialize(2048)
@@ -403,14 +374,10 @@ class TestAuthenticators {
     @Test
     fun `Test configureAuthenticators method`() =
         testApplication {
-            // This test verifies that the configureAuthenticators method doesn't throw any exceptions
-            // when setting up both OAuth and JWT authentication
             application {
                 install(Authentication) {
-                    // Create a combined config with both OAuth and JWT settings
                     val combinedConfig =
                         buildJsonObject {
-                            // OAuth settings from createOAuthConfig
                             put("name", JsonPrimitive("test-oauth"))
                             put("urlProvider", JsonPrimitive("http://example.com/oauth"))
                             put(
@@ -421,18 +388,17 @@ class TestAuthenticators {
                                     put("accessTokenUrl", JsonPrimitive("http://example.com/oauth/token"))
                                     put("clientId", JsonPrimitive("test-client-id"))
                                     put("clientSecret", JsonPrimitive("test-client-secret"))
-                                    put("defaultScopes", JsonArray(listOf(JsonPrimitive("email"), JsonPrimitive("profile"))))
+                                    put(
+                                        "defaultScopes",
+                                        JsonArray(listOf(JsonPrimitive("email"), JsonPrimitive("profile"))),
+                                    )
                                 },
                             )
-                            // JWT settings
                             put("jwtIssuer", JsonPrimitive("http://example.com"))
                         }
-
-                    // This should configure both OAuth and JWT authentication without throwing exceptions
                     configureAuthenticators(combinedConfig)
                 }
 
-                // Add a simple route to verify the application starts correctly
                 routing {
                     get("/test") {
                         call.respond(HttpStatusCode.OK)
@@ -440,7 +406,6 @@ class TestAuthenticators {
                 }
             }
 
-            // Verify the application starts correctly
             val response = client.get("/test")
             assertEquals(HttpStatusCode.OK, response.status)
         }
@@ -466,14 +431,11 @@ class TestAuthenticators {
                 }
             }
 
-            // Create a valid token
             val validToken = createValidToken(port)
 
-            // Create a valid AuthenticatedSession
             val validSession = AuthenticatedSession(userId = "test-user-id", token = validToken, admin = false)
             val serializedSession = Json.encodeToString(AuthenticatedSession.serializer(), validSession)
 
-            // Test with a valid AuthenticatedSession cookie
             val responseWithValidCookie =
                 client.get("/protected") {
                     cookie("AuthenticatedSession", serializedSession)
@@ -502,10 +464,8 @@ class TestAuthenticators {
                 }
             }
 
-            // Create a valid token
             val validToken = createValidToken(port)
 
-            // Test with a valid Authorization header
             val responseWithValidHeader =
                 client.get("/protected") {
                     header(HttpHeaders.Authorization, "Bearer $validToken")
@@ -534,10 +494,8 @@ class TestAuthenticators {
                 }
             }
 
-            // Create a token without a sub claim
             val invalidToken = createTokenWithoutSubClaim(port)
 
-            // Test with an invalid token (missing sub claim)
             val responseWithInvalidToken =
                 client.get("/protected") {
                     header(HttpHeaders.Authorization, "Bearer $invalidToken")
@@ -566,10 +524,8 @@ class TestAuthenticators {
                 }
             }
 
-            // Create a token with a null sub claim
             val invalidToken = createTokenWithNullSubClaim(port)
 
-            // Test with an invalid token (null sub claim)
             val responseWithInvalidToken =
                 client.get("/protected") {
                     header(HttpHeaders.Authorization, "Bearer $invalidToken")

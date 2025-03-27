@@ -32,6 +32,7 @@ export default defineConfig({
         'src/__tests__',
         'src/components/ui',
         'src/types',
+        '**/Types.ts',
       ],
     },
   },

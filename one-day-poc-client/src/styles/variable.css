@@ -46,8 +46,8 @@
   body {
     @apply font-sans antialiased bg-background text-white;
   }
-  :is(button, input, textarea, select, a):focus-visible {
-    @apply ring-2 ring-offset-1 outline-none rounded-xl p-2 transition duration-100;
+  :is(button, input, select):focus-visible {
+    @apply ring-2 ring-offset-1 ring-purple-200 outline-none transition duration-100;
   }
 
 
