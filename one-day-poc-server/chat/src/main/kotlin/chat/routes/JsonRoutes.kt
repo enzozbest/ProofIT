@@ -10,6 +10,7 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import prompting.PredefinedPrototypes
 import prompting.PromptingMain
 import java.time.Instant
 
@@ -81,13 +82,28 @@ private suspend fun handleJsonRequest(
         )
     }
 
+    println("received a request, predefined value is ${request.predefined}")
 
-    val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
-    MessageHandler.saveMessage(request.conversationId, request.userID, request.prompt)
     try {
-        val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
+        val chatContent: String
+        val prototypeFilesJson: String?
 
-        val (chatContent, prototypeFilesJson) = JsonProcessor.processRawJsonResponse(promptJsonResponse)
+        if (request.predefined) {
+            val predefinedResponse = PredefinedPrototypes.run(request.prompt)
+
+            chatContent = predefinedResponse.chatMessage
+            prototypeFilesJson = predefinedResponse.files
+        } else {
+            val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
+            MessageHandler.saveMessage(request.conversationId, request.userID, request.prompt)
+
+            val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
+
+            
+            val processed = JsonProcessor.processRawJsonResponse(promptJsonResponse)
+            chatContent = processed.first
+            prototypeFilesJson = processed.second
+        }
 
         val messageId = MessageHandler.savePrototype(request.conversationId, chatContent, prototypeFilesJson)
 
@@ -98,7 +114,8 @@ private suspend fun handleJsonRequest(
                     "message": "${chatContent.trim()}",
                     "role": "LLM",
                     "timestamp": "${Instant.now()}",
-                    "messageId": "$messageId"
+                    "messageId": "$messageId",
+                    "conversationId": "${request.conversationId}"
                 },
                 "prototype": {
                     "files": ${prototypeFilesJson.trim()}

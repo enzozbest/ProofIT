@@ -3,9 +3,9 @@ import { PrototypeFrameProps } from '../types/Types';
 import { useWebContainer } from './UseWebContainer';
 import { normaliseFiles, cleanFileSystem } from './FileHandler';
 import { WebContainerProcess } from '@webcontainer/api';
-import { 
-  ensureViteConfig, 
-  ensureViteDependencies, 
+import {
+  ensureViteConfig,
+  ensureViteDependencies,
   chooseViteStartScript,
   configureViteSandbox,
   ViteSetupContext,
@@ -61,18 +61,18 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
         await resetEnvironment();
         await mountFiles();
         await new Promise(resolve => setTimeout(resolve, 100));
-        
+
         const needsDepsInstall = await ensureViteDependencies(viteContext);
         await ensureViteConfig(viteContext);
-        
+
         await ensureIndexHtml(viteContext);
-        
+
         if (needsDepsInstall) {
           await installDependencies();
         } else {
           console.log('Vite dependencies already installed');
         }
-        
+
         await startServer();
         configureViteSandbox(iframeRef);
       } catch (error: unknown) {
@@ -125,6 +125,8 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     console.log('Files mounted successfully');
   };
 
+
+
   /**
    * Install dependencies
    */
@@ -133,7 +135,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
     
     setStatus('Installing dependencies...');
     const installProcess = await webcontainerInstance.spawn('npm', ['install']);
-    
+
     activeProcessesRef.current.push(installProcess);
     installProcess.output.pipeTo(
       new WritableStream({
@@ -310,6 +312,7 @@ const usePrototypeFrame = <T extends PrototypeFrameProps>(props: T) => {
    * this can be removed if not needed
    */
   const configureSandbox = () => {
+    if (!iframeRef.current) return;
     configureViteSandbox(iframeRef);
   };
 

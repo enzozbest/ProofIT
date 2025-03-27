@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 interface ChatBoxProps {
   message: string;
   setMessage: (message: string) => void;
-  handleSend: (messageToSend?: string) => Promise<void>;
+  handleSend: (messageToSend?: string, isPredefined?: boolean) => Promise<void>;
   setError: (error: string | null) => void;
 }
 
@@ -29,11 +29,12 @@ export function ChatBox({
 }: ChatBoxProps) {
   const location = useLocation();
   const initialMessage = location.state?.initialMessage;
+  const isPredefined = location.state?.isPredefined;
   const sendInitialMessage = useRef(false);
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    if (initialMessage) {
+    if (initialMessage && isPredefined == false) {
       setMessage(initialMessage);
       sendInitialMessage.current = true;
     }

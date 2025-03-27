@@ -213,12 +213,12 @@ describe('PrototypeFrame Component', () => {
       loading: false,
       error: null,
     });
-  
+
     render(<PrototypeFrame files={{}} />);
-  
+
     const iframe = screen.getByTitle('Prototype Preview');
     expect(iframe).toBeInTheDocument();
-    
+
     const sandboxAttr = iframe.getAttribute('sandbox');
     expect(sandboxAttr).toContain('allow-scripts');
     expect(sandboxAttr).toContain('allow-same-origin');
@@ -393,14 +393,14 @@ describe('PrototypeFrame Component', () => {
         output: { pipeTo: vi.fn() },
       };
     });
-    
+
     const mockIframe = {
       sandbox: {
         add: vi.fn(),
         contains: vi.fn().mockReturnValue(false),
       },
     };
-  
+
     vi.spyOn(React, 'useRef').mockReturnValue({ current: mockIframe });
 
     (useWebContainer as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -527,12 +527,12 @@ describe('PrototypeFrame Component', () => {
         files={{ 'index.js': { file: { contents: 'console.log("hello");' } } }}
       />
     );
-  
+
     await new Promise((resolve) => setTimeout(resolve, 500));
 
     const logCalls = consoleLogSpy.mock.calls.map(call => call[0]);
-    
-    expect(logCalls.some(msg => 
+
+    expect(logCalls.some(msg =>
       typeof msg === 'string' && msg.includes('Files to mount')
     )).toBe(true);
   });
@@ -976,5 +976,6 @@ describe('Filesystem cleanup functionality', () => {
     );
 
     expect(consoleLogSpy).toHaveBeenCalledWith('Removed file: file4.txt');
+    expect(consoleLogSpy).toHaveBeenCalledWith('Filesystem reset complete');
   });
 });
