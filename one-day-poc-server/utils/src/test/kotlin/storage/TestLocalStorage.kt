@@ -22,6 +22,7 @@ class TestLocalStorage {
     fun tearDown() {
         unmockkAll()
     }
+
     @Test
     fun `storeFile moves file successfully`(
         @TempDir tempDir: java.nio.file.Path,
@@ -110,10 +111,9 @@ class TestLocalStorage {
         val destDir = File(tempDir.toFile(), "dest")
         destDir.mkdir()
 
-        // Mock File.copyTo to throw an exception
         mockkStatic(File::copyTo)
-        every { 
-            originalFile.copyTo(any(), any()) 
+        every {
+            originalFile.copyTo(any(), any())
         } throws IOException("Simulated copy failure")
 
         val result = LocalStorage.storeFile(destDir.absolutePath, "stored.txt", originalFile)
@@ -126,7 +126,6 @@ class TestLocalStorage {
     fun `storeFile handles exception during file deletion`(
         @TempDir tempDir: java.nio.file.Path,
     ) {
-        // Create a read-only file that can't be deleted
         val originalFile = File(tempDir.toFile(), "original.txt")
         originalFile.writeText("Hello, world!")
         originalFile.setReadOnly() // Make the file read-only so it can't be deleted
@@ -137,15 +136,12 @@ class TestLocalStorage {
         try {
             val result = LocalStorage.storeFile(destDir.absolutePath, "stored.txt", originalFile)
 
-            // Even though deletion might fail, the file was copied, so we should get a path
             val expectedPath = Path(destDir.absolutePath, "stored.txt").toString()
             assertEquals(expectedPath, result, "storeFile should return the path even when deletion fails")
 
-            // New file should exist because copy succeeded
             val newFile = File(expectedPath)
             assertTrue(newFile.exists(), "New file should exist in the destination")
         } finally {
-            // Clean up: make the file writable again so it can be deleted by the test framework
             originalFile.setWritable(true)
         }
     }
@@ -156,17 +152,13 @@ class TestLocalStorage {
     ) {
         val testFile = File(tempDir.toFile(), "delete.txt")
         testFile.writeText("To be deleted")
-        val filePath = testFile.absolutePath
+        testFile.absolutePath
 
-        // Use a different approach to test exception handling
-        // Instead of mocking File.delete, we'll use a directory that can't be deleted
-        // Create a directory and a file inside it
         val dirToDelete = File(tempDir.toFile(), "dir-to-delete")
         dirToDelete.mkdir()
         val fileInDir = File(dirToDelete, "file-in-dir.txt")
         fileInDir.writeText("This file prevents directory deletion")
 
-        // Try to delete the directory - this should fail because it's not empty
         val deleteResult = LocalStorage.deleteFile(dirToDelete.absolutePath)
 
         assertTrue(deleteResult, "deleteFile should return true even when deletion fails")
@@ -176,7 +168,6 @@ class TestLocalStorage {
 
     @Test
     fun `deleteFile handles invalid path`() {
-        // Test with a path that will cause a SecurityException
         val invalidPath = "/root/forbidden" // Trying to access a protected directory
 
         val deleteResult = LocalStorage.deleteFile(invalidPath)

@@ -64,23 +64,17 @@ class EnvironmentLoaderTest {
 
     @Test
     fun `Test reset clears environment`() {
-        // First verify we can get a value from the loaded environment
         val beforeReset = EnvironmentLoader.get("DB_URL")
         assertNotEquals("", beforeReset)
 
-        // Reset the environment
         EnvironmentLoader.reset()
 
-        // Now try to get the same value, but with no system env fallback
         val afterReset = EnvironmentLoader.get("DB_URL")
         assertEquals("", afterReset)
     }
 
     @Test
     fun `Test system environment variable fallback with null return`() {
-        // This test verifies that the system environment variable is used as a fallback
-        // when the .env file doesn't have the variable, but the system env also returns null
-
         EnvironmentLoader.reset()
         val result = EnvironmentLoader.get("NON_EXISTENT_SYSTEM_VAR")
         assertEquals("", result)

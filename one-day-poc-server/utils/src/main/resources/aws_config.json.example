@@ -1,0 +1,10 @@
+{
+  "s3": {
+    "role": "arn:aws:iam::<ACCOUNT>:role/<ROLE>",
+    "buckets": [
+      "my-bucket-1",
+      "my-bucket-2"
+    ],
+    "region": "us-east-1"
+  }
+}
