@@ -82,7 +82,6 @@ private suspend fun handleJsonRequest(
         )
     }
 
-
     println("received a request, predefined value is ${request.predefined}")
 
     try {
@@ -115,7 +114,8 @@ private suspend fun handleJsonRequest(
                     "message": "${chatContent.trim()}",
                     "role": "LLM",
                     "timestamp": "${Instant.now()}",
-                    "messageId": "$messageId"
+                    "messageId": "$messageId",
+                    "conversationId": "${request.conversationId}"
                 },
                 "prototype": {
                     "files": ${prototypeFilesJson.trim()}
