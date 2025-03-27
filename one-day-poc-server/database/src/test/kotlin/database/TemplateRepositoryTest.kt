@@ -152,7 +152,6 @@ class TemplateRepositoryTest {
     @Test
     fun `Test saveTemplateToDB failure path`() =
         runTest {
-            // Create a repository with an invalid database connection
             val invalidDb = Database.connect(
                 url = "jdbc:postgresql://localhost:5432/nonexistentdb",
                 driver = "org.postgresql.Driver",
@@ -174,7 +173,6 @@ class TemplateRepositoryTest {
     @Test
     fun `Test getTemplateFromDB failure path`() =
         runTest {
-            // Create a repository with an invalid database connection
             val invalidDb = Database.connect(
                 url = "jdbc:postgresql://localhost:5432/nonexistentdb",
                 driver = "org.postgresql.Driver",

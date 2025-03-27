@@ -72,7 +72,7 @@ internal fun Route.setLogOutEndpoint(route: String) {
         val cookie =
             call.request.cookies["AuthenticatedSession"]?.let {
                 runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()
-            } ?: return@post call.respond(HttpStatusCode.OK) // User already logged out, nothing to do.
+            } ?: return@post call.respond(HttpStatusCode.OK)
 
         call.sessions.clear<AuthenticatedSession>()
         call.response.cookies.append(
@@ -85,7 +85,6 @@ internal fun Route.setLogOutEndpoint(route: String) {
                 expires = GMTDate(0),
             ),
         )
-        // Remove cached session
         Redis.getRedisConnection().use { jedis ->
             jedis.del("auth:${cookie.token}")
         }
@@ -180,7 +179,7 @@ internal fun Route.setUpUserInfoRoute(
             return@get call.respondText(
                 "Internal Server Error",
                 status = HttpStatusCode.InternalServerError,
-            ) // Issue with the generation of the user info JSON.
+            )
         }
         call.respondText(
             Json.encodeToString<CognitoUserInfo>(userInfo),
@@ -202,7 +201,7 @@ internal fun Route.setUpCallbackRoute(
         val token: String =
             principal?.let {
                 it.extraParameters["id_token"]
-            } ?: return@get call.respond(HttpStatusCode.Unauthorized) // Authentication failed, do not grant access.
+            } ?: return@get call.respond(HttpStatusCode.Unauthorized)
 
         val decoded =
             runCatching { JWT.decode(token) }.getOrElse {

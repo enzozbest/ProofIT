@@ -81,7 +81,7 @@ def test_new_success(client, monkeypatch):
     monkeypatch.setattr(information_retrieval.embedding_service.pi,
                         "store_jsonld", lambda name, jsonld: True)
 
-    # The /new route expects "text" and "name" in the JSON payload
+
     payload = {
         "text": {"name": "LoginForm", "description": "desc"},
         "name": "LoginForm"
