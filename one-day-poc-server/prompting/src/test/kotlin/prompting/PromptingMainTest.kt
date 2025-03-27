@@ -754,4 +754,130 @@ class PromptingMainTest {
         coVerify(exactly = 1) { PrototypeInteractor.prompt(prompt, any(), OllamaOptions()) }
         verify(exactly = 0) { PromptingTools.formatResponseJson(any()) }
     }
+
+    @Test
+    fun `test JSON parsing with error handling in run method`() {
+        val userPrompt = "test prompt"
+        val sanitizedPrompt = SanitisedPromptResult("sanitized test prompt", listOf("keyword1"))
+        val freqsPrompt = "functional requirements prompt"
+
+        every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitizedPrompt
+        every { PromptingTools.functionalRequirementsPrompt(any(), any()) } returns freqsPrompt
+
+        coEvery { PrototypeInteractor.prompt(eq(freqsPrompt), any(), any()) } returns
+                OllamaResponse(
+                        model = "test-model",
+                        created_at = "2024-01-01",
+                        response = "malformed response",
+                        done = true,
+                        done_reason = "test"
+                )
+
+        every { PromptingTools.formatResponseJson("malformed response") } returns
+                "{ this is not valid JSON }"
+
+        val fetcherInputSlot = slot<String>()
+        coEvery { TemplateInteractor.fetchTemplates(capture(fetcherInputSlot)) } returns emptyList()
+
+        val exception =
+                assertThrows<PromptException> { runBlocking { promptingMain.run(userPrompt) } }
+
+        assertEquals("Failed to extract requirements from LLM response", exception.message)
+
+        assertEquals(
+                ", $userPrompt",
+                fetcherInputSlot.captured,
+                "With invalid JSON, requirements should be empty and only userPrompt should be used"
+        )
+
+        verify { PromptingTools.formatResponseJson("malformed response") }
+
+        coVerify {
+            PrototypeInteractor.prompt(eq(freqsPrompt), any(), any())
+            TemplateInteractor.fetchTemplates(any())
+        }
+    }
+
+    @Test
+    fun `test keywords extraction in prototypePrompt with error handling`() {
+        val userPrompt = "test prompt"
+
+        mockkStatic(PromptingTools::class)
+
+        val templatesSlot = slot<List<String>>()
+
+        every {
+            PromptingTools.prototypePrompt(
+                    userPrompt = any(),
+                    requirements = any(),
+                    templates = capture(templatesSlot),
+                    previousGeneration = any()
+            )
+        } returns "mocked prototype prompt"
+
+        val method =
+                promptingMain::class.java.getDeclaredMethod(
+                        "prototypePrompt",
+                        String::class.java,
+                        JsonObject::class.java,
+                        List::class.java,
+                        String::class.java
+                )
+        method.isAccessible = true
+
+        run {
+            val validResponse = buildJsonObject {
+                put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
+                put("keywords", JsonArray(listOf(JsonPrimitive("key1"), JsonPrimitive("key2"))))
+            }
+
+            method.invoke(promptingMain, userPrompt, validResponse, emptyList<String>(), null)
+
+            verify {
+                PromptingTools.prototypePrompt(
+                        userPrompt = userPrompt,
+                        requirements = any(),
+                        templates =
+                                emptyList(),
+                        previousGeneration = null
+                )
+            }
+        }
+
+        run {
+            clearMocks(PromptingTools)
+            every {
+                PromptingTools.prototypePrompt(
+                        userPrompt = any(),
+                        requirements = any(),
+                        templates = capture(templatesSlot),
+                        previousGeneration = any()
+                )
+            } returns "mocked prototype prompt"
+
+            val responseWithStringKeywords = buildJsonObject {
+                put("requirements", JsonArray(listOf(JsonPrimitive("req1"), JsonPrimitive("req2"))))
+                put("keywords", JsonPrimitive("not an array"))
+            }
+
+            method.invoke(
+                    promptingMain,
+                    userPrompt,
+                    responseWithStringKeywords,
+                    emptyList<String>(),
+                    null
+            )
+
+            verify {
+                PromptingTools.prototypePrompt(
+                        userPrompt = userPrompt,
+                        requirements = any(),
+                        templates = emptyList(),
+                        previousGeneration = null
+                )
+            }
+        }
+
+        unmockkStatic(PromptingTools::class)
+    }
 }
