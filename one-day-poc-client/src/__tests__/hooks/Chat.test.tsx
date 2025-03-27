@@ -167,8 +167,12 @@ describe('ChatMessage Hook', () => {
 
   it('should handle chat responses from the API', async () => {
     (sendChatMessage as any).mockImplementation(
-      (message: any, chatCallback: (arg0: { message: string }) => void) => {
-        chatCallback({ message: 'AI response to your message' });
+      (message: any, chatCallback: (arg0: { message: string, role: string, timestamp: string, messageId?: string }) => void) => {
+        chatCallback({ 
+          message: 'AI response to your message',
+          role: 'LLM',
+          timestamp: new Date('2023-01-01T00:00:00Z').toISOString()
+        });
         return Promise.resolve();
       }
     );
@@ -279,8 +283,12 @@ describe('ChatMessage Hook', () => {
 
     await act(async () => {
       (sendChatMessage as any).mockImplementation(
-        (msg: any, callback: (arg0: { message: string }) => void) => {
-          callback({ message: 'LLM response' });
+        (msg: any, callback: (arg0: { message: string, role: string, timestamp: string, messageId?: string }) => void) => {
+          callback({ 
+            message: 'LLM response',
+            role: 'LLM',
+            timestamp: new Date().toISOString()
+          });
           return Promise.resolve();
         }
       );
@@ -304,6 +312,7 @@ describe('ChatMessage Hook', () => {
         message: any,
         chatCallback: any,
         prototypeCallback: any,
+        isPredefined: boolean = false,
         errorCallback: (errorMsg: string) => void
       ) => {
         errorCallback('Custom error from API');

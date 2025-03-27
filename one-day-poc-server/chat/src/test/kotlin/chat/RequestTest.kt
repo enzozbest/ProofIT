@@ -15,6 +15,7 @@ class RequestTest {
                 userID = "testUser",
                 time = "2025-01-01T12:00:00",
                 prompt = "Hello",
+                predefined = false,
                 conversationId = "test-conversation-id",
             )
 
@@ -29,7 +30,8 @@ class RequestTest {
         val request = Request(
             userID = "testUser",
             time = "2025-01-01T12:00:00",
-            prompt = "Hello"
+            prompt = "Hello",
+            predefined = false,
         )
 
         assertEquals("testUser", request.userID)
@@ -46,6 +48,7 @@ class RequestTest {
                 time = "2025-01-01T12:00:00",
                 prompt = "Hello",
                 conversationId = "test-conversation-id",
+                predefined = false,
             )
 
         val jsonString = Json.encodeToString(Request.serializer(), request)
@@ -68,7 +71,8 @@ class RequestTest {
         val request = Request(
             userID = "testUser",
             time = "2025-01-01T12:00:00",
-            prompt = "Hello"
+            prompt = "Hello",
+            predefined = false
         )
 
         val jsonString = Json.encodeToString(Request.serializer(), request)
