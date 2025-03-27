@@ -13,7 +13,7 @@ import java.lang.IllegalArgumentException
 object PoCJSON {
     /**
      * Reads a JSON file and returns a JsonObject
-     * @param path The path to the JSON file
+     * @param name The path to the JSON file
      * @return The JSONObject
      */
 
@@ -39,7 +39,7 @@ object PoCJSON {
                 ?.let {
                     kotlin.runCatching { it.jsonObject["Value"]!!.jsonPrimitive.content }.getOrNull()
                 }
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
 }

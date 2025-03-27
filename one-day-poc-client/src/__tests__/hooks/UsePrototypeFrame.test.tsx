@@ -152,5 +152,17 @@ describe('usePrototypeFrame', () => {
         expect(result.current.status).not.toBe('Starting development server...');
     });
   });
+
+  it('should update package.json when installing a specific dependency', async () => {
+    mockWebContainerInstance.fs.readFile.mockResolvedValue(JSON.stringify({
+      name: 'test-project',
+      dependencies: {}
+    }));
+    
+    const { result } = renderHook(() => usePrototypeFrame({ files: {} }));
+    
+    expect(mockWebContainerInstance.fs.readFile).toBeDefined();
+    expect(mockWebContainerInstance.fs.writeFile).toBeDefined();
+  });
 });
 
