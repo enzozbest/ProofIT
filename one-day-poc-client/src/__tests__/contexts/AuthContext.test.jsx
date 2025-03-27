@@ -121,7 +121,9 @@ describe('AuthContext', () => {
       json: () => Promise.resolve({ userId: 1 }),
     });
 
-    window.sessionStorage.getItem.mockReturnValueOnce('saved prompt');
+    window.sessionStorage.getItem
+      .mockReturnValueOnce('saved prompt')  // First call for 'selectedPrompt'
+      .mockReturnValueOnce('true');         // Second call for 'isPredefined'
 
     render(
       <MemoryRouter>
@@ -134,6 +136,12 @@ describe('AuthContext', () => {
     await waitFor(() => {
       expect(window.sessionStorage.getItem).toHaveBeenCalledWith(
         'selectedPrompt'
+      );
+      expect(window.sessionStorage.getItem).toHaveBeenCalledWith(
+        'isPredefined'
+      );
+      expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
+        'isPredefined'
       );
       expect(window.sessionStorage.removeItem).toHaveBeenCalledWith(
         'selectedPrompt'
