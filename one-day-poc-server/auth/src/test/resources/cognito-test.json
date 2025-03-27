@@ -1,11 +1,11 @@
 {
   "name": "testAuth",
-  "urlProvider": "http://localhost:8000/api/callback",
-  "jwtIssuer": "http://example.com:2000",
+  "urlProvider": "http://localhost:22003/api/callback",
+  "jwtIssuer": "http://example.com:22001",
   "providerLookup": {
     "name": "testAuth",
-    "authorizeUrl": "http://example.com:2000/authorize",
-    "accessTokenUrl": "http://example.com:2000/token",
+    "authorizeUrl": "http://example.com:22001/authorize",
+    "accessTokenUrl": "http://example.com:22001/token",
     "clientId": "someId",
     "clientSecret": "someSecret",
     "defaultScopes": [

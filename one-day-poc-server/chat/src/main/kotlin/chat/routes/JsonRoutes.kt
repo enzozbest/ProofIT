@@ -98,6 +98,8 @@ private suspend fun handleJsonRequest(
             prototypeFilesJson = predefinedResponse.files
         } else {
             val previousGenerationJson = getPreviousPrototype(request.conversationId)?.filesJson
+            MessageHandler.saveMessage(request.conversationId, request.userID, request.prompt)
+
             val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
 
             // Extract chat content and prototype files JSON
@@ -114,13 +116,13 @@ private suspend fun handleJsonRequest(
             """
             {
                 "chat": {
-                    "message": "$chatContent",
+                    "message": "${chatContent.trim()}",
                     "role": "LLM",
                     "timestamp": "${Instant.now()}",
                     "messageId": "$messageId"
                 },
                 "prototype": {
-                    "files": $prototypeFilesJson
+                    "files": ${prototypeFilesJson.trim()}
                 }
             }
             """.trimIndent()

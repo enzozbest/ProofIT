@@ -15,22 +15,39 @@ type NormalisedFiles = Record<string, FileEntry | DirectoryEntry>;
 /**
  * Main function to normalize files for WebContainer
  */
-export const normaliseFiles = (files: Record<string, FileData>): NormalisedFiles => {
+export const normaliseFiles = (input: any): NormalisedFiles => {
+  console.log('Original input:', input);
+  
+  const files = input.files ? input.files : input;
+  
   const result: NormalisedFiles = {};
+  // console.log('Files to process:', files);
 
   Object.keys(files).forEach(path => {
     const fileData = files[path];
-    console.log(`\nProcessing path: "${path}"`);
+    console.log(`\nProcessing path: "${path}" with type: ${typeof fileData}`);
     
-    // Special handling for package.json
+    // Handle package.json specially
     if (path === "package.json") {
-      const packageJsonEntry = handlePackageJson(fileData);
-      if (packageJsonEntry) {
-        result[path] = packageJsonEntry;
-        return;
+      if (typeof fileData === 'string') {
+        // String format
+        result[path] = { file: { contents: fileData } };
+      } else if (typeof fileData === 'object') {
+        if ('file' in fileData && 'contents' in fileData.file) {
+          // Already in correct format
+          result[path] = fileData;
+        } else if ('contents' in fileData) {
+          // Has contents property directly
+          result[path] = { file: { contents: fileData.contents } };
+        } else {
+          // Direct package.json object (like with name, version, etc.)
+          result[path] = { file: { contents: JSON.stringify(fileData, null, 2) } };
+        }
       }
+      return;
     }
 
+    // Handle standard files
     if (typeof fileData === 'string') {
       console.log(`Processing string content for: ${path}`);
       if (path.includes('/')) {
@@ -49,12 +66,20 @@ export const normaliseFiles = (files: Record<string, FileData>): NormalisedFiles
     } else if (isDirectoryEntry(fileData)) {
       processDirectoryEntry(path, fileData, result);
     } else if (typeof fileData === 'object') {
-      console.log(`Processing implicit directory object: ${path}`);
-      result[path] = { directory: normaliseFiles(fileData as Record<string, FileData>) };
+      // handles objects that are not in the required format
+      if (Object.keys(fileData).some(key => 
+          ['name', 'version', 'scripts', 'dependencies', 'devDependencies'].includes(key))) {
+        // package.json content slipped through
+        result[path] = { file: { contents: JSON.stringify(fileData, null, 2) } };
+      } else {
+        // assumes implicit directory object
+        console.log(`Processing implicit directory object: ${path}`);
+        result[path] = { directory: normaliseFiles(fileData) };
+      }
     }
   });
 
-  console.log('Normalized result structure complete');
+  console.log('Normalized result structure:', result);
   return result;
 };
 

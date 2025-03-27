@@ -1,23 +1,8 @@
 package utils.storage
 
-import utils.environment.EnvironmentLoader
 import java.io.File
 
 object StorageService {
-    private var localStorage = true
-
-    private fun updateStorageLocation() {
-        EnvironmentLoader.reset()
-        EnvironmentLoader.get("LOCAL_STORAGE").let {
-            localStorage = it.toBoolean()
-        }
-    }
-
-    private fun getStorageLocation(): String {
-        updateStorageLocation()
-        return if (localStorage) "local" else "remote"
-    }
-
     /**
      * Function to store a file in local storage.
      * If the call succeeds, the full path to the file is returned. Otherwise, an empty string is returned.

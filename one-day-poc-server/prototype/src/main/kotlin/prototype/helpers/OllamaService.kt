@@ -7,7 +7,6 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import utils.environment.EnvironmentLoader
@@ -102,20 +101,22 @@ object OllamaService {
      */
     private suspend fun callOllama(request: OllamaRequest): OllamaResponse? {
         val ollamaApiUrl = "http://$OLLAMA_HOST:$OLLAMA_PORT/api/generate"
-        val response: HttpResponse = client.post(ollamaApiUrl) {
-            header(HttpHeaders.ContentType, "application/json")
-            setBody(jsonParser.encodeToString<OllamaRequest>(request))
-        }
+        val response: HttpResponse =
+            client.post(ollamaApiUrl) {
+                header(HttpHeaders.ContentType, "application/json")
+                setBody(jsonParser.encodeToString<OllamaRequest>(request))
+            }
 
         if (response.status != HttpStatusCode.OK) {
             throw Exception("HTTP error: ${response.status}")
         }
         val responseText = response.bodyAsText()
-        val ollamaResponse = runCatching { 
-            jsonParser.decodeFromString<OllamaResponse>(responseText) 
-        }.getOrElse {
-            throw Exception("Failed to parse Ollama response")
-        }
+        val ollamaResponse =
+            runCatching {
+                jsonParser.decodeFromString<OllamaResponse>(responseText)
+            }.getOrElse {
+                throw Exception("Failed to parse Ollama response")
+            }
 
         // Only for debugging
         val jsonPrinter = Json { prettyPrint = true }

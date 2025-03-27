@@ -128,7 +128,7 @@ object AuthenticationTestHelpers {
 
     fun TestApplicationBuilder.setupExternalServices() {
         externalServices {
-            hosts("http://example.com:2000") {
+            hosts("http://example.com:22001") {
                 routing {
                     install(ContentNegotiation) {
                         json()
@@ -187,7 +187,7 @@ object AuthenticationTestHelpers {
         }
         routing {
             authenticate("test") {
-                setUpCallbackRoute("/validate", "localhost:7000")
+                setUpCallbackRoute("/validate", "localhost:22002")
             }
         }
     }
