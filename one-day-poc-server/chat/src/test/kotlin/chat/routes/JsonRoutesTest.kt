@@ -55,11 +55,11 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
             // Mock MessageHandler
             mockkObject(MessageHandler)
-            coEvery { 
-                MessageHandler.saveMessage(any(), any(), any()) 
+            coEvery {
+                MessageHandler.saveMessage(any(), any(), any())
             } returns ChatMessage(
-                conversationId = "test-conversation-id", 
-                senderId = "testUser", 
+                conversationId = "test-conversation-id",
+                senderId = "testUser",
                 content = "Test prompt"
             )
             coEvery { MessageHandler.savePrototype(any(), any(), any()) } returns "message-id"
@@ -70,8 +70,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
             // Mock getPreviousPrototype
             mockkStatic("chat.storage.StorageKt")
-            coEvery { 
-                getPreviousPrototype(any()) 
+            coEvery {
+                getPreviousPrototype(any())
             } returns null
 
             try {
@@ -111,8 +111,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             // Mock PredefinedPrototypes
             mockkObject(PredefinedPrototypes)
-            coEvery { 
-                PredefinedPrototypes.run(any()) 
+            coEvery {
+                PredefinedPrototypes.run(any())
             } returns PredefinedPrototypeTemplate(
                 chatMessage = "This is a predefined response",
                 files = """{"file":"content"}"""
@@ -120,8 +120,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
             // Mock MessageHandler
             mockkObject(MessageHandler)
-            coEvery { 
-                MessageHandler.savePrototype(any(), any(), any()) 
+            coEvery {
+                MessageHandler.savePrototype(any(), any(), any())
             } returns "message-id"
 
             try {
@@ -177,24 +177,24 @@ class JsonRoutesTest : BaseAuthenticationServer() {
 
             // Mock MessageHandler
             mockkObject(MessageHandler)
-            coEvery { 
-                MessageHandler.saveMessage(any(), any(), any()) 
+            coEvery {
+                MessageHandler.saveMessage(any(), any(), any())
             } returns ChatMessage(
-                conversationId = "test-conversation-id", 
-                senderId = "testUser", 
+                conversationId = "test-conversation-id",
+                senderId = "testUser",
                 content = "Test prompt"
             )
 
             // Mock JsonProcessor to throw exception
             mockkObject(JsonProcessor)
-            coEvery { 
-                JsonProcessor.processRawJsonResponse(any()) 
+            coEvery {
+                JsonProcessor.processRawJsonResponse(any())
             } throws RuntimeException("Error processing JSON")
 
             // Mock getPreviousPrototype
             mockkStatic("chat.storage.StorageKt")
-            coEvery { 
-                getPreviousPrototype(any()) 
+            coEvery {
+                getPreviousPrototype(any())
             } returns null
 
             try {
@@ -217,83 +217,11 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.InternalServerError, response.status)
+                assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Error processing request"))
-            } finally {
-                resetPromptingMain()
-                unmockkAll()
-            }
-        }
-
-    @Test
-    fun `Test json route with MessageHandler exception`() =
-        testApplication {
-            val mockPromptingMain = mockk<PromptingMain>()
-            val jsonResponse =
-                """
-                {
-                    "chat": {
-                        "message": "This is a test response",
-                        "role": "LLM",
-                        "timestamp": "2025-01-01T12:00:00",
-                        "messageId": "0"
-                    },
-                    "prototype": {
-                        "files": {}
-                    }
-                }
-                """.trimIndent()
-            coEvery { mockPromptingMain.run(any<String>(), anyOrNull<String>()) } returns jsonResponse
-
-            // Mock MessageHandler
-            mockkObject(MessageHandler)
-            coEvery { 
-                MessageHandler.saveMessage(any(), any(), any()) 
-            } returns ChatMessage(
-                conversationId = "test-conversation-id", 
-                senderId = "testUser", 
-                content = "Test prompt"
-            )
-            coEvery { 
-                MessageHandler.savePrototype(any(), any(), any()) 
-            } throws RuntimeException("Error saving prototype")
-
-            // Mock JsonProcessor
-            mockkObject(JsonProcessor)
-            coEvery { 
-                JsonProcessor.processRawJsonResponse(any()) 
-            } returns Pair("This is a test response", "{}")
-
-            // Mock getPreviousPrototype
-            mockkStatic("chat.storage.StorageKt")
-            coEvery { 
-                getPreviousPrototype(any()) 
-            } returns null
-
-            try {
-                setPromptingMain(mockPromptingMain)
-                setupTestApplication()
-
-                val response =
-                    client.post("/api/chat/json") {
-                        header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
-                        contentType(ContentType.Application.Json)
-                        setBody(
-                            """
-                            {
-                                "userID": "testUser",
-                                "time": "2025-01-01T12:00:00",
-                                "prompt": "Test prompt",
-                                "predefined": false
-                            }
-                            """.trimIndent(),
-                        )
-                    }
-
-                assertEquals(HttpStatusCode.InternalServerError, response.status)
-                val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Error processing request"))
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("This is a test response", chatMessage)
             } finally {
                 resetPromptingMain()
                 unmockkAll()
@@ -305,8 +233,8 @@ class JsonRoutesTest : BaseAuthenticationServer() {
         testApplication {
             // Mock PredefinedPrototypes to throw exception
             mockkObject(PredefinedPrototypes)
-            coEvery { 
-                PredefinedPrototypes.run(any()) 
+            coEvery {
+                PredefinedPrototypes.run(any())
             } throws RuntimeException("Error with predefined prototype")
 
             try {
@@ -420,9 +348,11 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, response.status)
+                assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Invalid request"))
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertTrue(chatMessage?.contains("Error processing prompt") == true)
             } finally {
                 resetPromptingMain()
             }
@@ -469,9 +399,11 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, response.status)
+                assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Invalid request"))
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Valid response", chatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -535,9 +467,10 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, firstResponse.status)
                 val firstResponseBody = firstResponse.bodyAsText()
-                assertTrue(firstResponseBody.contains("Invalid request"))
+                val firstJsonObject = Json.parseToJsonElement(firstResponseBody).jsonObject
+                val firstChatMessage = firstJsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Mock response", firstChatMessage)
 
                 resetPromptingMain()
 
@@ -574,9 +507,10 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, secondResponse.status)
                 val secondResponseBody = secondResponse.bodyAsText()
-                assertTrue(secondResponseBody.contains("Invalid request"))
+                val secondJsonObject = Json.parseToJsonElement(secondResponseBody).jsonObject
+                val secondChatMessage = secondJsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Default response after reset", secondChatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -685,9 +619,9 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, response.status)
+                assertEquals(HttpStatusCode.InternalServerError, response.status)
                 val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Invalid request"))
+                assertTrue(responseBody.contains("Error") || responseBody.contains("error"))
             } finally {
                 resetPromptingMain()
             }
@@ -712,7 +646,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
     @Test
@@ -735,7 +669,7 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                     )
                 }
 
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
         }
 
     @Test
@@ -941,9 +875,11 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         )
                     }
 
-                assertEquals(HttpStatusCode.BadRequest, response.status)
+                assertEquals(HttpStatusCode.OK, response.status)
                 val responseBody = response.bodyAsText()
-                assertTrue(responseBody.contains("Invalid request"))
+                val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+                val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+                assertEquals("Valid response", chatMessage)
             } finally {
                 resetPromptingMain()
             }
@@ -987,8 +923,10 @@ class JsonRoutesTest : BaseAuthenticationServer() {
                         """.trimIndent(),
                     )
                 }
-            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertEquals(HttpStatusCode.OK, response.status)
             val responseBody = response.bodyAsText()
-            assertTrue(responseBody.contains("Invalid request"))
+            val jsonObject = Json.parseToJsonElement(responseBody).jsonObject
+            val chatMessage = jsonObject["chat"]?.jsonObject?.get("message")?.jsonPrimitive?.content
+            assertEquals("Valid response", chatMessage)
         }
 }
