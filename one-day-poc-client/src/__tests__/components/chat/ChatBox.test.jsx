@@ -16,9 +16,13 @@ describe('ChatBox Component', () => {
   test('test if handleSend is called if initial message is set', async () => {
     const initialMessage = 'test';
 
-    render(
+    // Mock handleSend to return a resolved promise
+    handleSendMock.mockResolvedValue();
+
+    // Create a component with the initial state
+    const { rerender } = render(
       <MemoryRouter
-        initialEntries={[{ pathname: '/', state: { initialMessage } }]}
+        initialEntries={[{ pathname: '/', state: { initialMessage, isPredefined: false } }]}
       >
         <Routes>
           <Route
@@ -36,15 +40,16 @@ describe('ChatBox Component', () => {
       </MemoryRouter>
     );
 
+    // Wait for setMessage to be called with initialMessage
     await waitFor(() => {
       expect(setMessageMock).toHaveBeenCalledWith(initialMessage);
     });
 
-    setMessageMock.mock.calls[0][0] = initialMessage;
-
-    render(
+    // Simulate the message state being updated
+    // This will trigger the second useEffect
+    rerender(
       <MemoryRouter
-        initialEntries={[{ pathname: '/', state: { initialMessage } }]}
+        initialEntries={[{ pathname: '/', state: { initialMessage, isPredefined: false } }]}
       >
         <Routes>
           <Route
@@ -62,6 +67,7 @@ describe('ChatBox Component', () => {
       </MemoryRouter>
     );
 
+    // Wait for handleSend to be called
     await waitFor(() => {
       expect(handleSendMock).toHaveBeenCalled();
     });
