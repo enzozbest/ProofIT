@@ -87,6 +87,8 @@ private suspend fun handleJsonRequest(
 
     println("Handling JSON request: ${request.prompt} from ${request.userID} for conversation ${request.conversationId}")
 
+    println("received a request, predefined value is ${request.predefined}")
+
     try {
         val chatContent: String
         val prototypeFilesJson: String?
@@ -129,7 +131,6 @@ private suspend fun handleJsonRequest(
 
         call.respondText(finalResponse, contentType = ContentType.Application.Json)
     } catch (e: Exception) {
-        println("Throwing error and predefined value is: ${request.predefined}")
         println("Error in handleJsonRequest: ${e.message}")
         e.printStackTrace()
         call.respondText(
