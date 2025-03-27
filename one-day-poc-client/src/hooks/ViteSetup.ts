@@ -324,4 +324,6 @@ export const configureViteSandbox = (iframeRef: React.RefObject<HTMLIFrameElemen
   
   iframeRef.current.sandbox.add('allow-forms');
   iframeRef.current.sandbox.add('allow-modals');
+  iframeRef.current.sandbox.add('allow-scripts');
+  iframeRef.current.sandbox.add('allow-same-origin');
 };
