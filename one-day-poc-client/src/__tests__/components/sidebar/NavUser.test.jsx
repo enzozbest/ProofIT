@@ -87,6 +87,7 @@ vi.mock('@/components/ui/DropdownMenu', () => ({
 vi.mock('lucide-react', () => ({
   BadgeCheck: () => <div data-testid="badge-check-icon">BadgeCheck</div>,
   LogOut: () => <div data-testid="logout-icon">LogOut</div>,
+  User: () => <div data-testid="user-icon">User</div>,
 }));
 
 vi.mock('@radix-ui/react-icons', () => ({
@@ -141,11 +142,8 @@ test('Fetches and displays user data', async () => {
     expect(screen.getAllByText('john@example.com')[0]).toBeInTheDocument();
   });
 
-  const avatarImages = screen.getAllByTestId('avatar-image');
-  expect(avatarImages[0]).toHaveAttribute(
-    'src',
-    'https://example.com/avatar.jpg'
-  );
+  const userIcons = screen.getAllByTestId('user-icon');
+  expect(userIcons.length).toBeGreaterThan(0);
 });
 
 test('Navigates to profile page when Account is clicked', async () => {
