@@ -56,7 +56,6 @@ object ResponseHandler {
         prototypeResponse: HttpResponse,
         call: ApplicationCall,
     ) {
-        println("Error: ${prototypeResponse.status}")
         val response = createResponse("Error: ${prototypeResponse.status}, ${prototypeResponse.bodyAsText()}")
         call.respond(response)
     }

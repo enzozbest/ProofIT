@@ -93,7 +93,6 @@ class PromptingMain(
         val prototypeOptions =
             OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
         val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions)
-        println("DONE DECODING!")
 
         return prototypeResponse
     }
@@ -132,10 +131,6 @@ class PromptingMain(
         runCatching {
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
-
-        if (previousGeneration != null) {
-            println("Using previous generation in prototype prompt")
-        }
 
         return PromptingTools.prototypePrompt(
             userPrompt,

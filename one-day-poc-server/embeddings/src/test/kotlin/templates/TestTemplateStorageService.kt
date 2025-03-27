@@ -54,8 +54,6 @@ class TestTemplateStorageService {
         runBlocking {
             val fileURI = "file:///templates/sample-failure.json"
 
-            println("[DEBUG_LOG] Starting createTemplate handles repository failure test")
-
             unmockkAll()
 
             try {
@@ -68,15 +66,10 @@ class TestTemplateStorageService {
                 coEvery {
                     mockRepo.saveTemplateToDB(any())
                 } answers {
-                    println("[DEBUG_LOG] Mock throwing exception")
                     throw RuntimeException("Database operation failed")
                 }
 
-                println("[DEBUG_LOG] Mocks set up, calling createTemplate")
-
                 val templateId = TemplateStorageService.createTemplate(fileURI)
-
-                println("[DEBUG_LOG] createTemplate returned: $templateId")
 
                 assertNull(templateId)
             } finally {
