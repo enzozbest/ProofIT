@@ -42,7 +42,6 @@ class CoroutineCoverageTest {
     private val testScheduler = TestCoroutineScheduler()
     private val testDispatcher = StandardTestDispatcher(testScheduler)
 
-    // Invalid database for testing failure paths
     private val invalidDb = Database.connect(
         url = "jdbc:postgresql://localhost:5432/nonexistentdb",
         driver = "org.postgresql.Driver",
@@ -87,7 +86,6 @@ class CoroutineCoverageTest {
 
     @Test
     fun `Test savePrototype with StandardTestDispatcher`() = runTest(testDispatcher) {
-        // First create a message
         val conversationId = UUID.randomUUID().toString()
         val messageId = UUID.randomUUID().toString()
         val message = ChatMessage(
@@ -102,7 +100,6 @@ class CoroutineCoverageTest {
         testScheduler.advanceUntilIdle()
         assertTrue(messageSaveResult)
 
-        // Now create a prototype for this message
         val prototype = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = messageId,
@@ -120,7 +117,6 @@ class CoroutineCoverageTest {
 
     @Test
     fun `Test getPrototype with StandardTestDispatcher`() = runTest(testDispatcher) {
-        // First create a message
         val conversationId = UUID.randomUUID().toString()
         val messageId = UUID.randomUUID().toString()
         val message = ChatMessage(
@@ -134,7 +130,6 @@ class CoroutineCoverageTest {
         chatRepository.saveMessage(message)
         testScheduler.advanceUntilIdle()
 
-        // Create a prototype
         val prototypeId = UUID.randomUUID().toString()
         val filesJson = """{"files":[{"name":"test.js","content":"console.log('hello')"}]}"""
         val prototype = Prototype(
@@ -149,7 +144,6 @@ class CoroutineCoverageTest {
         chatRepository.savePrototype(prototype)
         testScheduler.advanceUntilIdle()
 
-        // Retrieve the prototype by message ID
         val prototypes = chatRepository.getPrototypesByMessageId(messageId)
         testScheduler.advanceUntilIdle()
 
@@ -160,7 +154,6 @@ class CoroutineCoverageTest {
 
     @Test
     fun `Test get all prototypes in conversation with StandardTestDispatcher`() = runTest(testDispatcher) {
-        // Create a conversation with two messages
         val conversationId = UUID.randomUUID().toString()
 
         val message1Id = UUID.randomUUID().toString()
@@ -185,7 +178,6 @@ class CoroutineCoverageTest {
         chatRepository.saveMessage(message2)
         testScheduler.advanceUntilIdle()
 
-        // Create prototypes for each message
         val prototype1 = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = message1Id,
@@ -208,7 +200,6 @@ class CoroutineCoverageTest {
         chatRepository.savePrototype(prototype2)
         testScheduler.advanceUntilIdle()
 
-        // Get all prototypes in the conversation
         val prototypes = chatRepository.getAllPrototypesInConversation(conversationId)
         testScheduler.advanceUntilIdle()
 
@@ -252,7 +243,7 @@ class CoroutineCoverageTest {
 
         val prototype = Prototype(
             id = UUID.randomUUID().toString(),
-            messageId = UUID.randomUUID().toString(), // Invalid message ID
+            messageId = UUID.randomUUID().toString(), 
             filesJson = """{"files":[]}""",
             version = 1,
             isSelected = true,

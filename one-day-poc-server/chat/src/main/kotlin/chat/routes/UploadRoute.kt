@@ -100,7 +100,7 @@ private suspend fun handlePart(
     when (part) {
         is PartData.FormItem -> handleFormItem(part, uploadData, call)
         is PartData.FileItem -> handleFileItem(part, uploadDir, uploadData)
-        else -> { // Empty because we do nothing here!
+        else -> { 
         }
     }
     part.dispose()

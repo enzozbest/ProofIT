@@ -97,7 +97,7 @@ class ChatEntitiesTest {
             val model = message.toChatMessage()
             assertEquals(messageId.toString(), model.id)
             assertEquals(conversationId.toString(), model.conversationId)
-            assertEquals("LLM", model.senderId) // Should be "LLM" when isFromLLM is true
+            assertEquals("LLM", model.senderId) 
             assertEquals(content, model.content)
             assertEquals(now, model.timestamp)
         }
@@ -124,7 +124,7 @@ class ChatEntitiesTest {
                 }
 
             val model = message.toChatMessage()
-            assertEquals("user", model.senderId) // Should be "user" when isFromLLM is false
+            assertEquals("user", model.senderId)
         }
     }
 

@@ -34,7 +34,6 @@ object MockEnvironment {
 
         try {
             newContainer.start()
-            // Additional verification that container is truly ready
             var retries = 5
             while (retries > 0) {
                 try {
@@ -71,7 +70,7 @@ object MockEnvironment {
     }
 
     fun generateEnvironmentFile() {
-        val cont = postgresContainer // Ensure container is started before getting connection details
+        val cont = postgresContainer 
         val env =
             """
             DB_URL=${cont.jdbcUrl}
