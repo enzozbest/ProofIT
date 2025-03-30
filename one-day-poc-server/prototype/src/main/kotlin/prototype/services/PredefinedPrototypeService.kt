@@ -1,14 +1,13 @@
-package prototype.services
+package prototype
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import java.io.File
+import java.net.URL
 
 /**
  * Data class representing a template loaded from a JSON file.
  */
-@Serializable
+@kotlinx.serialization.Serializable
 data class PredefinedPrototype(
     val message: String,
     val keywords: List<String>,
@@ -31,8 +30,6 @@ data class PrototypeTemplate(
  * them based on prompt content.
  */
 object PredefinedPrototypeService {
-    private const val PROTOTYPES_DIR = "prototype/src/main/resources/prototypes"
-
     /**
      * Gets a prototype response for a given prompt.
      *
@@ -41,30 +38,18 @@ object PredefinedPrototypeService {
      */
     fun getPrototypeForPrompt(prompt: String): PrototypeTemplate {
         val normalizedPrompt = prompt.lowercase()
-        val prototypeDir = File(PROTOTYPES_DIR)
 
-        if (!prototypeDir.exists() || !prototypeDir.isDirectory) {
-            println("Warning: Prototypes directory not found at $PROTOTYPES_DIR")
-            return PrototypeTemplate(
-                chatMessage = "Prototypes directory not found at: $PROTOTYPES_DIR",
-                files = JsonObject(emptyMap()),
-            )
-        }
-
-        val prototypeFiles = prototypeDir.listFiles { file -> file.extension == "json" } ?: emptyArray()
-
-        // Try to find exact filename match
-        for (file in prototypeFiles) {
-            val filenameWithoutExtension = file.nameWithoutExtension.lowercase()
-
-            // If the filename is directly contained in the prompt, use this template
-            if (normalizedPrompt.contains(filenameWithoutExtension)) {
-                return loadPrototype(file)
+        val fileName =
+            when {
+                normalizedPrompt.contains("chatbot") -> "chatbot.json"
+                normalizedPrompt.contains("dashboard") -> "dashboard.json"
+                normalizedPrompt.contains("tool") -> "tool.json"
+                else -> null
             }
-        }
-
-        // No matching template found, return null to indicate failure
-        return PrototypeTemplate(
+        return fileName?.let {
+            val file = this::class.java.getResource(fileName)
+            loadPrototype(file)
+        } ?: PrototypeTemplate(
             chatMessage = "I didn't find pre-defined prototype for user prompt: $prompt",
             files = JsonObject(emptyMap()),
         )
@@ -77,7 +62,7 @@ object PredefinedPrototypeService {
      * @param originalPrompt The original user prompt (for error handling)
      * @return A ServerResponse based on the template file
      */
-    private fun loadPrototype(file: File): PrototypeTemplate =
+    private fun loadPrototype(file: URL): PrototypeTemplate =
         try {
             val content = file.readText()
             val predefinedPrototype = Json.decodeFromString<PredefinedPrototype>(content)
@@ -87,7 +72,7 @@ object PredefinedPrototypeService {
                 files = predefinedPrototype.files,
             )
         } catch (e: Exception) {
-            println("Error loading template ${file.name}: ${e.message}")
+            println("Error loading hardcoded prototype: $file, ${e.message}")
             PrototypeTemplate(
                 chatMessage = "There was an error loading pre-defined prototype",
                 files = JsonObject(emptyMap()),

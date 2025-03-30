@@ -1,6 +1,6 @@
 package prompting
 
-import prototype.services.PredefinedPrototypeService
+import prototype.PredefinedPrototypeService
 
 data class PredefinedPrototypeTemplate(
     val chatMessage: String,
