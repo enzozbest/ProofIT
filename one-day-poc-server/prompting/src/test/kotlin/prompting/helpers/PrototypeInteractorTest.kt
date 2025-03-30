@@ -41,7 +41,7 @@ class PrototypeInteractorTest {
                 )
 
             coEvery {
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns expectedResponse
 
             val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
@@ -56,7 +56,7 @@ class PrototypeInteractorTest {
             val testModel = "llama2"
 
             coEvery {
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns null
 
             val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
@@ -80,8 +80,8 @@ class PrototypeInteractorTest {
                 )
 
             // Use a more explicit mocking approach
-            coEvery { 
-                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any()) 
+            coEvery {
+                anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns expectedResponse
 
             val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())

@@ -1,13 +1,17 @@
 package prompting.helpers
 
 import prototype.PrototypeMain
-import prototype.helpers.OllamaOptions
-import prototype.helpers.OllamaResponse
+import prototype.helpers.LLMOptions
+import prototype.helpers.LLMResponse
 
 object PrototypeInteractor {
     suspend fun prompt(
         prompt: String,
         model: String,
-        options: OllamaOptions,
-    ): OllamaResponse? = PrototypeMain(model).prompt(prompt, options)
+        route: String,
+        options: LLMOptions,
+    ): LLMResponse? {
+        val prototypeMain = PrototypeMain(route = route, model = model)
+        return prototypeMain.prompt(prompt, options)
+    }
 }

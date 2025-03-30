@@ -4,10 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.mock.*
 import io.ktor.http.*
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.unmockkAll
 import io.mockk.unmockkObject
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -15,9 +12,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import prototype.helpers.OllamaOptions
-import prototype.helpers.OllamaRequest
 import prototype.helpers.OllamaResponse
-import prototype.helpers.OllamaService
+import prototype.services.OllamaRequest
+import prototype.services.OllamaService
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -136,13 +133,14 @@ class PrototypeMainTest {
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            val mockEngine = MockEngine { request ->
-                respond(
-                    content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                )
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
@@ -172,8 +170,8 @@ class PrototypeMainTest {
             val testException = RuntimeException("Test exception")
 
             mockkObject(OllamaService)
-            coEvery { 
-                OllamaService.generateResponse(any()) 
+            coEvery {
+                OllamaService.generateResponse(any())
             } throws testException
 
             val testImpl = PrototypeMain(testModel)
@@ -199,9 +197,10 @@ class PrototypeMainTest {
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            val mockEngine = MockEngine { request ->
-                throw java.net.ConnectException("Connection refused")
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    throw java.net.ConnectException("Connection refused")
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
@@ -233,13 +232,14 @@ class PrototypeMainTest {
             val options = OllamaOptions()
             val expectedResponse = "This is a test response"
 
-            val mockEngine = MockEngine { request ->
-                respond(
-                    content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                )
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
@@ -269,13 +269,14 @@ class PrototypeMainTest {
             val options = OllamaOptions()
             val expectedResponse = "This is a test response"
 
-            val mockEngine = MockEngine { request ->
-                respond(
-                    content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                )
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":"$expectedResponse","done":true,"done_reason":"stop"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
@@ -314,20 +315,21 @@ class PrototypeMainTest {
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            val mockEngine = MockEngine { request ->
-                respondError(HttpStatusCode.InternalServerError)
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    respondError(HttpStatusCode.InternalServerError)
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
 
-           mockkObject(OllamaService)
+            mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
             val testImpl = PrototypeMain(testModel)
 
             try {
-                val result = testImpl.prompt(testPrompt, options)
+                testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
             } catch (e: IllegalStateException) {
                 assertEquals("Failed to receive response from the LLM", e.message)
@@ -347,13 +349,14 @@ class PrototypeMainTest {
             val testPrompt = "test prompt"
             val options = OllamaOptions()
 
-            val mockEngine = MockEngine { request ->
-                respond(
-                    content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
-                    status = HttpStatusCode.OK,
-                    headers = headersOf(HttpHeaders.ContentType, "application/json"),
-                )
-            }
+            val mockEngine =
+                MockEngine { request ->
+                    respond(
+                        content = """{"model":"llama2","created_at":"2024-01-01T00:00:00Z","response":null,"done":true,"done_reason":"stop"}""",
+                        status = HttpStatusCode.OK,
+                        headers = headersOf(HttpHeaders.ContentType, "application/json"),
+                    )
+                }
             val client = HttpClient(mockEngine)
 
             OllamaService.client = client
@@ -370,6 +373,4 @@ class PrototypeMainTest {
             unmockkObject(OllamaService)
         }
     }
-
-
 }

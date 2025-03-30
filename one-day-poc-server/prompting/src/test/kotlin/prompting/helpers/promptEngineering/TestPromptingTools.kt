@@ -175,7 +175,7 @@ class TestPromptingTools {
             }
             """.trimIndent()
 
-        val result = promptingTools.prototypePrompt(userPrompt, requirements, listOf(templates))
+        val result = promptingTools.ollamaPrompt(userPrompt, requirements, listOf(templates))
 
         assertTrue(result.contains(userPrompt), "Result should contain the user prompt somewhere in the string")
 

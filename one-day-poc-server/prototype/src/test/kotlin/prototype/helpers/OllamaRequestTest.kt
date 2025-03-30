@@ -5,6 +5,8 @@ import kotlinx.serialization.MissingFieldException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
+import prototype.helpers.OllamaOptions
+import prototype.services.OllamaRequest
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse

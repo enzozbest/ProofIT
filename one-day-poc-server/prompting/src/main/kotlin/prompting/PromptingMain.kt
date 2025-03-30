@@ -2,6 +2,7 @@ package prompting
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -13,7 +14,11 @@ import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
 import prototype.LlmResponse
+import prototype.helpers.LLMOptions
 import prototype.helpers.OllamaOptions
+import prototype.helpers.OllamaResponse
+import prototype.helpers.OpenAIOptions
+import prototype.helpers.OpenAIResponse
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import utils.environment.EnvironmentLoader
@@ -45,10 +50,11 @@ data class PrototypeResponse(
  * user prompts, including prompt sanitization, requirements extraction, template
  * fetching, and final prototype generation.
  *
- * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
+ * @property ollamaModel The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = EnvironmentLoader.get("OLLAMA_MODEL"),
+    private val ollamaModel: String = EnvironmentLoader.get("OLLAMA_MODEL"),
+    private val openAIModel: String = EnvironmentLoader.get("OPENAI_MODEL"),
 ) {
     /**
      * Executes the complete prompting workflow for a user prompt.
@@ -71,26 +77,39 @@ class PromptingMain(
         userPrompt: String,
         previousGeneration: String? = null,
     ): String {
+        // Step 1: Sanitise the user prompt
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
+
+        // Step 2: Extract functional requirements
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
-
         val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
-        val freqs: String = promptLlm(freqsPrompt, freqsOptions)
-
+        val freqs: String = promptLlm(freqsPrompt, freqsOptions, "local")
         val freqsResponse: JsonObject =
             runCatching { Json.decodeFromString<JsonObject>(freqs) }.getOrElse { buildJsonObject { } }
         val requirements = freqsResponse["requirements"]?.jsonArray?.joinToString(",") ?: ""
-        val fetcherInput = "$requirements, $userPrompt"
 
+        // Step 3: Fetch templates based on requirements and user prompt
+        val fetcherInput = "$requirements, $userPrompt"
         val templates = TemplateInteractor.fetchTemplates(fetcherInput)
 
-        val prototypePrompt = prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration)
+        // Step 4: Generate the prototype
+        val route =
+            when (EnvironmentLoader.get("USE_OPENAI").toBoolean()) {
+                true -> "openai"
+                false -> "local"
+            }
 
+        val prototypePrompt =
+            prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration, route).also { println(it) }
         val prototypeOptions =
-            OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
-        val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions)
+            when (route) {
+                "local" -> OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
+                "openai" -> OpenAIOptions(temperature = 0.40)
+                else -> throw IllegalArgumentException("Invalid route $route")
+            }.also { println(it) }
 
-        return prototypeResponse
+        val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions, route)
+        return prototypeResponse.also { println(it) }
     }
 
     /**
@@ -112,6 +131,7 @@ class PromptingMain(
         freqsResponse: JsonObject,
         templates: List<String> = emptyList(),
         previousGeneration: String? = null,
+        route: String,
     ): String {
         val reqs =
             runCatching {
@@ -128,12 +148,21 @@ class PromptingMain(
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
 
-        return PromptingTools.prototypePrompt(
-            userPrompt,
-            reqs,
-            templates,
-            previousGeneration,
-        )
+        return if (route == "local") {
+            PromptingTools.ollamaPrompt(
+                userPrompt,
+                reqs,
+                templates,
+                previousGeneration,
+            )
+        } else {
+            PromptingTools.openAIPrompt(
+                userPrompt,
+                reqs,
+                templates,
+                previousGeneration,
+            )
+        }
     }
 
     /**
@@ -145,13 +174,28 @@ class PromptingMain(
      */
     private fun promptLlm(
         prompt: String,
-        options: OllamaOptions = OllamaOptions(),
+        options: LLMOptions,
+        route: String,
     ): String =
         runBlocking {
+            val model =
+                when (route) {
+                    "local" -> ollamaModel
+                    "openai" -> openAIModel
+                    else -> throw IllegalArgumentException("Invalid route $route")
+                }
+
             val llmResponse =
-                PrototypeInteractor.prompt(prompt, model, options)
+                PrototypeInteractor.prompt(prompt, model, route, options)
                     ?: throw PromptException("LLM did not respond!")
-            PromptingTools.formatResponseJson(llmResponse.response ?: throw PromptException("LLM response was null!"))
+            if (route == "local") {
+                llmResponse as OllamaResponse
+                PromptingTools.formatResponseJson(
+                    llmResponse.response ?: throw PromptException("LLM response was null!"),
+                )
+            } else {
+                Json.encodeToString(llmResponse as OpenAIResponse)
+            }
         }
 
     /**
