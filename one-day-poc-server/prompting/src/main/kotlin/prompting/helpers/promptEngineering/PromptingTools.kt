@@ -484,6 +484,8 @@ object PromptingTools {
                     .reversed()
                     .indexOf('}') // As a "forwards" index pointing to the character just after the last '}'
 
-        return response.substring(openingBrace, closingBrace).trim()
+        return response
+            .substring(openingBrace, closingBrace)
+            .trim()
     }
 }

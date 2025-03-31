@@ -1,8 +1,9 @@
 package prototype
 
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
-import java.net.URL
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import utils.json.PoCJSON
 
 /**
  * Data class representing a template loaded from a JSON file.
@@ -47,8 +48,8 @@ object PredefinedPrototypeService {
                 else -> null
             }
         return fileName?.let {
-            val file = this::class.java.getResource(fileName)
-            loadPrototype(file)
+            println("TRYING TO LOAD PRE-DEFINED PROTOTYPE: $fileName")
+            loadPrototype(fileName)
         } ?: PrototypeTemplate(
             chatMessage = "I didn't find pre-defined prototype for user prompt: $prompt",
             files = JsonObject(emptyMap()),
@@ -62,17 +63,15 @@ object PredefinedPrototypeService {
      * @param originalPrompt The original user prompt (for error handling)
      * @return A ServerResponse based on the template file
      */
-    private fun loadPrototype(file: URL): PrototypeTemplate =
+    private fun loadPrototype(fileName: String): PrototypeTemplate =
         try {
-            val content = file.readText()
-            val predefinedPrototype = Json.decodeFromString<PredefinedPrototype>(content)
+            val content = PoCJSON.readJsonFile(fileName)
 
             PrototypeTemplate(
-                chatMessage = predefinedPrototype.message,
-                files = predefinedPrototype.files,
+                chatMessage = content.get("message")!!.jsonPrimitive.content,
+                files = content.get("files")!!.jsonObject,
             )
         } catch (e: Exception) {
-            println("Error loading hardcoded prototype: $file, ${e.message}")
             PrototypeTemplate(
                 chatMessage = "There was an error loading pre-defined prototype",
                 files = JsonObject(emptyMap()),

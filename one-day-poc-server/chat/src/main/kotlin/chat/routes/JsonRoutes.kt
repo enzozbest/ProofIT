@@ -87,6 +87,7 @@ private suspend fun handleJsonRequest(
         val prototypeFilesJson: String?
 
         if (request.predefined) {
+            println("IDENTIFYING PREDEFINED PROTOTYPE")
             val predefinedResponse = PredefinedPrototypes.run(request.prompt)
 
             chatContent = predefinedResponse.chatMessage

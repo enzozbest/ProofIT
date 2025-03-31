@@ -95,7 +95,7 @@ class PrototypeMain(
             .apply {
                 method = io.ktor.http.HttpMethod.Post
                 url {
-                    protocol = URLProtocol.HTTP
+                    protocol = URLProtocol.HTTPS
                     host = apiHost
                     path(apiPath)
                 }
@@ -112,11 +112,11 @@ class PrototypeMain(
                         put("model", JsonPrimitive(model))
                         put("input", JsonPrimitive(prompt))
                         if (instructions.isNotBlank()) {
-                            setBody("instructions" to instructions)
+                            put("instructions", JsonPrimitive(instructions))
                         }
                     }
                 setBody(Json.encodeToString(JsonObject.serializer(), jsonRequestObject))
-            }.also { println(it) }
+            }
 
     private fun generateInstructions() =
         """

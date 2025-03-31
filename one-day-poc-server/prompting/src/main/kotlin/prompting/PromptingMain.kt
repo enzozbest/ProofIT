@@ -2,7 +2,6 @@ package prompting
 
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -189,12 +188,13 @@ class PromptingMain(
                 PrototypeInteractor.prompt(prompt, model, route, options)
                     ?: throw PromptException("LLM did not respond!")
             if (route == "local") {
-                llmResponse as OllamaResponse
                 PromptingTools.formatResponseJson(
-                    llmResponse.response ?: throw PromptException("LLM response was null!"),
+                    (llmResponse as OllamaResponse).response ?: throw PromptException("LLM response was null!"),
                 )
             } else {
-                Json.encodeToString(llmResponse as OpenAIResponse)
+                PromptingTools.formatResponseJson(
+                    (llmResponse as OpenAIResponse).response ?: throw PromptException("LLM response was null!"),
+                )
             }
         }
 

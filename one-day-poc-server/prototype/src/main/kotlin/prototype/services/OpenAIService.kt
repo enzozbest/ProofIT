@@ -5,9 +5,9 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.request
 import io.ktor.client.statement.bodyAsText
-import kotlinx.serialization.json.Json
 import prototype.helpers.OpenAIOptions
 import prototype.helpers.OpenAIResponse
+import prototype.helpers.parseOpenAIResponse
 
 object OpenAIService {
     suspend fun callOpenAI(
@@ -15,11 +15,7 @@ object OpenAIService {
         options: OpenAIOptions,
     ): OpenAIResponse? {
         val client = HttpClient(CIO)
-
-        val response = client.request(request).also { println(it) }
-        val responseBody = response.bodyAsText()
-        val json = runCatching { Json.decodeFromString(OpenAIResponse.serializer(), responseBody) }
-
-        return json.getOrNull()
+        val response = client.request(request)
+        return parseOpenAIResponse(response.bodyAsText())
     }
 }
