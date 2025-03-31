@@ -82,8 +82,6 @@ private suspend fun handleJsonRequest(
         )
     }
 
-    println("received a request, predefined value is ${request.predefined}")
-
     try {
         val chatContent: String
         val prototypeFilesJson: String?
@@ -99,7 +97,6 @@ private suspend fun handleJsonRequest(
 
             val promptJsonResponse = PromptingMainProvider.getInstance().run(request.prompt, previousGenerationJson)
 
-            
             val processed = JsonProcessor.processRawJsonResponse(promptJsonResponse)
             chatContent = processed.first
             prototypeFilesJson = processed.second

@@ -391,8 +391,6 @@ object PromptingTools {
     private val openAISystemMessage =
         """
         $preamble
-
-        $responseFormat
         
         $example1
         

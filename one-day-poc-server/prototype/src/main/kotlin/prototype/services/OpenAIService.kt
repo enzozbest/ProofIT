@@ -16,7 +16,7 @@ object OpenAIService {
     ): OpenAIResponse? {
         val client = HttpClient(CIO)
 
-        val response = client.request(request)
+        val response = client.request(request).also { println(it) }
         val responseBody = response.bodyAsText()
         val json = runCatching { Json.decodeFromString(OpenAIResponse.serializer(), responseBody) }
 

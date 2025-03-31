@@ -5,6 +5,10 @@ import io.ktor.client.request.header
 import io.ktor.client.request.setBody
 import io.ktor.http.URLProtocol
 import io.ktor.http.path
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import prototype.helpers.LLMOptions
 import prototype.helpers.LLMResponse
 import prototype.helpers.OllamaOptions
@@ -74,6 +78,7 @@ class PrototypeMain(
                 prompt = prompt,
                 projectId = EnvironmentLoader.get("OPENAI_PROJECT_ID"),
             )
+
         return OpenAIService.callOpenAI(request, options)
     }
 
@@ -86,27 +91,32 @@ class PrototypeMain(
         instructions: String,
         prompt: String,
     ): HttpRequestBuilder =
-        HttpRequestBuilder().apply {
-            method = io.ktor.http.HttpMethod.Post
-            url {
-                protocol = URLProtocol.HTTP
-                host = apiHost
-                path(apiPath)
-            }
-            header("Authorization", "Bearer $apiKey")
-            if (organisationId.isNotBlank()) {
-                header("OpenAI-Organization", organisationId)
-            }
-            if (projectId.isNotBlank()) {
-                header("OpenAI-Project", projectId)
-            }
-            header("Content-Type", "application/json")
-            setBody("model" to model)
-            setBody("prompt" to prompt)
-            if (instructions.isNotBlank()) {
-                setBody("instructions" to instructions)
-            }
-        }
+        HttpRequestBuilder()
+            .apply {
+                method = io.ktor.http.HttpMethod.Post
+                url {
+                    protocol = URLProtocol.HTTP
+                    host = apiHost
+                    path(apiPath)
+                }
+                header("Authorization", "Bearer $apiKey")
+                if (organisationId.isNotBlank()) {
+                    header("OpenAI-Organization", organisationId)
+                }
+                if (projectId.isNotBlank()) {
+                    header("OpenAI-Project", projectId)
+                }
+                header("Content-Type", "application/json")
+                val jsonRequestObject =
+                    buildJsonObject {
+                        put("model", JsonPrimitive(model))
+                        put("input", JsonPrimitive(prompt))
+                        if (instructions.isNotBlank()) {
+                            setBody("instructions" to instructions)
+                        }
+                    }
+                setBody(Json.encodeToString(JsonObject.serializer(), jsonRequestObject))
+            }.also { println(it) }
 
     private fun generateInstructions() =
         """
