@@ -9,6 +9,8 @@ import io.ktor.http.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import prototype.helpers.LLMOptions
+import prototype.helpers.LLMResponse
 import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaResponse
 import utils.environment.EnvironmentLoader
@@ -45,7 +47,7 @@ data class EnhancedResponse(
 /**
  * Service for interacting with an Ollama instance
  */
-object OllamaService {
+object OllamaService : LLMService {
     private val jsonParser = Json { ignoreUnknownKeys = true }
     private const val OLLAMA_PORT = 11434
     private val OLLAMA_HOST = EnvironmentLoader.get("OLLAMA_HOST")
@@ -73,12 +75,33 @@ object OllamaService {
         }.getOrElse { false }
 
     /**
+     * Sends a prompt to the language model and returns the generated response.
+     *
+     * @param prompt The text prompt to send to the language model
+     * @param model The identifier of the language model to use
+     * @param options Options for controlling the behavior of the language model
+     * @return The response from the language model, or null if the request failed
+     */
+    override suspend fun generateResponse(
+        prompt: String,
+        model: String,
+        options: LLMOptions
+    ): Result<LLMResponse?> {
+        if (options !is OllamaOptions) {
+            return Result.failure(Exception("Invalid options type for OllamaService"))
+        }
+
+        val request = OllamaRequest(model = model, prompt = prompt, stream = false, options = options)
+        return generateOllamaResponse(request)
+    }
+
+    /**
      * Sends a prompt to an LLM via Ollama and returns the generated response.
      *
      * @param request Input for the model formatted as an instance of [OllamaRequest].
      * @return Result object containing an instance of [OllamaResponse], or a failure with error message.
      */
-    suspend fun generateResponse(request: OllamaRequest): Result<OllamaResponse?> {
+    suspend fun generateOllamaResponse(request: OllamaRequest): Result<OllamaResponse?> {
         if (!isOllamaRunning()) {
             return Result.failure(Exception("Ollama is not running. Run: 'ollama serve' in terminal to start it."))
         }

@@ -71,7 +71,7 @@ object PredefinedPrototypeService {
                 chatMessage = content.get("message")!!.jsonPrimitive.content,
                 files = content.get("files")!!.jsonObject,
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             PrototypeTemplate(
                 chatMessage = "There was an error loading pre-defined prototype",
                 files = JsonObject(emptyMap()),

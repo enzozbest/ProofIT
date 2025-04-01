@@ -8,7 +8,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
+import prompting.helpers.OptionsFactory
+import prompting.helpers.PromptFormatterFactory
 import prompting.helpers.PrototypeInteractor
+import prompting.helpers.ResponseFormatterFactory
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
@@ -100,12 +103,7 @@ class PromptingMain(
 
         val prototypePrompt =
             prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration, route).also { println(it) }
-        val prototypeOptions =
-            when (route) {
-                "local" -> OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
-                "openai" -> OpenAIOptions(temperature = 0.40)
-                else -> throw IllegalArgumentException("Invalid route $route")
-            }.also { println(it) }
+        val prototypeOptions = OptionsFactory.getOptions(route, 0.40).also { println(it) }
 
         val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions, route)
         return prototypeResponse.also { println(it) }
@@ -147,21 +145,13 @@ class PromptingMain(
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
 
-        return if (route == "local") {
-            PromptingTools.ollamaPrompt(
-                userPrompt,
-                reqs,
-                templates,
-                previousGeneration,
-            )
-        } else {
-            PromptingTools.openAIPrompt(
-                userPrompt,
-                reqs,
-                templates,
-                previousGeneration,
-            )
-        }
+        val promptFormatter = PromptFormatterFactory.getFormatter(route)
+        return promptFormatter.format(
+            userPrompt,
+            reqs,
+            templates,
+            previousGeneration
+        )
     }
 
     /**
@@ -187,15 +177,9 @@ class PromptingMain(
             val llmResponse =
                 PrototypeInteractor.prompt(prompt, model, route, options)
                     ?: throw PromptException("LLM did not respond!")
-            if (route == "local") {
-                PromptingTools.formatResponseJson(
-                    (llmResponse as OllamaResponse).response ?: throw PromptException("LLM response was null!"),
-                )
-            } else {
-                PromptingTools.formatResponseJson(
-                    (llmResponse as OpenAIResponse).response ?: throw PromptException("LLM response was null!"),
-                )
-            }
+
+            val responseFormatter = ResponseFormatterFactory.getFormatter(route)
+            responseFormatter.format(llmResponse)
         }
 
     /**
