@@ -7,8 +7,8 @@ import kotlinx.serialization.json.put
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import prototype.services.PredefinedPrototypeService
-import prototype.services.PrototypeTemplate
+import prototype.PredefinedPrototypeService
+import prototype.PrototypeTemplate
 import kotlin.test.assertEquals
 
 class PredefinedPrototypesTest {

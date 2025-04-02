@@ -44,7 +44,7 @@ class PrototypeInteractorTest {
                 anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns expectedResponse
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, "local", OllamaOptions())
             assertEquals(expectedResponse, result)
             coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }
         }
@@ -59,7 +59,7 @@ class PrototypeInteractorTest {
                 anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns null
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, "local", OllamaOptions())
 
             assertNull(result)
             coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }
@@ -84,7 +84,7 @@ class PrototypeInteractorTest {
                 anyConstructed<PrototypeMain>().prompt(eq(testPrompt), any())
             } returns expectedResponse
 
-            val result = PrototypeInteractor.prompt(testPrompt, testModel, OllamaOptions())
+            val result = PrototypeInteractor.prompt(testPrompt, testModel, "openai", OllamaOptions())
 
             assertEquals(expectedResponse, result)
             coVerify(exactly = 1) { anyConstructed<PrototypeMain>().prompt(testPrompt, any()) }

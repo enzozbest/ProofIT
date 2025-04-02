@@ -394,7 +394,7 @@ class TemplateRetrievalTest {
             mockkObject(Json)
 
             every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
-            coEvery { PrototypeInteractor.prompt("test prompt", any(), any()) } returns ollamaResponse
+            coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
 
             every { Json.parseToJsonElement(any<String>()) } returns responseJson
 
@@ -414,7 +414,7 @@ class TemplateRetrievalTest {
             val componentName = "Button"
 
             every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
-            coEvery { PrototypeInteractor.prompt("test prompt", any(), any()) } returns null
+            coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns null
 
             val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
 
@@ -437,7 +437,7 @@ class TemplateRetrievalTest {
                 )
 
             every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
-            coEvery { PrototypeInteractor.prompt("test prompt", any(), any()) } returns ollamaResponse
+            coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
             every { PromptingTools.formatResponseJson("invalid json") } throws Exception("Invalid JSON")
 
             val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
@@ -470,7 +470,7 @@ class TemplateRetrievalTest {
                 )
 
             every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
-            coEvery { PrototypeInteractor.prompt("test prompt", any(), any()) } returns ollamaResponse
+            coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
 
             val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
 

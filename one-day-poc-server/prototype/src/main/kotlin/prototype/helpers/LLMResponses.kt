@@ -38,7 +38,7 @@ data class OpenAIResponse(
 
 // Internal class for parsing the full OpenAI API response
 @Serializable
-private data class OpenAIApiResponse(
+internal data class OpenAIApiResponse(
     val id: String,
     val `object`: String,
     @SerialName("created_at") val createdAt: Long,

@@ -28,6 +28,14 @@ class PrototypeMainTest {
     private val testModel = "llama2"
 
     /**
+     * Creates a PrototypeMain instance with a non-empty model name.
+     * This is needed because the PrototypeMain class requires a non-empty model name.
+     */
+    private fun createPrototypeMain(model: String = testModel): PrototypeMain {
+        return PrototypeMain("local", model)
+    }
+
+    /**
      * Test that the prompt method returns the response when the LLM call is successful.
      */
     @Test
@@ -66,7 +74,7 @@ class PrototypeMainTest {
                 )
             } returns Result.success(expectedResponse)
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
             val result = testImpl.prompt(testPrompt, OllamaOptions())
 
             assertNotNull(result)
@@ -99,7 +107,7 @@ class PrototypeMainTest {
 
             println("[DEBUG_LOG] Mock setup complete")
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             var caughtException: Exception? = null
 
@@ -117,7 +125,7 @@ class PrototypeMainTest {
             }
 
             assertNotNull(caughtException)
-            assertEquals("Failed to receive response from the LLM", caughtException?.message)
+            assertEquals("Failed to receive response from the LLM! Is the model installed?", caughtException?.message)
 
             unmockkObject(OllamaService)
         }
@@ -148,11 +156,12 @@ class PrototypeMainTest {
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             val result = testImpl.prompt(testPrompt, options)
 
-            assertNull(result, "Expected null response")
+            assertNotNull(result, "Expected non-null response even when response field is null")
+            assertNull(result?.response, "Expected response field to be null")
 
             unmockkObject(OllamaService)
         }
@@ -171,10 +180,10 @@ class PrototypeMainTest {
 
             mockkObject(OllamaService)
             coEvery {
-                OllamaService.generateResponse(any())
+                OllamaService.generateResponse(any(), any(), any())
             } throws testException
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             try {
                 testImpl.prompt(testPrompt, options)
@@ -208,13 +217,13 @@ class PrototypeMainTest {
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             try {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
             } catch (e: IllegalStateException) {
-                assertEquals("Failed to receive response from the LLM", e.message)
+                assertEquals("Failed to receive response from the LLM! Is the model installed?", e.message)
             } finally {
                 unmockkObject(OllamaService)
             }
@@ -247,7 +256,7 @@ class PrototypeMainTest {
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             val result = testImpl.prompt(testPrompt, options)
 
@@ -267,7 +276,7 @@ class PrototypeMainTest {
         runBlocking {
             val testPrompt = "test prompt"
             val options = OllamaOptions()
-            val expectedResponse = "This is a test response"
+            val expectedResponse = "test response"
 
             val mockEngine =
                 MockEngine { request ->
@@ -285,7 +294,7 @@ class PrototypeMainTest {
 
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             val result = testImpl.prompt(testPrompt, options)
 
@@ -298,7 +307,7 @@ class PrototypeMainTest {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
             } catch (e: IllegalStateException) {
-                assertEquals("Failed to receive response from the LLM", e.message)
+                assertEquals("Failed to receive response from the LLM! Is the model installed?", e.message)
             }
 
             unmockkObject(OllamaService)
@@ -326,13 +335,13 @@ class PrototypeMainTest {
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             try {
                 testImpl.prompt(testPrompt, options)
                 fail("Expected IllegalStateException to be thrown")
             } catch (e: IllegalStateException) {
-                assertEquals("Failed to receive response from the LLM", e.message)
+                assertEquals("Failed to receive response from the LLM! Is the model installed?", e.message)
             } finally {
                 unmockkObject(OllamaService)
             }
@@ -364,11 +373,12 @@ class PrototypeMainTest {
             mockkObject(OllamaService)
             coEvery { OllamaService.isOllamaRunning() } returns true
 
-            val testImpl = PrototypeMain(testModel)
+            val testImpl = createPrototypeMain()
 
             val result = testImpl.prompt(testPrompt, options)
 
-            assertNull(result, "Expected null result when response.response is null")
+            assertNotNull(result, "Expected non-null result even when response.response is null")
+            assertNull(result?.response, "Expected response field to be null")
 
             unmockkObject(OllamaService)
         }
