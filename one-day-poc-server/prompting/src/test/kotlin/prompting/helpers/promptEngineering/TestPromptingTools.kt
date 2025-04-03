@@ -195,4 +195,97 @@ class TestPromptingTools {
 
         assertTrue(result.contains("Technologies"))
     }
+
+    @Test
+    fun `test ollamaPrompt when previousGeneration is not null`() {
+        val userPrompt = "Create a login form"
+        val requirements =
+            """
+            1. Must include email and password fields
+            2. Implement input validation
+            3. Show error messages
+            """.trimIndent()
+        val templates =
+            """
+            {
+                "html": {
+                    "code": "<form>...</form>",
+                    "frameworks": ["React"],
+                    "dependencies": []
+                },
+                "css": {
+                    "code": ".form { ... }",
+                    "frameworks": ["Tailwind"],
+                    "dependencies": []
+                }
+            }
+            """.trimIndent()
+
+        val previousGeneration =
+            """
+            This is the code you used in the previous attempt:
+            """.trimIndent()
+
+        val result = promptingTools.ollamaPrompt(userPrompt, requirements, listOf(templates), previousGeneration)
+
+        assertTrue(result.contains(userPrompt), "Result should contain the user prompt somewhere in the string")
+
+        assertTrue(result.contains("Must include email"), "Result should contain part of the requirements")
+        assertTrue(result.contains("validation"), "Result should contain part of the requirements")
+        assertTrue(result.contains("form"), "Result should contain part of the templates")
+        assertTrue(result.contains("React"), "Result should contain part of the templates")
+        assertTrue(
+            result.contains("This is the code you used in the previous attempt"),
+            "Result should contain the previous generation",
+        )
+        assertTrue(result.contains("\"role\":\"system\""))
+        assertTrue(result.contains("Response Format"))
+        assertTrue(result.contains("Response Structure"))
+        assertTrue(result.contains("What the model must do"))
+        assertTrue(result.contains("Generate"))
+
+        assertTrue(result.contains("requirements"))
+        assertTrue(result.contains("templates"))
+
+        assertTrue(result.contains("Technologies"))
+    }
+
+    @Test
+    fun `test openAIPrompt with null previous generation`() {
+        val userPrompt = "Create a login form"
+        val requirements =
+            """
+            1. Must include email and password fields
+            2. Implement input validation
+            3. Show error messages
+            """.trimIndent()
+        val templates =
+            """
+            {
+                "html": {
+                    "code": "<form>...</form>",
+                    "frameworks": ["React"],
+                    "dependencies": []
+                },
+                "css": {
+                    "code": ".form { ... }",
+                    "frameworks": ["Tailwind"],
+                    "dependencies": []
+                }
+            }
+            """.trimIndent()
+
+        val result = promptingTools.openAIPrompt(userPrompt, requirements, listOf(templates))
+
+        assertTrue(result.contains(userPrompt), "Result should contain the user prompt somewhere in the string")
+
+        assertTrue(result.contains("Must include email"), "Result should contain part of the requirements")
+        assertTrue(result.contains("validation"), "Result should contain part of the requirements")
+        assertTrue(result.contains("form"), "Result should contain part of the templates")
+        assertTrue(result.contains("React"), "Result should contain part of the templates")
+
+        assertTrue(result.contains("requirements"))
+        assertTrue(result.contains("templates"))
+        assertTrue(result.contains("Technologies"))
+    }
 }

@@ -30,7 +30,6 @@ class LLMResponsesTest {
         assertEquals("response", response.response)
         assertFalse(response.done)
         assertEquals("done_reason", response.done_reason)
-        assertTrue(response is LLMResponse)
     }
 
     // Test for OpenAIResponse data class
@@ -42,7 +41,6 @@ class LLMResponsesTest {
         assertEquals("response", response.response)
         assertTrue(response.done)
         assertEquals("stop", response.done_reason)
-        assertTrue(response is LLMResponse)
     }
 
     // Test for OpenAIResponse with default values
