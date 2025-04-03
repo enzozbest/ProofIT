@@ -25,6 +25,7 @@ import utils.environment.EnvironmentLoader
  * Service for interacting with OpenAI API
  */
 object OpenAIService : LLMService {
+    var client = HttpClient(CIO)
     /**
      * Sends a prompt to the language model and returns the generated response.
      *
@@ -56,7 +57,11 @@ object OpenAIService : LLMService {
 
         return try {
             val response = callOpenAI(request, options)
-            Result.success(response)
+            if (response != null) {
+                Result.success(response)
+            } else {
+                Result.failure(Exception("Failed to call OpenAI: API call failed"))
+            }
         } catch (e: Exception) {
             Result.failure(Exception("Failed to call OpenAI: ${e.message}"))
         }
@@ -73,10 +78,15 @@ object OpenAIService : LLMService {
         request: HttpRequestBuilder,
         options: OpenAIOptions,
     ): OpenAIResponse? {
-        val client = HttpClient(CIO)
-        val response = client.request(request)
-        println(response.bodyAsText())
-        return parseOpenAIResponse(response.bodyAsText())
+        return try {
+            val response = client.request(request)
+            val responseText = response.bodyAsText()
+            println(responseText)
+            parseOpenAIResponse(responseText)
+        } catch (e: Exception) {
+            println(e.message)
+            null
+        }
     }
 
     /**

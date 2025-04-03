@@ -1195,6 +1195,194 @@ class LLMResponsesTest {
     }
 
     @Test
+    fun `Test parseOpenAIResponse with non-text content type`() {
+        val jsonString =
+            """
+            {
+                "id": "test-id",
+                "object": "test-object",
+                "created_at": 1672531200,
+                "status": "completed",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "text",
+                        "id": "output-id",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "image",
+                                "text": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        val response = parseOpenAIResponse(jsonString)
+        assertEquals("test-model", response.model)
+        assertEquals(1672531200, response.created_at)
+        assertEquals("", response.response)
+        assertTrue(response.done)
+        assertEquals("stop", response.done_reason)
+    }
+
+    @Test
+    fun `Test parseOpenAIResponse with multiple content items`() {
+        val jsonString =
+            """
+            {
+                "id": "test-id",
+                "object": "test-object",
+                "created_at": 1672531200,
+                "status": "completed",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "text",
+                        "id": "output-id",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "First item"
+                            },
+                            {
+                                "type": "text",
+                                "text": "Second item"
+                            }
+                        ]
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        val response = parseOpenAIResponse(jsonString)
+        assertEquals("test-model", response.model)
+        assertEquals(1672531200, response.created_at)
+        assertEquals("First item", response.response)
+        assertTrue(response.done)
+        assertEquals("stop", response.done_reason)
+    }
+
+    @Test
+    fun `Test parseOpenAIResponse with output containing non-empty content but no items`() {
+        val jsonString =
+            """
+            {
+                "id": "test-id",
+                "object": "test-object",
+                "created_at": 1672531200,
+                "status": "completed",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "text",
+                        "id": "output-id",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": []
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        val response = parseOpenAIResponse(jsonString)
+        assertEquals("test-model", response.model)
+        assertEquals(1672531200, response.created_at)
+        assertEquals("", response.response)
+        assertTrue(response.done)
+        assertEquals("stop", response.done_reason)
+    }
+
+    @Test
+    fun `Test parseOpenAIResponse with output array containing multiple items`() {
+        val jsonString =
+            """
+            {
+                "id": "test-id",
+                "object": "test-object",
+                "created_at": 1672531200,
+                "status": "completed",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "text",
+                        "id": "output-id-1",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "First output item"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "text",
+                        "id": "output-id-2",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Second output item"
+                            }
+                        ]
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        val response = parseOpenAIResponse(jsonString)
+        assertEquals("test-model", response.model)
+        assertEquals(1672531200, response.created_at)
+        assertEquals("First output item", response.response)
+        assertTrue(response.done)
+        assertEquals("stop", response.done_reason)
+    }
+
+    @Test
+    fun `Test parseOpenAIResponse with output item having content with different structure`() {
+        // Create a test with a different structure for the content
+        // This might help cover the remaining branches
+        val jsonString =
+            """
+            {
+                "id": "test-id",
+                "object": "test-object",
+                "created_at": 1672531200,
+                "status": "completed",
+                "model": "test-model",
+                "output": [
+                    {
+                        "type": "text",
+                        "id": "output-id",
+                        "status": "completed",
+                        "role": "assistant",
+                        "content": [
+                            {
+                                "type": "other",
+                                "text": "Some text"
+                            }
+                        ]
+                    }
+                ]
+            }
+            """.trimIndent()
+
+        val response = parseOpenAIResponse(jsonString)
+        assertEquals("test-model", response.model)
+        assertEquals(1672531200, response.created_at)
+        assertEquals("Some text", response.response)
+        assertTrue(response.done)
+        assertEquals("stop", response.done_reason)
+    }
+
+    @Test
     fun `Test OpenAIApiResponse with non-default constructor values`() {
         val inputTokensDetails = InputTokensDetails(5)
         val outputTokensDetails = OutputTokensDetails(15)
