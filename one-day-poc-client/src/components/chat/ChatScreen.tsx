@@ -112,7 +112,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({
   };
 
   return (
-    <div className="relative h-full flex flex-col h-[calc(100vh-6rem)]">
+    <div className="relative flex flex-col h-[calc(100vh-6rem)]">
       {loadingMessages && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
           <p>Loading messages...</p>
