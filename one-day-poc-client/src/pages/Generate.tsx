@@ -48,7 +48,7 @@ export default function Page() {
 
   return (
     <div
-      className="min-h-screen bg-gray-900 text-white"
+      className="h-screen bg-gray-900 text-white overflow-hidden"
       style={{
         backgroundImage: "url('/background.svg')",
         backgroundSize: 'cover',
