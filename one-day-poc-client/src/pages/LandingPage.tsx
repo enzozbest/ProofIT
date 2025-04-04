@@ -34,7 +34,7 @@ const LandingPage: FC = () => {
 
   return (
     <div
-      className="flex flex-col min-h-screen"
+      className="flex flex-col min-h-screen pt-20"
       style={{
         backgroundImage: `url(${BackgroundSVG})`,
         backgroundSize: 'cover',
