@@ -3,6 +3,7 @@ import BackgroundSVG from '../assets/background.svg';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import UserService from '../services/UserService';
+import NavBar from '@/components/NavBar';
 
 /**
  * ProfilePage Component
@@ -68,6 +69,7 @@ const ProfilePage: React.FC = () => {
         backgroundPosition: 'center',
       }}
     >
+      <NavBar />
       <div className="flex flex-col items-center justify-center h-screen text-white">
         <div className="relative w-80 mb-4 flex justify-center items-center">
           <ArrowLeft

@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
+import NavBar from '@/components/NavBar';
 
 /**
  * Generate Page Component
@@ -57,6 +58,7 @@ export default function Page() {
       }}
       data-testid="container"
     >
+      <NavBar />
       <SidebarWrapper>
         <div
           className={`w-[450px] rounded-xl bg-white/15 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden ${

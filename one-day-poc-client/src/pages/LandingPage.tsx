@@ -34,7 +34,7 @@ const LandingPage: FC = () => {
 
   return (
     <div
-      className="flex flex-col min-h-screen pt-20"
+      className="flex flex-col min-h-screen"
       style={{
         backgroundImage: `url(${BackgroundSVG})`,
         backgroundSize: 'cover',
@@ -42,7 +42,8 @@ const LandingPage: FC = () => {
         backgroundPosition: 'center',
       }}
     >
-      <div className="flex flex-col items-center justify-center flex-grow w-full px-6">
+      <NavBar />
+      <div className="flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
         <HeroSection />
         <div className="flex justify-center w-full mt-6">
           <GeneratedPrompts prompts={prompts} />
