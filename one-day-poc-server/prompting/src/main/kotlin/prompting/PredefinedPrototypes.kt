@@ -1,8 +1,6 @@
 package prompting
 
-import kotlinx.serialization.json.JsonObject
 import prototype.PredefinedPrototypeService
-import prototype.PrototypeTemplate
 
 data class PredefinedPrototypeTemplate(
     val chatMessage: String,

@@ -21,9 +21,9 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import prototype.helpers.OllamaOptions
-import prototype.helpers.OllamaRequest
 import prototype.helpers.OllamaResponse
-import prototype.helpers.OllamaService
+import prototype.services.OllamaRequest
+import prototype.services.OllamaService
 
 class OllamaServiceTest {
     @Test

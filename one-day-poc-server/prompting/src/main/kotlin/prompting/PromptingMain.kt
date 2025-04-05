@@ -8,12 +8,19 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
+import prompting.helpers.OptionsFactory
+import prompting.helpers.PromptFormatterFactory
 import prompting.helpers.PrototypeInteractor
+import prompting.helpers.ResponseFormatterFactory
 import prompting.helpers.promptEngineering.PromptingTools
 import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
 import prototype.LlmResponse
+import prototype.helpers.LLMOptions
 import prototype.helpers.OllamaOptions
+import prototype.helpers.OllamaResponse
+import prototype.helpers.OpenAIOptions
+import prototype.helpers.OpenAIResponse
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import utils.environment.EnvironmentLoader
@@ -45,10 +52,11 @@ data class PrototypeResponse(
  * user prompts, including prompt sanitization, requirements extraction, template
  * fetching, and final prototype generation.
  *
- * @property model The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
+ * @property ollamaModel The LLM model identifier to use for prompt processing (default: "qwen2.5-coder:14b")
  */
 class PromptingMain(
-    private val model: String = EnvironmentLoader.get("OLLAMA_MODEL"),
+    private val ollamaModel: String = EnvironmentLoader.get("OLLAMA_MODEL"),
+    private val openAIModel: String = EnvironmentLoader.get("OPENAI_MODEL"),
 ) {
     /**
      * Executes the complete prompting workflow for a user prompt.
@@ -71,26 +79,34 @@ class PromptingMain(
         userPrompt: String,
         previousGeneration: String? = null,
     ): String {
+        // Step 1: Sanitise the user prompt
         val sanitisedPrompt = SanitisationTools.sanitisePrompt(userPrompt)
+
+        // Step 2: Extract functional requirements
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
-
         val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
-        val freqs: String = promptLlm(freqsPrompt, freqsOptions)
-
+        val freqs: String = promptLlm(freqsPrompt, freqsOptions, "local")
         val freqsResponse: JsonObject =
             runCatching { Json.decodeFromString<JsonObject>(freqs) }.getOrElse { buildJsonObject { } }
         val requirements = freqsResponse["requirements"]?.jsonArray?.joinToString(",") ?: ""
-        val fetcherInput = "$requirements, $userPrompt"
 
+        // Step 3: Fetch templates based on requirements and user prompt
+        val fetcherInput = "$requirements, $userPrompt"
         val templates = TemplateInteractor.fetchTemplates(fetcherInput)
 
-        val prototypePrompt = prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration)
+        // Step 4: Generate the prototype
+        val route =
+            when (EnvironmentLoader.get("USE_OPENAI").toBoolean()) {
+                true -> "openai"
+                false -> "local"
+            }
 
-        val prototypeOptions =
-            OllamaOptions(temperature = 0.40, top_k = 300, top_p = 0.9)
-        val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions)
+        val prototypePrompt =
+            prototypePrompt(userPrompt, freqsResponse, templates, previousGeneration, route).also { println(it) }
+        val prototypeOptions = OptionsFactory.getOptions(route, 0.40).also { println(it) }
 
-        return prototypeResponse
+        val prototypeResponse: String = promptLlm(prototypePrompt, prototypeOptions, route)
+        return prototypeResponse.also { println(it) }
     }
 
     /**
@@ -112,6 +128,7 @@ class PromptingMain(
         freqsResponse: JsonObject,
         templates: List<String> = emptyList(),
         previousGeneration: String? = null,
+        route: String,
     ): String {
         val reqs =
             runCatching {
@@ -128,11 +145,12 @@ class PromptingMain(
             (freqsResponse["keywords"] as JsonArray).map { (it as JsonPrimitive).content }
         }.getOrDefault(emptyList())
 
-        return PromptingTools.prototypePrompt(
+        val promptFormatter = PromptFormatterFactory.getFormatter(route)
+        return promptFormatter.format(
             userPrompt,
             reqs,
             templates,
-            previousGeneration,
+            previousGeneration
         )
     }
 
@@ -145,13 +163,23 @@ class PromptingMain(
      */
     private fun promptLlm(
         prompt: String,
-        options: OllamaOptions = OllamaOptions(),
+        options: LLMOptions,
+        route: String,
     ): String =
         runBlocking {
+            val model =
+                when (route) {
+                    "local" -> ollamaModel
+                    "openai" -> openAIModel
+                    else -> throw IllegalArgumentException("Invalid route $route")
+                }
+
             val llmResponse =
-                PrototypeInteractor.prompt(prompt, model, options)
+                PrototypeInteractor.prompt(prompt, model, route, options)
                     ?: throw PromptException("LLM did not respond!")
-            PromptingTools.formatResponseJson(llmResponse.response ?: throw PromptException("LLM response was null!"))
+
+            val responseFormatter = ResponseFormatterFactory.getFormatter(route)
+            responseFormatter.format(llmResponse)
         }
 
     /**

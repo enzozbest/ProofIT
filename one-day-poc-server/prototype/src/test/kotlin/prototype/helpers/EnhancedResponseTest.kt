@@ -3,10 +3,11 @@ package prototype.helpers
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.jupiter.api.Test
+import prototype.services.EnhancedResponse
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-import kotlin.test.assertNull
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class EnhancedResponseTest {
     @Test
@@ -54,11 +55,13 @@ class EnhancedResponseTest {
 
     @Test
     fun `Test EnhancedResponse de-serialises from JSON`() {
-        val expectedOllamaResponse = OllamaResponse("llama2", "2023-03-15T12:00:00Z", "generated code", true, "complete")
+        val expectedOllamaResponse =
+            OllamaResponse("llama2", "2023-03-15T12:00:00Z", "generated code", true, "complete")
         val expectedTemplates = listOf("<Component1 />", "<Component2 prop=\"value\" />")
         val expected = EnhancedResponse(expectedOllamaResponse, expectedTemplates)
 
-        val jsonString = """
+        val jsonString =
+            """
             {
                 "response":{
                     "model":"llama2",
@@ -69,7 +72,7 @@ class EnhancedResponseTest {
                 },
                 "extractedTemplates":["<Component1 />", "<Component2 prop=\"value\" />"]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val actual = Json.decodeFromString<EnhancedResponse>(jsonString)
 
@@ -83,12 +86,13 @@ class EnhancedResponseTest {
         val expectedTemplates = listOf("<Component1 />", "<Component2 />")
         val expected = EnhancedResponse(null, expectedTemplates)
 
-        val jsonString = """
+        val jsonString =
+            """
             {
                 "response":null,
                 "extractedTemplates":["<Component1 />", "<Component2 />"]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val actual = Json.decodeFromString<EnhancedResponse>(jsonString)
 
@@ -102,7 +106,8 @@ class EnhancedResponseTest {
         val expectedOllamaResponse = OllamaResponse("gpt4", "2023-03-15", "response content", true, "complete")
         val expected = EnhancedResponse(expectedOllamaResponse, emptyList())
 
-        val jsonString = """
+        val jsonString =
+            """
             {
                 "response":{
                     "model":"gpt4",
@@ -113,7 +118,7 @@ class EnhancedResponseTest {
                 },
                 "extractedTemplates":[]
             }
-        """.trimIndent()
+            """.trimIndent()
 
         val actual = Json.decodeFromString<EnhancedResponse>(jsonString)
 
