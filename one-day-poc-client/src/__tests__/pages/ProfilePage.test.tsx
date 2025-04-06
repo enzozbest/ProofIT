@@ -4,11 +4,14 @@ import ProfilePage from '../../pages/ProfilePage';
 import UserService from '../../services/UserService';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 vi.mock('../../services/UserService', () => ({
   default: {
     fetchUserData: vi.fn(),
     getError: vi.fn(),
+    clearUser: vi.fn(),
   },
 }));
 
@@ -50,9 +53,11 @@ describe('ProfilePage', () => {
     vi.spyOn(UserService, 'getError').mockReturnValue(null);
 
     render(
-      <BrowserRouter>
-        <ProfilePage />
-      </BrowserRouter>
+      <MemoryRouter>
+        <AuthProvider>
+          <ProfilePage />
+        </AuthProvider>
+      </MemoryRouter>
     );
 
     await waitFor(() => {
@@ -71,9 +76,11 @@ describe('ProfilePage', () => {
     );
 
     render(
-      <BrowserRouter>
-        <ProfilePage />
-      </BrowserRouter>
+        <MemoryRouter>
+          <AuthProvider>
+            <ProfilePage />
+          </AuthProvider>
+        </MemoryRouter>
     );
 
     await waitFor(() => {
@@ -86,9 +93,11 @@ describe('ProfilePage', () => {
     vi.spyOn(UserService, 'getError').mockReturnValue(null);
 
     render(
-      <BrowserRouter>
-        <ProfilePage />
-      </BrowserRouter>
+        <MemoryRouter>
+          <AuthProvider>
+            <ProfilePage />
+          </AuthProvider>
+        </MemoryRouter>
     );
 
     await waitFor(() => {
@@ -108,9 +117,11 @@ describe('ProfilePage', () => {
     });
 
     render(
-      <BrowserRouter>
-        <ProfilePage />
-      </BrowserRouter>
+        <MemoryRouter>
+          <AuthProvider>
+            <ProfilePage />
+          </AuthProvider>
+        </MemoryRouter>
     );
 
     await waitFor(() =>
