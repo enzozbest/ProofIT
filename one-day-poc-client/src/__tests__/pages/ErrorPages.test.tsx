@@ -1,8 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ErrorRoutes from '../../pages/ErrorPages';
-import { describe, it, expect } from 'vitest';
+import ErrorFallback from '../../pages/ErrorPages';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ErrorBoundary } from 'react-error-boundary';
+
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.resetAllMocks();
+});
 
 const testCases = [
   {
@@ -19,12 +28,16 @@ const testCases = [
   },
 ];
 
+
+
 describe('ErrorRoutes', () => {
   testCases.forEach(({ path, code, message }) => {
-    it(`renders correct error page for ${path}`, () => {
+    it(`renders correct error page for ${path}`, async () => {
       render(
         <MemoryRouter initialEntries={[path]}>
-          <ErrorRoutes />
+          <AuthProvider>
+            <ErrorRoutes />
+          </AuthProvider>
         </MemoryRouter>
       );
 
@@ -36,7 +49,9 @@ describe('ErrorRoutes', () => {
   it('renders fallback error message for unhandled errors', () => {
     render(
       <MemoryRouter initialEntries={['/unknown']}>
-        <ErrorRoutes />
+        <AuthProvider>
+          <ErrorRoutes />
+        </AuthProvider>
       </MemoryRouter>
     );
 
@@ -46,8 +61,25 @@ describe('ErrorRoutes', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders ErrorFallback component correctly', () => {
-    render(<ErrorRoutes />);
+  it('renders ErrorFallback component correctly', async () => {
+    vi.doMock('../../pages/ErrorPages', () => ({
+      default: () => {
+        throw new Error('Forced test error');
+      },
+    }));
+
+    const { default: ErrorRoutes } = await import('../../pages/ErrorPages');
+
+    render(
+        <MemoryRouter initialEntries={['/403']}>
+          <AuthProvider>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <ErrorRoutes/>
+            </ErrorBoundary>
+          </AuthProvider>
+        </MemoryRouter>
+    );
+
     expect(
       screen.getByText('An unexpected error occurred. Please try again later.')
     ).toBeInTheDocument();
