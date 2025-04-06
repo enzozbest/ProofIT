@@ -6,6 +6,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ReactNode } from 'react';
+
+const mockNavigate = vi.fn();
 
 vi.mock('../../services/UserService', () => ({
   default: {
@@ -15,14 +18,18 @@ vi.mock('../../services/UserService', () => ({
   },
 }));
 
+vi.mock('@/contexts/AuthContext.tsx', () => {
+  return {
+    useAuth: () => ({ isAuthenticated: false, login: vi.fn() }),
+    AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  };
+});
+
 vi.mock('react-router-dom', async () => {
-  const actual =
-    await vi.importActual<typeof import('react-router-dom')>(
-      'react-router-dom'
-    );
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
   return {
     ...actual,
-    useNavigate: vi.fn(),
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -33,9 +40,11 @@ describe('ProfilePage', () => {
 
   it('displays loading text initially', () => {
     render(
-      <BrowserRouter>
-        <ProfilePage />
-      </BrowserRouter>
+        <MemoryRouter>
+          <AuthProvider>
+            <ProfilePage />
+          </AuthProvider>
+        </MemoryRouter>
     );
 
     expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -106,9 +115,6 @@ describe('ProfilePage', () => {
   });
 
   it('navigates back when the arrow button is clicked', async () => {
-    const mockNavigate = vi.fn();
-    vi.mocked(useNavigate).mockReturnValue(mockNavigate);
-
     vi.mocked(UserService.fetchUserData).mockResolvedValue({
       name: 'John Doe',
       email: 'john.doe@example.com',
