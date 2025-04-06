@@ -5,7 +5,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate  } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
@@ -33,6 +34,9 @@ export default function Page() {
   const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
   const [isPredefined, setIsPredefined] = useState<boolean>(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
@@ -46,6 +50,12 @@ export default function Page() {
       setIsPredefined(location.state.isPredefined || false);
     }
   }, [location]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/403');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div
