@@ -51,7 +51,7 @@ test('Renders navbar with logo', () => {
 
   const navElement = screen.getByRole('navigation');
   expect(navElement).toHaveClass(
-    'fixed top-2 left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50'
+    'absolute top-2  left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50'
   );
 });
 

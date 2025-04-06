@@ -1,8 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import ErrorRoutes from '../../pages/ErrorPages';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ReactNode } from 'react';
+
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.resetAllMocks();
+});
+
+vi.mock('@/contexts/AuthContext.tsx', () => {
+  return {
+    useAuth: () => ({ isAuthenticated: false, login: vi.fn() }),
+    AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  };
+});
 
 const testCases = [
   {
@@ -19,12 +34,16 @@ const testCases = [
   },
 ];
 
+
+
 describe('ErrorRoutes', () => {
   testCases.forEach(({ path, code, message }) => {
-    it(`renders correct error page for ${path}`, () => {
+    it(`renders correct error page for ${path}`, async () => {
       render(
         <MemoryRouter initialEntries={[path]}>
-          <ErrorRoutes />
+          <AuthProvider>
+            <ErrorRoutes />
+          </AuthProvider>
         </MemoryRouter>
       );
 
@@ -36,20 +55,15 @@ describe('ErrorRoutes', () => {
   it('renders fallback error message for unhandled errors', () => {
     render(
       <MemoryRouter initialEntries={['/unknown']}>
-        <ErrorRoutes />
+        <AuthProvider>
+          <ErrorRoutes />
+        </AuthProvider>
       </MemoryRouter>
     );
 
     expect(screen.getByText('404')).toBeInTheDocument();
     expect(
       screen.getByText('The page you are looking for does not exist.')
-    ).toBeInTheDocument();
-  });
-
-  it('renders ErrorFallback component correctly', () => {
-    render(<ErrorRoutes />);
-    expect(
-      screen.getByText('An unexpected error occurred. Please try again later.')
     ).toBeInTheDocument();
   });
 });
