@@ -5,6 +5,7 @@ import chat.routes.setGetHistoryRoute
 import chat.routes.setGetPrototypeRoute
 import chat.routes.setJsonRoute
 import chat.routes.setJsonRouteRetrieval
+import chat.routes.setJsonRouteDelete
 import chat.routes.uploadRoutes
 import io.ktor.server.routing.Route
 
