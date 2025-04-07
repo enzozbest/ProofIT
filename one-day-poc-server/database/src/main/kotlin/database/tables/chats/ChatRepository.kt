@@ -238,4 +238,21 @@ class ChatRepository(private val db: Database){
             null
         }
     }
+
+    suspend fun deleteConversation(conversationId: String): Boolean {
+        return try {
+            newSuspendedTransaction(IO_DISPATCHER, db) {
+                val id = UUID.fromString(conversationId)
+                val conversation = ConversationEntity.findById(id)
+                if (conversation != null) {
+                    conversation.delete()
+                    true
+                } else {
+                    false
+                }
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

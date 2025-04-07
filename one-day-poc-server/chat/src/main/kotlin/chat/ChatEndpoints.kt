@@ -25,6 +25,7 @@ object ChatEndpoints {
     fun Route.setJsonRoutes() {
         setJsonRoute()
         setJsonRouteRetrieval()
+        setJsonRouteDelete()
     }
 
     fun Route.setUploadRoutes() {

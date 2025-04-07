@@ -61,6 +61,25 @@ internal fun Route.setJsonRouteRetrieval() {
     }
 }
 
+internal fun Route.setJsonRouteDelete() {
+    post("$JSON/{conversationId}/delete") {
+        try {
+            val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
+            val success = chatStorage.deleteConversation(conversationId)
+            if (success) {
+                call.respondText("Conversation deleted successfully", status = HttpStatusCode.OK)
+            } else {
+                call.respondText("Failed to delete conversation", status = HttpStatusCode.InternalServerError)
+            }
+        } catch (e: Exception) {
+            call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.BadRequest,
+            )
+        }
+    }
+}
+
 /**
  * Processes a validated JSON request by passing it to the prompting pipeline.
  *
