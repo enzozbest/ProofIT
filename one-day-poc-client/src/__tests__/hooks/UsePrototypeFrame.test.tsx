@@ -146,6 +146,7 @@ describe('usePrototypeFrame', () => {
   });
 
   it('should install dependencies when ensureViteDependencies returns true', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
     const files = {
       'index.html': {
         file: {
@@ -153,6 +154,19 @@ describe('usePrototypeFrame', () => {
         },
       },
     };
+
+    const mockInstallProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Installing packages...');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0),
+    };
+
+    mockWebContainerInstance.spawn.mockResolvedValue(mockInstallProcess);
 
     (ensureViteDependencies as any).mockResolvedValue(true);
     const mockSetStatus = vi.fn();
@@ -169,8 +183,10 @@ describe('usePrototypeFrame', () => {
     });
 
     expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['install']);
-    expect(mockProcess.output.pipeTo).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith('Install output:', 'Installing packages...');
     await expect(mockProcess.exit).resolves.toBe(0);
+
+    consoleSpy.mockRestore();
   });
 
   describe('startServer and runServerWithAutoInstall', () => {
