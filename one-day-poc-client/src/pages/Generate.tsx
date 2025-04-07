@@ -5,10 +5,12 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate  } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
+import NavBar from '@/components/NavBar';
 
 /**
  * Generate Page Component
@@ -32,6 +34,9 @@ export default function Page() {
   const [prototypeFiles, setPrototypeFiles] = useState<any>(null);
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
   const [isPredefined, setIsPredefined] = useState<boolean>(false);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
@@ -46,9 +51,15 @@ export default function Page() {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/403');
+    }
+  }, [isAuthenticated, navigate]);
+
   return (
     <div
-      className="min-h-screen bg-gray-900 text-white"
+      className="h-screen bg-gray-900 text-white overflow-hidden"
       style={{
         backgroundImage: "url('/background.svg')",
         backgroundSize: 'cover',
@@ -57,6 +68,7 @@ export default function Page() {
       }}
       data-testid="container"
     >
+      <NavBar />
       <SidebarWrapper>
         <div
           className={`w-[450px] rounded-xl bg-white/15 backdrop-blur-xl transition-all duration-300 ease-in-out overflow-hidden ${

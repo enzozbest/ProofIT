@@ -3,6 +3,9 @@ import BackgroundSVG from '../assets/background.svg';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import UserService from '../services/UserService';
+import NavBar from '@/components/NavBar';
+import { useAuth } from '@/contexts/AuthContext';
+
 
 /**
  * ProfilePage Component
@@ -28,6 +31,7 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     async function loadUserData() {
@@ -44,6 +48,12 @@ const ProfilePage: React.FC = () => {
 
     loadUserData();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/403');
+    }
+  }, [isAuthenticated, navigate]);
 
   if (loading)
     return (
@@ -68,6 +78,7 @@ const ProfilePage: React.FC = () => {
         backgroundPosition: 'center',
       }}
     >
+      <NavBar />
       <div className="flex flex-col items-center justify-center h-screen text-white">
         <div className="relative w-80 mb-4 flex justify-center items-center">
           <ArrowLeft

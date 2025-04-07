@@ -33,7 +33,6 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <ConversationProvider>
-        <NavBar />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/profile" element={<ProfilePage />} />
