@@ -72,7 +72,7 @@ suspend fun getPreviousPrototype(conversationId: String): Prototype? {
     }
 }
 
-supend fun deleteConversation(conversationId: String): Boolean {
+suspend fun deleteConversation(conversationId: String): Boolean {
     return runCatching {
         ChatStorageFactory.getChatRepository().deleteConversation(conversationId)
     }.getOrElse { e ->

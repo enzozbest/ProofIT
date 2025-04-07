@@ -4,6 +4,7 @@ import chat.JSON
 import chat.Request
 import chat.storage.getPreviousPrototype
 import chat.storage.updateConversationName
+import chat.storage.deleteConversation
 import io.ktor.http.*
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -65,7 +66,7 @@ internal fun Route.setJsonRouteDelete() {
     post("$JSON/{conversationId}/delete") {
         try {
             val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
-            val success = chatStorage.deleteConversation(conversationId)
+            val success = deleteConversation(conversationId)
             if (success) {
                 call.respondText("Conversation deleted successfully", status = HttpStatusCode.OK)
             } else {
