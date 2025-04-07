@@ -102,7 +102,7 @@ describe('AuthContext', () => {
 
     await waitFor(() => {
       expect(window.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/auth/check',
+        'https://proofit.uk/api/auth/check',
         expect.any(Object)
       );
     });
@@ -244,7 +244,7 @@ describe('AuthContext', () => {
       'selectedPrompt',
       'test prompt'
     );
-    expect(window.location.href).toBe('http://localhost:8000/api/auth');
+    expect(window.location.href).toBe('https://proofit.uk/api/auth');
   });
 
   test('login function without prompt parameter', async () => {
@@ -268,7 +268,7 @@ describe('AuthContext', () => {
     });
 
     expect(window.sessionStorage.setItem).not.toHaveBeenCalled();
-    expect(window.location.href).toBe('http://localhost:8000/api/auth');
+    expect(window.location.href).toBe('https://proofit.uk/api/auth');
   });
 
   test('logout function success', async () => {
@@ -301,7 +301,7 @@ describe('AuthContext', () => {
     });
 
     expect(window.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/logout',
+      'https://proofit.uk/api/auth/logout',
       expect.any(Object)
     );
     expect(screen.getByTestId('auth-status')).toHaveTextContent(

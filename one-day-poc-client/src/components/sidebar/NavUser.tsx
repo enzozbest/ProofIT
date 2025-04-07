@@ -42,9 +42,13 @@ export function NavUser({}: {
   const { isMobile } = useSidebar();
   const navigate = useNavigate();
   const handleSignOut = () => {
-    fetch('http://localhost:8000/api/auth/logout', {
+    fetch('https://proofit.uk/api/auth/logout', {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Host': 'proofit.uk',
+      }
     })
       .then(() => {
         window.location.href = '/';
@@ -58,7 +62,7 @@ export function NavUser({}: {
   } | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/auth/me', {
+    fetch('https://proofit.uk/api/auth/me', {
       method: 'GET',
       credentials: 'include',
     })

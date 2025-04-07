@@ -110,7 +110,7 @@ test('Valid post request', async () => {
     { timeout: 3000 }
   );
 
-  expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/chat/json', {
+  expect(fetch).toHaveBeenCalledWith('https://proofit.uk/api/chat/json', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -156,7 +156,7 @@ test('Clicking send button sends a message', async () => {
     { timeout: 3000 }
   );
 
-  expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/chat/json', {
+  expect(fetch).toHaveBeenCalledWith('https://proofit.uk/api/chat/json', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },

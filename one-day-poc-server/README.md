@@ -47,5 +47,5 @@ powershell.exe -ExecutionPolicy Bypass -File .\start.ps1
 The script will automatically install the required dependencies (e.g. Python/Pip packages) and start both
 the Python microservice and the Kotlin server without any further input from the user.
 
-The Kotlin server will be available at http://localhost:8000 by default.
+The Kotlin server will be available at https://proofit.uk by default.
 The Python microservice will be available at http://localhost:7000 by default.

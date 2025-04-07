@@ -14,12 +14,12 @@ import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import utils.json.PoCJSON
 
-val frontendHost = Pair("localhost:5173", listOf("http"))
+val frontendHost = Pair("proofit.uk", listOf("http, https"))
 
 fun Application.configurePlugins() {
     configureCORS(
         listOf(frontendHost),
-        listOf(HttpMethod.Get, HttpMethod.Options),
+        listOf(HttpMethod.Get, HttpMethod.Options, HttpMethod.Post),
         listOf(HttpHeaders.Authorization, HttpHeaders.ContentType),
         credentials = true,
     )

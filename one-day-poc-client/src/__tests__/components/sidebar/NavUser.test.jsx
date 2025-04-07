@@ -129,7 +129,7 @@ test('Fetches and displays user data', async () => {
 
   await waitFor(() => {
     expect(window.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/me',
+      'https://proofit.uk/api/auth/me',
       expect.objectContaining({
         method: 'GET',
         credentials: 'include',
@@ -200,7 +200,7 @@ test('Logs out user when Log out is clicked', async () => {
 
   await waitFor(() => {
     expect(window.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/logout',
+      'https://proofit.uk/api/auth/logout',
       expect.objectContaining({
         method: 'POST',
         credentials: 'include',
@@ -239,7 +239,7 @@ test('Handles logout error gracefully', async () => {
 
   await waitFor(() => {
     expect(window.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/logout',
+      'https://proofit.uk/api/auth/logout',
       expect.any(Object)
     );
   });

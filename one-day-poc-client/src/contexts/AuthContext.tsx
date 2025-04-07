@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/auth/check', {
+      const response = await fetch('/api/auth/check', {
         method: 'GET',
         credentials: 'include',
       });
@@ -91,14 +91,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       sessionStorage.setItem('selectedPrompt', promptTextOrEvent);
       sessionStorage.setItem('isPredefined', String(isPredefined));
     }
-    window.location.href = 'http://localhost:8000/api/auth';
+    window.location.href = '/api/auth';
   };
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8000/api/auth/logout', {
+      await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Host': 'proofit.uk',
+        },
+        body: '{}'
       });
       setIsAuthenticated(false);
       setIsAdmin(false);

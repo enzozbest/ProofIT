@@ -23,7 +23,7 @@ export async function fetchChatHistory(): Promise<Conversation[]> {
     console.log('Fetching chat history');
     const userId = UserService.getUserId();
     const response = await fetch(
-      `http://localhost:8000/api/chat/history?userId=${encodeURIComponent(userId)}`,
+      `https://proofit.uk/api/chat/history?userId=${encodeURIComponent(userId)}`,
       {
         method: 'GET',
         credentials: 'include',
@@ -55,12 +55,13 @@ export async function apiUpdateConversationName(
 ): Promise<void> {
   try {
     const response = await fetch(
-      `http://localhost:8000/api/chat/json/${conversationId}/rename`,
+      `https://proofit.uk/api/chat/json/${conversationId}/rename`,
       {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'Host': 'proofit.uk'
         },
         body: JSON.stringify({ name }),
       }
@@ -79,7 +80,7 @@ export async function getConversationHistory(
 ): Promise<Message[]> {
   try {
     const response = await fetch(
-      `http://localhost:8000/api/chat/history/${conversationId}`,
+      `https://proofit.uk/api/chat/history/${conversationId}`,
       {
         method: 'GET',
         credentials: 'include',
@@ -122,7 +123,7 @@ export async function getPrototypeForMessage(
     }
 
     const response = await fetch(
-      `http://localhost:8000/api/chat/history/${conversationId}/${messageId}`,
+      `https://proofit.uk/api/chat/history/${conversationId}/${messageId}`,
       {
         method: 'GET',
         credentials: 'include',
@@ -207,11 +208,12 @@ export async function sendChatMessage(
       predefined: isPredefined,
     };
 
-    const response = await fetch('http://localhost:8000/api/chat/json', {
+    const response = await fetch('https://proofit.uk/api/chat/json', {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
+        'Host': 'proofit.uk'
       },
       body: JSON.stringify(messagePayload),
     });

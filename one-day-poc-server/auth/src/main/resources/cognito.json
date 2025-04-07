@@ -1,7 +1,7 @@
 {
   "name": "Cognito",
   "jwtIssuer": "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_i06RrasFd",
-  "urlProvider": "http://localhost:8000/api/auth/callback",
+  "urlProvider": "https://proofit.uk/api/auth/callback",
   "providerLookup": {
     "name": "Cognito",
     "authorizeUrl": "https://eu-west-2i06rrasfd.auth.eu-west-2.amazoncognito.com/oauth2/authorize",

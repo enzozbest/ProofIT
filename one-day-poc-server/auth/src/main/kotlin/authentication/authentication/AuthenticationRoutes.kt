@@ -129,7 +129,7 @@ internal fun Route.setUpCheckEndpoint(checkRoute: String) {
         }
 
         call.response.headers.append(HttpHeaders.Authorization, "Bearer ${sessionCookie.token}")
-        call.response.headers.append(HttpHeaders.Location, "http://localhost:8000/api/auth/validate")
+        call.response.headers.append(HttpHeaders.Location, "https://proofit.uk/api/auth/validate")
         call.respond(HttpStatusCode.TemporaryRedirect)
     }
 }
@@ -194,7 +194,7 @@ internal fun Route.setUpUserInfoRoute(
  */
 internal fun Route.setUpCallbackRoute(
     route: String,
-    redirectDomain: String = "http://localhost:5173",
+    redirectDomain: String = "https://proofit.uk",
 ) {
     get(route) {
         val principal: OAuthAccessTokenResponse.OAuth2? = call.authentication.principal()

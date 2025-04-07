@@ -86,7 +86,7 @@ describe('sendChatMessage', () => {
     expect(onChatResponse).toHaveBeenCalledWith(mockChatResponse);
     expect(onPrototypeResponse).toHaveBeenCalledWith(mockPrototypeResponse);
 
-    expect(fetch).toHaveBeenCalledWith('http://localhost:8000/api/chat/json', {
+    expect(fetch).toHaveBeenCalledWith('https://proofit.uk/api/chat/json', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -192,7 +192,7 @@ describe('getPrototypeForMessage', () => {
 
     expect(result).toEqual(mockFileTree);
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/chat/history/valid-conversation-id/valid-message-id',
+      'https://proofit.uk/api/chat/history/valid-conversation-id/valid-message-id',
       {
         method: 'GET',
         credentials: 'include',
@@ -351,7 +351,7 @@ describe('apiUpdateConversationName', () => {
     await apiUpdateConversationName(conversationId, newName);
 
     expect(fetch).toHaveBeenCalledWith(
-      `http://localhost:8000/api/chat/json/${conversationId}/rename`,
+      `https://proofit.uk/api/chat/json/${conversationId}/rename`,
       {
         method: 'POST',
         credentials: 'include',
@@ -448,7 +448,7 @@ describe('getConversationHistory', () => {
     const result = await getConversationHistory(conversationId);
 
     expect(fetch).toHaveBeenCalledWith(
-      `http://localhost:8000/api/chat/history/${conversationId}`,
+      `https://proofit.uk/api/chat/history/${conversationId}`,
       {
         method: 'GET',
         credentials: 'include',
@@ -584,7 +584,7 @@ describe('fetchChatHistory', () => {
     const result = await fetchChatHistory();
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/chat/history?userId=user-123',
+      'https://proofit.uk/api/chat/history?userId=user-123',
       {
         method: 'GET',
         credentials: 'include',

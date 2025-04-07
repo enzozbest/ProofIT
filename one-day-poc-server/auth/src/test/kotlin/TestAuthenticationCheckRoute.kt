@@ -83,7 +83,7 @@ class TestAuthenticationCheckRoute {
                 }
             assertEquals(HttpStatusCode.TemporaryRedirect, response.status)
             assertEquals("Bearer $jwt", response.headers["Authorization"])
-            assertEquals("http://localhost:8000/api/auth/validate", response.headers["Location"])
+            assertEquals("https://proofit.uk/api/auth/validate", response.headers["Location"])
         }
 
     @Test

@@ -59,7 +59,7 @@ describe('UserService', () => {
     const user = await UserService.fetchUserData();
 
     expect(window.fetch).toHaveBeenCalledWith(
-      'http://localhost:8000/api/auth/me',
+      'https://proofit.uk/api/auth/me',
       {
         method: 'GET',
         credentials: 'include',
