@@ -68,8 +68,8 @@ vi.mock('@/components/ui/Sidebar', () => ({
   ),
 }));
 
-vi.mock('@radix-ui/react-icons', () => ({
-  ChevronRightIcon: () => (
+vi.mock('lucide-react', () => ({
+  ChevronRight: () => (
     <div data-testid="chevron-right-icon">ChevronRightIcon</div>
   ),
 }));
@@ -307,4 +307,108 @@ test('Sub-item with onClick handler calls the handler when clicked', () => {
   fireEvent.click(subButton);
   
   expect(mockOnClick).toHaveBeenCalledTimes(1);
+});
+
+test('Renders action buttons for sub-items', () => {
+  const mockActionClick = vi.fn();
+  const MockActionIcon = () => <div data-testid="action-icon">Action</div>;
+  
+  const items = [
+    {
+      title: 'Item 1',
+      url: '#',
+      items: [
+        {
+          title: 'Sub Item 1',
+          url: '#',
+          actions: [
+            {
+              icon: MockActionIcon,
+              className: 'test-class',
+              onClick: mockActionClick
+            }
+          ]
+        },
+      ],
+    },
+  ];
+
+  render(<NavMain items={items} />);
+
+  expect(screen.getByTestId('action-icon')).toBeInTheDocument();
+});
+
+test('Action button click calls handler without triggering parent onClick', () => {
+  const mockItemClick = vi.fn();
+  const mockActionClick = vi.fn();
+  
+  const items = [
+    {
+      title: 'Item 1',
+      url: '#',
+      items: [
+        {
+          title: 'Sub Item 1',
+          url: '#',
+          onClick: mockItemClick,
+          actions: [
+            {
+              icon: () => <button 
+                data-testid="action-button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  mockActionClick();
+                }}
+              >
+                Action
+              </button>,
+              onClick: (e) => {
+                e.stopPropagation();
+                mockActionClick();
+              }
+            }
+          ]
+        },
+      ],
+    },
+  ];
+
+  render(<NavMain items={items} />);
+  
+  const actionButton = screen.getByTestId('action-button');
+  fireEvent.click(actionButton);
+  
+  expect(mockActionClick).toHaveBeenCalled();
+  expect(mockItemClick).not.toHaveBeenCalled();
+});
+
+test('Action buttons are rendered with correct classes', () => {
+  const mockActionClick = vi.fn();
+  
+  const items = [
+    {
+      title: 'Item 1',
+      url: '#',
+      items: [
+        {
+          title: 'Sub Item 1',
+          url: '#',
+          actions: [
+            {
+              icon: () => <div data-testid="action-icon">Action</div>,
+              className: 'custom-action-class',
+              onClick: mockActionClick
+            }
+          ]
+        },
+      ],
+    },
+  ];
+
+  const { container } = render(<NavMain items={items} />);
+  
+  const actionButton = screen.getByTestId('action-icon').closest('button');
+  
+  expect(actionButton).toBeDefined();
+  expect(actionButton.className).toContain('custom-action-class');
 });
