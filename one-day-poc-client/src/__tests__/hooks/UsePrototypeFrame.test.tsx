@@ -145,6 +145,34 @@ describe('usePrototypeFrame', () => {
     expect(normaliseFiles).not.toHaveBeenCalled();
   });
 
+  it('should install dependencies when ensureViteDependencies returns true', async () => {
+    const files = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+
+    (ensureViteDependencies as any).mockResolvedValue(true);
+    const mockSetStatus = vi.fn();
+    const { result } = renderHook(() =>
+        usePrototypeFrame({
+          files,
+          setStatus: mockSetStatus
+        } as any)
+    );
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+    });
+
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['install']);
+    expect(mockProcess.output.pipeTo).toHaveBeenCalled();
+    await expect(mockProcess.exit).resolves.toBe(0);
+  });
+
   describe('startServer and runServerWithAutoInstall', () => {
     it('should do nothing if no webcontainer instance in startServer', async () => {
       (useWebContainer as any).mockReturnValueOnce({
