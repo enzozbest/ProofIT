@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sendChatMessage } from '../api/FrontEndAPI';
+import { sendChatMessage } from '@/api';
 import {
   Message,
   ChatHookReturn,
@@ -31,7 +31,6 @@ const ChatMessage = ({
 }: ChatMessageProps): ChatHookReturn => {
   const [message, setMessage] = useState<string>('');
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
-  const [llmResponse, setLlmResponse] = useState<string>('');
   const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

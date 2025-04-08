@@ -6,7 +6,7 @@ import {
   apiUpdateConversationName,
   apiDeleteConversation,
   getConversationHistory,
-} from '../api/FrontEndAPI';
+} from '@/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationContextType {
