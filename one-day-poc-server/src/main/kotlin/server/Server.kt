@@ -35,6 +35,7 @@ fun Application.configurePlugins() {
             call.application.environment.log
                 .warn("403 intercepted! URI: ${call.request.uri}")
             println("403 intercepted! URI: ${call.request.uri}")
+            call.request.headers.forEach { key, values -> println("$key: $values") }
             call.respond(HttpStatusCode.Forbidden)
         }
     }

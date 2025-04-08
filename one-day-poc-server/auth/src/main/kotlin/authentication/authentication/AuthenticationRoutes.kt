@@ -69,6 +69,7 @@ internal fun Route.setAuthenticationEndpoint(route: String) {
  */
 internal fun Route.setLogOutEndpoint(route: String) {
     post(route) {
+        call.request.headers.forEach { key, values -> println("$key: $values") }
         val cookie =
             call.request.cookies["AuthenticatedSession"]?.let {
                 runCatching { Json.decodeFromString<AuthenticatedSession>(it) }.getOrNull()
