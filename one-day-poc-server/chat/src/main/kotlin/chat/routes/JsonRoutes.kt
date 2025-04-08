@@ -91,7 +91,7 @@ internal fun Route.setJsonRouteDelete() {
  * @param request The validated Request object containing the user's prompt
  * @param call The ApplicationCall used to send the response back to the client
  */
-private suspend fun handleJsonRequest(
+suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {
