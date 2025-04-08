@@ -4,12 +4,16 @@ import authentication.authentication.AuthenticatedSession
 import authentication.authentication.configureAuthenticators
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.uri
+import io.ktor.server.response.respond
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import utils.json.PoCJSON
@@ -25,6 +29,15 @@ fun Application.configurePlugins() {
     )
     configureContentNegotiation()
     configureAuthentication("cognito.json")
+
+    install(StatusPages) {
+        status(HttpStatusCode.Forbidden) {
+            call.application.environment.log
+                .warn("403 intercepted! URI: ${call.request.uri}")
+            println("403 intercepted! URI: ${call.request.uri}")
+            call.respond(HttpStatusCode.Forbidden)
+        }
+    }
 }
 
 internal fun Application.configureAuthentication(configFilePath: String) {
