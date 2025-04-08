@@ -145,6 +145,243 @@ describe('usePrototypeFrame', () => {
     expect(normaliseFiles).not.toHaveBeenCalled();
   });
 
+  it('should install dependencies when ensureViteDependencies returns true', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    const files = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+
+    const mockInstallProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Installing packages...');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0),
+    };
+
+    mockWebContainerInstance.spawn.mockResolvedValue(mockInstallProcess);
+
+    (ensureViteDependencies as any).mockResolvedValue(true);
+    const mockSetStatus = vi.fn();
+    const { result } = renderHook(() =>
+        usePrototypeFrame({
+          files,
+          setStatus: mockSetStatus
+        } as any)
+    );
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+    });
+
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['install']);
+    expect(consoleSpy).toHaveBeenCalledWith('Install output:', 'Installing packages...');
+    await expect(mockProcess.exit).resolves.toBe(0);
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should install dependencies when detectMissingDependencies does not return null', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    const files = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+
+    const mockServerProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write("Cannot find module 'missing-package'");
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(1),
+      kill: vi.fn()
+    };
+  
+
+    const mockInstallProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Installing missing-package...');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0),
+    };
+
+    const mockRestartedServerProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Server started successfully');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0)
+    };
+
+    mockWebContainerInstance.spawn
+    .mockResolvedValueOnce(mockServerProcess)
+    .mockResolvedValueOnce(mockInstallProcess)
+    .mockResolvedValueOnce(mockRestartedServerProcess);
+
+    const mockSetStatus = vi.fn();
+    const { result } = renderHook(() =>
+        usePrototypeFrame({
+          files,
+          setStatus: mockSetStatus
+        } as any)
+    );
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+    });
+
+  
+    expect(mockServerProcess.kill).toHaveBeenCalled();
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['run', 'dev']);
+    expect(consoleSpy).toHaveBeenCalledWith('Server output:', expect.stringContaining('Cannot find module'));
+    expect(consoleSpy).toHaveBeenCalledWith('Installing missing-package output:', expect.stringContaining('Installing missing-package'));
+    expect(consoleSpy).toHaveBeenCalledWith('Server output:', expect.stringContaining('Server started successfully'));
+
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle an error successfully in killActiveProcess', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    const files = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+
+    const mockServerProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write("Cannot find module 'missing-package'");
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(1),
+      kill: vi.fn().mockImplementation(() => {
+        throw new Error('Failed to kill process');
+      })
+    };
+  
+
+    const mockInstallProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Installing missing-package...');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0),
+    };
+
+    const mockRestartedServerProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('Server started successfully');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(0)
+    };
+
+    mockWebContainerInstance.spawn
+    .mockResolvedValueOnce(mockServerProcess)
+    .mockResolvedValueOnce(mockInstallProcess)
+    .mockResolvedValueOnce(mockRestartedServerProcess);
+
+    const mockSetStatus = vi.fn();
+    const { result } = renderHook(() =>
+        usePrototypeFrame({
+          files,
+          setStatus: mockSetStatus
+        } as any)
+    );
+
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+    });
+
+  
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error killing process:',
+      expect.any(Error)
+    );
+
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['install', 'missing-package']);
+    expect(consoleSpy).toHaveBeenCalledWith('Server output:', expect.stringContaining('Server started successfully'));
+  
+    consoleSpy.mockRestore();
+  });
+
+  it('should handle failed dependency installation', async () => {
+    const consoleSpy = vi.spyOn(console, 'log');
+    const files = {
+      'index.html': {
+        file: {
+          contents: '<!DOCTYPE html><html></html>',
+        },
+      },
+    };
+  
+    const mockFailedInstallProcess = {
+      output: {
+        pipeTo: (writable: WritableStream) => {
+          const writer = writable.getWriter();
+          writer.write('npm ERR! Failed to install dependencies');
+          writer.close();
+        }
+      },
+      exit: Promise.resolve(1),
+    };
+  
+    mockWebContainerInstance.spawn.mockResolvedValue(mockFailedInstallProcess);
+    (ensureViteDependencies as any).mockResolvedValue(true);
+  
+    const mockSetStatus = vi.fn();
+    const { result } = renderHook(() =>
+      usePrototypeFrame({
+        files,
+        setStatus: mockSetStatus
+      } as any)
+    );
+  
+    await act(async () => {
+      await vi.runAllTimersAsync();
+      await Promise.resolve();
+    });
+  
+    expect(mockWebContainerInstance.spawn).toHaveBeenCalledWith('npm', ['install']);
+    expect(consoleSpy).toHaveBeenCalledWith('Install output:', expect.stringContaining('npm ERR!'));
+  
+    consoleSpy.mockRestore();
+  });
+
   describe('startServer and runServerWithAutoInstall', () => {
     it('should do nothing if no webcontainer instance in startServer', async () => {
       (useWebContainer as any).mockReturnValueOnce({
