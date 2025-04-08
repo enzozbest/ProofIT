@@ -1,7 +1,7 @@
 'use client';
 
-import { type LucideIcon } from 'lucide-react';
-
+import React from 'react';
+import { ChevronRight as ChevronRightIcon, LucideIcon } from 'lucide-react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -9,15 +9,13 @@ import {
 } from '@/components/ui/Collapsible';
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
   SidebarMenuSub,
-  SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/Sidebar';
-import { ChevronRightIcon } from '@radix-ui/react-icons';
 
 /**
  * NavMain component renders a collapsible sidebar navigation menu.
@@ -44,6 +42,11 @@ export function NavMain({
       isActive?: boolean;
       subtitle?: string;
       onClick?: () => void;
+      actions?: {
+        icon: LucideIcon;
+        className?: string;
+        onClick: (e: React.MouseEvent) => void;
+      }[];
     }[];
   }[];
 }) {
@@ -73,7 +76,7 @@ export function NavMain({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem
                       key={subItem.id || subItem.title}
-                      className=""
+                      className="group relative"
                     >
                       <SidebarMenuSubButton
                         onClick={(e) => {
@@ -82,9 +85,27 @@ export function NavMain({
                         }}
                         className={`w-full ${subItem.isActive ? 'bg-muted text-foreground' : ''}`}
                       >
-                        <span className="truncate w-full" title={subItem.title}>
-                          {subItem.title}
-                        </span>
+                        <div className="flex w-full items-center justify-between">
+                          <div className="truncate" title={subItem.title}>
+                            {subItem.title}
+                          </div>
+                          
+                          {subItem.actions && (
+                            <div className="ml-2 flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              {subItem.actions.map((action, index) => (
+                                <button
+                                  key={index}
+                                  onClick={action.onClick}
+                                  className={`p-0.5 rounded-sm mr-1 ${action.className || ""}`}
+                                  aria-label="Delete conversation"
+                                >
+                                  <action.icon className="w-3.5 h-3.5" />
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
                         {subItem.subtitle && (
                           <span className="text-xs text-muted-foreground mt-1 truncate w-full">
                             {subItem.subtitle}

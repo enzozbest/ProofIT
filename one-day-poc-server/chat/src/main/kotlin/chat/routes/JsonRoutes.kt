@@ -4,6 +4,7 @@ import chat.JSON
 import chat.Request
 import chat.storage.getPreviousPrototype
 import chat.storage.updateConversationName
+import chat.storage.deleteConversation
 import io.ktor.http.*
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
@@ -61,6 +62,25 @@ internal fun Route.setJsonRouteRetrieval() {
     }
 }
 
+internal fun Route.setJsonRouteDelete() {
+    post("$JSON/{conversationId}/delete") {
+        try {
+            val conversationId = call.parameters["conversationId"] ?: throw IllegalArgumentException("Missing ID")
+            val success = deleteConversation(conversationId)
+            if (success) {
+                call.respondText("Conversation deleted successfully", status = HttpStatusCode.OK)
+            } else {
+                call.respondText("Failed to delete conversation", status = HttpStatusCode.InternalServerError)
+            }
+        } catch (e: Exception) {
+            call.respondText(
+                "Error: ${e.message}",
+                status = HttpStatusCode.BadRequest,
+            )
+        }
+    }
+}
+
 /**
  * Processes a validated JSON request by passing it to the prompting pipeline.
  *
@@ -71,7 +91,7 @@ internal fun Route.setJsonRouteRetrieval() {
  * @param request The validated Request object containing the user's prompt
  * @param call The ApplicationCall used to send the response back to the client
  */
-private suspend fun handleJsonRequest(
+suspend fun handleJsonRequest(
     request: Request,
     call: ApplicationCall,
 ) {

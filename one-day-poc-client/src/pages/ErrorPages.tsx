@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
+import NavBar from '@/components/NavBar';
 
 /**
  * Props for the ErrorPage component
@@ -24,6 +25,8 @@ interface ErrorPageProps {
  */
 const ErrorPage: React.FC<ErrorPageProps> = ({ code, message }) => {
   return (
+    <>    
+    <NavBar />  
     <div className="flex flex-col items-center justify-center h-screen text-white bg-gradient-to-br from-blue-900 to-purple-900">
       {code && <h1 className="text-6xl font-bold">{code}</h1>}
       <p className="mt-4 text-xl">{message}</p>
@@ -34,6 +37,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ code, message }) => {
         Go Home
       </a>
     </div>
+    </>
   );
 };
 

@@ -18,6 +18,9 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.addJsonObject
+import java.io.IOException
 
 class TemplateRetrievalTest {
     private val testDir = createTempDir("template-test")
@@ -44,6 +47,44 @@ class TemplateRetrievalTest {
     fun tearDown() {
         unmockkAll()
         testDir.deleteRecursively()
+    }
+
+    @Test
+    fun `storeTemplateFiles returns false when storage operation throws exception`() = runBlocking {
+        val componentName = "TestComponent"
+        val templateCode = "export const TestComponent = () => <div>Test</div>;"
+        val jsonLD = "{\"json\":\"data\"}"
+
+        // Start with clean mocks
+        unmockkAll()
+
+        // Mock only what we need
+        mockkObject(TemplateInteractor)
+
+        // Use a spy on TemplateRetrieval to override only specific methods
+        val retrieval = spyk(TemplateRetrieval)
+
+        // Setup directories to exist
+        every { retrieval.templatesDir } returns testTemplatesDir.absolutePath
+        every { retrieval.metadataDir } returns testMetadataDir.absolutePath
+
+        // Make sure directories exist
+        testTemplatesDir.mkdirs()
+        testMetadataDir.mkdirs()
+
+        // Force an exception during the TemplateInteractor call
+        coEvery {
+            TemplateInteractor.storeNewTemplate(any(), any(), any())
+        } throws IOException("Simulated database error")
+
+        // This should trigger our exception in the storeTemplateFiles method
+        val result = retrieval.storeTemplateFiles(componentName, templateCode, jsonLD)
+
+        // The method should catch the exception and return false
+        assertFalse(result, "storeTemplateFiles should return false when an exception occurs")
+
+        // Verify the exception was thrown
+        coVerify { TemplateInteractor.storeNewTemplate(any(), any(), any()) }
     }
 
     @Test
@@ -531,4 +572,130 @@ class TemplateRetrievalTest {
 
             coVerify { TemplateRetrieval.processTemplatesFromResponse(response) }
         }
+
+    @Test
+    fun `generateTemplateAnnotation handles JsonArray response with annotation`() = runBlocking {
+        val templateCode = "export const Button = () => <button>Click me</button>;"
+        val componentName = "Button"
+        val annotation = "{\"@context\":\"https://schema.org/\"}"
+
+        // Create a JsonArray response with an annotation
+        val jsonArray = buildJsonArray {
+            addJsonObject {
+                put("annotation", JsonPrimitive(annotation))
+            }
+        }
+
+        val ollamaResponse = OllamaResponse(
+            model = "test-model",
+            created_at = "timestamp",
+            response = "[{\"annotation\":\"$annotation\"}]",
+            done = true,
+            done_reason = "stop"
+        )
+
+        mockkObject(Json)
+
+        every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
+        coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
+        every { Json.parseToJsonElement(any<String>()) } returns jsonArray
+        every { PromptingTools.formatResponseJson(any()) } returns ollamaResponse.response.toString()
+
+        val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
+
+        assertEquals(annotation, result)
+        verify { Json.parseToJsonElement(any()) }
+    }
+
+    @Test
+    fun `generateTemplateAnnotation returns null when JsonArray is empty`() = runBlocking {
+        val templateCode = "export const Button = () => <button>Click me</button>;"
+        val componentName = "Button"
+
+        // Create an empty JsonArray
+        val emptyJsonArray = buildJsonArray {}
+
+        val ollamaResponse = OllamaResponse(
+            model = "test-model",
+            created_at = "timestamp",
+            response = "[]", // Empty array
+            done = true,
+            done_reason = "stop"
+        )
+
+        mockkObject(Json)
+
+        every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
+        coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
+        every { Json.parseToJsonElement(any<String>()) } returns emptyJsonArray
+        every { PromptingTools.formatResponseJson(any()) } returns ollamaResponse.response.toString()
+
+        val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
+
+        assertNull(result)
+        verify { Json.parseToJsonElement(any()) }
+    }
+
+    @Test
+    fun `generateTemplateAnnotation returns null when JsonArray item has no annotation field`() = runBlocking {
+        val templateCode = "export const Button = () => <button>Click me</button>;"
+        val componentName = "Button"
+
+        // Create a JsonArray without an annotation field
+        val jsonArray = buildJsonArray {
+            addJsonObject {
+                put("something", JsonPrimitive("else"))
+            }
+        }
+
+        val ollamaResponse = OllamaResponse(
+            model = "test-model",
+            created_at = "timestamp",
+            response = "[{\"something\":\"else\"}]",
+            done = true,
+            done_reason = "stop"
+        )
+
+        mockkObject(Json)
+
+        every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
+        coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
+        every { Json.parseToJsonElement(any<String>()) } returns jsonArray
+        every { PromptingTools.formatResponseJson(any()) } returns ollamaResponse.response.toString()
+
+        val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
+
+        assertNull(result)
+        verify { Json.parseToJsonElement(any()) }
+    }
+
+    @Test
+    fun `generateTemplateAnnotation returns null for unexpected JSON format`() = runBlocking {
+        val templateCode = "export const Button = () => <button>Click me</button>;"
+        val componentName = "Button"
+
+        // Create a JsonPrimitive (neither object nor array)
+        val jsonPrimitive = JsonPrimitive("unexpected format")
+
+        val ollamaResponse = OllamaResponse(
+            model = "test-model",
+            created_at = "timestamp",
+            response = "\"unexpected format\"",
+            done = true,
+            done_reason = "stop"
+        )
+
+        mockkObject(Json)
+
+        every { TemplateRetrieval.buildAnnotationPrompt(templateCode, componentName) } returns "test prompt"
+        coEvery { PrototypeInteractor.prompt("test prompt", any(), any(), any()) } returns ollamaResponse
+        every { Json.parseToJsonElement(any<String>()) } returns jsonPrimitive
+        every { PromptingTools.formatResponseJson(any()) } returns ollamaResponse.response.toString()
+
+        val result = TemplateRetrieval.generateTemplateAnnotation(templateCode, componentName)
+
+        assertNull(result)
+        verify { Json.parseToJsonElement(any()) }
+    }
+
 }

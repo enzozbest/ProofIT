@@ -99,8 +99,9 @@ test('Authenticated users see new prompts', async () => {
   ).toBeInTheDocument();
   expect(screen.getByTestId('input-box')).toBeInTheDocument();
 
-  const promptButtons = screen.getAllByRole('button');
-  expect(promptButtons.length).toBe(3);
+  //With the navbar in the landing page, it now counts the sign in/log out button as a button, keep it as 4
+  const landingPageButtons = screen.getAllByRole('button');
+  expect(landingPageButtons.length).toBe(4);
 });
 
 test("Unauthenticated users dont't see OldPrompts component", async () => {

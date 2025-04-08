@@ -11,6 +11,7 @@ import {
   sendChatMessage,
   fetchChatHistory,
   apiUpdateConversationName,
+  apiDeleteConversation,
   getConversationHistory,
 } from '@/api/FrontEndAPI';
 import {
@@ -405,6 +406,48 @@ describe('apiUpdateConversationName', () => {
 
     expect(console.error).toHaveBeenCalledWith(
       'Error updating conversation name:',
+      networkError
+    );
+  });
+});
+
+describe('apiDeleteConversation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (console.error as any).mockClear();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should return false when the response is not ok', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+      })
+    );
+
+    const conversationId = 'test-conversation-123';
+    const result = await apiDeleteConversation(conversationId);
+
+    expect(result).toBe(false);
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to delete conversation'
+    );
+  });
+
+  it('should handle network errors', async () => {
+    const networkError = new Error('Network failure');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(networkError));
+
+    const conversationId = 'test-conversation-123';
+    const result = await apiDeleteConversation(conversationId);
+
+    expect(result).toBe(false);
+    expect(console.error).toHaveBeenCalledWith(
+      'Error deleting conversation:',
       networkError
     );
   });
