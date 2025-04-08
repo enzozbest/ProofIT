@@ -8,13 +8,13 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import * as FrontEndAPI from '@/api/FrontEndAPI';
+import * as FrontEndAPI from '@/api';
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@/api/FrontEndAPI', () => ({
+vi.mock('@/api', () => ({
   fetchChatHistory: vi.fn(),
   createNewConversation: vi.fn(),
   apiUpdateConversationName: vi.fn(),

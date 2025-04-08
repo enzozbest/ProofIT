@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import ChatMessage from '../../hooks/Chat';
-import { sendChatMessage } from '../../api/FrontEndAPI';
+import { sendChatMessage } from '@/api';
 import { Message, ChatResponse } from '../../types/Types';
 import { useConversation } from '../../contexts/ConversationContext';
 
-vi.mock('../../api/FrontEndAPI', () => ({
+vi.mock('@/api', () => ({
   sendChatMessage: vi.fn(),
 }));
 

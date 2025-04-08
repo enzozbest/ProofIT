@@ -8,6 +8,7 @@ export const defaultHeaders = {
 
 export async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   const defaultOptions: RequestInit = {
+    method: 'GET',
     credentials: 'include',
     headers: defaultHeaders,
   };
