@@ -74,6 +74,33 @@ export async function apiUpdateConversationName(
   }
 }
 
+export async function apiDeleteConversation(
+  conversationId: string
+): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/api/chat/json/${conversationId}/delete`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }
+    );
+
+    if (!response.ok) {
+      console.error('Failed to delete conversation');
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error deleting conversation:', error);
+    return false;
+  }
+}
+
 export async function getConversationHistory(
   conversationId: string
 ): Promise<Message[]> {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sendChatMessage } from '../api/FrontEndAPI';
+import { sendChatMessage } from '@/api';
 import {
   Message,
   ChatHookReturn,
@@ -31,7 +31,6 @@ const ChatMessage = ({
 }: ChatMessageProps): ChatHookReturn => {
   const [message, setMessage] = useState<string>('');
   const [sentMessages, setSentMessages] = useState<Message[]>([]);
-  const [llmResponse, setLlmResponse] = useState<string>('');
   const [chatResponse, setChatResponse] = useState<ChatResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -114,30 +113,26 @@ const ChatMessage = ({
       const messageId = chatResponse.messageId;
       const conversationId = chatResponse.conversationId;
 
-      if (activeConversationId) {
-        console.log('Extracted values:', {
-          content: messageContent,
-          id: messageId,
+      const newLLMMessage: Message = {
+        role: 'LLM',
+        content: messageContent,
+        timestamp: currentTime,
+        conversationId: conversationId,
+        id: messageId,
+        isError: false,
+      };
+
+      if (newLLMMessage.conversationId === activeConversationId) {
+        console.log('Adding message to current conversation:', {
+          messageConversationId: conversationId,
           activeConversationId
         });
-
-        const newLLMMessage: Message = {
-          role: 'LLM',
-          content: messageContent,
-          timestamp: currentTime,
-          conversationId: conversationId,
-          id: messageId,
-          isError: false,
-        };
-
-        if (newLLMMessage.conversationId === activeConversationId) {
-          setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
-        } else {
-          console.log('Message from different conversation, not displaying', {
-            messageConversationId: newLLMMessage.conversationId,
-            activeConversationId
-          });
-        }
+        setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
+      } else {
+        console.log('Message from different conversation, not displaying', {
+          messageConversationId: conversationId,
+          activeConversationId
+        });
       }
     }
   }, [chatResponse, activeConversationId]);

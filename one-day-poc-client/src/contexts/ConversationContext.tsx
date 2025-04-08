@@ -4,8 +4,9 @@ import {
   fetchChatHistory,
   createNewConversation,
   apiUpdateConversationName,
+  apiDeleteConversation,
   getConversationHistory,
-} from '../api/FrontEndAPI';
+} from '@/api';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ConversationContextType {
@@ -17,6 +18,7 @@ interface ConversationContextType {
   createConversation: () => string;
   refreshConversations: () => Promise<void>;
   updateConversationName: (id: string, name: string) => Promise<void>;
+  deleteConversation: (id: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -70,6 +72,26 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const deleteConversation = async (id: string) => {
+    try {
+      const success = await apiDeleteConversation(id);
+      if (success) {
+        setConversations(conversations.filter(conv => conv.id !== id));
+        
+        if (activeConversationId === id) {
+          setActiveConversationId(null);
+          setMessages([]);
+        }
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      return false;
+    }
+  };
+
   const loadConversationMessages = async (conversationId: string) => {
     if (!conversationId) return;
 
@@ -112,6 +134,7 @@ export const ConversationProvider: React.FC<{ children: React.ReactNode }> = ({
         createConversation,
         refreshConversations,
         updateConversationName,
+        deleteConversation,
         isLoading,
       }}
     >

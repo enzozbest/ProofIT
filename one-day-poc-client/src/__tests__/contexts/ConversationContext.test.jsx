@@ -8,17 +8,18 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import * as FrontEndAPI from '@/api/FrontEndAPI';
+import * as FrontEndAPI from '@/api';
 
 vi.mock('@/contexts/AuthContext', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@/api/FrontEndAPI', () => ({
+vi.mock('@/api', () => ({
   fetchChatHistory: vi.fn(),
   createNewConversation: vi.fn(),
   apiUpdateConversationName: vi.fn(),
   getConversationHistory: vi.fn(),
+  apiDeleteConversation: vi.fn(),
 }));
 
 const renderWithAct = async (ui) => {
@@ -37,6 +38,7 @@ const ConversationConsumer = () => {
     createConversation,
     refreshConversations,
     updateConversationName,
+    deleteConversation,
     isLoading,
   } = useConversation();
 
@@ -76,6 +78,18 @@ const ConversationConsumer = () => {
         onClick={() => setActiveConversationId('test-id')}
       >
         Set Active
+      </button>
+      <button
+        data-testid="delete-conversation"
+        onClick={() => activeConversationId && deleteConversation(activeConversationId)}
+      >
+        Delete Active Conversation
+      </button>
+      <button
+        data-testid="delete-specific"
+        onClick={() => deleteConversation('specific-id')}
+      >
+        Delete Specific Conversation
       </button>
     </div>
   );
@@ -475,5 +489,284 @@ describe('ConversationContext', () => {
     });
   
     expect(FrontEndAPI.getConversationHistory).not.toHaveBeenCalled();
+  });
+
+  test('deleteConversation removes the conversation from state and calls API', async () => {
+    const mockConversations = [
+      {
+        id: 'test-id-1',
+        name: 'Conversation 1',
+        lastModified: '2023-01-01',
+        messageCount: 0,
+        messages: [],
+      },
+      {
+        id: 'test-id-2',
+        name: 'Conversation 2',
+        lastModified: '2023-01-02',
+        messageCount: 0,
+        messages: [],
+      }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockResolvedValue(true);
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationConsumer />
+      </ConversationProvider>
+    );
+
+    const setActiveButton = screen.getByTestId('set-active');
+    await act(async () => {
+      await userEvent.click(setActiveButton);
+    });
+
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('2');
+    expect(screen.getByTestId('active-conversation')).toHaveTextContent('test-id');
+
+    const deleteSpecificButton = screen.getByTestId('delete-specific');
+    await act(async () => {
+      await userEvent.click(deleteSpecificButton);
+    });
+
+    expect(FrontEndAPI.apiDeleteConversation).toHaveBeenCalledWith('specific-id');
+  });
+
+  test('deleteConversation resets active conversation when deleting the active one', async () => {
+    const mockConversations = [
+      {
+        id: 'test-id',
+        name: 'Test Conversation',
+        lastModified: '2023-01-01',
+        messageCount: 0,
+        messages: [],
+      }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockResolvedValue(true);
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationConsumer />
+      </ConversationProvider>
+    );
+
+    const setActiveButton = screen.getByTestId('set-active');
+    await act(async () => {
+      await userEvent.click(setActiveButton);
+    });
+
+    expect(screen.getByTestId('active-conversation')).toHaveTextContent('test-id');
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('1');
+
+    const deleteButton = screen.getByTestId('delete-conversation');
+    await act(async () => {
+      await userEvent.click(deleteButton);
+    });
+
+    expect(screen.getByTestId('active-conversation')).toHaveTextContent('No Active Conversation');
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('0');
+    expect(screen.getByTestId('messages-count')).toHaveTextContent('0');
+    expect(FrontEndAPI.apiDeleteConversation).toHaveBeenCalledWith('test-id');
+  });
+
+  test('deleteConversation handles API errors', async () => {
+    const mockConversations = [
+      {
+        id: 'test-id',
+        name: 'Test Conversation',
+        lastModified: '2023-01-01',
+        messageCount: 0,
+        messages: [],
+      }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockResolvedValue(false);
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationConsumer />
+      </ConversationProvider>
+    );
+
+    const deleteSpecificButton = screen.getByTestId('delete-specific');
+    await act(async () => {
+      await userEvent.click(deleteSpecificButton);
+    });
+
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('1');
+    expect(FrontEndAPI.apiDeleteConversation).toHaveBeenCalledWith('specific-id');
+  });
+
+  test('deleteConversation handles exceptions', async () => {
+    const mockConversations = [
+      {
+        id: 'test-id',
+        name: 'Test Conversation',
+        lastModified: '2023-01-01',
+        messageCount: 0,
+        messages: [],
+      }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockRejectedValue(new Error('API error'));
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationConsumer />
+      </ConversationProvider>
+    );
+
+    const deleteSpecificButton = screen.getByTestId('delete-specific');
+    await act(async () => {
+      await userEvent.click(deleteSpecificButton);
+    });
+
+    expect(console.error).toHaveBeenCalledWith(
+      'Error deleting conversation:',
+      expect.any(Error)
+    );
+    expect(screen.getByTestId('conversation-count')).toHaveTextContent('1');
+  });
+
+  test('deleteConversation sets current conversation to none', async () => {
+    const ConversationListTester = () => {
+      const { 
+        conversations, 
+        activeConversationId, 
+        setActiveConversationId, 
+        deleteConversation 
+      } = useConversation();
+      
+      return (
+        <div>
+          <div data-testid="active-id">{activeConversationId || 'none'}</div>
+          <div data-testid="conversations-count">{conversations.length}</div>
+          {conversations.map(conv => (
+            <div key={conv.id} data-testid={`conv-${conv.id}`}>
+              {conv.name}
+              <button 
+                data-testid={`select-${conv.id}`}
+                onClick={() => setActiveConversationId(conv.id)}
+              >
+                Select
+              </button>
+              <button 
+                data-testid={`delete-${conv.id}`}
+                onClick={() => deleteConversation(conv.id)}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const mockConversations = [
+      { id: 'conv-1', name: 'First Conv', lastModified: '2023-01-01', messageCount: 0 },
+      { id: 'conv-2', name: 'Second Conv', lastModified: '2023-01-02', messageCount: 0 },
+      { id: 'conv-3', name: 'Third Conv', lastModified: '2023-01-03', messageCount: 0 }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockResolvedValue(true);
+    FrontEndAPI.getConversationHistory.mockResolvedValue([]);
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationListTester />
+      </ConversationProvider>
+    );
+
+    expect(screen.getByTestId('conversations-count')).toHaveTextContent('3');
+    
+    await act(async () => {
+      await userEvent.click(screen.getByTestId('select-conv-2'));
+    });
+    
+    expect(screen.getByTestId('active-id')).toHaveTextContent('conv-2');
+    
+    await act(async () => {
+      await userEvent.click(screen.getByTestId('delete-conv-2'));
+    });
+    
+    expect(screen.getByTestId('active-id')).toHaveTextContent('none');
+    expect(screen.getByTestId('conversations-count')).toHaveTextContent('2');
+    
+    expect(screen.queryByTestId('conv-conv-2')).not.toBeInTheDocument();
+  });
+
+  test('deleteConversation clears active conversation when deleting the active one', async () => {
+    const ConversationListTester = () => {
+      const { 
+        conversations, 
+        activeConversationId, 
+        setActiveConversationId, 
+        deleteConversation 
+      } = useConversation();
+      
+      return (
+        <div>
+          <div data-testid="active-id">{activeConversationId || 'none'}</div>
+          <div data-testid="conversations-count">{conversations.length}</div>
+          {conversations.map(conv => (
+            <div key={conv.id} data-testid={`conv-${conv.id}`}>
+              {conv.name}
+              <button 
+                data-testid={`select-${conv.id}`}
+                onClick={() => setActiveConversationId(conv.id)}
+              >
+                Select
+              </button>
+              <button 
+                data-testid={`delete-${conv.id}`}
+                onClick={() => deleteConversation(conv.id)}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const mockConversations = [
+      { id: 'conv-1', name: 'First Conv', lastModified: '2023-01-01', messageCount: 0 },
+      { id: 'conv-2', name: 'Second Conv', lastModified: '2023-01-02', messageCount: 0 },
+      { id: 'conv-3', name: 'Third Conv', lastModified: '2023-01-03', messageCount: 0 }
+    ];
+
+    FrontEndAPI.fetchChatHistory.mockResolvedValue(mockConversations);
+    FrontEndAPI.apiDeleteConversation.mockResolvedValue(true);
+    FrontEndAPI.getConversationHistory.mockResolvedValue([]);
+
+    await renderWithAct(
+      <ConversationProvider>
+        <ConversationListTester />
+      </ConversationProvider>
+    );
+
+    expect(screen.getByTestId('conversations-count')).toHaveTextContent('3');
+    
+    await act(async () => {
+      await userEvent.click(screen.getByTestId('select-conv-2'));
+    });
+    
+    expect(screen.getByTestId('active-id')).toHaveTextContent('conv-2');
+    
+    await act(async () => {
+      await userEvent.click(screen.getByTestId('delete-conv-2'));
+    });
+    
+    expect(screen.getByTestId('active-id')).toHaveTextContent('none');
+    expect(screen.getByTestId('conversations-count')).toHaveTextContent('2');
+    
+    expect(screen.queryByTestId('conv-conv-2')).not.toBeInTheDocument();
   });
 });
