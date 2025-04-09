@@ -28,6 +28,7 @@ class PrototypeMain(
         require(model.isNotBlank()) { "Model name cannot be empty!" }
 
         val service = LLMServiceFactory.getService(route)
+        println("Prompting with model: $model")
         val result = service.generateResponse(prompt, model, options)
 
         check(result.isSuccess) { "Failed to receive response from the LLM! Is the model installed?" }
