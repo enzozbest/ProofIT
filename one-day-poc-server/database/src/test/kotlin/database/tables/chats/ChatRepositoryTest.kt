@@ -32,7 +32,7 @@ class ChatRepositoryTest {
             SchemaUtils.create(ChatMessageTable)
             SchemaUtils.create(PrototypeTable)
         }
-        
+
         repository = ChatRepository(db)
     }
 
@@ -65,7 +65,7 @@ class ChatRepositoryTest {
         assertNotNull(retrieved)
         assertEquals(message.content, retrieved.content)
     }
-    
+
     @Test
     fun `test saving message with invalid conversationId`() = runTest {
         val message = ChatMessage(
@@ -79,7 +79,7 @@ class ChatRepositoryTest {
         val saveResult = repository.saveMessage(message)
         assertTrue(saveResult)
     }
-    
+
     @Test
     fun `test saving message with empty conversationId creates new conversation`() = runTest {
         val messageId = UUID.randomUUID().toString()
@@ -93,16 +93,16 @@ class ChatRepositoryTest {
 
         val saveResult = repository.saveMessage(message)
         assertTrue(saveResult)
-        
+
         val retrieved = repository.getMessageById(messageId)
         assertNotNull(retrieved)
         assertNotEquals("", retrieved.conversationId)
     }
-    
+
     @Test
     fun `test retrieving conversation messages with paging`() = runTest {
         val conversationId = UUID.randomUUID().toString()
-        
+
         val messages = (1..5).map { 
             ChatMessage(
                 id = UUID.randomUUID().toString(),
@@ -112,24 +112,24 @@ class ChatRepositoryTest {
                 timestamp = Instant.now().plusSeconds(it.toLong())
             )
         }
-        
+
         messages.forEach { repository.saveMessage(it) }
-        
+
         val firstPage = repository.getMessagesByConversation(conversationId, 2, 0)
         assertEquals(2, firstPage.size)
         assertEquals("Message 1", firstPage[0].content)
         assertEquals("Message 2", firstPage[1].content)
-        
+
         val secondPage = repository.getMessagesByConversation(conversationId, 2, 2)
         assertEquals(2, secondPage.size)
         assertEquals("Message 3", secondPage[0].content)
         assertEquals("Message 4", secondPage[1].content)
-        
+
         val thirdPage = repository.getMessagesByConversation(conversationId, 2, 4)
         assertEquals(1, thirdPage.size)
         assertEquals("Message 5", thirdPage[0].content)
     }
-    
+
     @Test
     fun `test deleting message`() = runTest {
         val messageId = UUID.randomUUID().toString()
@@ -140,15 +140,15 @@ class ChatRepositoryTest {
             content = "Hello for deletion",
             timestamp = Instant.now()
         )
-        
+
         repository.saveMessage(message)
         val deleteResult = repository.deleteMessage(messageId)
         assertTrue(deleteResult)
-        
+
         val retrieved = repository.getMessageById(messageId)
         assertNull(retrieved)
     }
-    
+
     @Test
     fun `test updating conversation name`() = runTest {
         val conversationId = UUID.randomUUID().toString()
@@ -159,21 +159,21 @@ class ChatRepositoryTest {
             content = "Hello",
             timestamp = Instant.now()
         )
-        
+
         repository.saveMessage(message)
-        
+
         val updateResult = repository.updateConversationName(conversationId, "Updated Name")
         assertTrue(updateResult)
-        
+
         val conversations = repository.getConversationsByUser("user1")
         assertEquals(1, conversations.size)
         assertEquals("Updated Name", conversations[0].name)
     }
-    
+
     @Test
     fun `test getting conversation message count`() = runTest {
         val conversationId = UUID.randomUUID().toString()
-        
+
         repeat(3) {
             repository.saveMessage(ChatMessage(
                 id = UUID.randomUUID().toString(),
@@ -183,18 +183,18 @@ class ChatRepositoryTest {
                 timestamp = Instant.now()
             ))
         }
-        
+
         val count = repository.getConversationMessageCount(conversationId)
         assertEquals(3, count)
     }
-    
+
     @Test
     fun `test getting conversations by user`() = runTest {
         val userId = "test-user"
-        
+
         val conversation1Id = UUID.randomUUID().toString()
         val conversation2Id = UUID.randomUUID().toString()
-        
+
         repository.saveMessage(ChatMessage(
             id = UUID.randomUUID().toString(),
             conversationId = conversation1Id,
@@ -202,7 +202,7 @@ class ChatRepositoryTest {
             content = "Message in conversation 1",
             timestamp = Instant.now().minusSeconds(3600)
         ))
-        
+
         repository.saveMessage(ChatMessage(
             id = UUID.randomUUID().toString(),
             conversationId = conversation2Id,
@@ -210,17 +210,17 @@ class ChatRepositoryTest {
             content = "Message in conversation 2",
             timestamp = Instant.now()
         ))
-        
+
         repository.updateConversationName(conversation1Id, "Conversation 1")
         repository.updateConversationName(conversation2Id, "Conversation 2")
-        
+
         val conversations = repository.getConversationsByUser(userId)
-        
+
         assertEquals(2, conversations.size)
         assertEquals("Conversation 2", conversations[0].name)
         assertEquals("Conversation 1", conversations[1].name)
     }
-    
+
     @Test
     fun `test saving and retrieving prototype`() = runTest {
         val messageId = UUID.randomUUID().toString()
@@ -280,12 +280,12 @@ class ChatRepositoryTest {
         assertEquals(1, retrieved.size)
         assertEquals(prototype.filesJson, retrieved[0].filesJson)
     }
-    
+
     @Test
     fun `test retrieving prototypes for a message`() = runTest {
         val messageId = UUID.randomUUID().toString()
         val conversationId = UUID.randomUUID().toString()
-        
+
         repository.saveMessage(ChatMessage(
             id = messageId,
             conversationId = conversationId,
@@ -293,7 +293,7 @@ class ChatRepositoryTest {
             content = "Hello",
             timestamp = Instant.now()
         ))
-        
+
         val prototype1 = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = messageId,
@@ -302,7 +302,7 @@ class ChatRepositoryTest {
             isSelected = true,
             timestamp = Instant.now().minusSeconds(60)
         )
-        
+
         val prototype2 = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = messageId,
@@ -311,19 +311,19 @@ class ChatRepositoryTest {
             isSelected = false,
             timestamp = Instant.now()
         )
-        
+
         repository.savePrototype(prototype1)
         repository.savePrototype(prototype2)
-        
+
         val prototypes = repository.getPrototypesByMessageId(messageId)
         assertEquals(2, prototypes.size)
     }
-    
+
     @Test
     fun `test retrieving selected prototype for message`() = runTest {
         val conversationId = UUID.randomUUID().toString()
         val messageId = UUID.randomUUID().toString()
-        
+
         val message = ChatMessage(
             id = messageId,
             conversationId = conversationId,
@@ -357,14 +357,14 @@ class ChatRepositoryTest {
         assertNotNull(selected)
         assertEquals(prototype1.filesJson, selected.filesJson)
     }
-    
+
     @Test
     fun `test getting all prototypes in a conversation`() = runTest {
         val conversationId = UUID.randomUUID().toString()
-        
+
         val message1Id = UUID.randomUUID().toString()
         val message2Id = UUID.randomUUID().toString()
-        
+
         repository.saveMessage(ChatMessage(
             id = message1Id,
             conversationId = conversationId,
@@ -372,7 +372,7 @@ class ChatRepositoryTest {
             content = "Message 1",
             timestamp = Instant.now()
         ))
-        
+
         repository.saveMessage(ChatMessage(
             id = message2Id,
             conversationId = conversationId,
@@ -380,7 +380,7 @@ class ChatRepositoryTest {
             content = "Message 2",
             timestamp = Instant.now()
         ))
-        
+
         val prototype1 = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = message1Id,
@@ -389,7 +389,7 @@ class ChatRepositoryTest {
             isSelected = true,
             timestamp = Instant.now()
         )
-        
+
         val prototype2 = Prototype(
             id = UUID.randomUUID().toString(),
             messageId = message2Id,
@@ -398,14 +398,14 @@ class ChatRepositoryTest {
             isSelected = true,
             timestamp = Instant.now()
         )
-        
+
         repository.savePrototype(prototype1)
         repository.savePrototype(prototype2)
-        
+
         val prototypes = repository.getAllPrototypesInConversation(conversationId)
         assertEquals(2, prototypes.size)
     }
-    
+
     @Test
     fun `test failure handling for invalid message ID`() = runTest {
         val invalidId = "invalid-uuid"
@@ -419,7 +419,7 @@ class ChatRepositoryTest {
         val prototypes = repository.getPrototypesByMessageId(nonExistentId)
         assertTrue(prototypes.isEmpty())
     }
-    
+
     @Test
     fun `test failure handling for invalid conversation ID when getting prototypes`() = runTest {
         val invalidId = "invalid-uuid"
@@ -667,4 +667,52 @@ class ChatRepositoryTest {
     }
 
 
+    @Test
+    fun `test deleteConversation successfully deletes existing conversation`() = runTest {
+        // Create a conversation by saving a message
+        val conversationId = UUID.randomUUID().toString()
+        val message = ChatMessage(
+            id = UUID.randomUUID().toString(),
+            conversationId = conversationId,
+            senderId = "user1",
+            content = "Test message for deletion",
+            timestamp = Instant.now()
+        )
+
+        repository.saveMessage(message)
+
+        // Verify the conversation exists
+        val conversations = repository.getConversationsByUser("user1")
+        assertEquals(1, conversations.size)
+
+        // Delete the conversation
+        val result = repository.deleteConversation(conversationId)
+
+        // Verify deletion was successful
+        assertTrue(result)
+
+        // Verify the conversation no longer exists
+        val conversationsAfterDeletion = repository.getConversationsByUser("user1")
+        assertEquals(0, conversationsAfterDeletion.size)
+    }
+
+    @Test
+    fun `test deleteConversation returns false when conversation doesn't exist`() = runTest {
+        // Try to delete a non-existent conversation
+        val nonExistentId = UUID.randomUUID().toString()
+        val result = repository.deleteConversation(nonExistentId)
+
+        // Verify the result is false
+        assertFalse(result)
+    }
+
+    @Test
+    fun `test deleteConversation returns false when an exception occurs`() = runTest {
+        // Try to delete with an invalid UUID
+        val invalidId = "invalid-uuid"
+        val result = repository.deleteConversation(invalidId)
+
+        // Verify the result is false
+        assertFalse(result)
+    }
 }
