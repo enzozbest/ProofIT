@@ -109,7 +109,7 @@ suspend fun handleJsonRequest(
         if (request.predefined) {
             println("IDENTIFYING PREDEFINED PROTOTYPE")
             val predefinedResponse = PredefinedPrototypes.run(request.prompt)
-
+            MessageHandler.saveMessage(request.conversationId, request.userID, request.prompt)
             chatContent = predefinedResponse.chatMessage
             prototypeFilesJson = predefinedResponse.files
         } else {
