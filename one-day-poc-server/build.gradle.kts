@@ -9,6 +9,10 @@ plugins {
     jacoco
 }
 
+tasks.shadowJar {
+    mergeServiceFiles()
+}
+
 tasks.register<JavaExec>("seed") {
     group = "Seeding"
     description = "Seeds the Template Library."
