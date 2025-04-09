@@ -5,9 +5,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
 import BackgroundSVG from '../assets/background.svg';
-import { useLocation, useNavigate  } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 import NavBar from '@/components/NavBar';
@@ -37,7 +36,6 @@ export default function Page() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
     if (savedMessage) {
@@ -45,21 +43,22 @@ export default function Page() {
     }
     // Check for initialMessage and isPredefined from location state
     else if (location.state?.initialMessage) {
-      console.log("inside /generate, predefined value is ", isPredefined)
+      console.log('inside /generate, predefined value is ', isPredefined);
       setInitialMessage(location.state.initialMessage);
       setIsPredefined(location.state.isPredefined || false);
     }
   }, [location]);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/403');
-    }
-  }, [isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/403');
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   return (
+    // TODO: add back 'overflow-hidden'
     <div
-      className="h-screen bg-gray-900 text-white overflow-hidden"
+      className="h-screen bg-gray-900 text-white"
       style={{
         backgroundImage: "url('/background.svg')",
         backgroundSize: 'cover',
