@@ -28,7 +28,7 @@ const NavBar: React.FC = () => {
   };
 
   return (
-    <nav className="absolute top-2  left-0 w-full h-16 flex justify-between items-center px-10 py-6 z-50">
+    <nav className="bg-lime-400 border-2 border-dashed w-full h-16 flex justify-between items-center px-10 py-6 z-50">
       <Logo />
       <div className="flex gap-2">
         {isAuthenticated ? (
