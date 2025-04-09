@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { sendChatMessage } from '@/api';
 import {
   Message,
@@ -7,6 +7,19 @@ import {
   ChatResponse,
 } from '../types/Types';
 import { useConversation } from '../contexts/ConversationContext';
+
+const createMessage = (
+  role: 'User' | 'LLM', 
+  content: string, 
+  conversationId: string, 
+  options: Partial<Message> = {}
+): Message => ({
+  role,
+  content,
+  timestamp: new Date().toISOString(),
+  conversationId,
+  ...options
+});
 
 /**
  * ChatMessage hook manages state and functionality for chat interactions
@@ -54,19 +67,21 @@ const ChatMessage = ({
     setChatResponse(null);
   }, [activeConversationId]);
 
-  const handleSend = async (messageToSend: string = message, isPredefined: boolean = false): Promise<void> => {
+  const handleChatError = useCallback((errorMsg: string, conversationId: string) => {
+    console.error('Chat Error:', errorMsg);
+    
+    if(conversationId === activeConversationId) {
+      const errorSystemMessage = createMessage('LLM', errorMsg, conversationId, { isError: true });
+      setSentMessages((prevMessages) => [...prevMessages, errorSystemMessage]);
+      setErrorMessage('Error. Please check your connection and try again.');
+    }
+  }, [activeConversationId, setSentMessages, setErrorMessage]);
+
+  const handleSend = useCallback(async (messageToSend: string = message, isPredefined: boolean = false): Promise<void> => {
     if (!messageToSend.trim()) return;
 
-    const currentTime = new Date().toISOString();
-
     const conversationId = activeConversationId || createConversation();
-
-    const newMessage: Message = {
-      role: 'User',
-      content: messageToSend,
-      timestamp: currentTime,
-      conversationId: conversationId,
-    };
+    const newMessage = createMessage('User', messageToSend, conversationId);
 
     setSentMessages((prevMessages) => [...prevMessages, newMessage]);
     setMessage('');
@@ -83,54 +98,32 @@ const ChatMessage = ({
           setPrototypeFiles(prototypeResponse.files);
         },
         isPredefined,
-        (errorMsg) => {
-          const errorSystemMessage: Message = {
-            role: 'LLM',
-            content: errorMsg,
-            timestamp: new Date().toISOString(),
-            conversationId: conversationId,
-            isError: true,
-          };
-          setSentMessages((prevMessages) => [
-            ...prevMessages,
-            errorSystemMessage,
-          ]);
-          setErrorMessage('Error. Please check your connection and try again.');
-        }
+        (errorMsg) => handleChatError(errorMsg, conversationId)
       );
     } catch (error) {
-      console.error('Error:', error);
-      setErrorMessage('Error. Please check your connection and try again.');
+      handleChatError('There was an error, please try again', conversationId);
     }
-  };
+  }, [message, activeConversationId, createConversation, setMessage, setSentMessages, setChatResponse, handleChatError, setPrototype, setPrototypeFiles]);
 
   useEffect(() => {
     if (chatResponse) {
-      const currentTime = new Date().toISOString();
+      const newLLMMessage = createMessage(
+        'LLM', 
+        chatResponse.message, 
+        chatResponse.conversationId ?? 'unknown-conversation',
+        { id: chatResponse.messageId, isError: false }
+      );
       console.log('Chat response:', chatResponse);
-
-      const messageContent = chatResponse.message;
-      const messageId = chatResponse.messageId;
-      const conversationId = chatResponse.conversationId;
-
-      const newLLMMessage: Message = {
-        role: 'LLM',
-        content: messageContent,
-        timestamp: currentTime,
-        conversationId: conversationId,
-        id: messageId,
-        isError: false,
-      };
 
       if (newLLMMessage.conversationId === activeConversationId) {
         console.log('Adding message to current conversation:', {
-          messageConversationId: conversationId,
+          messageConversationId: newLLMMessage.conversationId,
           activeConversationId
         });
         setSentMessages((prevMessages) => [...prevMessages, newLLMMessage]);
       } else {
         console.log('Message from different conversation, not displaying', {
-          messageConversationId: conversationId,
+          messageConversationId: newLLMMessage.conversationId,
           activeConversationId
         });
       }
