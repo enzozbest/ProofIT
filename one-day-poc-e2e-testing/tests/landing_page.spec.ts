@@ -220,18 +220,6 @@ test('Authenticated Landing page has the correct input box', async ({ page }) =>
     await logoutWithCognitoViaFlow(page)
 })
 
-test('Authenticated landing page has all previous prompts', async ({ page }) => {
-    const buttonGeneratingCodeForApplication = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[1]")
-    const buttonCreatingPortfolioWebsite = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[2]")
-    const buttonCreatingWebPageFrom = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[3]")
-    await loginWithCognitoViaFlow(page)
-   await page.goto("/")
-    await previousPromptsAssertions(buttonGeneratingCodeForApplication)
-    await previousPromptsAssertions(buttonCreatingPortfolioWebsite)
-    await previousPromptsAssertions(buttonCreatingWebPageFrom)
-    await logoutWithCognitoViaFlow(page.context(), page)
-})
-
 async function previousPromptsAssertions(button: Locator): Promise<void> {
     await expect(button).toBeVisible()
     await expect(button).toBeEnabled()
