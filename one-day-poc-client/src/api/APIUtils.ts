@@ -1,6 +1,6 @@
 import UserService from '../services/UserService';
 
-export const API_BASE_URL = 'http://localhost:8000/api';
+export const API_BASE_URL = 'https://proofit.uk/api';
 
 export const defaultHeaders = {
   'Content-Type': 'application/json',
