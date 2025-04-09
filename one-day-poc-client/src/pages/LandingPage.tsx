@@ -43,12 +43,12 @@ const LandingPage: FC = () => {
       }}
     >
       <NavBar />
-      <div className="border-2 border-red-600 flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
+      <div className="flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
         <HeroSection />
-        <div className="bg-red-600 border-2 border-white border-dashed flex justify-center w-full mt-6">
+        <div className="flex justify-center w-full mt-6">
           <GeneratedPrompts prompts={prompts} />
         </div>
-        <div className="bg-blue-600 border-white border-dashed border-2 w-full max-w-5xl mt-6">
+        <div className="w-full max-w-5xl mt-6">
           <InputBox />
         </div>
         {isAuthenticated && (
