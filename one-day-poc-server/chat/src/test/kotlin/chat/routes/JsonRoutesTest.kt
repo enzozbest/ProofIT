@@ -2,6 +2,7 @@ package chat.routes
 
 import chat.BaseAuthenticationServer
 import chat.storage.updateConversationName
+import chat.storage.deleteConversation
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -749,5 +750,65 @@ class JsonRoutesTest : BaseAuthenticationServer() {
             verify { PredefinedPrototypes.run("Test predefined prompt") }
 
             unmockkObject(PredefinedPrototypes)
+        }
+
+    @Test
+    fun `Test deleting a conversation is successful and returns true`() =
+        testApplication {
+            setupTestApplication()
+            mockkStatic("chat.storage.StorageKt")
+            val conversationId = "123"
+
+            coEvery { deleteConversation(conversationId) } returns true
+
+            val response =
+                client.post("/api/chat/json/$conversationId/delete") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                }
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertTrue(response.bodyAsText().contains("Conversation deleted successfully"))
+            unmockkAll()
+        }
+
+    @Test
+    fun `Test failing to delete a conversation returns false`() =
+        testApplication {
+            setupTestApplication()
+            mockkStatic("chat.storage.StorageKt")
+            val conversationId = "123"
+
+            coEvery { deleteConversation(conversationId) } returns false
+
+            val response =
+                client.post("/api/chat/json/$conversationId/delete") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                }
+
+            assertEquals(HttpStatusCode.InternalServerError, response.status)
+            assertTrue(response.bodyAsText().contains("Failed to delete conversation"))
+            unmockkAll()
+        }
+
+    @Test
+    fun `Test error thrown while deleting a conversation is handled gracefully`() =
+        testApplication {
+            setupTestApplication()
+            mockkStatic("chat.storage.StorageKt")
+            val conversationId = "123"
+
+            coEvery { deleteConversation(conversationId) } throws RuntimeException("Error deleting conversation")
+
+            val response =
+                client.post("/api/chat/json/$conversationId/delete") {
+                    header(HttpHeaders.Authorization, "Bearer ${createValidToken()}")
+                    contentType(ContentType.Application.Json)
+                }
+
+            assertEquals(HttpStatusCode.BadRequest, response.status)
+            assertTrue(response.bodyAsText().contains("Error: Error deleting conversation"))
+            unmockkAll()
         }
 }
