@@ -69,10 +69,10 @@ class ResponseFormatterTest {
         val response =
             OpenAIResponse(
                 model = "test-model",
-                created_at = 1672531200,
+                createdAt = 1672531200,
                 response = """{"key": "value"}""",
                 done = true,
-                done_reason = "stop",
+                doneReason = "stop",
             )
         assertThrows<IllegalArgumentException> {
             formatter.format(response)
@@ -86,10 +86,10 @@ class ResponseFormatterTest {
         val response =
             OpenAIResponse(
                 model = "test-model",
-                created_at = 1672531200,
+                createdAt = 1672531200,
                 response = """{"key": "value"}""",
                 done = true,
-                done_reason = "stop",
+                doneReason = "stop",
             )
 
         val formattedResponse = formatter.format(response)
@@ -104,10 +104,10 @@ class ResponseFormatterTest {
         val response =
             OpenAIResponse(
                 model = "test-model",
-                created_at = 1672531200,
+                createdAt = 1672531200,
                 response = null,
                 done = true,
-                done_reason = "stop",
+                doneReason = "stop",
             )
 
         val message = assertFailsWith<RuntimeException> { formatter.format(response) }.message

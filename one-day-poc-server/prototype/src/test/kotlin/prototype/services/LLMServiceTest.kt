@@ -87,10 +87,10 @@ class LLMServiceTest {
             Result.success(
                 OpenAIResponse(
                     model = "test-model",
-                    created_at = 1672531200,
+                    createdAt = 1672531200,
                     response = "Test response",
                     done = true,
-                    done_reason = "stop",
+                    doneReason = "stop",
                 ),
             )
     }
@@ -119,9 +119,9 @@ class LLMServiceTest {
             assertTrue(response is OpenAIResponse)
             val openAIResponse = response as OpenAIResponse
             assertEquals("test-model", openAIResponse.model)
-            assertEquals(1672531200, openAIResponse.created_at)
+            assertEquals(1672531200, openAIResponse.createdAt)
             assertEquals("Test response", openAIResponse.response)
             assertTrue(openAIResponse.done)
-            assertEquals("stop", openAIResponse.done_reason)
+            assertEquals("stop", openAIResponse.doneReason)
         }
 }
