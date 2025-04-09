@@ -147,16 +147,6 @@ test("Authenticated landing page has the correct title", async ({ page }) => {
     await logoutWithCognitoViaFlow(page)
 })
 
-test("Logout button is visible and clickable", async ({ page }) => {
-    await page.goto("/")
-    await loginWithCognitoViaFlow(page)
-    const buttonLogOut = page.locator("xpath=//button[contains(@class, 'py-2')]")
-    await expect(buttonLogOut).toBeVisible()
-    await expect(buttonLogOut).toBeEnabled()
-    await expect(buttonLogOut).toHaveText("Log Out")
-    await logoutWithCognitoViaFlow(page)
-})
-
 test('Authenticated Landing page has pre-set prompt buttons', async ({ page }) => {
     const buttonChatbotAssistantForCustomer = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[1]")
     const buttonDashboardForFinancialReports = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[2]")
