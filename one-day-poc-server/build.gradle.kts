@@ -9,7 +9,7 @@ plugins {
     jacoco
 }
 
-tasks.shadowJar {
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     mergeServiceFiles()
 }
 
