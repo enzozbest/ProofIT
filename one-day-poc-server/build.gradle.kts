@@ -9,6 +9,11 @@ plugins {
     jacoco
 }
 
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    mergeServiceFiles()
+}
+
 tasks.register<JavaExec>("seed") {
     group = "Seeding"
     description = "Seeds the Template Library."
