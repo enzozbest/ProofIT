@@ -379,4 +379,49 @@ describe('ChatMessage Hook', () => {
 
     vi.useRealTimers();
   });
+
+  it('should apply fallback ID but not display messages from unknown conversations', async () => {
+    const chatResponseWithoutId = {
+      message: 'Response without conversation ID',
+      role: 'LLM',
+      timestamp: new Date().toISOString(),
+      messageId: 'msg-123',
+      conversationId: undefined
+    };
+
+    // Setup mocks
+    (sendChatMessage as any).mockImplementation(
+      (message: any, chatCallback: any) => {
+        chatCallback(chatResponseWithoutId);
+        return Promise.resolve();
+      }
+    );
+
+    // Mock different active conversation ID than the one that will be assigned
+    (useConversation as any).mockReturnValue({
+      activeConversationId: 'different-conversation-id', // Not 'unknown-conversation'
+      createConversation: mockCreateConversation,
+      messages: [],
+      loadingMessages: false,
+    });
+    
+    // Render the hook
+    const { result } = renderHook(() =>
+      ChatMessage({
+        setPrototype: mockSetPrototype,
+        setPrototypeFiles: mockSetPrototypeFiles,
+      })
+    );
+
+    // Trigger message sending
+    await act(async () => {
+      await result.current.handleSend('Test message');
+    });
+
+    // Now check for the message - it should not be found
+    const llmMessage = result.current.sentMessages.find(
+      msg => msg.role === 'LLM' && msg.content === 'Response without conversation ID'
+    );
+    expect(llmMessage).toBeUndefined();
+  });
 });
