@@ -3,13 +3,6 @@ plugins {
 }
 rootProject.name = "one-day-poc-server"
 
-include(
-    "auth",
-    "database",
-    "routes",
-    "utils",
-    "chat",
-    "prototype",
-    "embeddings",
-    "prompting",
-)
+include("auth", "database", "routes", "utils", "chat", "prototype", "embeddings", "prompting")
+include("routes")
+include("routes")
