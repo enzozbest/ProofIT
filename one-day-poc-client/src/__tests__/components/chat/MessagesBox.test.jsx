@@ -2,9 +2,9 @@ import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { describe, test, expect, beforeEach } from 'vitest';
 import { MessageBox } from '../../../components/chat/MessagesBox.js';
 import '../../mocks/message-box.mock.jsx';
-import { getPrototypeForMessage } from '@/api/FrontEndAPI';
+import { getPrototypeForMessage } from '@/api';
 
-vi.mock('@/api/FrontEndAPI', () => ({
+vi.mock('@/api', () => ({
   getPrototypeForMessage: vi.fn().mockResolvedValue([]),
 }));
 

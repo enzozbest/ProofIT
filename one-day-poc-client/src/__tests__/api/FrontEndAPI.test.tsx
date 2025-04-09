@@ -13,7 +13,8 @@ import {
   apiUpdateConversationName,
   apiDeleteConversation,
   getConversationHistory,
-} from '@/api/FrontEndAPI';
+  getPrototypeForMessage
+} from '@/api';
 import {
   Message,
   ChatResponse,
@@ -21,7 +22,6 @@ import {
   Conversation,
 } from '@/types/Types';
 import UserService from '@/services/UserService';
-import { getPrototypeForMessage } from '@/api/FrontEndAPI';
 
 const originalConsoleError = console.error;
 const originalConsoleLog = console.log;
