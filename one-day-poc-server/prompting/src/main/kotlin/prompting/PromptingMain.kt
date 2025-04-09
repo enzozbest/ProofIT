@@ -17,7 +17,6 @@ import prompting.helpers.promptEngineering.SanitisationTools
 import prompting.helpers.templates.TemplateInteractor
 import prototype.LlmResponse
 import prototype.helpers.LLMOptions
-import prototype.helpers.OllamaOptions
 import prototype.helpers.PromptException
 import prototype.security.secureCodeCheck
 import utils.environment.EnvironmentLoader
@@ -81,7 +80,7 @@ class PromptingMain(
 
         // Step 2: Extract functional requirements
         val freqsPrompt = PromptingTools.functionalRequirementsPrompt(sanitisedPrompt.prompt, sanitisedPrompt.keywords)
-        val freqsOptions = OllamaOptions(temperature = 0.50, top_k = 300, top_p = 0.9, num_predict = 500)
+        val freqsOptions = OptionsFactory.getOptions("openai", 0.40).also { println(it) }
         val freqs: String = promptLlm(freqsPrompt, freqsOptions, "openai")
         val freqsResponse: JsonObject =
             runCatching { Json.decodeFromString<JsonObject>(freqs) }.getOrElse { buildJsonObject { } }
