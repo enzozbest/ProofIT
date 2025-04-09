@@ -1,10 +1,8 @@
 import ChatScreen from '../components/chat/ChatScreen';
 import PrototypeFrame from '../components/prototype/PrototypeFrame';
 import PrototypeWindow from '@/components/prototype/PrototypeWindow';
-import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
-import BackgroundSVG from '../assets/background.svg';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
