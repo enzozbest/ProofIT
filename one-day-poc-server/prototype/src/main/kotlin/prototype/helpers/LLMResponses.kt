@@ -68,8 +68,8 @@ internal data class OpenAIApiResponse(
 data class OutputItem(
     val type: String,
     val id: String,
-    val status: String,
-    val role: String,
+    val status: String? = null,
+    val role: String? = null,
     val content: List<ContentItem> = emptyList(),
 )
 
