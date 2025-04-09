@@ -43,7 +43,7 @@ const LandingPage: FC = () => {
       }}
     >
       <NavBar />
-      <div className="bg-slate-500 border-2 border-red-600 flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
+      <div className="border-2 border-red-600 flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
         <HeroSection />
         <div className="bg-red-600 border-2 border-white border-dashed flex justify-center w-full mt-6">
           <GeneratedPrompts prompts={prompts} />
