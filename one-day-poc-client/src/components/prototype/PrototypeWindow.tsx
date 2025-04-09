@@ -14,9 +14,9 @@ export default function PrototypeWindow({
   return (
     <div className="w-full h-full flex flex-col me-8 bg-white/15 backdrop-blur-lg rounded-xl border-[0.2vmin] border-white overflow-hidden text-white">
       <div className="w-full flex flex-row justify-between p-1 px-3 gap-1 ">
-        <button className="bg-transparent rounded-full hover:bg-white hover:text-[#731ecb] transition p-1 rounded-xl">
+        <div className="gap-1 flex flex-row p-1">
           <RefreshCw size={12} strokeWidth={2} className="text-neutral/50" />
-        </button>
+        </div>
         <div className="gap-1 flex flex-row p-1">
           <Minus size={14} strokeWidth={2} className="text-neutral/50" />
           <Square size={12} strokeWidth={2} className="text-neutral/50" />

@@ -115,10 +115,10 @@ class OpenAIServiceTest {
             assertTrue(response is OpenAIResponse)
             val openAIResponse = response as OpenAIResponse
             assertEquals("gpt-4", openAIResponse.model)
-            assertEquals(1672531200, openAIResponse.created_at)
+            assertEquals(1672531200, openAIResponse.createdAt)
             assertEquals("Test response", openAIResponse.response)
             assertTrue(openAIResponse.done)
-            assertEquals("stop", openAIResponse.done_reason)
+            assertEquals("stop", openAIResponse.doneReason)
         }
 
     @Test
@@ -185,10 +185,10 @@ class OpenAIServiceTest {
 
             assertNotNull(response)
             assertEquals("gpt-4", response?.model)
-            assertEquals(1672531200, response?.created_at)
+            assertEquals(1672531200, response?.createdAt)
             assertEquals("Test response", response?.response)
             assertTrue(response?.done == true)
-            assertEquals("stop", response?.done_reason)
+            assertEquals("stop", response?.doneReason)
         }
 
     @Test
@@ -238,10 +238,10 @@ class OpenAIServiceTest {
 
             assertNotNull(response)
             assertEquals("gpt-4", response?.model)
-            assertEquals(1672531200, response?.created_at)
+            assertEquals(1672531200, response?.createdAt)
             assertEquals("", response?.response)
             assertTrue(response?.done == true)
-            assertEquals("stop", response?.done_reason)
+            assertEquals("stop", response?.doneReason)
         }
 
     @Test

@@ -8,7 +8,7 @@ import {
   MessageBubbleTimestamp,
 } from './MessageBubble';
 import { Message, MessageBoxProps } from '@/types/Types';
-import { getPrototypeForMessage } from '@/api/FrontEndAPI';
+import { getPrototypeForMessage } from '@/api';
 
 /**
  * MessageBox component displays the chat conversation history.

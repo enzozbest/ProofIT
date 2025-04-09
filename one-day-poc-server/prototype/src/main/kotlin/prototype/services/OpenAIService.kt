@@ -25,7 +25,13 @@ import utils.environment.EnvironmentLoader
  * Service for interacting with OpenAI API
  */
 object OpenAIService : LLMService {
-    var client = HttpClient(CIO)
+    private const val REQUEST_TIMEOUT_MILLIS = 6_000_000L
+    var client =
+        HttpClient(CIO) {
+            engine {
+                requestTimeout = REQUEST_TIMEOUT_MILLIS
+            }
+        }
 
     /**
      * Sends a prompt to the language model and returns the generated response.
@@ -57,11 +63,8 @@ object OpenAIService : LLMService {
                 options = options,
             )
 
-        println(request)
-
         return try {
             val response = callOpenAI(request, options)
-            println(response)
             if (response != null) {
                 Result.success(response)
             } else {
