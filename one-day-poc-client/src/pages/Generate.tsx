@@ -55,7 +55,6 @@ export default function Page() {
   // }, [isAuthenticated, navigate]);
 
   return (
-    // TODO: add back 'overflow-hidden'
     <div className="h-screen text-white" data-testid="container">
       <NavBar />
       <SidebarWrapper>
