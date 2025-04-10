@@ -47,6 +47,7 @@ export default function Page() {
     }
   }, [location]);
 
+  // TODO: Put back auth redirection
   // useEffect(() => {
   //   if (!isAuthenticated) {
   //     navigate('/403');
@@ -55,16 +56,7 @@ export default function Page() {
 
   return (
     // TODO: add back 'overflow-hidden'
-    <div
-      className="h-screen bg-gray-900 text-white"
-      style={{
-        backgroundImage: "url('/background.svg')",
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}
-      data-testid="container"
-    >
+    <div className="h-screen bg-gray-900 text-white" data-testid="container">
       <NavBar />
       <SidebarWrapper>
         <div

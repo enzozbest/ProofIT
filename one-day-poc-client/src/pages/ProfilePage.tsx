@@ -6,7 +6,6 @@ import UserService from '../services/UserService';
 import NavBar from '@/components/NavBar';
 import { useAuth } from '@/contexts/AuthContext';
 
-
 /**
  * ProfilePage Component
  *
@@ -49,11 +48,12 @@ const ProfilePage: React.FC = () => {
     loadUserData();
   }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/403');
-    }
-  }, [isAuthenticated, navigate]);
+  // TODO: Put back auth redirection
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/403');
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   if (loading)
     return (
@@ -69,15 +69,7 @@ const ProfilePage: React.FC = () => {
     );
 
   return (
-    <div
-      className="flex flex-col min-h-screen"
-      style={{
-        backgroundImage: `url(${BackgroundSVG})`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}
-    >
+    <div className="flex flex-col min-h-screen">
       <NavBar />
       <div className="flex flex-col items-center justify-center h-screen text-white">
         <div className="relative w-80 mb-4 flex justify-center items-center">
