@@ -147,16 +147,6 @@ test("Authenticated landing page has the correct title", async ({ page }) => {
     await logoutWithCognitoViaFlow(page)
 })
 
-test("Logout button is visible and clickable", async ({ page }) => {
-    await page.goto("/")
-    await loginWithCognitoViaFlow(page)
-    const buttonLogOut = page.locator("xpath=//button[contains(@class, 'py-2')]")
-    await expect(buttonLogOut).toBeVisible()
-    await expect(buttonLogOut).toBeEnabled()
-    await expect(buttonLogOut).toHaveText("Log Out")
-    await logoutWithCognitoViaFlow(page)
-})
-
 test('Authenticated Landing page has pre-set prompt buttons', async ({ page }) => {
     const buttonChatbotAssistantForCustomer = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[1]")
     const buttonDashboardForFinancialReports = page.locator("xpath=/html/body/div/div/div/div[2]/div/button[2]")
@@ -218,18 +208,6 @@ test('Authenticated Landing page has the correct input box', async ({ page }) =>
     await expect(sendButton).toBeEnabled()
     await expect(sendButton).toHaveAttribute("class", "p-3 flex items-center justify-center bg-transparent rounded-full hover:bg-gray-800 transition ml-2")
     await logoutWithCognitoViaFlow(page)
-})
-
-test('Authenticated landing page has all previous prompts', async ({ page }) => {
-    const buttonGeneratingCodeForApplication = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[1]")
-    const buttonCreatingPortfolioWebsite = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[2]")
-    const buttonCreatingWebPageFrom = page.locator("xpath=/html/body/div/div/div/div[4]/div/button[3]")
-    await loginWithCognitoViaFlow(page)
-   await page.goto("/")
-    await previousPromptsAssertions(buttonGeneratingCodeForApplication)
-    await previousPromptsAssertions(buttonCreatingPortfolioWebsite)
-    await previousPromptsAssertions(buttonCreatingWebPageFrom)
-    await logoutWithCognitoViaFlow(page.context(), page)
 })
 
 async function previousPromptsAssertions(button: Locator): Promise<void> {

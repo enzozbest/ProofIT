@@ -4,8 +4,13 @@ import com.zaxxer.hikari.HikariDataSource
 import database.helpers.MockEnvironment
 import database.helpers.MockEnvironment.ENV_FILE
 import database.helpers.MockEnvironment.generateEnvironmentFile
-import database.tables.templates.TemplateRepository
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkAll
+import io.mockk.verify
 import org.flywaydb.core.api.FlywayException
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -109,11 +114,12 @@ class DatabaseManagerTest {
 
     @Test
     fun `test default maxPoolSize is 10`() {
-        val credentials = DatabaseCredentials(
-            url = "jdbc:postgresql://localhost:5432/testdb",
-            username = "test_user",
-            password = "test_pass",
-        )
+        val credentials =
+            DatabaseCredentials(
+                url = "jdbc:postgresql://localhost:5432/testdb",
+                username = "test_user",
+                password = "test_pass",
+            )
 
         assertEquals(10, credentials.maxPoolSize, "Default maxPoolSize should be 10")
     }
@@ -222,9 +228,10 @@ class DatabaseManagerTest {
 
     @Test
     fun `test chat repository throws exception when database is uninitialized`() {
-        val exception = assertThrows<IllegalStateException> {
-            DatabaseManager.chatRepository()
-        }
+        val exception =
+            assertThrows<IllegalStateException> {
+                DatabaseManager.chatRepository()
+            }
         assertEquals("Database connection not initialized. Call init() first.", exception.message)
     }
 
@@ -289,5 +296,16 @@ class DatabaseManagerTest {
                 } == true
             }
         assertTrue(prototypesTableExists, "Migrations should create prototypes table")
+    }
+
+    @Test
+    fun `test externalInit() calls init() correctly`() {
+        mockkObject(DatabaseManager)
+        val mockdb = mockk<Database>()
+        every { DatabaseManager.init() } returns mockdb
+
+        DatabaseManager.externalInit()
+        verify(exactly = 1) { DatabaseManager.init() }
+        unmockkAll()
     }
 }

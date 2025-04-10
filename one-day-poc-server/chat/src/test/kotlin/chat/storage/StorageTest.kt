@@ -332,4 +332,30 @@ class StorageTest {
             coVerify(exactly = 1) { mockRepository.getPreviousPrototype(conversationId) }
             assertNull(result)
         }
+
+    @Test
+    fun `test deleteConversation success`() =
+        runBlocking {
+            val conversationId = "test-conversation"
+
+            coEvery { mockRepository.deleteConversation(conversationId) } returns true
+
+            val result = deleteConversation(conversationId)
+
+            coVerify(exactly = 1) { mockRepository.deleteConversation(conversationId) }
+            assertTrue(result)
+        }
+
+    @Test
+    fun `test deleteConversation failure`() =
+        runBlocking {
+            val conversationId = "test-conversation"
+
+            coEvery { mockRepository.deleteConversation(conversationId) } throws RuntimeException("Test exception")
+
+            val result = deleteConversation(conversationId)
+
+            coVerify(exactly = 1) { mockRepository.deleteConversation(conversationId) }
+            assertFalse(result)
+        }
 }

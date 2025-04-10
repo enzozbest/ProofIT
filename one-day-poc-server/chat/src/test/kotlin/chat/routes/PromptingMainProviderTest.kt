@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import prompting.PromptingMain
 import kotlin.test.assertEquals
 import kotlin.test.assertNotSame
-import kotlin.test.assertTrue
 
 class PromptingMainProviderTest {
     @AfterEach
@@ -18,8 +17,7 @@ class PromptingMainProviderTest {
 
     @Test
     fun `Test getInstance when instance is not initialized`() {
-        val instance = PromptingMainProvider.getInstance()
-        assertTrue(instance is PromptingMain)
+        PromptingMainProvider.getInstance()
     }
 
     @Test
@@ -46,7 +44,6 @@ class PromptingMainProviderTest {
         val newInstance = PromptingMainProvider.getInstance()
 
         assertNotSame(customInstance, newInstance)
-        assertTrue(newInstance is PromptingMain)
     }
 
     @Test

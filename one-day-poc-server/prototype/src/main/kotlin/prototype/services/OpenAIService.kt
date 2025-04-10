@@ -25,7 +25,14 @@ import utils.environment.EnvironmentLoader
  * Service for interacting with OpenAI API
  */
 object OpenAIService : LLMService {
-    var client = HttpClient(CIO)
+    private const val REQUEST_TIMEOUT_MILLIS = 6_000_000L
+    var client =
+        HttpClient(CIO) {
+            engine {
+                requestTimeout = REQUEST_TIMEOUT_MILLIS
+            }
+        }
+
     /**
      * Sends a prompt to the language model and returns the generated response.
      *
@@ -53,6 +60,7 @@ object OpenAIService : LLMService {
                 model = model,
                 prompt = prompt,
                 instructions = generateInstructions(),
+                options = options,
             )
 
         return try {
@@ -77,17 +85,15 @@ object OpenAIService : LLMService {
     suspend fun callOpenAI(
         request: HttpRequestBuilder,
         options: OpenAIOptions,
-    ): OpenAIResponse? {
-        return try {
+    ): OpenAIResponse? =
+        try {
             val response = client.request(request)
             val responseText = response.bodyAsText()
             println(responseText)
             parseOpenAIResponse(responseText)
-        } catch (e: Exception) {
-            println(e.message)
+        } catch (_: Exception) {
             null
         }
-    }
 
     /**
      * Builds an HTTP request for the OpenAI API.
@@ -111,6 +117,7 @@ object OpenAIService : LLMService {
         model: String,
         prompt: String,
         instructions: String,
+        options: OpenAIOptions = OpenAIOptions(),
     ): HttpRequestBuilder =
         HttpRequestBuilder()
             .apply {
@@ -135,6 +142,8 @@ object OpenAIService : LLMService {
                         if (instructions.isNotBlank()) {
                             put("instructions", JsonPrimitive(instructions))
                         }
+                        put("temperature", JsonPrimitive(options.temperature))
+                        put("top_p", JsonPrimitive(options.topP))
                     }
                 setBody(Json.encodeToString(JsonObject.serializer(), jsonRequestObject))
             }

@@ -166,7 +166,7 @@ object TemplateRetrieval {
         runBlocking {
             try {
                 val prompt = buildAnnotationPrompt(templateCode, componentName)
-                val options = OllamaOptions(temperature = 0.3, top_k = 100, top_p = 0.9)
+                val options = OllamaOptions(temperature = 0.3, topK = 100, topP = 0.9)
 
                 val response =
                     PrototypeInteractor.prompt(prompt, annotationModel, "local", options)

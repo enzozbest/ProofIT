@@ -37,10 +37,10 @@ class LLMResponsesTest {
     fun `Test OpenAIResponse Class`() {
         val response = OpenAIResponse("model", 1672531200, "response", true, "stop")
         assertEquals("model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("response", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for OpenAIResponse with default values
@@ -48,10 +48,10 @@ class LLMResponsesTest {
     fun `Test OpenAIResponse with default values`() {
         val response = OpenAIResponse("model", 1672531200, "response")
         assertEquals("model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("response", response.response)
         assertTrue(response.done) // Default value is true
-        assertEquals("stop", response.done_reason) // Default value is "stop"
+        assertEquals("stop", response.doneReason) // Default value is "stop"
     }
 
     // Test for parseOpenAIResponse function with complete response
@@ -84,10 +84,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("This is a test response", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse function with empty output
@@ -107,10 +107,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse function with null response
@@ -138,10 +138,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse function with complex response including all fields
@@ -211,10 +211,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("This is a test response", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with minimal valid response
@@ -233,10 +233,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with output but no content
@@ -263,10 +263,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with output containing content with no items
@@ -294,10 +294,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with output and content but no text
@@ -330,10 +330,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with null output field
@@ -353,10 +353,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with output item that has null content
@@ -384,10 +384,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for parseOpenAIResponse with a complex structure that exercises all branches
@@ -408,7 +408,7 @@ class LLMResponsesTest {
 
         val response1 = parseOpenAIResponse(jsonString1)
         assertEquals("test-model", response1.model)
-        assertEquals(1672531200, response1.created_at)
+        assertEquals(1672531200, response1.createdAt)
         assertEquals("", response1.response)
 
         // Then test with output containing an item with empty content
@@ -434,7 +434,7 @@ class LLMResponsesTest {
 
         val response2 = parseOpenAIResponse(jsonString2)
         assertEquals("test-model", response2.model)
-        assertEquals(1672531200, response2.created_at)
+        assertEquals(1672531200, response2.createdAt)
         assertEquals("", response2.response)
 
         // Finally test with null output
@@ -452,7 +452,7 @@ class LLMResponsesTest {
 
         val response3 = parseOpenAIResponse(jsonString3)
         assertEquals("test-model", response3.model)
-        assertEquals(1672531200, response3.created_at)
+        assertEquals(1672531200, response3.createdAt)
         assertEquals("", response3.response)
     }
 
@@ -592,10 +592,10 @@ class LLMResponsesTest {
         val deserializedResponse = Json.decodeFromString<OpenAIResponse>(json)
         assertEquals(response, deserializedResponse)
         assertEquals("model", deserializedResponse.model)
-        assertEquals(1672531200, deserializedResponse.created_at)
+        assertEquals(1672531200, deserializedResponse.createdAt)
         assertEquals("response", deserializedResponse.response)
         assertTrue(deserializedResponse.done)
-        assertEquals("stop", deserializedResponse.done_reason)
+        assertEquals("stop", deserializedResponse.doneReason)
     }
 
     // Test for OpenAIResponse deserialization
@@ -614,10 +614,10 @@ class LLMResponsesTest {
 
         val response = Json.decodeFromString<OpenAIResponse>(json)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("This is a test response", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     // Test for OpenAIResponse deserialization with default values
@@ -634,10 +634,10 @@ class LLMResponsesTest {
 
         val response = Json.decodeFromString<OpenAIResponse>(json)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("This is a test response", response.response)
         assertTrue(response.done) // Default value is true
-        assertEquals("stop", response.done_reason) // Default value is "stop"
+        assertEquals("stop", response.doneReason) // Default value is "stop"
     }
 
     // Test for OutputItem serialization and deserialization
@@ -913,7 +913,7 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
 
         // Test with output field but null content
@@ -939,7 +939,7 @@ class LLMResponsesTest {
 
         val response2 = parseOpenAIResponse(jsonString2)
         assertEquals("test-model", response2.model)
-        assertEquals(1672531200, response2.created_at)
+        assertEquals(1672531200, response2.createdAt)
         assertEquals("", response2.response)
     }
 
@@ -1018,7 +1018,7 @@ class LLMResponsesTest {
 
         val response1 = parseOpenAIResponse(jsonString1)
         assertEquals("test-model", response1.model)
-        assertEquals(1672531200, response1.created_at)
+        assertEquals(1672531200, response1.createdAt)
         assertEquals("", response1.response)
 
         // Test with output array containing an item with empty content array
@@ -1044,7 +1044,7 @@ class LLMResponsesTest {
 
         val response2 = parseOpenAIResponse(jsonString2)
         assertEquals("test-model", response2.model)
-        assertEquals(1672531200, response2.created_at)
+        assertEquals(1672531200, response2.createdAt)
         assertEquals("", response2.response)
 
         // Test with output array containing an item with content array containing an item with empty text
@@ -1075,7 +1075,7 @@ class LLMResponsesTest {
 
         val response3 = parseOpenAIResponse(jsonString3)
         assertEquals("test-model", response3.model)
-        assertEquals(1672531200, response3.created_at)
+        assertEquals(1672531200, response3.createdAt)
         assertEquals("", response3.response)
 
         // Test with null output field to cover the branch in toOpenAIResponse
@@ -1093,7 +1093,7 @@ class LLMResponsesTest {
 
         val response4 = parseOpenAIResponse(jsonString4)
         assertEquals("test-model", response4.model)
-        assertEquals(1672531200, response4.created_at)
+        assertEquals(1672531200, response4.createdAt)
         assertEquals("", response4.response)
     }
 
@@ -1221,10 +1221,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     @Test
@@ -1260,10 +1260,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("First item", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     @Test
@@ -1290,10 +1290,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     @Test
@@ -1337,10 +1337,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("First output item", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     @Test
@@ -1374,10 +1374,10 @@ class LLMResponsesTest {
 
         val response = parseOpenAIResponse(jsonString)
         assertEquals("test-model", response.model)
-        assertEquals(1672531200, response.created_at)
+        assertEquals(1672531200, response.createdAt)
         assertEquals("Some text", response.response)
         assertTrue(response.done)
-        assertEquals("stop", response.done_reason)
+        assertEquals("stop", response.doneReason)
     }
 
     @Test
@@ -1461,5 +1461,20 @@ class LLMResponsesTest {
         assertEquals(20, test.usage?.outputTokens)
         assertEquals(15, test.usage?.outputTokensDetails?.reasoningTokens)
         assertEquals(30, test.usage?.totalTokens)
+    }
+
+    @Test
+    fun `Test OutputItem with default constructor values`() {
+        val item = OutputItem(type = "type", id = "id", content = listOf(ContentItem("type", "text")))
+
+        assertEquals("type", item.type)
+        assertEquals("id", item.id)
+        assertNull(item.status)
+        assertNull(item.role)
+        assertEquals(1, item.content.size)
+        assertEquals("type", item.content[0].type)
+        assertEquals("text", item.content[0].text)
+        assertTrue(item.content[0].annotations.isEmpty())
+        assertEquals(0, item.content[0].annotations.size)
     }
 }
