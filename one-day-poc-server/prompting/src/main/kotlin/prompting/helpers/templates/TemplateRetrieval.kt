@@ -23,12 +23,10 @@ import java.util.UUID
 object TemplateRetrieval {
     private val annotationModel = EnvironmentLoader.get("OLLAMA_MODEL")
 
-    // Directory paths for template storage
-    private val resourcesBasePath = "embeddings/src/main/resources/components"
+    private const val RESOURCE_BASE_PATH: String = "embeddings/src/main/resources/components"
 
-    // Make these var or property with getter for better testability
-    var templatesDir = "$resourcesBasePath/templates"
-    var metadataDir = "$resourcesBasePath/metadata"
+    var templatesDir: String = "$RESOURCE_BASE_PATH/templates"
+    var metadataDir: String = "$RESOURCE_BASE_PATH/metadata"
 
     /**
      * Cleans a raw template string to ensure it's properly formatted and usable.
@@ -37,10 +35,7 @@ object TemplateRetrieval {
      * @param rawTemplate The raw template string from the LLM
      * @return Clean, usable code
      */
-    fun cleanTemplate(rawTemplate: String): String {
-        // Use the existing tool from PromptingTools
-        return PromptingTools.cleanLlmResponse(rawTemplate)
-    }
+    fun cleanTemplate(rawTemplate: String): String = PromptingTools.cleanLlmResponse(rawTemplate)
 
     /**
      * Processes templates identified in an LLM response.
@@ -57,7 +52,6 @@ object TemplateRetrieval {
             return emptyList()
         }
 
-        // Ensure directories exist
         createDirectoriesIfNeeded()
 
         return response.extractedTemplates.mapNotNull { rawTemplateCode ->
@@ -81,13 +75,8 @@ object TemplateRetrieval {
      * @return Template ID if successful, null otherwise
      */
     suspend fun processTemplate(templateCode: String): String? {
-        // Extract component name from template code
         val componentName = extractComponentName(templateCode) ?: return null
-
-        // Generate JSON-LD annotation for the template
         val jsonLD = generateTemplateAnnotation(templateCode, componentName) ?: return null
-
-        // Store both the template code and its annotation
         val success = storeTemplateFiles(componentName, templateCode, jsonLD)
 
         return if (success) componentName else null
@@ -146,8 +135,7 @@ object TemplateRetrieval {
                 templateCode,
                 jsonLD,
             )
-        } catch (e: Exception) {
-            println("Failed to store template files: ${e.message}")
+        } catch (_: Exception) {
             return false
         }
     }

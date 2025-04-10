@@ -1,5 +1,4 @@
 val ktorVersion: String by rootProject.extra
-val kotlinVersion: String by rootProject.extra
 
 plugins {
     kotlin("jvm")
@@ -7,7 +6,7 @@ plugins {
 }
 
 group = "kcl.seg.rtt"
-version = "0.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral()

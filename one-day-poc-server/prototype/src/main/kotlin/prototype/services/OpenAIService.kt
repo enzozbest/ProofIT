@@ -117,7 +117,7 @@ object OpenAIService : LLMService {
         model: String,
         prompt: String,
         instructions: String,
-        options: OpenAIOptions = OpenAIOptions(),
+        options: OpenAIOptions,
     ): HttpRequestBuilder =
         HttpRequestBuilder()
             .apply {

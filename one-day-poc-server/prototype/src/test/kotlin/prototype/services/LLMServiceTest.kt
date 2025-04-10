@@ -11,6 +11,7 @@ import prototype.helpers.OllamaOptions
 import prototype.helpers.OllamaResponse
 import prototype.helpers.OpenAIOptions
 import prototype.helpers.OpenAIResponse
+import kotlin.test.assertFailsWith
 
 /**
  * Tests for the LLMService interface and its implementations.
@@ -124,4 +125,14 @@ class LLMServiceTest {
             assertTrue(openAIResponse.done)
             assertEquals("stop", openAIResponse.doneReason)
         }
+
+    @Test
+    fun `test correct exception is thrown for illegal route`() {
+        val route = "invalid_route"
+        assertFailsWith<IllegalArgumentException> {
+            LLMServiceFactory.getService(route)
+        }.apply {
+            assertEquals("Invalid route $route", message)
+        }
+    }
 }
