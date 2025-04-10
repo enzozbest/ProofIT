@@ -78,7 +78,7 @@ export default function SidebarWrapper({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="mt-16">
+      <SidebarInset>
         {' '}
         <header className="flex shrink-0 items-center gap-2 px-4 text-white">
           <div className="flex items-center gap-2 px-4 w-full">
