@@ -25,18 +25,18 @@ interface ErrorPageProps {
  */
 const ErrorPage: React.FC<ErrorPageProps> = ({ code, message }) => {
   return (
-    <>    
-    <NavBar />  
-    <div className="flex flex-col items-center justify-center h-screen text-white bg-gradient-to-br from-blue-900 to-purple-900">
-      {code && <h1 className="text-6xl font-bold">{code}</h1>}
-      <p className="mt-4 text-xl">{message}</p>
-      <a
-        href="/"
-        className="mt-6 px-6 py-3 bg-white text-gray-800 rounded-lg shadow-lg hover:bg-gray-200 transition"
-      >
-        Go Home
-      </a>
-    </div>
+    <>
+      <NavBar />
+      <div className="flex flex-col items-center justify-center h-[calc(100svh-4rem)] text-white bg-gradient-to-br from-blue-900 to-purple-900">
+        {code && <h1 className="text-6xl font-bold">{code}</h1>}
+        <p className="mt-4 text-xl">{message}</p>
+        <a
+          href="/"
+          className="mt-6 px-6 py-3 bg-white text-gray-800 rounded-lg shadow-lg hover:bg-gray-200 transition"
+        >
+          Go Home
+        </a>
+      </div>
     </>
   );
 };
