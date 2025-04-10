@@ -27,7 +27,7 @@ const ErrorPage: React.FC<ErrorPageProps> = ({ code, message }) => {
   return (
     <>
       <NavBar />
-      <div className="flex flex-col items-center justify-center h-[calc(100svh-4rem)] text-white bg-gradient-to-br from-blue-900 to-purple-900">
+      <div className="flex flex-col items-center justify-center h-[calc(100svh-4rem)] bg-slate-500">
         {code && <h1 className="text-6xl font-bold">{code}</h1>}
         <p className="mt-4 text-xl">{message}</p>
         <a
