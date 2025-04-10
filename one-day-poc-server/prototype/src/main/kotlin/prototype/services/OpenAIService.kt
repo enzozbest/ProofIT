@@ -60,6 +60,7 @@ object OpenAIService : LLMService {
                 model = model,
                 prompt = prompt,
                 instructions = generateInstructions(),
+                options = options,
             )
 
         return try {
@@ -90,8 +91,7 @@ object OpenAIService : LLMService {
             val responseText = response.bodyAsText()
             println(responseText)
             parseOpenAIResponse(responseText)
-        } catch (e: Exception) {
-            println(e.message)
+        } catch (_: Exception) {
             null
         }
 
@@ -117,6 +117,7 @@ object OpenAIService : LLMService {
         model: String,
         prompt: String,
         instructions: String,
+        options: OpenAIOptions = OpenAIOptions(),
     ): HttpRequestBuilder =
         HttpRequestBuilder()
             .apply {
@@ -141,6 +142,8 @@ object OpenAIService : LLMService {
                         if (instructions.isNotBlank()) {
                             put("instructions", JsonPrimitive(instructions))
                         }
+                        put("temperature", JsonPrimitive(options.temperature))
+                        put("top_p", JsonPrimitive(options.topP))
                     }
                 setBody(Json.encodeToString(JsonObject.serializer(), jsonRequestObject))
             }
