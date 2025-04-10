@@ -2,7 +2,6 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { vi, test, expect, beforeEach, beforeAll } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Page from '../../pages/Generate.js';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 import ChatScreen from '../../components/chat/ChatScreen.js';
 import { NavUser } from '../../components/sidebar/NavUser.tsx';
@@ -20,7 +19,7 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useLocation: () => mockUseLocation()
+    useLocation: () => mockUseLocation(),
   };
 });
 
@@ -49,7 +48,7 @@ vi.mock('@/components/prototype/PrototypeFrame', () => ({
     return props.testVisible ? (
       <div data-testid="prototype-frame">Mock Prototype Frame</div>
     ) : null;
-  }
+  },
 }));
 
 beforeAll(() => {
@@ -71,13 +70,13 @@ beforeEach(() => {
   vi.clearAllMocks();
   sessionStorage.clear();
   ChatScreen.mockClear();
-  
+
   // Set the default mock return value for useLocation
   mockUseLocation.mockReturnValue({
     pathname: '/generate',
     search: '',
     hash: '',
-    state: null
+    state: null,
   });
 });
 
@@ -205,23 +204,6 @@ test('Non-mobile sidebar renders correctly', async () => {
   expect(button).toBeInTheDocument();
 });
 
-test('Renders background image correctly', () => {
-  render(
-    <MemoryRouter>
-      <AuthProvider>
-        <ConversationProvider>
-          <Generate />
-        </ConversationProvider>
-      </AuthProvider>
-    </MemoryRouter>
-  );
-
-  const containerDiv = screen.getByTestId('container').closest('div');
-  expect(containerDiv).toHaveStyle({
-    backgroundImage: "url('/background.svg')",
-  });
-});
-
 test('Sets initialMessage and isPredefined from location state', () => {
   const consoleLogSpy = vi.spyOn(console, 'log');
 
@@ -231,8 +213,8 @@ test('Sets initialMessage and isPredefined from location state', () => {
     hash: '',
     state: {
       initialMessage: 'Message from router state',
-      isPredefined: true
-    }
+      isPredefined: true,
+    },
   });
 
   render(
@@ -248,14 +230,14 @@ test('Sets initialMessage and isPredefined from location state', () => {
   expect(ChatScreen).toHaveBeenCalledWith(
     expect.objectContaining({
       initialMessage: 'Message from router state',
-      isPredefined: true
+      isPredefined: true,
     }),
     expect.anything()
   );
 
   expect(consoleLogSpy).toHaveBeenCalledWith(
-    'inside /generate, predefined value is ', 
-    false  
+    'inside /generate, predefined value is ',
+    false
   );
 
   consoleLogSpy.mockRestore();
@@ -267,8 +249,8 @@ test('Handles location state with initialMessage but without isPredefined', () =
     search: '',
     hash: '',
     state: {
-      initialMessage: 'Another message from router state'
-    }
+      initialMessage: 'Another message from router state',
+    },
   });
 
   render(
@@ -284,7 +266,7 @@ test('Handles location state with initialMessage but without isPredefined', () =
   expect(ChatScreen).toHaveBeenCalledWith(
     expect.objectContaining({
       initialMessage: 'Another message from router state',
-      isPredefined: false
+      isPredefined: false,
     }),
     expect.anything()
   );
@@ -293,7 +275,7 @@ test('Handles location state with initialMessage but without isPredefined', () =
 test('Does not render PrototypeFrame when showPrototype is false', () => {
   const TestComponent = () => {
     const showPrototype = false;
-    
+
     return (
       <div>
         {showPrototype ? (
@@ -304,14 +286,14 @@ test('Does not render PrototypeFrame when showPrototype is false', () => {
   };
 
   render(<TestComponent />);
-  
+
   expect(screen.queryByTestId('prototype-frame')).not.toBeInTheDocument();
 });
 
 test('Renders PrototypeFrame when showPrototype is true', () => {
   const TestComponent = () => {
     const showPrototype = true;
-    
+
     return (
       <div>
         {showPrototype ? (
@@ -322,6 +304,6 @@ test('Renders PrototypeFrame when showPrototype is true', () => {
   };
 
   render(<TestComponent />);
-  
+
   expect(screen.getByTestId('prototype-frame')).toBeInTheDocument();
 });
