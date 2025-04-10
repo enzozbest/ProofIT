@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
     return (
       <>
         <NavBar />
-        <div className="flex items-center justify-center h-screen text-white">
+        <div className="flex items-center justify-center h-[calc(100svh-4rem)] text-white">
           Loading...
         </div>
       </>
@@ -67,14 +67,14 @@ const ProfilePage: React.FC = () => {
     return (
       <>
         <NavBar />
-        <div className="flex items-center justify-center h-screen text-white">
+        <div className="flex items-center justify-center h-[calc(100svh-4rem)] text-white">
           {error}
         </div>
       </>
     );
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-[calc(100svh-4rem)]">
       <NavBar />
       <div className="flex flex-col items-center justify-center h-screen text-white">
         <div className="relative w-80 mb-4 flex justify-center items-center">
