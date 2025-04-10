@@ -1462,4 +1462,19 @@ class LLMResponsesTest {
         assertEquals(15, test.usage?.outputTokensDetails?.reasoningTokens)
         assertEquals(30, test.usage?.totalTokens)
     }
+
+    @Test
+    fun `Test OutputItem with default constructor values`() {
+        val item = OutputItem(type = "type", id = "id", content = listOf(ContentItem("type", "text")))
+
+        assertEquals("type", item.type)
+        assertEquals("id", item.id)
+        assertNull(item.status)
+        assertNull(item.role)
+        assertEquals(1, item.content.size)
+        assertEquals("type", item.content[0].type)
+        assertEquals("text", item.content[0].text)
+        assertTrue(item.content[0].annotations.isEmpty())
+        assertEquals(0, item.content[0].annotations.size)
+    }
 }

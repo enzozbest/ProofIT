@@ -637,7 +637,7 @@ class PromptingMainTest {
         coEvery { PrototypeInteractor.prompt(prompt, any(), "openai", any()) } returns
             OpenAIResponse(
                 model = "test-model",
-                created_at = 1672531200,
+                createdAt = 1672531200,
                 response = "test response",
             )
 
@@ -846,7 +846,7 @@ class PromptingMainTest {
         coEvery { PrototypeInteractor.prompt(any(), any(), eq("openai"), any()) } returns
             OpenAIResponse(
                 model = "test-model",
-                created_at = 1672531200,
+                createdAt = 1672531200,
                 response = """{"requirements": ["req1"], "keywords": ["key1"]}""",
             )
 
