@@ -56,15 +56,21 @@ const ProfilePage: React.FC = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Loading...
-      </div>
+      <>
+        <NavBar />
+        <div className="flex items-center justify-center h-screen text-white">
+          Loading...
+        </div>
+      </>
     );
   if (error)
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        {error}
-      </div>
+      <>
+        <NavBar />
+        <div className="flex items-center justify-center h-screen text-white">
+          {error}
+        </div>
+      </>
     );
 
   return (
