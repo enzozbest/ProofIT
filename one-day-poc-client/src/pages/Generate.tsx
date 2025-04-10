@@ -47,12 +47,11 @@ export default function Page() {
     }
   }, [location]);
 
-  // TODO: Put back auth redirection
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate('/403');
-  //   }
-  // }, [isAuthenticated, navigate]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/403');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="h-screen text-white" data-testid="container">

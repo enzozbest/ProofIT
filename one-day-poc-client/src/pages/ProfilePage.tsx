@@ -48,12 +48,11 @@ const ProfilePage: React.FC = () => {
     loadUserData();
   }, []);
 
-  // TODO: Put back auth redirection
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate('/403');
-  //   }
-  // }, [isAuthenticated, navigate]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/403');
+    }
+  }, [isAuthenticated, navigate]);
 
   if (loading)
     return (
