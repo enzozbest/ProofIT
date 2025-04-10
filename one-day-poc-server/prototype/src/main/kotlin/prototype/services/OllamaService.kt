@@ -85,10 +85,10 @@ object OllamaService : LLMService {
     override suspend fun generateResponse(
         prompt: String,
         model: String,
-        options: LLMOptions
+        options: LLMOptions,
     ): Result<LLMResponse?> {
         if (options !is OllamaOptions) {
-            return Result.failure(Exception("Invalid options type for OllamaService"))
+            return Result.failure(IllegalArgumentException("Invalid options type for OllamaService"))
         }
 
         val request = OllamaRequest(model = model, prompt = prompt, stream = false, options = options)

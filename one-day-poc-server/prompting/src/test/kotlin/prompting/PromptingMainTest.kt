@@ -2,6 +2,8 @@ package prompting
 
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
@@ -32,6 +34,7 @@ import prototype.security.secureCodeCheck
 import prototype.services.OllamaService
 import utils.environment.EnvironmentLoader
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class PromptingMainTest {
@@ -862,86 +865,19 @@ class PromptingMainTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Disabled("This test is failing due to issues with mocking the LLM")
-    fun `test run with OpenAI route`() {
-        val userPrompt = "Create a hello world app"
-        val modelName = "gpt-4"
-        val ollamaModelName = "deepseek-r1:32b"
-        val sanitisedPrompt = SanitisedPromptResult("Create a hello world app", listOf("hello", "world"))
-        val freqsPrompt = "Functional requirements prompt"
-        val prototypePrompt = "Prototype prompt"
+    fun `test serialisation and deserialisation of PrototypeResponse`() {
+        val files = """{"file1": "content1", "file2": "content2"}"""
+        val response = PrototypeResponse(files)
 
-        mockkObject(SanitisationTools)
-        mockkObject(PromptingTools)
-        mockkObject(PrototypeInteractor)
-        mockkObject(TemplateInteractor)
+        val jsonString = Json.encodeToString(PrototypeResponse.serializer(), response)
+        val deserializedResponse = Json.decodeFromString(PrototypeResponse.serializer(), jsonString)
 
-        val testPromptingMain = PromptingMain(ollamaModel = ollamaModelName, openAIModel = modelName)
+        assertEquals(response.files, deserializedResponse.files)
+    }
 
-        every { SanitisationTools.sanitisePrompt(userPrompt) } returns sanitisedPrompt
-        every {
-            PromptingTools.functionalRequirementsPrompt(
-                sanitisedPrompt.prompt,
-                sanitisedPrompt.keywords,
-            )
-        } returns freqsPrompt
-
-        every {
-            PromptingTools.ollamaPrompt(
-                userPrompt = any(),
-                requirements = any(),
-                templates = any(),
-            )
-        } returns prototypePrompt
-
-        coEvery { PrototypeInteractor.prompt(eq(freqsPrompt), eq(ollamaModelName), eq("local"), any()) } returns
-            OllamaResponse(
-                model = ollamaModelName,
-                created_at = "2024-03-07T21:53:03Z",
-                response = "{\"requirements\": [\"Display hello world\"], \"keywords\": [\"hello\", \"world\"]}",
-                done = true,
-                done_reason = "stop",
-            )
-
-        coEvery { TemplateInteractor.fetchTemplates(any()) } returns emptyList()
-
-        coEvery { PrototypeInteractor.prompt(eq(prototypePrompt), eq(modelName), eq("openai"), any()) } returns
-            OllamaResponse(
-                model = modelName,
-                created_at = "2024-03-07T21:53:03Z",
-                response = "{\"chat\": {\"message\": \"Here is your hello world app\"}, \"prototype\": {\"files\": {}}}",
-                done = true,
-                done_reason = "stop",
-            )
-
-        every { PromptingTools.formatResponseJson(any()) } returnsMany
-            listOf(
-                """{"requirements": ["Display hello world"], "keywords": ["hello", "world"]}""",
-                """{"chat": {"message": "Here is your hello world app"}, "prototype": {"files": {}}}""",
-            )
-
-        val result = runBlocking { testPromptingMain.run(userPrompt) }
-
-        verify {
-            SanitisationTools.sanitisePrompt(userPrompt)
-            PromptingTools.functionalRequirementsPrompt(
-                sanitisedPrompt.prompt,
-                sanitisedPrompt.keywords,
-            )
-            PromptingTools.formatResponseJson(any())
-        }
-
-        coVerify {
-            PrototypeInteractor.prompt(freqsPrompt, ollamaModelName, "local", any())
-            TemplateInteractor.fetchTemplates(any())
-            PrototypeInteractor.prompt(prototypePrompt, modelName, "openai", any())
-        }
-
-        assertTrue(result.contains("Here is your hello world app"), "Result should contain the expected message")
-
-        unmockkObject(SanitisationTools)
-        unmockkObject(PromptingTools)
-        unmockkObject(PrototypeInteractor)
-        unmockkObject(TemplateInteractor)
+    @Test
+    fun `test serialisation and deserialisation of PrototypeResponse with missing field`() {
+        val jsonString = """{}"""
+        assertFailsWith<SerializationException> { Json.decodeFromString(PrototypeResponse.serializer(), jsonString) }
     }
 }

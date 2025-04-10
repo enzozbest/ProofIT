@@ -123,8 +123,8 @@ class PromptingMain(
     private fun prototypePrompt(
         userPrompt: String,
         freqsResponse: JsonObject,
-        templates: List<String> = emptyList(),
-        previousGeneration: String? = null,
+        templates: List<String>,
+        previousGeneration: String?,
         route: String,
     ): String {
         val reqs =
