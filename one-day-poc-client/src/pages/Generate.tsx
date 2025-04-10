@@ -56,7 +56,7 @@ export default function Page() {
 
   return (
     // TODO: add back 'overflow-hidden'
-    <div className="h-screen bg-gray-900 text-white" data-testid="container">
+    <div className="h-screen text-white" data-testid="container">
       <NavBar />
       <SidebarWrapper>
         <div
