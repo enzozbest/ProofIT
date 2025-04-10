@@ -43,12 +43,16 @@
 
   body {
     @apply font-sans antialiased bg-background text-white;
+  }
+  
+  :is(button, input, select):focus-visible {
+    @apply ring-2 ring-offset-1 ring-purple-200 outline-none transition duration-100;
+  }
+
+  #root {
     background-image: url('/background.svg');
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
-  }
-  :is(button, input, select):focus-visible {
-    @apply ring-2 ring-offset-1 ring-purple-200 outline-none transition duration-100;
   }
 }
