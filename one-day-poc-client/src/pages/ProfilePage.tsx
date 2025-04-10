@@ -6,7 +6,6 @@ import UserService from '../services/UserService';
 import NavBar from '@/components/NavBar';
 import { useAuth } from '@/contexts/AuthContext';
 
-
 /**
  * ProfilePage Component
  *
@@ -57,27 +56,25 @@ const ProfilePage: React.FC = () => {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        Loading...
-      </div>
+      <>
+        <NavBar />
+        <div className="flex items-center justify-center h-[calc(100svh-4rem)] text-white">
+          Loading...
+        </div>
+      </>
     );
   if (error)
     return (
-      <div className="flex items-center justify-center h-screen text-white">
-        {error}
-      </div>
+      <>
+        <NavBar />
+        <div className="flex items-center justify-center h-[calc(100svh-4rem)] text-white">
+          {error}
+        </div>
+      </>
     );
 
   return (
-    <div
-      className="flex flex-col min-h-screen"
-      style={{
-        backgroundImage: `url(${BackgroundSVG})`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}
-    >
+    <div className="flex flex-col h-[calc(100svh-4rem)]">
       <NavBar />
       <div className="flex flex-col items-center justify-center h-screen text-white">
         <div className="relative w-80 mb-4 flex justify-center items-center">

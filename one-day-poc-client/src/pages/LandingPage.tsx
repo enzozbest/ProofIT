@@ -1,10 +1,9 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import NavBar from '../components/NavBar';
 import HeroSection from '../components/landing/HeroSection';
 import InputBox from '../components/landing/InputBox';
 import OldPrompts from '../components/landing/OldPrompts';
 import GeneratedPrompts from '../components/landing/GeneratedPrompts';
-import BackgroundSVG from '../assets/background.svg';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
@@ -33,15 +32,7 @@ const LandingPage: FC = () => {
   ];
 
   return (
-    <div
-      className="flex flex-col min-h-screen"
-      style={{
-        backgroundImage: `url(${BackgroundSVG})`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}
-    >
+    <div className="flex flex-col min-h-screen">
       <NavBar />
       <div className="flex flex-col items-center justify-center flex-grow w-full px-6 pt-20">
         <HeroSection />
