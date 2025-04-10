@@ -40,22 +40,27 @@ class ChatStorageFactoryTest {
      */
     @Test
     fun `test ChatStorageFactory initialization and caching behavior`() {
-        mockkObject(ChatStorageFactory)
-        
+        // Get the repository for the first time
         val repository1 = ChatStorageFactory.getChatRepository()
-        
+
+        // Verify that the initialization methods were called exactly once
         verify(exactly = 1) { DatabaseManager.externalInit() }
         verify(exactly = 1) { DatabaseManager.chatRepository() }
-        
+
+        // Verify that the repository is the mock repository we set up
         assertEquals(mockRepository, repository1)
-        
+
+        // Clear verification marks to reset the call count
         clearMocks(DatabaseManager, verificationMarks = true)
-        
+
+        // Get the repository again
         val repository2 = ChatStorageFactory.getChatRepository()
-        
+
+        // Verify that the initialization methods were not called again
         verify(exactly = 0) { DatabaseManager.externalInit() }
         verify(exactly = 0) { DatabaseManager.chatRepository() }
-        
+
+        // Verify that both calls return the same instance (lazy initialization caching)
         assertSame(repository1, repository2)
     }
 }

@@ -1,13 +1,10 @@
 import ChatScreen from '../components/chat/ChatScreen';
 import PrototypeFrame from '../components/prototype/PrototypeFrame';
 import PrototypeWindow from '@/components/prototype/PrototypeWindow';
-import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
-import BackgroundSVG from '../assets/background.svg';
-import { useLocation, useNavigate  } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-
 
 import SidebarWrapper from '@/components/sidebar/SidebarWrapper';
 import NavBar from '@/components/NavBar';
@@ -37,7 +34,6 @@ export default function Page() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-
   useEffect(() => {
     const savedMessage = sessionStorage.getItem('initialMessage');
     if (savedMessage) {
@@ -45,7 +41,7 @@ export default function Page() {
     }
     // Check for initialMessage and isPredefined from location state
     else if (location.state?.initialMessage) {
-      console.log("inside /generate, predefined value is ", isPredefined)
+      console.log('inside /generate, predefined value is ', isPredefined);
       setInitialMessage(location.state.initialMessage);
       setIsPredefined(location.state.isPredefined || false);
     }
@@ -58,16 +54,7 @@ export default function Page() {
   }, [isAuthenticated, navigate]);
 
   return (
-    <div
-      className="h-screen bg-gray-900 text-white overflow-hidden"
-      style={{
-        backgroundImage: "url('/background.svg')",
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-      }}
-      data-testid="container"
-    >
+    <div className="h-screen text-white" data-testid="container">
       <NavBar />
       <SidebarWrapper>
         <div

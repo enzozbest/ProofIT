@@ -19,9 +19,12 @@ object OptionsFactory {
      * @return The LLMOptions implementation for the given route
      * @throws IllegalArgumentException If the route is not supported
      */
-    fun getOptions(route: String, temperature: Double): LLMOptions =
+    fun getOptions(
+        route: String,
+        temperature: Double,
+    ): LLMOptions =
         when (route) {
-            "local" -> OllamaOptions(temperature = temperature, top_k = 300, top_p = 0.9)
+            "local" -> OllamaOptions(temperature = temperature, topK = 300, topP = 0.9)
             "openai" -> OpenAIOptions(temperature = temperature)
             else -> throw IllegalArgumentException("Invalid route $route")
         }

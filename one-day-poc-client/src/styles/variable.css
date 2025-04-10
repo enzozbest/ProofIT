@@ -1,7 +1,5 @@
 @layer base {
   :root {
-    --background: url('../assets/background.svg');
-    --background-image: url('../assets/background.svg');
     --foreground: 247 55% 20%;
     --card: 237, 19%, 100%;
     --card-foreground: 0 0% 96%;
@@ -45,10 +43,12 @@
 
   body {
     @apply font-sans antialiased bg-background text-white;
+    background-image: url('/background.svg');
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
   }
   :is(button, input, select):focus-visible {
     @apply ring-2 ring-offset-1 ring-purple-200 outline-none transition duration-100;
   }
-
-
 }

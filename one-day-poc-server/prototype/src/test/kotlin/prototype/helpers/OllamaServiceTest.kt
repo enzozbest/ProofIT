@@ -325,39 +325,39 @@ class OllamaServiceTest {
     fun `Test OllamaOptions data class properties and behavior`() {
         val defaultOptions = OllamaOptions()
         assertNull(defaultOptions.temperature)
-        assertNull(defaultOptions.top_k)
-        assertNull(defaultOptions.top_p)
-        assertNull(defaultOptions.num_predict)
+        assertNull(defaultOptions.topK)
+        assertNull(defaultOptions.topP)
+        assertNull(defaultOptions.numPredict)
         assertNull(defaultOptions.stop)
 
         val options =
             OllamaOptions(
                 temperature = 0.7,
-                top_k = 40,
-                top_p = 0.9,
-                num_predict = 100,
+                topK = 40,
+                topP = 0.9,
+                numPredict = 100,
                 stop = listOf(".", "?", "!"),
             )
 
         assertEquals(0.7, options.temperature)
-        assertEquals(40, options.top_k)
-        assertEquals(0.9, options.top_p)
-        assertEquals(100, options.num_predict)
+        assertEquals(40, options.topK)
+        assertEquals(0.9, options.topP)
+        assertEquals(100, options.numPredict)
         assertEquals(listOf(".", "?", "!"), options.stop)
 
-        val copiedOptions = options.copy(temperature = 0.5, top_k = 50)
+        val copiedOptions = options.copy(temperature = 0.5, topK = 50)
         assertEquals(0.5, copiedOptions.temperature)
-        assertEquals(50, copiedOptions.top_k)
-        assertEquals(options.top_p, copiedOptions.top_p)
-        assertEquals(options.num_predict, copiedOptions.num_predict)
+        assertEquals(50, copiedOptions.topK)
+        assertEquals(options.topP, copiedOptions.topP)
+        assertEquals(options.numPredict, copiedOptions.numPredict)
         assertEquals(options.stop, copiedOptions.stop)
 
         val sameOptions =
             OllamaOptions(
                 temperature = 0.7,
-                top_k = 40,
-                top_p = 0.9,
-                num_predict = 100,
+                topK = 40,
+                topP = 0.9,
+                numPredict = 100,
                 stop = listOf(".", "?", "!"),
             )
         assertEquals(options, sameOptions)
@@ -366,9 +366,9 @@ class OllamaServiceTest {
 
         val toStringResult = options.toString()
         assertTrue(toStringResult.contains("temperature=0.7"))
-        assertTrue(toStringResult.contains("top_k=40"))
-        assertTrue(toStringResult.contains("top_p=0.9"))
-        assertTrue(toStringResult.contains("num_predict=100"))
+        assertTrue(toStringResult.contains("topK=40"))
+        assertTrue(toStringResult.contains("topP=0.9"))
+        assertTrue(toStringResult.contains("numPredict=100"))
         assertTrue(toStringResult.contains("stop=[., ?, !]"))
     }
 
@@ -377,9 +377,9 @@ class OllamaServiceTest {
         val original =
             OllamaOptions(
                 temperature = 0.7,
-                top_k = 40,
-                top_p = 0.9,
-                num_predict = 100,
+                topK = 40,
+                topP = 0.9,
+                numPredict = 100,
                 stop = listOf(".", "?", "!"),
             )
 
@@ -395,9 +395,9 @@ class OllamaServiceTest {
 
         assertEquals(original, deserialized)
         assertEquals(original.temperature, deserialized.temperature)
-        assertEquals(original.top_k, deserialized.top_k)
-        assertEquals(original.top_p, deserialized.top_p)
-        assertEquals(original.num_predict, deserialized.num_predict)
+        assertEquals(original.topK, deserialized.topK)
+        assertEquals(original.topP, deserialized.topP)
+        assertEquals(original.numPredict, deserialized.numPredict)
         assertEquals(original.stop, deserialized.stop)
     }
 
@@ -406,9 +406,9 @@ class OllamaServiceTest {
         val original =
             OllamaOptions(
                 temperature = 0.7,
-                top_k = null,
-                top_p = 0.9,
-                num_predict = null,
+                topK = null,
+                topP = 0.9,
+                numPredict = null,
                 stop = null,
             )
 
@@ -424,9 +424,9 @@ class OllamaServiceTest {
 
         assertEquals(original, deserialized)
         assertEquals(original.temperature, deserialized.temperature)
-        assertEquals(original.top_k, deserialized.top_k)
-        assertEquals(original.top_p, deserialized.top_p)
-        assertEquals(original.num_predict, deserialized.num_predict)
+        assertEquals(original.topK, deserialized.topK)
+        assertEquals(original.topP, deserialized.topP)
+        assertEquals(original.numPredict, deserialized.numPredict)
         assertEquals(original.stop, deserialized.stop)
     }
 }
